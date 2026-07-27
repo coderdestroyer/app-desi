@@ -48,6 +48,11 @@ class OperatorController extends Controller
         ];
     }
 
+    public function selection()
+    {
+        return view('operator.selection');
+    }
+
     public function index()
     {
         $countLq = \App\Models\LQ::count();

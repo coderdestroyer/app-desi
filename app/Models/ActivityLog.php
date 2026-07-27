@@ -13,7 +13,10 @@ class ActivityLog extends Model
         'user_id',
         'module',
         'action',
-        'desc'
+        'desc',
+        'description',
+        'ip_address',
+        'user_agent'
     ];
 
     public function user()

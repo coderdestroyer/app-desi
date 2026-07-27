@@ -486,16 +486,30 @@
     @stack('styles')
 </head>
 <body>
+@php
+    $isSelectionScreen = request()->routeIs('operator.dashboard');
+    $isPeluangInvestasi = request()->routeIs('operator.peluang-investasi*');
+@endphp
+
+    @if(!$isSelectionScreen)
     <button type="button" id="mobileSidebarButton" class="mobile-sidebar-button" aria-label="Buka menu">
         <i class="fa-solid fa-bars"></i>
     </button>
-
     <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+    @endif
 
     <div class="admin-shell">
+        @if(!$isSelectionScreen)
         <aside id="adminSidebar" class="admin-sidebar">
             <div class="sidebar-logo">
                 <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo DPMPTSP Sumatera Utara">
+            </div>
+
+            <div class="px-5 py-3 border-b border-white/10">
+                <a href="{{ route('operator.dashboard') }}" class="sidebar-link hover:bg-white/15 transition-all text-xs font-semibold text-[#FFD54F] border border-[#FFD54F]/30 rounded-xl">
+                    <i class="fa-solid fa-arrow-left text-[#FFD54F]"></i>
+                    <span>Pilih Ruang Kerja</span>
+                </a>
             </div>
 
             <div id="adminProfile" class="sidebar-profile">
@@ -506,7 +520,7 @@
 
                     <span class="profile-copy">
                         <span class="profile-name">
-                            {{ Auth::user()?->name ?? 'Siti' }}
+                            {{ Auth::user()?->name ?? 'Operator' }}
                         </span>
                         <span class="profile-role">
                             {{ auth()->user()->role ?? 'operator' }}
@@ -530,7 +544,7 @@
 
                         <div class="profile-dropdown-divider"></div>
 
-                        <button type="button" id="openLogoutModal" class="profile-dropdown-link logout">
+                        <button type="button" class="openLogoutModalBtn profile-dropdown-link logout">
                             <i class="fa-solid fa-right-from-bracket"></i>
                             <span>Logout</span>
                         </button>
@@ -539,42 +553,59 @@
             </div>
 
             <nav class="sidebar-content">
-                <div class="sidebar-section-title">
-                    Menu Operator
-                </div>
+                @if($isPeluangInvestasi)
+                    <!-- SIDEBAR MENU PELUANG INVESTASI (IPRO) -->
+                    <div class="sidebar-section-title">
+                        Peluang Investasi (IPRO)
+                    </div>
 
-                <ul class="sidebar-menu">
-                    <li>
-                        <a href="{{ route('operator.dashboard') }}" class="sidebar-link {{ request()->routeIs('operator.dashboard') ? 'active' : '' }}">
-                            <i class="fa-solid fa-table-cells-large"></i>
-                            <span>Dashboard Operator</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('operator.lq.index') }}" class="sidebar-link {{ request()->routeIs('operator.lq.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-line"></i>
-                            <span>Analisis LQ</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('operator.ss.index') }}" class="sidebar-link {{ request()->routeIs('operator.ss.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-pie"></i>
-                            <span>Analisis SS</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('operator.tipologi.index') }}" class="sidebar-link {{ request()->routeIs('operator.tipologi.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-layer-group"></i>
-                            <span>Analisis Tipologi Sektor</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('operator.klassen.index') }}" class="sidebar-link {{ request()->routeIs('operator.klassen.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-bar"></i>
-                            <span>Analisis Klassen</span>
-                        </a>
-                    </li>
-                </ul>
+                    <ul class="sidebar-menu">
+                        <li>
+                            <a href="{{ route('operator.peluang-investasi') }}" class="sidebar-link {{ request()->routeIs('operator.peluang-investasi') ? 'active' : '' }}">
+                                <i class="fa-solid fa-briefcase"></i>
+                                <span>Dashboard Peluang</span>
+                            </a>
+                        </li>
+                    </ul>
+                @else
+                    <!-- SIDEBAR MENU POTENSI UNGGULAN (MAKRO) -->
+                    <div class="sidebar-section-title">
+                        Potensi Unggulan Daerah
+                    </div>
+
+                    <ul class="sidebar-menu">
+                        <li>
+                            <a href="{{ route('operator.potensi-unggulan') }}" class="sidebar-link {{ request()->routeIs('operator.potensi-unggulan') ? 'active' : '' }}">
+                                <i class="fa-solid fa-table-cells-large"></i>
+                                <span>Dashboard Potensi</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('operator.lq.index') }}" class="sidebar-link {{ request()->routeIs('operator.lq.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Analisis LQ</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('operator.ss.index') }}" class="sidebar-link {{ request()->routeIs('operator.ss.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-chart-pie"></i>
+                                <span>Analisis SS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('operator.tipologi.index') }}" class="sidebar-link {{ request()->routeIs('operator.tipologi.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-layer-group"></i>
+                                <span>Analisis Tipologi Sektor</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('operator.klassen.index') }}" class="sidebar-link {{ request()->routeIs('operator.klassen.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-chart-bar"></i>
+                                <span>Analisis Klassen</span>
+                            </a>
+                        </li>
+                    </ul>
+                @endif
 
                 <div class="sidebar-section-title">
                     Menu Utama
@@ -590,8 +621,31 @@
                 </ul>
             </nav>
         </aside>
+        @endif
 
-        <main class="admin-main">
+        <main class="admin-main" style="{{ $isSelectionScreen ? 'width: 100% !important; margin-left: 0 !important;' : '' }}">
+            @if($isSelectionScreen)
+            <!-- TOPBAR UNTUK SELECTION SCREEN (TANPA SIDEBAR) -->
+            <header class="bg-white border-b border-[#CFE3D5] px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo DPMPTSP" class="h-10 object-contain">
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <span class="block text-sm font-semibold text-[#17201C]">{{ Auth::user()?->name }}</span>
+                        <span class="block text-xs text-[#667069] font-medium uppercase tracking-wider">Operator DPMPTSP</span>
+                    </div>
+                    <a href="{{ route('operator.profile') }}" class="w-10 h-10 rounded-full bg-[#E7F2EB] text-[#145239] border border-[#CFE3D5] flex items-center justify-center font-bold text-sm hover:bg-[#145239] hover:text-white transition-colors" title="Profil Operator">
+                        {{ strtoupper(substr(Auth::user()?->name ?? 'O', 0, 1)) }}
+                    </a>
+                    <button type="button" class="openLogoutModalBtn px-3.5 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 text-xs font-semibold flex items-center gap-2 transition-colors border border-red-200">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Keluar</span>
+                    </button>
+                </div>
+            </header>
+            @endif
+
             <div class="p-4 md:p-6 lg:p-8 w-full space-y-6 flex-1">
                 @yield('content')
             </div>
@@ -628,13 +682,14 @@
             const sidebarButton = document.getElementById('mobileSidebarButton');
             const sidebarBackdrop = document.getElementById('sidebarBackdrop');
 
-            const logoutButton = document.getElementById('openLogoutModal');
             const logoutModal = document.getElementById('logoutModal');
             const confirmLogout = document.getElementById('confirmLogout');
             const logoutForm = document.getElementById('logoutForm');
             const closeLogoutButtons = document.querySelectorAll(
                 '[data-close-logout]'
             );
+            const openLogoutBtns = document.querySelectorAll('#openLogoutModal, .openLogoutModalBtn');
+            openLogoutBtns.forEach(btn => btn.addEventListener('click', openLogoutModal));
 
             if (profile && profileToggle) {
                 profileToggle.addEventListener('click', function () {
@@ -672,14 +727,16 @@
                 document.body.classList.remove('modal-open');
             }
 
-            logoutButton?.addEventListener('click', openLogoutModal);
-
             closeLogoutButtons.forEach(function (button) {
                 button.addEventListener('click', closeLogoutModal);
             });
 
-            confirmLogout?.addEventListener('click', function () {
-                logoutForm?.submit();
+            confirmLogout?.addEventListener('click', function (e) {
+                e.preventDefault();
+                const form = document.getElementById('logoutForm');
+                if (form) {
+                    form.submit();
+                }
             });
 
             document.addEventListener('keydown', function (event) {

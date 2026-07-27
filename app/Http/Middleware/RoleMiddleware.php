@@ -20,8 +20,41 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        if (Auth::user()->role !== $role) {
-            abort(403, 'Unauthorized access.');
+        $user = Auth::user();
+
+        // Validasi status verifikasi akun (pending, approved, rejected, nonactive)
+        if ($user->status === 'pending') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda sedang dalam antrean verifikasi Administrator. Silakan tunggu persetujuan sebelum dapat masuk ke sistem.',
+            ]);
+        }
+
+        if ($user->status === 'rejected') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Permohonan pendaftaran akun Anda telah ditolak oleh Administrator.',
+            ]);
+        }
+
+        if ($user->status === 'nonactive') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda sedang dinonaktifkan oleh Administrator. Silakan hubungi pengelola sistem.',
+            ]);
+        }
+
+        if ($user->role !== $role) {
+            abort(403, 'Akses tidak diizinkan untuk peran Anda.');
         }
 
         return $next($request);

@@ -19,7 +19,6 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-
     /**
      * Memproses login pengguna.
      */
@@ -28,15 +27,50 @@ class AuthenticatedSessionController extends Controller
         // Validasi dan autentikasi login
         $request->authenticate();
 
+        $user = $request->user();
+
+        // Validasi status verifikasi akun
+        if ($user->status === 'pending') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda sedang dalam antrean verifikasi Administrator. Silakan tunggu persetujuan sebelum dapat masuk ke sistem.',
+            ]);
+        }
+
+        if ($user->status === 'rejected') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Permohonan pendaftaran akun Anda telah ditolak oleh Administrator.',
+            ]);
+        }
+
+        if ($user->status === 'nonactive') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda sedang dinonaktifkan oleh Administrator. Silakan hubungi pengelola sistem.',
+            ]);
+        }
+
         // Membuat ulang session ID untuk keamanan
         $request->session()->regenerate();
 
-        if ($request->user()->isOperator()) {
-            \App\Http\Controllers\Operator\OperatorController::logActivity(
-                'Autentikasi',
-                'Login',
-                'Operator (' . $request->user()->name . ') berhasil login ke sistem.'
-            );
+        if ($user->role === 'operator') {
+            if (class_exists('\App\Http\Controllers\Operator\OperatorController') && method_exists('\App\Http\Controllers\Operator\OperatorController', 'logActivity')) {
+                \App\Http\Controllers\Operator\OperatorController::logActivity(
+                    'Autentikasi',
+                    'Login',
+                    'Operator (' . $user->name . ') berhasil login ke sistem.'
+                );
+            }
         }
 
         /*
@@ -44,19 +78,30 @@ class AuthenticatedSessionController extends Controller
         | REDIRECT SETELAH LOGIN
         |--------------------------------------------------------------------------
         |
-        | Pengguna diarahkan ke dashboard masing-masing berdasarkan rolenya.
+        | - admin    -> admin.dashboard
+        | - operator -> operator.dashboard (Operator Selection Screen)
+        | - user     -> user.profile
         |
         */
 
-        $url = match ($request->user()->role) {
+        if (!in_array($user->role, ['admin', 'operator'])) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Halaman autentikasi ini hanya diperuntukkan bagi Administrator dan Operator.',
+            ]);
+        }
+
+        $url = match ($user->role) {
             'admin' => route('admin.dashboard', absolute: false),
             'operator' => route('operator.dashboard', absolute: false),
-            'user' => route('user.profile', absolute: false),
+            default => route('home', absolute: false),
         };
 
         return redirect()->intended($url);
     }
-
 
     /**
      * Logout pengguna.
@@ -64,12 +109,14 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        if ($user && $user->isOperator()) {
-            \App\Http\Controllers\Operator\OperatorController::logActivity(
-                'Autentikasi',
-                'Logout',
-                'Operator (' . $user->name . ') logout dari sistem.'
-            );
+        if ($user && $user->role === 'operator') {
+            if (class_exists('\App\Http\Controllers\Operator\OperatorController') && method_exists('\App\Http\Controllers\Operator\OperatorController', 'logActivity')) {
+                \App\Http\Controllers\Operator\OperatorController::logActivity(
+                    'Autentikasi',
+                    'Logout',
+                    'Operator (' . $user->name . ') logout dari sistem.'
+                );
+            }
         }
 
         // Logout dari guard web

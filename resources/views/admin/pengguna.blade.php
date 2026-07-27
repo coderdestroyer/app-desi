@@ -426,12 +426,6 @@
                                 Operator
                             </option>
 
-                            <option
-                                value="user"
-                                @selected(request('role') === 'user')
-                            >
-                                User
-                            </option>
                         </select>
 
                         <i
@@ -878,28 +872,34 @@
                                             text-xs
                                             font-semibold
 
-                                            {{
-                                                $statusLower === 'suspend'
-                                                    ? 'border-red-200 bg-red-50 text-red-700'
-                                                    : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                                            }}
+                                            @php
+                                                $badgeClass = match($statusLower) {
+                                                    'approved', 'aktif' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                                    'pending' => 'border-amber-200 bg-amber-50 text-amber-700',
+                                                    'rejected' => 'border-red-200 bg-red-50 text-red-700',
+                                                    'nonactive', 'suspend' => 'border-slate-300 bg-slate-100 text-slate-700',
+                                                    default => 'border-slate-200 bg-slate-50 text-slate-600',
+                                                };
+                                                $dotClass = match($statusLower) {
+                                                    'approved', 'aktif' => 'bg-emerald-500',
+                                                    'pending' => 'bg-amber-500',
+                                                    'rejected' => 'bg-red-500',
+                                                    'nonactive', 'suspend' => 'bg-slate-500',
+                                                    default => 'bg-slate-400',
+                                                };
+                                                $statusLabel = match($statusLower) {
+                                                    'approved', 'aktif' => 'Approved',
+                                                    'pending' => 'Pending',
+                                                    'rejected' => 'Rejected',
+                                                    'nonactive', 'suspend' => 'Nonactive',
+                                                    default => ucfirst($statusLower),
+                                                };
+                                            @endphp
+                                            {{ $badgeClass }}
                                         "
                                     >
-                                        <span
-                                            class="
-                                                h-1.5
-                                                w-1.5
-                                                rounded-full
-
-                                                {{
-                                                    $statusLower === 'suspend'
-                                                        ? 'bg-red-500'
-                                                        : 'bg-emerald-500'
-                                                }}
-                                            "
-                                        ></span>
-
-                                        {{ ucfirst($statusLower) }}
+                                        <span class="h-1.5 w-1.5 rounded-full {{ $dotClass }}"></span>
+                                        {{ $statusLabel }}
                                     </span>
                                 </td>
 
@@ -1553,7 +1553,7 @@
                                         'role',
                                         $isEdit
                                             ? $editData->role
-                                            : 'user'
+                                            : 'operator'
                                     );
                                 @endphp
 
@@ -1590,13 +1590,6 @@
                                         @selected($selectedRole === 'operator')
                                     >
                                         Operator
-                                    </option>
-
-                                    <option
-                                        value="user"
-                                        @selected($selectedRole === 'user')
-                                    >
-                                        User
                                     </option>
                                 </select>
 
@@ -1654,24 +1647,17 @@
                                         focus:ring-emerald-100
                                     "
                                 >
-                                    <option
-                                        value="Aktif"
-                                        @selected(
-                                            strtolower($selectedStatus)
-                                            === 'aktif'
-                                        )
-                                    >
-                                        Aktif
+                                    <option value="approved" @selected(in_array(strtolower($selectedStatus), ['approved', 'aktif']))>
+                                        Approved (Disetujui / Aktif)
                                     </option>
-
-                                    <option
-                                        value="Suspend"
-                                        @selected(
-                                            strtolower($selectedStatus)
-                                            === 'suspend'
-                                        )
-                                    >
-                                        Suspend
+                                    <option value="pending" @selected(strtolower($selectedStatus) === 'pending')>
+                                        Pending (Menunggu Verifikasi)
+                                    </option>
+                                    <option value="rejected" @selected(strtolower($selectedStatus) === 'rejected')>
+                                        Rejected (Ditolak)
+                                    </option>
+                                    <option value="nonactive" @selected(in_array(strtolower($selectedStatus), ['nonactive', 'suspend']))>
+                                        Nonactive (Non-Aktif)
                                     </option>
                                 </select>
 

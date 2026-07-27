@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckStatusMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,7 @@ return Application::configure(
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => RoleMiddleware::class,
+            'check.status' => CheckStatusMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

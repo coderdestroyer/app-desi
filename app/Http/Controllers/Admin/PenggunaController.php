@@ -77,9 +77,9 @@ class PenggunaController extends Controller
                 'icon' => 'fa-user-gear',
             ],
             [
-                'label' => 'Suspend',
+                'label' => 'Non-Aktif / Pending',
                 'value' => $hasStatusColumn
-                    ? User::whereRaw('LOWER(TRIM(status)) = ?', ['suspend'])->count()
+                    ? User::whereIn('status', ['pending', 'rejected', 'nonactive', 'suspend'])->count()
                     : 0,
                 'color' => 'red',
                 'icon' => 'fa-user-slash',
@@ -116,19 +116,31 @@ class PenggunaController extends Controller
         ];
 
         if ($hasRoleColumn) {
-            $rules['role'] = ['required', 'in:admin,operator,user'];
+            $rules['role'] = ['required', 'in:admin,operator'];
         }
 
         if ($hasStatusColumn) {
-            $rules['status'] = ['required', 'in:Aktif,Suspend'];
+            $rules['status'] = ['required', 'in:pending,approved,rejected,nonactive,Aktif,Suspend'];
         }
 
         $data = $request->validate($rules);
 
+        $statusValue = 'approved';
+        if ($hasStatusColumn && isset($data['status'])) {
+            $statusValue = match(strtolower($data['status'])) {
+                'approved', 'aktif' => 'approved',
+                'pending' => 'pending',
+                'rejected' => 'rejected',
+                'nonactive', 'suspend' => 'nonactive',
+                default => 'approved',
+            };
+        }
+
         $createData = [
             'name' => $data['name'],
-            'email' => $data['email'],
+            'email' => strtolower($data['email']),
             'password' => Hash::make($data['password']),
+            'email_verified_at' => now(),
         ];
 
         if ($hasRoleColumn) {
@@ -136,7 +148,7 @@ class PenggunaController extends Controller
         }
 
         if ($hasStatusColumn) {
-            $createData['status'] = $data['status'];
+            $createData['status'] = $statusValue;
         }
 
         User::create($createData);
@@ -163,14 +175,25 @@ class PenggunaController extends Controller
         ];
 
         if ($hasRoleColumn) {
-            $rules['role'] = ['required', 'in:admin,operator,user'];
+            $rules['role'] = ['required', 'in:admin,operator'];
         }
 
         if ($hasStatusColumn) {
-            $rules['status'] = ['required', 'in:Aktif,Suspend'];
+            $rules['status'] = ['required', 'in:pending,approved,rejected,nonactive,Aktif,Suspend'];
         }
 
         $data = $request->validate($rules);
+
+        $statusValue = 'approved';
+        if ($hasStatusColumn && isset($data['status'])) {
+            $statusValue = match(strtolower($data['status'])) {
+                'approved', 'aktif' => 'approved',
+                'pending' => 'pending',
+                'rejected' => 'rejected',
+                'nonactive', 'suspend' => 'nonactive',
+                default => 'approved',
+            };
+        }
 
         if (
             Auth::check()
@@ -187,16 +210,16 @@ class PenggunaController extends Controller
             Auth::check()
             && Auth::id() === $pengguna->id
             && $hasStatusColumn
-            && $data['status'] === 'Suspend'
+            && in_array($statusValue, ['nonactive', 'rejected', 'pending'])
         ) {
             return redirect()
                 ->route('admin.pengguna.index', ['edit' => $pengguna->id])
-                ->with('error', 'Akun yang sedang digunakan tidak boleh disuspend.');
+                ->with('error', 'Akun yang sedang digunakan tidak boleh dinonaktifkan.');
         }
 
         $updateData = [
             'name' => $data['name'],
-            'email' => $data['email'],
+            'email' => strtolower($data['email']),
         ];
 
         if ($hasRoleColumn) {
@@ -204,7 +227,7 @@ class PenggunaController extends Controller
         }
 
         if ($hasStatusColumn) {
-            $updateData['status'] = $data['status'];
+            $updateData['status'] = $statusValue;
         }
 
         if (! empty($data['password'])) {

@@ -9,13 +9,16 @@ use App\Http\Controllers\Operator\KlassenController;
 
 Route::middleware([
     'auth',
-    'verified',
     'role:operator',
 ])
     ->prefix('operator')
     ->name('operator.')
     ->group(function () {
-        Route::get('/dashboard', [OperatorController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [OperatorController::class, 'selection'])->name('dashboard');
+        Route::get('/potensi-unggulan', [OperatorController::class, 'index'])->name('potensi-unggulan');
+        Route::get('/peluang-investasi', function () {
+            return view('operator.peluang_investasi');
+        })->name('peluang-investasi');
         Route::get('/aktivitas', [OperatorController::class, 'aktivitas'])->name('aktivitas');
         
         Route::get('/profile', [OperatorController::class, 'profile'])->name('profile');
