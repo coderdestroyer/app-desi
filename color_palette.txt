@@ -1,0 +1,144 @@
+================================================================================
+                    DPMPTSP WEB APPLICATION - COLOR PALETTE & STYLING SPECIFICATION
+================================================================================
+Document Type   : Color Palette & Styling Documentation
+Project         : Web DPMPTSP (Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu)
+Frameworks      : Laravel, Tailwind CSS v3, Vanilla CSS Design Tokens, Vite
+Font Typography : Poppins, Inter, Figtree (Sans-serif)
+Date Generated  : 2026-07-27
+
+================================================================================
+1. RINGKASAN STYLING & GAYA DESAIN (DESIGN SYSTEM OVERVIEW)
+================================================================================
+Aplikasi Web DPMPTSP mengusung tema "Modern Government Portal & Investment Platform"
+dengan perpaduan warna yang memberikan kesan resmi, profesional, segar, dan terpercaya.
+
+Gaya UI & Komponen Visual Utama:
+- Brand Concept       : Dominasi Hijau Hutan (Forest Green) & Akses Kuning Emas (Gold)
+- Header / Navigation : Sticky navbar berlatar transparan blur (Glassmorphism)
+- Capsule & Pill UI   : Sudut melengkung halus (border-radius: 999px / 50px)
+- Shadows & Elevation : Bayangan lembut bermotif hijau gelap (rgba(0, 60, 47, 0.1))
+- Typography          : Google Fonts 'Poppins' (300-800) dan 'Inter' / 'Figtree'
+
+================================================================================
+2. PALET WARNA UTAMA (PRIMARY BRAND PALETTE)
+================================================================================
+
+[+] FOREST GREEN (Warna Utama Instansi)
+    - HEX Code      : #145239
+    - RGB           : rgb(20, 82, 57)
+    - Penggunaan    : Header text, Tombol utama (Primary Button), Hero Title, Footer link hover.
+    - Karakter      : Memberikan kesan resmi, stabil, amanah, dan terpercaya.
+
+[+] DEEP EMERALD GREEN (Warna Footer & Accent Dark)
+    - HEX Code      : #0B5D3D
+    - RGB           : rgb(11, 93, 61)
+    - Penggunaan    : Background utama Footer, elemen penegas batas bawah.
+
+[+] MEDIUM EMERALD GREEN (Sub-heading & Hover State)
+    - HEX Code      : #2E8B57 / #1E5D41 / #0F8A5F / #0F7D46
+    - RGB           : rgb(46, 139, 87) / rgb(30, 93, 65) / rgb(15, 138, 95)
+    - Penggunaan    : Subtitle section, hover state tombol operator, teks penjelas.
+
+================================================================================
+3. PALET WARNA AKSEN (ACCENT & HIGHLIGHT PALETTE)
+================================================================================
+
+[+] SUNFLOWER / AMBER GOLD (Tombol & Aksen Utama)
+    - HEX Code      : #FFD54F
+    - RGB           : rgb(255, 213, 79)
+    - Penggunaan    : Tombol Login/CTA Navbar, Hover icon sosial media, Teks highlight hero.
+
+[+] DARK GOLD / MUSTARD (Aksen Navigasi & Border)
+    - HEX Code      : #D4A017 / #D8A62A / #CBAA4C
+    - RGB           : rgb(212, 160, 23) / rgb(216, 166, 42)
+    - Penggunaan    : Indikator menu aktif (Active Nav Link), garis underline animasi navigasi.
+
+[+] BRIGHT YELLOW ACCENT (Hover State & Badges)
+    - HEX Code      : #FFC93B / #FFD35A / #FFCB43
+    - RGB           : rgb(255, 201, 59)
+    - Penggunaan    : Teks badge interaktif, elemen hover aksen terang.
+
+================================================================================
+4. WARNA PERMUKAAN & LATAR BELAKANG (SURFACE & LIGHT BACKGROUND PALETTE)
+================================================================================
+
+[+] SOFT MINT GREEN (Nav Capsule & Card Tint)
+    - HEX Code      : #E7F2EB
+    - RGB           : rgb(231, 242, 235)
+    - Penggunaan    : Background capsule floating menu navigasi desktop.
+
+[+] LIGHT SAGE GREEN (Badges & Input Container)
+    - HEX Code      : #EEF8F2 / #DFF3E7 / #EAF5EE
+    - RGB           : rgb(238, 248, 242)
+    - Penggunaan    : Tagline badge hero, background input form operator/filter.
+
+[+] CANVAS OFF-WHITE (Latar Belakang Halaman)
+    - HEX Code      : #F7FAF8 / #F9FAF5 / #F4F6F9
+    - RGB           : rgb(247, 250, 248)
+    - Penggunaan    : Background utama body halaman (mengurangi ketegangan mata).
+
+[+] PURE WHITE (Kartu & Kontainer)
+    - HEX Code      : #FFFFFF
+    - RGB           : rgb(255, 255, 255)
+    - Penggunaan    : Background card, modal dialog, background sticky header.
+
+================================================================================
+5. WARNA SEGUNDER & FITUR KHUSUS (SECONDARY & CHART PALETTE)
+================================================================================
+
+[+] NAVY DEEP BLUE (Peta & Mode Kontras)
+    - HEX Code      : #001E6C (--dark-blue / --primary-dark)
+    - RGB           : rgb(0, 30, 108)
+    - Penggunaan    : Variasi judul section peta & elemen kontras tinggi.
+
+[+] ROYAL / SKY BLUE (Analisis Data & Chart)
+    - HEX Code      : #5089C6 (--primary) & #035397 (--secondary)
+    - RGB           : rgb(80, 137, 198) & rgb(3, 83, 151)
+    - Penggunaan    : Elemen grafik Chart.js, statistik visual komparasi investasi.
+
+[+] STEEL BLUE (Sub-header Khusus)
+    - HEX Code      : #17375E
+    - RGB           : rgb(23, 55, 94)
+    - Penggunaan    : Judul H2 pada halaman profil/tentang kami.
+
+================================================================================
+6. WARNA TEKS & GARIS PEMBATAS (TYPOGRAPHY & BORDER PALETTE)
+================================================================================
+
+[+] TEXT PRIMARY (Teks Utama)
+    - HEX Code      : #17201C / #333333 / #20523F
+    - Penggunaan    : Judul artikel, paragraf utama, label form.
+
+[+] TEXT SECONDARY & MUTED (Teks Sekunder)
+    - HEX Code      : #555555 / #667069 / #8A938E / #777777
+    - Penggunaan    : Sub-judul, tanggal, keterangan kecil, placeholder form.
+
+[+] BORDER & DIVIDER (Garis Pembatas)
+    - HEX Code      : #E3E9E5 / #CFE3D5 / #EEEEEE / #CBD5E1 (slate-300)
+    - Penggunaan    : Garis tepi kartu, border input, garis pemisah tabel.
+
+================================================================================
+7. TABEL RINGKASAN KODE WARNA (HEX QUICK REFERENCE)
+================================================================================
+
+Kategori               | Kode HEX    | Peran / Penggunaan Utama
+-----------------------+-------------+------------------------------------------
+Brand Primary          | #145239     | Hijau Utama (Header, Buttons, Titles)
+Brand Dark             | #0B5D3D     | Hijau Tua (Footer Background)
+Brand Medium           | #1E5D41     | Hijau Sedang (Badges, Secondary Buttons)
+Accent Gold            | #FFD54F     | Kuning Emas (Login CTA, Highlights)
+Accent Active          | #D4A017     | Kuning Gelap (Nav Active & Hover Line)
+Surface Capsule        | #E7F2EB     | Hijau Mint (Capsule Menu Navigation)
+Surface Badge          | #EEF8F2     | Mint Muda (Background Tagline/Badge)
+Background Page        | #F7FAF8     | Off-White (Canvas Body Web)
+Surface Card           | #FFFFFF     | Putih (Card Container & Modal)
+Text Main              | #17201C     | Hitam Gelap Soft (Teks Utama Body)
+Text Muted             | #667069     | Abu-Abu Greenish (Teks Keterangan)
+Border Light           | #CFE3D5     | Hijau Soft Border (Pembatas Nav/Input)
+Secondary Navy         | #001E6C     | Biru Navy (Dark Blue Accent)
+Secondary Blue         | #5089C6     | Biru Muda (Analisis Data / Chart)
+
+================================================================================
+                               END OF SPECIFICATION
+================================================================================
