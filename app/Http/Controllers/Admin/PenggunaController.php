@@ -116,19 +116,30 @@ class PenggunaController extends Controller
         ];
 
         if ($hasRoleColumn) {
-            $rules['role'] = ['required', 'in:admin,operator,user'];
+            $rules['role'] = ['required', 'in:admin,operator'];
         }
 
         if ($hasStatusColumn) {
-            $rules['status'] = ['required', 'in:Aktif,Suspend'];
+            $rules['status'] = ['nullable', 'string'];
         }
 
         $data = $request->validate($rules);
 
+        $statusValue = 'approved';
+        if ($hasStatusColumn && isset($data['status'])) {
+            $statusValue = match(strtolower($data['status'])) {
+                'aktif', 'approved' => 'approved',
+                'suspend', 'rejected' => 'rejected',
+                'pending' => 'pending',
+                default => 'approved',
+            };
+        }
+
         $createData = [
             'name' => $data['name'],
-            'email' => $data['email'],
+            'email' => strtolower($data['email']),
             'password' => Hash::make($data['password']),
+            'email_verified_at' => now(),
         ];
 
         if ($hasRoleColumn) {
@@ -136,7 +147,7 @@ class PenggunaController extends Controller
         }
 
         if ($hasStatusColumn) {
-            $createData['status'] = $data['status'];
+            $createData['status'] = $statusValue;
         }
 
         User::create($createData);
@@ -163,7 +174,7 @@ class PenggunaController extends Controller
         ];
 
         if ($hasRoleColumn) {
-            $rules['role'] = ['required', 'in:admin,operator,user'];
+            $rules['role'] = ['required', 'in:admin,operator'];
         }
 
         if ($hasStatusColumn) {

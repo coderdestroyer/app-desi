@@ -65,34 +65,15 @@ Route::get(
 */
 
 Route::get('/dashboard', function () {
-
     $user = auth()->user();
 
     return match ($user->role) {
-
-        'admin' => redirect()->route(
-            'admin.dashboard'
-        ),
-
-        'operator' => redirect()->route(
-            'operator.dashboard'
-        ),
-
-        'user' => redirect()->route(
-            'user.profile'
-        ),
-
-        default => abort(
-            403,
-            'Role pengguna tidak dikenali.'
-        ),
+        'admin' => redirect()->route('admin.dashboard'),
+        'operator' => redirect()->route('operator.dashboard'),
+        default => redirect()->route('home'),
     };
-
 })
-->middleware([
-    'auth',
-    'verified',
-])
+->middleware(['auth'])
 ->name('dashboard');
 
 
