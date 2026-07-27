@@ -6,55 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Membuat tabel lokasi.
-     */
     public function up(): void
     {
         Schema::create('lokasi', function (Blueprint $table) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | PRIMARY KEY
-            |--------------------------------------------------------------------------
-            */
-
             $table->id();
-
-            /*
-            |--------------------------------------------------------------------------
-            | DATA LOKASI
-            |--------------------------------------------------------------------------
-            */
-
-            $table->string('nama', 255);
-
-            // Koordinat geografis
+            $table->unsignedBigInteger('kabupaten_id')->nullable();
+            $table->string('nama', 255)->index();
             $table->decimal('latitude', 10, 8);
-
             $table->decimal('longitude', 11, 8);
-
-            /*
-            |--------------------------------------------------------------------------
-            | INDEX
-            |--------------------------------------------------------------------------
-            */
-
-            $table->index('nama');
-
-            /*
-            |--------------------------------------------------------------------------
-            | TIMESTAMP
-            |--------------------------------------------------------------------------
-            */
-
             $table->timestamps();
+
+            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->nullOnDelete();
         });
     }
 
-    /**
-     * Menghapus tabel lokasi.
-     */
     public function down(): void
     {
         Schema::dropIfExists('lokasi');

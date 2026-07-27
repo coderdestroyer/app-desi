@@ -9,43 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('indikator_provinsi', function (Blueprint $table) {
-
             $table->id();
-
             $table->unsignedBigInteger('provinsi_id');
-            $table->unsignedBigInteger('sektor_id');
-
             $table->integer('tahun');
-
-            $table->decimal('pertumbuhan', 15, 10);
-            $table->decimal('kontribusi', 15, 10);
-
+            $table->string('nama_indikator', 255);
+            $table->decimal('nilai', 20, 2);
+            $table->string('satuan', 50)->nullable();
             $table->timestamps();
 
-            // Foreign Key
-            $table->foreign('provinsi_id')
-                ->references('provinsi_id')
-                ->on('provinsi')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->foreign('sektor_id')
-                ->references('sektor_id')
-                ->on('sektor')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            // Unique Constraint
-            $table->unique([
-                'provinsi_id',
-                'sektor_id',
-                'tahun',
-            ]);
-
-            // Index
-            $table->index('provinsi_id');
-            $table->index('sektor_id');
-            $table->index('tahun');
+            $table->foreign('provinsi_id')->references('provinsi_id')->on('provinsi')->cascadeOnDelete();
         });
     }
 

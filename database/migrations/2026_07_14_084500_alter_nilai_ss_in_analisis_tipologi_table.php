@@ -6,23 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('analisis_tipologi', function (Blueprint $table) {
-            $table->decimal('nilai_ss', 25, 4)->change();
-        });
+        if (Schema::hasTable('analisis_tipologi') && !Schema::hasColumn('analisis_tipologi', 'nilai_ss')) {
+            Schema::table('analisis_tipologi', function (Blueprint $table) {
+                $table->decimal('nilai_ss', 15, 2)->nullable()->after('kategori_sektor');
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('analisis_tipologi', function (Blueprint $table) {
-            $table->decimal('nilai_ss', 15, 6)->change();
-        });
+        if (Schema::hasTable('analisis_tipologi') && Schema::hasColumn('analisis_tipologi', 'nilai_ss')) {
+            Schema::table('analisis_tipologi', function (Blueprint $table) {
+                $table->dropColumn('nilai_ss');
+            });
+        }
     }
 };

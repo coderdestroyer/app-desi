@@ -9,43 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('indikator_kabupaten', function (Blueprint $table) {
-
             $table->id();
-
-            $table->unsignedBigInteger('kab_id');
-            $table->unsignedBigInteger('sektor_id');
-
+            $table->unsignedBigInteger('kabupaten_id');
             $table->integer('tahun');
-
-            $table->decimal('pertumbuhan', 15, 10);
-            $table->decimal('kontribusi', 15, 10);
-
+            $table->string('nama_indikator', 255);
+            $table->decimal('nilai', 20, 2);
+            $table->string('satuan', 50)->nullable();
             $table->timestamps();
 
-            // Foreign Key
-            $table->foreign('kab_id')
-                ->references('kab_id')
-                ->on('kabupaten')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->foreign('sektor_id')
-                ->references('sektor_id')
-                ->on('sektor')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            // Unique Constraint
-            $table->unique([
-                'kab_id',
-                'sektor_id',
-                'tahun',
-            ]);
-
-            // Index
-            $table->index('kab_id');
-            $table->index('sektor_id');
-            $table->index('tahun');
+            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->cascadeOnDelete();
         });
     }
 

@@ -6,38 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('pdrb_sumut', function (Blueprint $table) {
-
-            // Primary Key
             $table->id();
-
-            // Sesuai dengan header CSV:
-            // provinsi_id,sektor_id,tahun,nilai
-            $table->string('provinsi_id', 2);
-
-            $table->unsignedSmallInteger('sektor_id');
-
-            $table->year('tahun');
-
-            $table->bigInteger('nilai');
-
+            $table->unsignedBigInteger('sektor_id');
+            $table->integer('tahun');
+            $table->decimal('nilai_pdrb', 20, 2)->default(0);
             $table->timestamps();
 
-            // Index
-            $table->index('provinsi_id');
-            $table->index('sektor_id');
-            $table->index('tahun');
+            $table->foreign('sektor_id')->references('sektor_id')->on('sektor')->cascadeOnDelete();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('pdrb_sumut');

@@ -13,11 +13,8 @@ return new class extends Migration
     {
         Schema::create('provinsi', function (Blueprint $table) {
             $table->id('provinsi_id');
-            $table->string('nama_provinsi', 255);
-
+            $table->string('nama_provinsi', 255)->index();
             $table->timestamps();
-
-            $table->index('nama_provinsi');
         });
     }
 

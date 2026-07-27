@@ -12,29 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kabupaten', function (Blueprint $table) {
-
-            // Primary Key
             $table->id('kab_id');
-
-            // Foreign Key ke tabel provinsi
             $table->unsignedBigInteger('provinsi_id');
-
-            // Data kabupaten
-            $table->string('nama_kabupaten', 255);
-
-            // Timestamp
+            $table->string('nama_kabupaten', 255)->index();
             $table->timestamps();
 
-            // Foreign Key Constraint
             $table->foreign('provinsi_id')
                 ->references('provinsi_id')
                 ->on('provinsi')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            // Index
             $table->index('provinsi_id');
-            $table->index('nama_kabupaten');
         });
     }
 

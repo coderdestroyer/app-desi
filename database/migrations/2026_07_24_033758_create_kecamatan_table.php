@@ -9,23 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kecamatan', function (Blueprint $table) {
-            // Kode resmi kecamatan, contoh 110101
-            $table->bigInteger('kec_id')->primary();
-
-            // Harus sama tipe dengan kabupaten.kab_id
-            $table->bigInteger('kab_id');
-
-            $table->string('nama_kecamatan', 150);
-
+            $table->id();
+            $table->unsignedBigInteger('kabupaten_id');
+            $table->string('nama_kecamatan', 255)->index();
             $table->timestamps();
 
-            $table->foreign('kab_id')
-                ->references('kab_id')
-                ->on('kabupaten')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->index('kab_id');
+            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->cascadeOnDelete();
         });
     }
 

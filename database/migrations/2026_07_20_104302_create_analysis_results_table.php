@@ -6,26 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
-{
-    Schema::create('analysis_results', function (Blueprint $table) {
-        $table->id();
-        $table->integer('tahun');
-        $table->string('kabupaten_kota');
-        $table->string('sektor');
-        $table->double('lq');
-        $table->double('ssa');
-        $table->string('klassen');
-        $table->string('tipologi');
-    });
-}
+    {
+        Schema::create('analysis_results', function (Blueprint $table) {
+            $table->id();
+            $table->string('type', 50);
+            $table->unsignedBigInteger('kabupaten_id')->nullable();
+            $table->integer('tahun');
+            $table->json('payload');
+            $table->timestamps();
 
-    /**
-     * Reverse the migrations.
-     */
+            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->cascadeOnDelete();
+        });
+    }
+
     public function down(): void
     {
         Schema::dropIfExists('analysis_results');

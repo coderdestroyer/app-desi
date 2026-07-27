@@ -9,87 +9,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('analisis_ss', function (Blueprint $table) {
-
             $table->id();
-
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
-            $table->unsignedBigInteger('provinsi_id')->nullable();
             $table->unsignedBigInteger('kabupaten_id')->nullable();
             $table->unsignedBigInteger('sektor_id');
-
-            $table->string('tingkat_wilayah', 30);
-
-            $table->string('daerah_analisis', 100);
-            $table->string('daerah_pembanding', 100);
-
             $table->integer('tahun_awal');
             $table->integer('tahun_akhir');
-
-            $table->decimal('pdrb_sektor_analisis_awal', 25, 2);
-            $table->decimal('pdrb_sektor_analisis_akhir', 25, 2);
-
-            $table->decimal('total_pdrb_analisis_awal', 25, 2);
-            $table->decimal('total_pdrb_analisis_akhir', 25, 2);
-
-            $table->decimal('pdrb_sektor_pembanding_awal', 25, 2);
-            $table->decimal('pdrb_sektor_pembanding_akhir', 25, 2);
-
-            $table->decimal('total_pdrb_pembanding_awal', 25, 2);
-            $table->decimal('total_pdrb_pembanding_akhir', 25, 2);
-
-            $table->decimal('rij', 15, 6);
-            $table->decimal('rin', 15, 6);
-            $table->decimal('rn', 15, 6);
-
-            $table->decimal('nij', 30, 10);
-            $table->decimal('mij', 30, 10);
-            $table->decimal('cij', 30, 10);
-            $table->decimal('dij', 30, 10);
-
-            $table->string('status_pertumbuhan', 100);
-            $table->string('status_daya_saing', 100);
-
+            $table->decimal('komponen_n', 20, 2)->default(0);
+            $table->decimal('komponen_p', 20, 2)->default(0);
+            $table->decimal('komponen_d', 20, 2)->default(0);
+            $table->decimal('total_shift', 20, 2)->default(0);
             $table->timestamps();
 
-            // Foreign Key
-            $table->foreign('provinsi_id')
-                ->references('provinsi_id')
-                ->on('provinsi')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-            $table->foreign('kabupaten_id')
-                ->references('kab_id')
-                ->on('kabupaten')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-            $table->foreign('sektor_id')
-                ->references('sektor_id')
-                ->on('sektor')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
-            // Unique Constraint
-            $table->unique([
-                'user_id',
-                'sektor_id',
-                'tahun_awal',
-                'tahun_akhir',
-            ]);
-
-            // Index
-            $table->index('user_id');
-            $table->index('provinsi_id');
-            $table->index('kabupaten_id');
-            $table->index('sektor_id');
-            $table->index('tahun_awal');
-            $table->index('tahun_akhir');
-            $table->index('tingkat_wilayah');
+            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->nullOnDelete();
+            $table->foreign('sektor_id')->references('sektor_id')->on('sektor')->cascadeOnDelete();
         });
     }
 

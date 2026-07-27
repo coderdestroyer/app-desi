@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('sektor', function (Blueprint $table) {
             $table->id('sektor_id');
-            $table->string('nama_sektor', 255);
-            $table->index('nama_sektor');
+            $table->string('nama_sektor', 255)->index();
+            $table->timestamps();
         });
     }
 

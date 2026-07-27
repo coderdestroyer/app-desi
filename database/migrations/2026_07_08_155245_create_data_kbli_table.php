@@ -6,64 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Membuat tabel data_kbli.
-     */
     public function up(): void
     {
         Schema::create('data_kbli', function (Blueprint $table) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | PRIMARY KEY
-            |--------------------------------------------------------------------------
-            */
-
             $table->id();
-
-            /*
-            |--------------------------------------------------------------------------
-            | DATA KBLI
-            |--------------------------------------------------------------------------
-            */
-
-            // Nomor urut
-            $table->integer('no')->nullable();
-
-            // Kode KBLI
-            $table->text('kode');
-
-            // Judul KBLI
+            $table->string('struktur', 20);
+            $table->unsignedSmallInteger('level');
+            $table->string('kode', 10)->unique();
+            $table->string('kode_induk', 10)->nullable();
+            $table->string('kategori_kode', 2)->nullable();
+            $table->string('golongan_pokok_kode', 2)->nullable();
+            $table->string('golongan_kode', 3)->nullable();
+            $table->string('subgolongan_kode', 4)->nullable();
+            $table->string('kelompok_kode', 5)->nullable();
             $table->text('judul');
-
-            // Cakupan
             $table->text('cakupan')->nullable();
-
-            // Tidak termasuk cakupan
             $table->text('tidak_cakupan')->nullable();
+            $table->string('no_asli', 20)->nullable();
+            $table->string('kode_asli', 10)->nullable();
+            $table->text('catatan')->nullable();
+            $table->timestamps();
 
-            /*
-            |--------------------------------------------------------------------------
-            | INDEX
-            |--------------------------------------------------------------------------
-            */
-
-            $table->index('kode');
-            $table->index('no');
-
-            /*
-            |--------------------------------------------------------------------------
-            | TIMESTAMP
-            |--------------------------------------------------------------------------
-            */
-
-            $table->timestamp('updated_at')->nullable();
+            $table->index('kode_induk');
+            $table->index('struktur');
         });
     }
 
-    /**
-     * Menghapus tabel data_kbli.
-     */
     public function down(): void
     {
         Schema::dropIfExists('data_kbli');
