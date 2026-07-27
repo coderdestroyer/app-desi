@@ -50,6 +50,16 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        if ($user->status === 'nonactive') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda sedang dinonaktifkan oleh Administrator. Silakan hubungi pengelola sistem.',
+            ]);
+        }
+
         // Membuat ulang session ID untuk keamanan
         $request->session()->regenerate();
 

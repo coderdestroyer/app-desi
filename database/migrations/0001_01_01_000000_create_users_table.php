@@ -19,9 +19,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             
-            // Hak Akses & Status Approval
-            $table->string('role', 20)->default('user')->index(); // 'admin', 'operator', 'user'
-            $table->string('status', 20)->default('pending')->index(); // 'pending', 'approved', 'rejected'
+            $table->string('role', 20)->default('operator')->index(); // 'admin', 'operator'
+            $table->string('status', 20)->default('pending')->index(); // 'pending', 'approved', 'rejected', 'nonactive'
             $table->boolean('two_factor_enabled')->default(false);
             
             // OAuth Google

@@ -36,6 +36,16 @@ class CheckStatusMiddleware
                     'email' => 'Permohonan pendaftaran akun Anda telah ditolak oleh Administrator.',
                 ]);
             }
+
+            if ($user->status === 'nonactive') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('login')->withErrors([
+                    'email' => 'Akun Anda sedang dinonaktifkan oleh Administrator. Silakan hubungi pengelola sistem.',
+                ]);
+            }
         }
 
         return $next($request);

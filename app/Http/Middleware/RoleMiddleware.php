@@ -22,7 +22,7 @@ class RoleMiddleware
 
         $user = Auth::user();
 
-        // Validasi status verifikasi akun
+        // Validasi status verifikasi akun (pending, approved, rejected, nonactive)
         if ($user->status === 'pending') {
             Auth::logout();
             $request->session()->invalidate();
@@ -40,6 +40,16 @@ class RoleMiddleware
 
             return redirect()->route('login')->withErrors([
                 'email' => 'Permohonan pendaftaran akun Anda telah ditolak oleh Administrator.',
+            ]);
+        }
+
+        if ($user->status === 'nonactive') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda sedang dinonaktifkan oleh Administrator. Silakan hubungi pengelola sistem.',
             ]);
         }
 
