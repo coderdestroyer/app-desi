@@ -11,13 +11,13 @@
 @auth
 <form method="POST" action="{{ route('logout') }}" class="inline">
     @csrf
-    <button type="submit" class="btn-flat w-full sm:w-auto px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 border border-transparent">
+    <button type="submit" class="transition-all duration-200 ease-in-out hover:-translate-y-[1px] active:translate-y-0 w-full sm:w-auto px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 border border-transparent">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Keluar</span>
     </button>
 </form>
 @else
-<a href="{{ route('login') }}" class="btn-flat w-full sm:w-auto px-6 py-3 rounded-xl bg-[#145239] hover:bg-[#0b5d3d] text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 border border-transparent">
+<a href="{{ route('login') }}" class="transition-all duration-200 ease-in-out hover:-translate-y-[1px] active:translate-y-0 w-full sm:w-auto px-6 py-3 rounded-xl bg-[#145239] hover:bg-[#0b5d3d] text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 border border-transparent">
     <i class="fa-solid fa-right-to-bracket"></i>
     <span>Masuk</span>
 </a>

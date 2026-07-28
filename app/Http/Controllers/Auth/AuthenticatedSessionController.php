@@ -31,13 +31,8 @@ class AuthenticatedSessionController extends Controller
 
         // Validasi status verifikasi akun
         if ($user->status === 'pending') {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect()->route('login')->withErrors([
-                'email' => 'Akun Anda sedang dalam antrean verifikasi Administrator. Silakan tunggu persetujuan sebelum dapat masuk ke sistem.',
-            ]);
+            $request->session()->regenerate();
+            return redirect()->route('not-verified');
         }
 
         if ($user->status === 'rejected') {

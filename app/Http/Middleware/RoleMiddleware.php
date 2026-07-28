@@ -24,13 +24,7 @@ class RoleMiddleware
 
         // Validasi status verifikasi akun (pending, approved, rejected, nonactive)
         if ($user->status === 'pending') {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect()->route('login')->withErrors([
-                'email' => 'Akun Anda sedang dalam antrean verifikasi Administrator. Silakan tunggu persetujuan sebelum dapat masuk ke sistem.',
-            ]);
+            return redirect()->route('not-verified');
         }
 
         if ($user->status === 'rejected') {
