@@ -491,7 +491,7 @@
 <body>
     @php
     $isSelectionScreen = request()->routeIs('operator.dashboard');
-    $isPeluangInvestasi = request()->routeIs('operator.peluang-investasi*');
+    $isPeluangInvestasi = request()->routeIs('operator.peluang-investasi*') || request()->routeIs('operator.projects*');
     @endphp
 
     @if(!$isSelectionScreen)
@@ -559,14 +559,20 @@
                 @if($isPeluangInvestasi)
                 <!-- SIDEBAR MENU PELUANG INVESTASI (IPRO) -->
                 <div class="sidebar-section-title">
-                    Peluang Investasi (IPRO)
+                    Modul Peluang Investasi
                 </div>
 
                 <ul class="sidebar-menu">
                     <li>
                         <a href="{{ route('operator.peluang-investasi') }}" class="sidebar-link {{ request()->routeIs('operator.peluang-investasi') ? 'active' : '' }}">
-                            <i class="fa-solid fa-briefcase"></i>
+                            <i class="fa-solid fa-chart-line"></i>
                             <span>Dashboard Peluang</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.projects.index') }}" class="sidebar-link {{ request()->routeIs('operator.projects.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-calculator"></i>
+                            <span>Kalkulasi & Daftar Proyek</span>
                         </a>
                     </li>
                 </ul>

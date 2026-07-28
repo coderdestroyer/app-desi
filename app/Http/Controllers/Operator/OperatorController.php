@@ -71,7 +71,7 @@ class OperatorController extends Controller
             ->take(10)
             ->get();
 
-        return view('operator.dashboard', compact(
+        return view('operator.potensi_unggulan.dashboard', compact(
             'countLq', 'countSs', 'countTipologi', 'countKlassen', 'totalAnalisa',
             'statusLq', 'statusSs', 'statusTipologi', 'statusKlassen',
             'activityLogs'

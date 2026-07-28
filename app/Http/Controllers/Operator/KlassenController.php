@@ -93,7 +93,7 @@ class KlassenController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         ))->onEachSide(1);
 
-        return view('operator.klassen.index', [
+        return view('operator.potensi_unggulan.klassen.index', [
             'klassenData' => $paginatedData,
             'editData' => $editData,
         ]);

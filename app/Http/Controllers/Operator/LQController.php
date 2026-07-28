@@ -69,7 +69,7 @@ class LqController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         ))->onEachSide(1);
 
-        return view('operator.lq.index', [
+        return view('operator.potensi_unggulan.lq.index', [
             'lqData' => $paginatedData,
             'editItem' => $editItem,
         ]);
