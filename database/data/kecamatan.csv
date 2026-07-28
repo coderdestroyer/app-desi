@@ -1,0 +1,101 @@
+kec_id,kab_id,nama_kecamatan,created_at,updated_at
+110101,1101,Bakongan,null,null
+110102,1101,Kluet Utara,null,null
+110103,1101,Kluet Selatan,null,null
+110104,1101,Labuhan Haji,null,null
+110105,1101,Meukek,null,null
+110106,1101,Samadua,null,null
+110107,1101,Sawang,null,null
+110108,1101,Tapaktuan,null,null
+110109,1101,Trumon,null,null
+110110,1101,Pasi Raja,null,null
+110111,1101,Labuhan Haji Timur,null,null
+110112,1101,Labuhan Haji Barat,null,null
+110113,1101,Kluet Tengah,null,null
+110114,1101,Kluet Timur,null,null
+110115,1101,Bakongan Timur,null,null
+110116,1101,Trumon Timur,null,null
+110117,1101,Kota Bahagia,null,null
+110118,1101,Trumon Tengah,null,null
+110201,1102,Lawe Alas,null,null
+110202,1102,Lawe Sigala-Gala,null,null
+110203,1102,Bambel,null,null
+110204,1102,Babussalam,null,null
+110205,1102,Badar,null,null
+110206,1102,Babul Makmur,null,null
+110207,1102,Darul Hasanah,null,null
+110208,1102,Lawe Bulan,null,null
+110209,1102,Bukit Tusam,null,null
+110210,1102,Semadam,null,null
+110211,1102,Babul Rahmah,null,null
+110212,1102,Ketambe,null,null
+110213,1102,Deleng Pokhkisen,null,null
+110214,1102,Lawe Sumur,null,null
+110215,1102,Tanoh Alas,null,null
+110216,1102,Leuser,null,null
+110301,1103,Darul Aman,null,null
+110302,1103,Julok,null,null
+110303,1103,Idi Rayeuk,null,null
+110304,1103,Birem Bayeun,null,null
+110305,1103,Serbajadi,null,null
+110306,1103,Nurussalam,null,null
+110307,1103,Peureulak,null,null
+110308,1103,Rantau Selamat,null,null
+110309,1103,Simpang Ulim,null,null
+110310,1103,Rantau Peureulak,null,null
+110311,1103,Pante Bidari,null,null
+110312,1103,Madat,null,null
+110313,1103,Indra Makmu,null,null
+110314,1103,Idi Tunong,null,null
+110315,1103,Banda Alam,null,null
+110316,1103,Peudawa,null,null
+110317,1103,Peureulak Timur,null,null
+110318,1103,Peureulak Barat,null,null
+110319,1103,Sungai Raya,null,null
+110320,1103,Simpang Jernih,null,null
+110321,1103,Darul Ihsan,null,null
+110322,1103,Darul Falah,null,null
+110323,1103,Idi Timur,null,null
+110324,1103,Peunaron,null,null
+110401,1104,Linge,null,null
+110402,1104,Silih Nara,null,null
+110403,1104,Bebesen,null,null
+110407,1104,Pegasing,null,null
+110408,1104,Bintang,null,null
+110410,1104,Ketol,null,null
+110411,1104,Kebayakan,null,null
+110412,1104,Kute Panang,null,null
+110413,1104,Celala,null,null
+110417,1104,Laut Tawar,null,null
+110418,1104,Atu Lintang,null,null
+110419,1104,Jagong Jeget,null,null
+110420,1104,Bies,null,null
+110421,1104,Rusip Antara,null,null
+110501,1105,Johan Pahwalan,null,null
+110502,1105,Kaway XVI,null,null
+110503,1105,Sungai Mas,null,null
+110504,1105,Woyla,null,null
+110505,1105,Samatiga,null,null
+110506,1105,Bubon,null,null
+110507,1105,Arongan Lambalek,null,null
+110508,1105,Pante Ceureumen,null,null
+110509,1105,Meureubo,null,null
+110510,1105,Woyla Barat,null,null
+110511,1105,Woyla Timur,null,null
+110512,1105,Panton Reu,null,null
+110601,1106,Lhoong,null,null
+110602,1106,Lhoknga,null,null
+110603,1106,Indrapuri,null,null
+110604,1106,Seulimeum,null,null
+110605,1106,Montasik,null,null
+110606,1106,Sukamakmur,null,null
+110607,1106,Darul Imarah,null,null
+110608,1106,Peukan Bada,null,null
+110609,1106,Mesjid Raya,null,null
+110610,1106,Ingin Jaya,null,null
+110611,1106,Kuta Baro,null,null
+110612,1106,Darussalam,null,null
+110613,1106,Pulo Aceh,null,null
+110614,1106,Lembah Seulawah,null,null
+110615,1106,Kota Jantho,null,null
+110616,1106,Kota Cot Glie,null,null
