@@ -83,6 +83,11 @@ Route::get('/about', function () {
 })->name('about');
 
 
+Route::get('/not-verified', function () {
+    return view('errors.not-verified');
+})->name('not-verified');
+
+
 /*
 |--------------------------------------------------------------------------
 | AUTHENTICATION ROUTES
@@ -141,4 +146,5 @@ Route::prefix('test-error')->group(function() {
     Route::get('429', function() { return view('errors.429'); });
     Route::get('500', function() { return view('errors.500'); });
     Route::get('503', function() { return view('errors.503'); });
+    Route::get('not-verified', function() { return view('errors.not-verified'); });
 });

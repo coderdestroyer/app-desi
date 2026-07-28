@@ -15,6 +15,9 @@ return Application::configure(
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            CheckStatusMiddleware::class,
+        ]);
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'check.status' => CheckStatusMiddleware::class,

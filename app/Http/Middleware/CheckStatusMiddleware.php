@@ -18,13 +18,11 @@ class CheckStatusMiddleware
             $user = Auth::user();
 
             if ($user->status === 'pending') {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                if ($request->routeIs('not-verified') || $request->routeIs('logout')) {
+                    return $next($request);
+                }
 
-                return redirect()->route('login')->withErrors([
-                    'email' => 'Akun Anda sedang dalam antrean verifikasi Administrator. Silakan tunggu persetujuan sebelum dapat masuk ke sistem.',
-                ]);
+                return redirect()->route('not-verified');
             }
 
             if ($user->status === 'rejected') {
