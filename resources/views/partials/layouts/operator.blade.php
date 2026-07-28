@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -69,17 +70,13 @@
             overflow-y: auto;
             color: #ffffff;
             background:
-                radial-gradient(
-                    circle at 20% 0%,
+                radial-gradient(circle at 20% 0%,
                     rgba(255, 255, 255, 0.08),
-                    transparent 28%
-                ),
-                linear-gradient(
-                    180deg,
+                    transparent 28%),
+                linear-gradient(180deg,
                     #075735 0%,
                     #087849 48%,
-                    #0c8d58 100%
-                );
+                    #0c8d58 100%);
             box-shadow: 10px 0 30px rgba(5, 66, 40, 0.12);
         }
 
@@ -316,6 +313,11 @@
             background: var(--background);
         }
 
+        .admin-main.selection-screen {
+            width: 100% !important;
+            margin-left: 0 !important;
+        }
+
         .mobile-sidebar-button {
             display: none;
             position: fixed;
@@ -485,11 +487,12 @@
 
     @stack('styles')
 </head>
+
 <body>
-@php
+    @php
     $isSelectionScreen = request()->routeIs('operator.dashboard');
     $isPeluangInvestasi = request()->routeIs('operator.peluang-investasi*');
-@endphp
+    @endphp
 
     @if(!$isSelectionScreen)
     <button type="button" id="mobileSidebarButton" class="mobile-sidebar-button" aria-label="Buka menu">
@@ -554,57 +557,57 @@
 
             <nav class="sidebar-content">
                 @if($isPeluangInvestasi)
-                    <!-- SIDEBAR MENU PELUANG INVESTASI (IPRO) -->
-                    <div class="sidebar-section-title">
-                        Peluang Investasi (IPRO)
-                    </div>
+                <!-- SIDEBAR MENU PELUANG INVESTASI (IPRO) -->
+                <div class="sidebar-section-title">
+                    Peluang Investasi (IPRO)
+                </div>
 
-                    <ul class="sidebar-menu">
-                        <li>
-                            <a href="{{ route('operator.peluang-investasi') }}" class="sidebar-link {{ request()->routeIs('operator.peluang-investasi') ? 'active' : '' }}">
-                                <i class="fa-solid fa-briefcase"></i>
-                                <span>Dashboard Peluang</span>
-                            </a>
-                        </li>
-                    </ul>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="{{ route('operator.peluang-investasi') }}" class="sidebar-link {{ request()->routeIs('operator.peluang-investasi') ? 'active' : '' }}">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <span>Dashboard Peluang</span>
+                        </a>
+                    </li>
+                </ul>
                 @else
-                    <!-- SIDEBAR MENU POTENSI UNGGULAN (MAKRO) -->
-                    <div class="sidebar-section-title">
-                        Potensi Unggulan Daerah
-                    </div>
+                <!-- SIDEBAR MENU POTENSI UNGGULAN (MAKRO) -->
+                <div class="sidebar-section-title">
+                    Potensi Unggulan Daerah
+                </div>
 
-                    <ul class="sidebar-menu">
-                        <li>
-                            <a href="{{ route('operator.potensi-unggulan') }}" class="sidebar-link {{ request()->routeIs('operator.potensi-unggulan') ? 'active' : '' }}">
-                                <i class="fa-solid fa-table-cells-large"></i>
-                                <span>Dashboard Potensi</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('operator.lq.index') }}" class="sidebar-link {{ request()->routeIs('operator.lq.index') ? 'active' : '' }}">
-                                <i class="fa-solid fa-chart-line"></i>
-                                <span>Analisis LQ</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('operator.ss.index') }}" class="sidebar-link {{ request()->routeIs('operator.ss.index') ? 'active' : '' }}">
-                                <i class="fa-solid fa-chart-pie"></i>
-                                <span>Analisis SS</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('operator.tipologi.index') }}" class="sidebar-link {{ request()->routeIs('operator.tipologi.index') ? 'active' : '' }}">
-                                <i class="fa-solid fa-layer-group"></i>
-                                <span>Analisis Tipologi Sektor</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('operator.klassen.index') }}" class="sidebar-link {{ request()->routeIs('operator.klassen.index') ? 'active' : '' }}">
-                                <i class="fa-solid fa-chart-bar"></i>
-                                <span>Analisis Klassen</span>
-                            </a>
-                        </li>
-                    </ul>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="{{ route('operator.potensi-unggulan') }}" class="sidebar-link {{ request()->routeIs('operator.potensi-unggulan') ? 'active' : '' }}">
+                            <i class="fa-solid fa-table-cells-large"></i>
+                            <span>Dashboard Potensi</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.lq.index') }}" class="sidebar-link {{ request()->routeIs('operator.lq.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Analisis LQ</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.ss.index') }}" class="sidebar-link {{ request()->routeIs('operator.ss.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Analisis SS</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.tipologi.index') }}" class="sidebar-link {{ request()->routeIs('operator.tipologi.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <span>Analisis Tipologi Sektor</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('operator.klassen.index') }}" class="sidebar-link {{ request()->routeIs('operator.klassen.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-bar"></i>
+                            <span>Analisis Klassen</span>
+                        </a>
+                    </li>
+                </ul>
                 @endif
 
                 <div class="sidebar-section-title">
@@ -623,7 +626,7 @@
         </aside>
         @endif
 
-        <main class="admin-main" style="{{ $isSelectionScreen ? 'width: 100% !important; margin-left: 0 !important;' : '' }}">
+        <main class="admin-main {{ $isSelectionScreen ? 'selection-screen' : '' }}">
             @if($isSelectionScreen)
             <!-- TOPBAR UNTUK SELECTION SCREEN (TANPA SIDEBAR) -->
             <header class="bg-white border-b border-[#CFE3D5] px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
@@ -674,7 +677,7 @@
     @stack('scripts')
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const profile = document.getElementById('adminProfile');
             const profileToggle = document.getElementById('adminProfileToggle');
 
@@ -692,7 +695,7 @@
             openLogoutBtns.forEach(btn => btn.addEventListener('click', openLogoutModal));
 
             if (profile && profileToggle) {
-                profileToggle.addEventListener('click', function () {
+                profileToggle.addEventListener('click', function() {
                     profile.classList.toggle('open');
                 });
             }
@@ -702,7 +705,7 @@
                 sidebarBackdrop?.classList.remove('show');
             }
 
-            sidebarButton?.addEventListener('click', function () {
+            sidebarButton?.addEventListener('click', function() {
                 sidebar?.classList.toggle('open');
                 sidebarBackdrop?.classList.toggle('show');
             });
@@ -710,7 +713,7 @@
             sidebarBackdrop?.addEventListener('click', closeSidebar);
 
             function openLogoutModal() {
-                if (! logoutModal) {
+                if (!logoutModal) {
                     return;
                 }
 
@@ -719,7 +722,7 @@
             }
 
             function closeLogoutModal() {
-                if (! logoutModal) {
+                if (!logoutModal) {
                     return;
                 }
 
@@ -727,11 +730,11 @@
                 document.body.classList.remove('modal-open');
             }
 
-            closeLogoutButtons.forEach(function (button) {
+            closeLogoutButtons.forEach(function(button) {
                 button.addEventListener('click', closeLogoutModal);
             });
 
-            confirmLogout?.addEventListener('click', function (e) {
+            confirmLogout?.addEventListener('click', function(e) {
                 e.preventDefault();
                 const form = document.getElementById('logoutForm');
                 if (form) {
@@ -739,7 +742,7 @@
                 }
             });
 
-            document.addEventListener('keydown', function (event) {
+            document.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape') {
                     closeLogoutModal();
                     closeSidebar();
@@ -819,7 +822,7 @@
         function toggleSelectAll(source) {
             let selectedIds = getSelectedIds();
             const checkboxes = document.querySelectorAll('.row-checkbox');
-            
+
             checkboxes.forEach(cb => {
                 cb.checked = source.checked;
                 if (source.checked) {
@@ -828,7 +831,7 @@
                     selectedIds = selectedIds.filter(id => id !== cb.value);
                 }
             });
-            
+
             saveSelectedIds(selectedIds);
             updateBulkDeleteState();
         }
@@ -837,12 +840,12 @@
             const selectedIds = getSelectedIds();
             const bulkBtn = document.getElementById('bulkDeleteBtn');
             const form = document.getElementById('bulkDeleteForm');
-            
+
             if (!bulkBtn) return;
-            
+
             if (selectedIds.length > 0) {
                 bulkBtn.classList.remove('hidden');
-                
+
                 // Update button text with count while preserving SVG
                 bulkBtn.innerHTML = `
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -850,8 +853,8 @@
                     </svg>
                     Hapus Terpilih (${selectedIds.length})
                 `;
-                
-                if(form) {
+
+                if (form) {
                     // Update hidden inputs for submission
                     document.querySelectorAll('.bulk-id-input').forEach(el => el.remove());
                     selectedIds.forEach(id => {
@@ -870,7 +873,7 @@
             // Update master checkbox state for current page
             const allCheckboxes = document.querySelectorAll('.row-checkbox');
             const selectAll = document.getElementById('selectAll');
-            
+
             if (selectAll && allCheckboxes.length > 0) {
                 const checkedCount = Array.from(allCheckboxes).filter(cb => cb.checked).length;
                 selectAll.checked = checkedCount === allCheckboxes.length;
@@ -897,13 +900,13 @@
             if (e.target && e.target.classList.contains('row-checkbox')) {
                 let selectedIds = getSelectedIds();
                 const id = e.target.value;
-                
+
                 if (e.target.checked) {
                     if (!selectedIds.includes(id)) selectedIds.push(id);
                 } else {
                     selectedIds = selectedIds.filter(i => i !== id);
                 }
-                
+
                 saveSelectedIds(selectedIds);
                 updateBulkDeleteState();
             }
@@ -913,9 +916,9 @@
             event.preventDefault();
             const selectedIds = getSelectedIds();
             const count = selectedIds.length;
-            
-            if(count === 0) return false;
-            
+
+            if (count === 0) return false;
+
             Swal.fire({
                 title: '<span class="text-lg">Hapus Terpilih?</span>',
                 html: `<span class="text-sm">Apakah Anda yakin ingin menghapus <b>${count}</b> data terpilih?<br>Aksi ini tidak dapat dibatalkan!</span>`,
@@ -944,4 +947,5 @@
     </script>
 
 </body>
+
 </html>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\ComparisonController;
 use App\Http\Controllers\User\UserProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvestmentMapController;
 
@@ -65,9 +66,9 @@ Route::get(
 */
 
 Route::get('/dashboard', function () {
-    $user = auth()->user();
+    $user = Auth::user();
 
-    return match ($user->role) {
+    return match ($user?->role) {
         'admin' => redirect()->route('admin.dashboard'),
         'operator' => redirect()->route('operator.dashboard'),
         default => redirect()->route('home'),
