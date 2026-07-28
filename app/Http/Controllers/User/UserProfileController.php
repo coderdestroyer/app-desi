@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class UserProfileController extends Controller
 {
@@ -19,49 +19,36 @@ class UserProfileController extends Controller
         ]);
     }
 
-    /**
-     * Menampilkan halaman edit profil.
-     */
-    public function editProfile(Request $request): View
-    {
-        return view('user.edit', [
-            'user' => $request->user(),
-        ]);
-    }
 
     /**
-     * Memperbarui data profil.
+     * Memperbarui profil user.
      */
     public function update(Request $request): RedirectResponse
     {
-        $user = $request->user();
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
 
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'address' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
         ]);
 
-        $user->name = $request->name;
-        $user->save();
+        $request->user()->update($validated);
 
         return redirect()
             ->route('user.profile')
             ->with('success', 'Profil berhasil diperbarui.');
-    }
-
-    /**
-     * Menghapus akun.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $user = $request->user();
-
-        auth()->logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/');
     }
 }

@@ -1,0 +1,101 @@
+desa_id,kec_id,nama_kelurahan_desa,jenis,created_at,updated_at
+1101012001,110101,Keude Bakongan,null,null,null
+1101012002,110101,Ujong Mangki,null,null,null
+1101012003,110101,Ujong Padang,null,null,null
+1101012004,110101,Gampong Drien,null,null,null
+1101012015,110101,Darul Ikhsan,null,null,null
+1101012016,110101,Padang Beurahan,null,null,null
+1101012017,110101,Gampong Baro,null,null,null
+1101022001,110102,Fajar Harapan,null,null,null
+1101022002,110102,Krueng Batee,null,null,null
+1101022003,110102,Pasi Kuala Asahan,null,null,null
+1101022004,110102,Gunung Pulo,null,null,null
+1101022005,110102,Pulo Ie I,null,null,null
+1101022006,110102,Jambo Manyang,null,null,null
+1101022007,110102,Simpang Empat,null,null,null
+1101022008,110102,Limau Purut,null,null,null
+1101022009,110102,Pulo Kambing,null,null,null
+1101022010,110102,Kampung Paya,null,null,null
+1101022011,110102,Krueng Batu,null,null,null
+1101022012,110102,Krueng Kluet,null,null,null
+1101022013,110102,Alur Mas,null,null,null
+1101022014,110102,Kampung Tinggi,null,null,null
+1101022015,110102,Ruak,null,null,null
+1101022016,110102,Simpang Lhee,null,null,null
+1101022017,110102,Suaq Geuringgeng,null,null,null
+1101022018,110102,Pasi Kuala Ba'u,null,null,null
+1101022019,110102,Kedai Padang,null,null,null
+1101022020,110102,Kotafajar,null,null,null
+1101022021,110102,Gunung Pudung,null,null,null
+1101032001,110103,Suaq Bakung,null,null,null
+1101032002,110103,Rantau Binuang,null,null,null
+1101032003,110103,Barat Daya,null,null,null
+1101032004,110103,Sialang,null,null,null
+1101032005,110103,Kapeh,null,null,null
+1101032006,110103,Pulo Ie,null,null,null
+1101032007,110103,Kedai Runding,null,null,null
+1101032008,110103,Kedai Kandang,null,null,null
+1101032009,110103,Gampong Luar,null,null,null
+1101032010,110103,Ujung,null,null,null
+1101032011,110103,Jua,null,null,null
+1101032012,110103,Pasi Meurapat,null,null,null
+1101032013,110103,Ujung Pasir,null,null,null
+1101032014,110103,Geulumbuk,null,null,null
+1101032015,110103,Pasie Lembang,null,null,null
+1101032016,110103,Ujung Padang,null,null,null
+1101032017,110103,Indra Damai,null,null,null
+1101042001,110104,Bakau Hulu,null,null,null
+1101042002,110104,Padang Bakau,null,null,null
+1101042003,110104,Manggis Harapan,null,null,null
+1101042004,110104,Pasar Lama,null,null,null
+1101042005,110104,Apha,null,null,null
+1101042006,110104,Ujung Batu,null,null,null
+1101042007,110104,Pawoh,null,null,null
+1101042008,110104,Dalam,null,null,null
+1101042009,110104,Kota Palak,null,null,null
+1101042010,110104,Cacang,null,null,null
+1101042011,110104,Tengah Pisang,null,null,null
+1101042012,110104,Pisang,null,null,null
+1101042013,110104,Hulu Pisang,null,null,null
+1101042014,110104,Tengah Baru,null,null,null
+1101042015,110104,Lembah Baru,null,null,null
+1101042016,110104,Padang Baru,null,null,null
+1101052001,110105,Kuta Buloh II,null,null,null
+1101052002,110105,Kuta Buloh I,null,null,null
+1101052003,110105,Ie Dingen,null,null,null
+1101052004,110105,Drien Jalo,null,null,null
+1101052005,110105,Jambo Papeun,null,null,null
+1101052006,110105,Buket Meuh,null,null,null
+1101052007,110105,Blang Kuala,null,null,null
+1101052008,110105,Rot Teungoh,null,null,null
+1101052009,110105,Alue Baro,null,null,null
+1101052010,110105,Ladang Tuha,null,null,null
+1101052011,110105,Lhok Mamplam,null,null,null
+1101052012,110105,Arun Tunggai,null,null,null
+1101052013,110105,Blang Teungoh,null,null,null
+1101052014,110105,Blang Bladeh,null,null,null
+1101052015,110105,Ie Buboh,null,null,null
+1101052016,110105,Keude Meukek,null,null,null
+1101052017,110105,Kuta Baro,null,null,null
+1101052018,110105,Tanjung Harapan,null,null,null
+1101052019,110105,Labuhan Tarok,null,null,null
+1101052020,110105,Lhok Aman,null,null,null
+1101052021,110105,Alue Meutuah,null,null,null
+1101052022,110105,Ladang Baro,null,null,null
+1101052023,110105,Labuhan Tarok II,null,null,null
+1101062001,110106,Dalam,null,null,null
+1101062002,110106,Subarang,null,null,null
+1101062003,110106,Kuta Baru,null,null,null
+1101062004,110106,Gunung Ketek,null,null,null
+1101062005,110106,Ladang Panton Luas,null,null,null
+1101062006,110106,Madat,null,null,null
+1101062007,110106,Alur Seumerah,null,null,null
+1101062008,110106,Tengah,null,null,null
+1101062009,110106,Gunung Cut,null,null,null
+1101062010,110106,Alur Pinang,null,null,null
+1101062011,110106,Kuta Blang,null,null,null
+1101062012,110106,Batee Tunggai,null,null,null
+1101062013,110106,Ujung Tanah,null,null,null
+1101062014,110106,Ujung Kampung,null,null,null
+1101062015,110106,Jilatang,null,null,null
+1101062016,110106,Luar,null,null,null
