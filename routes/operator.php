@@ -6,6 +6,10 @@ use App\Http\Controllers\Operator\LqController;
 use App\Http\Controllers\Operator\SsController;
 use App\Http\Controllers\Operator\TipologiController;
 use App\Http\Controllers\Operator\KlassenController;
+use App\Http\Controllers\Operator\ProjectController;
+use App\Http\Controllers\Operator\CapexController;
+use App\Http\Controllers\Operator\ProfitLossController;
+use App\Http\Controllers\Operator\CashFlowController;
 
 Route::middleware([
     'auth',
@@ -16,9 +20,28 @@ Route::middleware([
     ->group(function () {
         Route::get('/dashboard', [OperatorController::class, 'selection'])->name('dashboard');
         Route::get('/potensi-unggulan', [OperatorController::class, 'index'])->name('potensi-unggulan');
-        Route::get('/peluang-investasi', function () {
-            return view('operator.peluang_investasi');
-        })->name('peluang-investasi');
+        
+        // Modul Peluang Investasi (IPRO Engine)
+        Route::get('/peluang-investasi', [ProjectController::class, 'dashboard'])->name('peluang-investasi');
+        Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+        Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+        Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+        Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+        Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+
+        // Rute Estimasi CAPEX
+        Route::get('/projects/{project}/capex', [CapexController::class, 'index'])->name('projects.capex.index');
+        Route::post('/projects/{project}/capex', [CapexController::class, 'store'])->name('projects.capex.store');
+
+        // Rute Proyeksi Laba Rugi (P&L)
+        Route::get('/projects/{project}/laba-rugi', [ProfitLossController::class, 'index'])->name('projects.pl.index');
+        Route::post('/projects/{project}/laba-rugi/settings', [ProfitLossController::class, 'updateSettings'])->name('projects.pl.settings');
+        Route::post('/projects/{project}/laba-rugi/data', [ProfitLossController::class, 'store'])->name('projects.pl.store');
+
+        // Rute Tabel Arus Kas (Cash Flow)
+        Route::get('/projects/{project}/cashflow', [CashFlowController::class, 'index'])->name('projects.cashflow.index');
+        Route::post('/projects/{project}/cashflow/settings', [CashFlowController::class, 'updateSettings'])->name('projects.cashflow.settings');
+
         Route::get('/aktivitas', [OperatorController::class, 'aktivitas'])->name('aktivitas');
         
         Route::get('/profile', [OperatorController::class, 'profile'])->name('profile');

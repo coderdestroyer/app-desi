@@ -79,7 +79,7 @@ class SsController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         ))->onEachSide(1);
 
-        return view('operator.ss.index', [
+        return view('operator.potensi_unggulan.ss.index', [
             'ssData' => $paginatedData,
             'editItem' => $editItem,
         ]);

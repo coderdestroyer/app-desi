@@ -66,7 +66,7 @@ class TipologiController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         ))->onEachSide(1);
 
-        return view('operator.tipologi.index', [
+        return view('operator.potensi_unggulan.tipologi.index', [
             'tipologiData' => $paginatedData,
             'editItem' => $editItem,
         ]);
