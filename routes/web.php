@@ -3,6 +3,7 @@
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\ComparisonController;
 use App\Http\Controllers\User\UserProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvestmentMapController;
 
@@ -65,9 +66,9 @@ Route::get(
 */
 
 Route::get('/dashboard', function () {
-    $user = auth()->user();
+    $user = Auth::user();
 
-    return match ($user->role) {
+    return match ($user?->role) {
         'admin' => redirect()->route('admin.dashboard'),
         'operator' => redirect()->route('operator.dashboard'),
         default => redirect()->route('home'),
@@ -126,3 +127,18 @@ require __DIR__ . '/operator.php';
 */
 
 require __DIR__ . '/user.php';
+
+/*
+|--------------------------------------------------------------------------
+| TEMPORARY ERROR PAGES PREVIEW
+|--------------------------------------------------------------------------
+*/
+Route::prefix('test-error')->group(function() {
+    Route::get('401', function() { return view('errors.401'); });
+    Route::get('403', function() { return view('errors.403'); });
+    Route::get('404', function() { return view('errors.404'); });
+    Route::get('419', function() { return view('errors.419'); });
+    Route::get('429', function() { return view('errors.429'); });
+    Route::get('500', function() { return view('errors.500'); });
+    Route::get('503', function() { return view('errors.503'); });
+});
