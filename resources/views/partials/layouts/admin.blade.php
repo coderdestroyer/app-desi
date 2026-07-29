@@ -425,6 +425,16 @@
 
                 <li>
                     <a
+                        href="{{ route('admin.proyek-ipro.index') }}"
+                        class="sidebar-link {{ request()->is('admin/proyek-ipro*') ? 'active' : '' }}"
+                    >
+                        <i class="fa-solid fa-file-invoice-dollar text-[#0F8A5F]"></i>
+                        <span>Dokumen IPRO</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a
                         href="{{ route('admin.data-wilayah.index') }}"
                         class="sidebar-link {{ request()->is('admin/data-wilayah*') ? 'active' : '' }}"
                     >
