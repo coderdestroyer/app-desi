@@ -53,9 +53,9 @@ class DataWilayahController extends Controller
                     ->orWhereRaw('LOWER(CAST(kab.nama_kabupaten AS TEXT)) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(CAST(kab.kab_id AS TEXT)) LIKE ?', [$search])
                     ->orWhereRaw('LOWER(CAST(kec.nama_kecamatan AS TEXT)) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(CAST(kec.kec_id AS TEXT)) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(CAST(d.nama_kelurahan_desa AS TEXT)) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(CAST(d.desa_id AS TEXT)) LIKE ?', [$search]);
+                    ->orWhereRaw('LOWER(CAST(kec.id AS TEXT)) LIKE ?', [$search])
+                    ->orWhereRaw('LOWER(CAST(d.nama_desa AS TEXT)) LIKE ?', [$search])
+                    ->orWhereRaw('LOWER(CAST(d.id AS TEXT)) LIKE ?', [$search]);
 
                 if ($this->desaHasColumn('status')) {
                     $subQuery->orWhereRaw(
@@ -82,7 +82,7 @@ class DataWilayahController extends Controller
 
         if ($request->filled('kode_kecamatan')) {
             $query->where(
-                'kec.kec_id',
+                'kec.id',
                 $this->digits((string) $request->kode_kecamatan)
             );
         }
@@ -102,7 +102,7 @@ class DataWilayahController extends Controller
             ->orderBy('p.nama_provinsi')
             ->orderBy('kab.nama_kabupaten')
             ->orderBy('kec.nama_kecamatan')
-            ->orderBy('d.nama_kelurahan_desa')
+            ->orderBy('d.nama_desa')
             ->paginate(10)
             ->withQueryString();
 
@@ -147,11 +147,11 @@ class DataWilayahController extends Controller
             ]);
 
         $kecamatanOptions = DB::table(self::TABLE_KECAMATAN)
-            ->select('kab_id', 'kec_id', 'nama_kecamatan')
+            ->select('kabupaten_id as kab_id', 'id as kec_id', 'nama_kecamatan')
             ->when(
                 $request->filled('kode_kabupaten'),
                 fn (Builder $q) => $q->where(
-                    'kab_id',
+                    'kabupaten_id',
                     $this->digits((string) $request->kode_kabupaten)
                 )
             )
@@ -164,15 +164,15 @@ class DataWilayahController extends Controller
             ]);
 
         $desaOptions = DB::table(self::TABLE_DESA)
-            ->select('kec_id', 'desa_id', 'nama_kelurahan_desa')
+            ->select('kecamatan_id as kec_id', 'id as desa_id', 'nama_desa as nama_kelurahan_desa')
             ->when(
                 $request->filled('kode_kecamatan'),
                 fn (Builder $q) => $q->where(
-                    'kec_id',
+                    'kecamatan_id',
                     $this->digits((string) $request->kode_kecamatan)
                 )
             )
-            ->orderBy('nama_kelurahan_desa')
+            ->orderBy('nama_desa')
             ->get()
             ->map(fn ($item) => (object) [
                 'kode_kecamatan' => $this->formatCode($item->kec_id, [2, 2, 2]),
@@ -242,8 +242,8 @@ class DataWilayahController extends Controller
         ]);
 
         $items = DB::table(self::TABLE_KECAMATAN)
-            ->select('kec_id', 'nama_kecamatan')
-            ->where('kab_id', $this->digits($validated['regency_code']))
+            ->select('id as kec_id', 'nama_kecamatan')
+            ->where('kabupaten_id', $this->digits($validated['regency_code']))
             ->orderBy('nama_kecamatan')
             ->get()
             ->map(fn ($item) => [
@@ -262,13 +262,13 @@ class DataWilayahController extends Controller
         ]);
 
         $items = DB::table(self::TABLE_DESA)
-            ->select('desa_id', 'nama_kelurahan_desa')
-            ->where('kec_id', $this->digits($validated['district_code']))
-            ->orderBy('nama_kelurahan_desa')
+            ->select('id as desa_id', 'nama_desa')
+            ->where('kecamatan_id', $this->digits($validated['district_code']))
+            ->orderBy('nama_desa')
             ->get()
             ->map(fn ($item) => [
                 'code' => $this->formatCode($item->desa_id, [2, 2, 2, 4]),
-                'name' => (string) $item->nama_kelurahan_desa,
+                'name' => (string) $item->nama_desa,
             ])
             ->values();
 
@@ -288,7 +288,7 @@ class DataWilayahController extends Controller
 
         if (
             DB::table(self::TABLE_DESA)
-                ->where('desa_id', $ids['desa_id'])
+                ->where('id', $ids['desa_id'])
                 ->exists()
         ) {
             throw ValidationException::withMessages([
@@ -300,9 +300,9 @@ class DataWilayahController extends Controller
             $this->saveHierarchy($data, $ids);
 
             $payload = [
-                'desa_id' => $ids['desa_id'],
-                'kec_id' => $ids['kec_id'],
-                'nama_kelurahan_desa' => trim($data['nama_desa']),
+                'id' => $ids['desa_id'],
+                'kecamatan_id' => $ids['kec_id'],
+                'nama_desa' => trim($data['nama_desa']),
                 'updated_at' => now(),
             ];
 
@@ -347,7 +347,7 @@ class DataWilayahController extends Controller
         if (
             (string) $ids['desa_id'] !== (string) $oldDesaId
             && DB::table(self::TABLE_DESA)
-                ->where('desa_id', $ids['desa_id'])
+                ->where('id', $ids['desa_id'])
                 ->exists()
         ) {
             throw ValidationException::withMessages([
@@ -359,9 +359,9 @@ class DataWilayahController extends Controller
             $this->saveHierarchy($data, $ids);
 
             $payload = [
-                'desa_id' => $ids['desa_id'],
-                'kec_id' => $ids['kec_id'],
-                'nama_kelurahan_desa' => trim($data['nama_desa']),
+                'id' => $ids['desa_id'],
+                'kecamatan_id' => $ids['kec_id'],
+                'nama_desa' => trim($data['nama_desa']),
                 'updated_at' => now(),
             ];
 
@@ -374,8 +374,9 @@ class DataWilayahController extends Controller
                     ? trim($data['keterangan'])
                     : null;
             }
+
             DB::table(self::TABLE_DESA)
-                ->where('desa_id', $oldDesaId)
+                ->where('id', $oldDesaId)
                 ->update($payload);
         });
 
@@ -389,7 +390,7 @@ class DataWilayahController extends Controller
         $desaId = $this->digits($dataWilayah);
 
         DB::table(self::TABLE_DESA)
-            ->where('desa_id', $desaId)
+            ->where('id', $desaId)
             ->delete();
 
         return redirect()
@@ -400,15 +401,15 @@ class DataWilayahController extends Controller
     private function wilayahQuery(): Builder
     {
         $selects = [
-            'd.desa_id as id',
+            'd.id as id',
             'p.provinsi_id',
             'p.nama_provinsi',
             'kab.kab_id',
             'kab.nama_kabupaten',
-            'kec.kec_id',
+            'kec.id as kec_id',
             'kec.nama_kecamatan',
-            'd.desa_id',
-            'd.nama_kelurahan_desa as nama_desa',
+            'd.id as desa_id',
+            'd.nama_desa as nama_desa',
         ];
 
         if ($this->desaHasColumn('status')) {
@@ -424,8 +425,8 @@ class DataWilayahController extends Controller
         }
 
         return DB::table(self::TABLE_DESA . ' as d')
-            ->join(self::TABLE_KECAMATAN . ' as kec', 'kec.kec_id', '=', 'd.kec_id')
-            ->join(self::TABLE_KABUPATEN . ' as kab', 'kab.kab_id', '=', 'kec.kab_id')
+            ->join(self::TABLE_KECAMATAN . ' as kec', 'kec.id', '=', 'd.kecamatan_id')
+            ->join(self::TABLE_KABUPATEN . ' as kab', 'kab.kab_id', '=', 'kec.kabupaten_id')
             ->join(self::TABLE_PROVINSI . ' as p', 'p.provinsi_id', '=', 'kab.provinsi_id')
             ->select($selects);
     }
@@ -433,7 +434,7 @@ class DataWilayahController extends Controller
     private function findWilayahOrFail(string $desaId): object
     {
         $item = $this->wilayahQuery()
-            ->where('d.desa_id', $this->digits($desaId))
+            ->where('d.id', $this->digits($desaId))
             ->first();
 
         abort_if(! $item, 404);
@@ -473,9 +474,9 @@ class DataWilayahController extends Controller
         );
 
         DB::table(self::TABLE_KECAMATAN)->updateOrInsert(
-            ['kec_id' => $ids['kec_id']],
+            ['id' => $ids['kec_id']],
             [
-                'kab_id' => $ids['kab_id'],
+                'kabupaten_id' => $ids['kab_id'],
                 'nama_kecamatan' => trim($data['nama_kecamatan']),
                 'updated_at' => now(),
             ]
