@@ -34,7 +34,6 @@ class HasilAnalisisSeeder extends Seeder
         $header = fgetcsv($handle);
 
         $batchLq = [];
-        $batchAnalisisLq = [];
 
         while (($row = fgetcsv($handle)) !== false) {
             if (count($row) < 6) continue;
@@ -46,36 +45,18 @@ class HasilAnalisisSeeder extends Seeder
             $kategori = trim($row[5]);
 
             $batchLq[] = [
-                'kabupaten_id' => $kabId,
+                'kab_id' => $kabId,
                 'sektor_id' => $sektorId,
                 'tahun' => $tahun,
                 'nilai_lq' => $nilaiLq,
                 'kategori' => $kategori,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-
-            $batchAnalisisLq[] = [
-                'tingkat_wilayah' => 'Kabupaten/Kota',
-                'daerah_analisis' => (string) $kabId,
-                'daerah_pembanding' => 'Sumatera Utara',
-                'sektor_id' => $sektorId,
-                'tahun' => $tahun,
-                'pdrb_sektor_analisis' => 0,
-                'total_pdrb_analisis' => 0,
-                'pdrb_sektor_pembanding' => 0,
-                'total_pdrb_pembanding' => 0,
-                'nilai_lq' => $nilaiLq,
-                'kategori' => $kategori,
-                'keterangan' => 'Imported from initial dataset',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
         }
 
         if (!empty($batchLq)) {
-            DB::table('hasil_lq')->insert($batchLq);
-            DB::table('analisis_lq')->insert($batchAnalisisLq);
+            DB::table('hasil_lq')->insertOrIgnore($batchLq);
         }
 
         fclose($handle);
@@ -102,10 +83,12 @@ class HasilAnalisisSeeder extends Seeder
             $cij = (float) $row[8];
 
             $batchSsa[] = [
-                'kabupaten_id' => $kabId,
+                'kab_id' => $kabId,
                 'sektor_id' => $sektorId,
-                'tahun_awal' => $tahun - 1,
-                'tahun_akhir' => $tahun,
+                'tahun' => $tahun,
+                'rn' => $rn,
+                'mij' => $mij,
+                'cij' => $cij,
                 'komponen_n' => $rn,
                 'komponen_p' => $mij,
                 'komponen_d' => $cij,
@@ -116,7 +99,7 @@ class HasilAnalisisSeeder extends Seeder
         }
 
         if (!empty($batchSsa)) {
-            DB::table('hasil_ssa')->insert($batchSsa);
+            DB::table('hasil_ssa')->insertOrIgnore($batchSsa);
         }
 
         fclose($handle);
@@ -144,7 +127,7 @@ class HasilAnalisisSeeder extends Seeder
             $kontribusiKab = (float) $row[10];
 
             $batchTipologi[] = [
-                'kabupaten_id' => $kabId,
+                'kab_id' => $kabId,
                 'sektor_id' => $sektorId,
                 'tahun' => $tahun,
                 'kuadran' => $kuadran,
@@ -154,8 +137,11 @@ class HasilAnalisisSeeder extends Seeder
             ];
 
             $batchKlassen[] = [
-                'kabupaten_id' => $kabId,
+                'kab_id' => $kabId,
                 'sektor_id' => $sektorId,
+                'tahun' => $tahun,
+                'pertumbuhan_kabupaten' => $pertumbuhanKab,
+                'kontribusi_kabupaten' => $kontribusiKab,
                 'laju_pertumbuhan' => $pertumbuhanKab,
                 'kontribusi_pdrb' => $kontribusiKab,
                 'kuadran' => $kuadran,
@@ -165,10 +151,14 @@ class HasilAnalisisSeeder extends Seeder
         }
 
         if (!empty($batchTipologi)) {
-            DB::table('tipologi_sektor')->insert($batchTipologi);
-            DB::table('tipologi_klassen')->insert($batchKlassen);
+            DB::table('hasil_tipologi_sektor')->insertOrIgnore($batchTipologi);
+        }
+
+        if (!empty($batchKlassen)) {
+            DB::table('hasil_tipologi_klassen')->insertOrIgnore($batchKlassen);
         }
 
         fclose($handle);
     }
 }
+
