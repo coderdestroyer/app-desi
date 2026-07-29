@@ -50,6 +50,13 @@
             <p class="text-xs text-slate-500 mt-1">Gunakan formulir di bawah ini untuk mencatat seluruh biaya modal proyek (tanah, bangunan, alat, perizinan, dll).</p>
         </div>
 
+        <!-- Tombol Tambah Dinamis -->
+        <div x-show="!isPreviewMode" class="flex gap-3 mb-4">
+            <button @click="addParent()" class="px-4 py-2 bg-[#E7F2EB] border border-[#CFE3D5] hover:bg-[#CFE3D5] text-[#145239] rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center gap-2">
+                <span>+ Kategori Utama</span>
+            </button>
+        </div>
+
         <!-- Tabel Responsive -->
         <div class="overflow-x-auto border border-[#CFE3D5] rounded-xl pb-6">
             <table class="w-full text-sm text-left border-collapse">
@@ -146,13 +153,6 @@
             </table>
         </div>
 
-        <!-- Add Category Button -->
-        <div x-show="!isPreviewMode" class="mt-6 flex justify-start">
-            <button @click="addParent()" class="px-4 py-2 bg-[#E7F2EB] hover:bg-[#CFE3D5] text-[#145239] border border-[#CFE3D5] rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-xs">
-                <i class="fa-solid fa-plus text-xs"></i>
-                <span>Tambah Kategori Utama</span>
-            </button>
-        </div>
 
         <!-- Grand Total CAPEX Section -->
         <div class="mt-8 border-t border-[#CFE3D5] pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
