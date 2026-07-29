@@ -595,7 +595,7 @@
                 if (value === null || value === undefined || isNaN(value)) return '0';
                 let isNegative = value < 0;
                 let formatted = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.abs(value));
-                return isNegative ? `(${formatted})` : formatted;
+                return isNegative ? `-${formatted}` : formatted;
             },
 
             showToast(message, isSuccess = true) {
