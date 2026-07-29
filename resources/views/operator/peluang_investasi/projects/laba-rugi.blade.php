@@ -9,71 +9,65 @@
     <!-- Breadcrumb & Top Bar -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <nav class="flex text-sm text-slate-500 space-x-2">
-            <a href="{{ route('operator.projects.index') }}" class="hover:text-primary font-medium">Proyek</a>
+            <a href="{{ route('operator.projects.index') }}" class="hover:text-[#145239] font-medium">Proyek</a>
             <span>/</span>
-            <a href="{{ route('operator.projects.show', $project->id) }}" class="hover:text-primary font-medium truncate max-w-xs">{{ $project->nama_proyek }}</a>
+            <a href="{{ route('operator.projects.show', $project->id) }}" class="hover:text-[#145239] font-medium truncate max-w-xs">{{ $project->nama_proyek }}</a>
             <span>/</span>
             <span class="text-slate-800 font-semibold">Proyeksi Laba Rugi</span>
         </nav>
 
         <div class="flex items-center gap-2">
-            <button @click="toggleMode()" class="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center">
-                <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path x-show="!isPreviewMode" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path x-show="!isPreviewMode" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    <path x-show="isPreviewMode" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
+            <button @click="toggleMode()" class="px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                <i class="fa-solid" :class="isPreviewMode ? 'fa-pen-to-square' : 'fa-eye'"></i>
                 <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau (Preview)'"></span>
             </button>
 
-            <button @click="saveData()" :disabled="isSaving" class="bg-primary hover:bg-primary-container text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg x-show="isSaving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <svg x-show="!isSaving" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                Simpan Perubahan
+            <button @click="saveData()" :disabled="isSaving" class="bg-[#145239] hover:bg-[#0B5D3D] text-white px-5 py-2 rounded-xl text-sm font-bold shadow-md transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
+                <i x-show="isSaving" class="fa-solid fa-spinner animate-spin"></i>
+                <i x-show="!isSaving" class="fa-solid fa-floppy-disk"></i>
+                <span>Simpan Perubahan</span>
             </button>
         </div>
     </div>
 
     <!-- Alert / Toast -->
-    <div x-show="toast.show" x-transition class="p-4 rounded-lg shadow-md flex items-center justify-between border" :class="toast.isSuccess ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'">
-        <div class="flex items-center">
-            <svg class="w-5 h-5 mr-3" :class="toast.isSuccess ? 'text-emerald-500' : 'text-rose-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="toast.isSuccess ? 'M5 13l4 4L19 7' : 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'"></path></svg>
-            <span class="text-sm font-medium" x-text="toast.message"></span>
+    <div x-show="toast.show" x-transition class="p-4 rounded-xl shadow-sm flex items-center justify-between border" :class="toast.isSuccess ? 'bg-[#EEF8F2] border-[#CFE3D5] text-[#145239]' : 'bg-rose-50 border-rose-200 text-rose-800'">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid text-lg" :class="toast.isSuccess ? 'fa-circle-check text-[#145239]' : 'fa-triangle-exclamation text-rose-500'"></i>
+            <span class="text-sm font-semibold" x-text="toast.message"></span>
         </div>
         <button @click="toast.show = false" class="text-slate-400 hover:text-slate-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <i class="fa-solid fa-xmark"></i>
         </button>
     </div>
 
     <!-- Main Workspace -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-sm border border-[#CFE3D5] p-6 overflow-hidden">
         
         <!-- Table Title and Desc -->
-        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#EEF8F2] pb-4">
             <div>
                 <h2 class="text-xl font-bold text-slate-800">Proyeksi Laba Rugi (Profit & Loss)</h2>
                 <p class="text-xs text-slate-500 mt-1">Buat struktur kategori Anda sendiri secara dinamis hingga 3 level turunan.</p>
             </div>
             
-            <button @click="isSettingsOpen = !isSettingsOpen" class="inline-flex items-center text-xs font-semibold px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors border border-slate-200 shadow-sm">
-                <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <button @click="isSettingsOpen = !isSettingsOpen" class="inline-flex items-center text-xs font-semibold px-3.5 py-2 bg-[#EEF8F2] hover:bg-[#E7F2EB] text-[#145239] rounded-xl transition-colors border border-[#CFE3D5] shadow-sm gap-2">
+                <i class="fa-solid fa-sliders text-xs"></i>
                 <span x-text="isSettingsOpen ? 'Tutup Pengaturan Variabel' : 'Pengaturan Variabel'"></span>
             </button>
         </div>
 
         <!-- Pengaturan Variabel P&L Card -->
-        <div x-show="isSettingsOpen" x-transition class="bg-slate-50 rounded-xl border border-slate-200 p-5 mb-6 shadow-sm">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+        <div x-show="isSettingsOpen" x-transition class="bg-[#F7FAF8] rounded-2xl border border-[#CFE3D5] p-5 mb-6 shadow-sm">
+            <div class="flex items-center justify-between border-b border-[#EEF8F2] pb-3 mb-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-800">Variabel Pengaturan Laba Rugi</h3>
                     <p class="text-[11px] text-slate-500">Nilai statis di bawah ini digunakan khusus untuk kalkulasi EBIT, EBT, dan EAT di akhir tabel.</p>
                 </div>
-                <button @click="saveSettings()" :disabled="isSavingSettings" class="bg-primary hover:bg-primary-container text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors flex items-center disabled:opacity-50">
-                    <svg x-show="isSavingSettings" class="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Simpan Pengaturan
+                <button @click="saveSettings()" :disabled="isSavingSettings" class="bg-[#145239] hover:bg-[#0B5D3D] text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow-md transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
+                    <i x-show="isSavingSettings" class="fa-solid fa-spinner animate-spin"></i>
+                    <i x-show="!isSavingSettings" class="fa-solid fa-floppy-disk"></i>
+                    <span>Simpan Pengaturan</span>
                 </button>
             </div>
             
