@@ -192,14 +192,8 @@
                         harga_m2: c.harga_m2 !== null ? parseFloat(c.harga_m2) : null
                     }));
                 } else {
-                    this.addDefaultStructure();
+                    this.rows = [];
                 }
-            },
-
-            addDefaultStructure() {
-                const p1 = this.generateTempId();
-                this.rows.push({ id: null, temp_id: p1, parent_temp_id: null, nama_komponen: 'I. BIAYA PERSIAPAN & TANAH', volume: null, satuan: '', luas: null, harga_m2: null });
-                this.rows.push({ id: null, temp_id: this.generateTempId(), parent_temp_id: p1, nama_komponen: 'Pembersihan & Pemataan Lahan', volume: 1, satuan: 'ls', luas: 10000, harga_m2: 150000 });
             },
 
             generateTempId() {
