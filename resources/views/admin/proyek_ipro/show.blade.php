@@ -180,45 +180,47 @@
             </div>
 
             @if(count($capexList) > 0)
-                <div class="space-y-6">
-                    @foreach($capexList as $kategori)
-                    <div class="border border-[#CFE3D5] rounded-xl overflow-hidden shadow-2xs">
-                        <div class="bg-[#145239] text-white px-5 py-3.5 flex items-center justify-between font-bold text-sm">
-                            <span>{{ $kategori['kategori'] }}</span>
-                            <span class="text-[#FFD54F]">Subtotal: Rp {{ number_format($kategori['subtotal'], 0, ',', '.') }}</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs text-slate-700">
-                                <thead class="bg-[#F7FAF8] border-b border-[#CFE3D5] text-slate-600 font-bold uppercase">
-                                    <tr>
-                                        <th class="py-3 px-4">Nama Subkomponen CAPEX</th>
-                                        <th class="py-3 px-4 text-center">Volume</th>
-                                        <th class="py-3 px-4 text-center">Satuan</th>
-                                        <th class="py-3 px-4 text-center">Luas (m²)</th>
-                                        <th class="py-3 px-4 text-right">Harga Unit / m²</th>
-                                        <th class="py-3 px-4 text-right">Total Sub-Nominal</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    @forelse($kategori['items'] as $item)
-                                    <tr class="hover:bg-slate-50">
-                                        <td class="py-3 px-4 font-semibold text-slate-800">{{ $item['nama'] }}</td>
-                                        <td class="py-3 px-4 text-center">{{ $item['vol'] ? number_format($item['vol']) : '-' }}</td>
-                                        <td class="py-3 px-4 text-center">{{ $item['satuan'] ?: '-' }}</td>
-                                        <td class="py-3 px-4 text-center">{{ $item['luas'] && $item['luas'] > 0 ? number_format($item['luas']) : '-' }}</td>
-                                        <td class="py-3 px-4 text-right whitespace-nowrap">Rp {{ number_format($item['harga_m2'], 0, ',', '.') }}</td>
-                                        <td class="py-3 px-4 text-right font-bold text-slate-900 whitespace-nowrap">Rp {{ number_format($item['total'], 0, ',', '.') }}</td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="6" class="py-3 px-4 text-center text-slate-400 italic">Belum ada subkomponen di bawah kategori ini.</td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    @endforeach
+                <div class="overflow-x-auto border border-[#CFE3D5] rounded-xl pb-6">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead>
+                            <tr class="bg-[#145239] text-white border-b border-[#0B5D3D]">
+                                <th class="px-4 py-3 font-semibold text-xs tracking-wider min-w-[60px] border-r border-[#0B5D3D] text-white">No</th>
+                                <th class="px-4 py-3 font-semibold text-xs tracking-wider min-w-[380px] border-r border-[#0B5D3D] text-white">Nama Komponen</th>
+                                <th class="px-4 py-3 font-semibold text-xs tracking-wider text-right min-w-[120px] border-r border-[#0B5D3D] text-white">Volume</th>
+                                <th class="px-4 py-3 font-semibold text-xs tracking-wider text-center min-w-[120px] border-r border-[#0B5D3D] text-white">Satuan</th>
+                                <th class="px-4 py-3 font-semibold text-xs tracking-wider text-right min-w-[130px] border-r border-[#0B5D3D] text-white">Luas (m²)</th>
+                                <th class="px-4 py-3 font-semibold text-xs tracking-wider text-right min-w-[200px] border-r border-[#0B5D3D] text-white">Harga Satuan</th>
+                                <th class="px-4 py-3 font-semibold text-xs tracking-wider text-right min-w-[200px] text-white">Total Harga</th>
+                            </tr>
+                        </thead>
+                        @foreach($capexList as $parentIndex => $kategori)
+                        <tbody>
+                            <!-- Parent Row (Kategori Utama) -->
+                            <tr class="border-b border-[#CFE3D5] font-bold bg-[#E7F2EB] text-[#145239]">
+                                <td class="px-4 py-3 font-mono border-r border-[#CFE3D5]">{{ $parentIndex + 1 }}</td>
+                                <td class="px-4 py-3 border-r border-[#CFE3D5] uppercase font-bold">{{ $kategori['kategori'] }}</td>
+                                <td class="px-4 py-3 text-right text-slate-400 font-mono border-r border-[#CFE3D5]">-</td>
+                                <td class="px-4 py-3 text-center text-slate-400 font-mono border-r border-[#CFE3D5]">-</td>
+                                <td class="px-4 py-3 text-right text-slate-400 font-mono border-r border-[#CFE3D5]">-</td>
+                                <td class="px-4 py-3 text-right text-slate-400 font-mono border-r border-[#CFE3D5]">-</td>
+                                <td class="px-4 py-3 text-right text-[#145239] font-bold font-mono text-base whitespace-nowrap">Rp {{ number_format($kategori['subtotal'], 0, ',', '.') }}</td>
+                            </tr>
+
+                            <!-- Children Rows (Sub-komponen) -->
+                            @foreach($kategori['items'] as $childIndex => $item)
+                            <tr class="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                                <td class="px-8 py-3 text-slate-500 font-mono border-r border-slate-100 text-xs">{{ ($parentIndex + 1) . '.' . ($childIndex + 1) }}</td>
+                                <td class="px-4 py-3 pl-8 border-r border-slate-100 font-semibold text-slate-700">{{ $item['nama'] }}</td>
+                                <td class="px-4 py-3 text-right border-r border-slate-100 font-mono text-slate-700">{{ $item['vol'] ? number_format($item['vol']) : '-' }}</td>
+                                <td class="px-4 py-3 text-center border-r border-slate-100 font-mono text-slate-700">{{ $item['satuan'] ?: '-' }}</td>
+                                <td class="px-4 py-3 text-right border-r border-slate-100 font-mono text-slate-700">{{ $item['luas'] && $item['luas'] > 0 ? number_format($item['luas']) : '-' }}</td>
+                                <td class="px-4 py-3 text-right border-r border-slate-100 font-mono text-slate-700 whitespace-nowrap">Rp {{ number_format($item['harga_m2'], 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-right font-mono font-medium text-slate-800 whitespace-nowrap">Rp {{ number_format($item['total'], 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        @endforeach
+                    </table>
                 </div>
             @else
                 <div class="py-12 text-center text-slate-400">
@@ -284,11 +286,23 @@
                             <!-- Level 2 -->
                             <template x-for="child in getChildren(parent.temp_id)" :key="child.temp_id">
                                 <tr class="bg-white">
-                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] font-semibold text-slate-700" x-text="child.nama_komponen"></td>
+                                    <td class="px-4 py-2 pl-10 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] font-semibold text-slate-700" x-text="child.nama_komponen"></td>
                                     <template x-for="year in years" :key="year">
                                         <td class="px-4 py-2 text-right font-mono text-slate-700 border-r border-slate-100 whitespace-nowrap" x-text="formatRupiah(getRowYearlyTotal(child.temp_id, year))"></td>
                                     </template>
                                 </tr>
+                            </template>
+
+                            <!-- Level 3 -->
+                            <template x-for="child in getChildren(parent.temp_id)" :key="'l3_'+child.temp_id">
+                                <template x-for="subchild in getChildren(child.temp_id)" :key="subchild.temp_id">
+                                    <tr class="bg-slate-50 border-t border-slate-100">
+                                        <td class="px-4 py-2 pl-16 sticky left-0 bg-slate-50 z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-600 text-xs" x-text="subchild.nama_komponen"></td>
+                                        <template x-for="year in years" :key="year">
+                                            <td class="px-4 py-2 text-right font-mono text-slate-600 text-xs border-r border-slate-100 whitespace-nowrap" x-text="formatRupiah(subchild.yearly_data[year] || 0)"></td>
+                                        </template>
+                                    </tr>
+                                </template>
                             </template>
                         </tbody>
                     </template>
@@ -314,11 +328,23 @@
                             <!-- Level 2 -->
                             <template x-for="child in getChildren(parent.temp_id)" :key="child.temp_id">
                                 <tr class="bg-white">
-                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] font-semibold text-slate-700" x-text="child.nama_komponen"></td>
+                                    <td class="px-4 py-2 pl-10 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] font-semibold text-slate-700" x-text="child.nama_komponen"></td>
                                     <template x-for="year in years" :key="year">
                                         <td class="px-4 py-2 text-right font-mono text-slate-700 border-r border-slate-100 whitespace-nowrap" x-text="formatRupiah(getRowYearlyTotal(child.temp_id, year))"></td>
                                     </template>
                                 </tr>
+                            </template>
+
+                            <!-- Level 3 -->
+                            <template x-for="child in getChildren(parent.temp_id)" :key="'l3_'+child.temp_id">
+                                <template x-for="subchild in getChildren(child.temp_id)" :key="subchild.temp_id">
+                                    <tr class="bg-slate-50 border-t border-slate-100">
+                                        <td class="px-4 py-2 pl-16 sticky left-0 bg-slate-50 z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-600 text-xs" x-text="subchild.nama_komponen"></td>
+                                        <template x-for="year in years" :key="year">
+                                            <td class="px-4 py-2 text-right font-mono text-slate-600 text-xs border-r border-slate-100 whitespace-nowrap" x-text="formatRupiah(subchild.yearly_data[year] || 0)"></td>
+                                        </template>
+                                    </tr>
+                                </template>
                             </template>
                         </tbody>
                     </template>
@@ -463,148 +489,154 @@
                 </div>
             </div>
 
-            <!-- Tabel Responsive Cash Flow -->
-            <div class="overflow-x-auto border border-[#CFE3D5] rounded-xl">
-                <table class="w-full text-sm text-left border-collapse">
-                    <thead>
-                        <tr class="bg-[#145239] text-white border-b border-[#0B5D3D]">
-                            <th class="px-4 py-3.5 font-bold text-xs uppercase tracking-wider sticky left-0 bg-[#145239] z-30 min-w-[290px] border-r border-[#0B5D3D] shadow-[2px_0_5px_rgba(0,0,0,0.15)]">
-                                Indikator Arus Kas (IDR)
-                            </th>
-                            <th class="px-4 py-3.5 font-bold text-xs uppercase tracking-wider text-right bg-amber-500/20 text-[#FFD54F] border-x border-[#0B5D3D] min-w-[170px] whitespace-nowrap">
-                                Tahun 0 (Persiapan)
-                            </th>
-                            <template x-for="t in years" :key="t">
-                                <th class="px-4 py-3.5 font-bold text-xs uppercase tracking-wider text-right min-w-[170px] border-r border-[#0B5D3D] whitespace-nowrap" x-text="'Tahun ' + t"></th>
-                            </template>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <!-- Tabel Responsive Cash Flow -->
+                    <div class="overflow-x-auto border border-[#CFE3D5] rounded-xl">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead>
+                                <tr class="bg-[#145239] text-white border-b border-[#0B5D3D]">
+                                    <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wider min-w-[280px] sticky left-0 bg-[#145239] z-20 border-r border-[#0B5D3D] shadow-[2px_0_5px_rgba(0,0,0,0.15)]">
+                                        Tahun
+                                    </th>
+                                    <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wider text-right min-w-[160px] border-r border-[#0B5D3D] bg-[#0E422D]">
+                                        0
+                                    </th>
+                                    <template x-for="t in years" :key="t">
+                                        <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wider text-right min-w-[160px] border-r border-[#0B5D3D]" x-text="t"></th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
 
-                        <!-- SEKSI 1: ARUS KAS INVESTASI AWAL (TAHUN 0) -->
-                        <tr class="bg-blue-100 text-blue-900 font-bold border-t border-b border-blue-200">
-                            <td class="px-4 py-2.5 text-xs uppercase tracking-wider text-blue-900 sticky left-0 bg-blue-100 shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20">
-                                1. ARUS KAS INVESTASI AWAL & PEMBIAYAAN (TAHUN 0)
-                            </td>
-                            <td :colspan="years.length + 1" class="bg-blue-100"></td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2.5 text-slate-700 font-medium sticky left-0 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20">
-                                Pengeluaran Investasi (CAPEX) [-]
-                            </td>
-                            <td class="px-4 py-2.5 text-right font-mono text-rose-600 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap" x-text="formatRupiah(-totalCapex)"></td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-slate-400 border-r border-slate-100 whitespace-nowrap">-</td>
-                            </template>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2.5 text-slate-700 font-medium sticky left-0 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20" x-text="'Penerimaan Modal Sendiri (Equity ' + settings.rasio_modal_sendiri + '%) [+]'"></td>
-                            <td class="px-4 py-2.5 text-right font-mono text-emerald-600 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap" x-text="formatRupiah(getEquityAmount())"></td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-slate-400 border-r border-slate-100 whitespace-nowrap">-</td>
-                            </template>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2.5 text-slate-700 font-medium sticky left-0 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20" x-text="'Penerimaan Kredit Bank (Debt ' + settings.rasio_pinjaman_kredit + '%) [+]'"></td>
-                            <td class="px-4 py-2.5 text-right font-mono text-emerald-600 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap" x-text="formatRupiah(getDebtAmount())"></td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-slate-400 border-r border-slate-100 whitespace-nowrap">-</td>
-                            </template>
-                        </tr>
+                                <!-- ================= ARUS KAS OPERASIONAL ================= -->
+                                <tr class="bg-[#E7F2EB] text-[#145239] font-bold border-y border-[#CFE3D5]">
+                                    <td class="px-4 py-2.5 sticky left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] font-bold uppercase tracking-wider text-xs">
+                                        Arus Kas Operasional
+                                    </td>
+                                    <td :colspan="years.length + 1" class="bg-[#E7F2EB]"></td>
+                                </tr>
+                                
+                                <tr class="bg-[#EEF8F2] border-b border-[#CFE3D5] hover:bg-[#E7F2EB] transition-colors">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] text-[#145239] font-semibold">
+                                        Kas Masuk
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="pendapatanPerTahun[t] ? formatRupiah(pendapatanPerTahun[t]) : '-'"></td>
+                                    </template>
+                                </tr>
 
-                        <!-- SEKSI 2: ARUS KAS OPERASIONAL -->
-                        <tr class="bg-[#E7F2EB] text-[#145239] font-bold border-t border-b border-[#CFE3D5]">
-                            <td class="px-4 py-2.5 text-xs uppercase tracking-wider text-[#145239] sticky left-0 bg-[#E7F2EB] shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20">
-                                2. ARUS KAS OPERASIONAL (TAHUN OPERASI)
-                            </td>
-                            <td :colspan="years.length + 1" class="bg-[#E7F2EB]"></td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2.5 text-slate-700 font-medium sticky left-0 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20">
-                                Kas Masuk Operasional (Pendapatan P&L) [+]
-                            </td>
-                            <td class="px-4 py-2.5 text-right font-mono text-slate-400 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap">-</td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-emerald-700 font-medium border-r border-slate-100 whitespace-nowrap" x-text="formatRupiah(pendapatanPerTahun[t] || 0)"></td>
-                            </template>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2.5 text-slate-700 font-medium sticky left-0 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20">
-                                Kas Keluar Operasional (OPEX P&L) [-]
-                            </td>
-                            <td class="px-4 py-2.5 text-right font-mono text-slate-400 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap">-</td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-rose-600 border-r border-slate-100 whitespace-nowrap" x-text="formatRupiah(-(opexPerTahun[t] || 0))"></td>
-                            </template>
-                        </tr>
-                        <tr class="bg-slate-50 font-bold">
-                            <td class="px-4 py-2.5 text-slate-800 sticky left-0 bg-slate-50 shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20">
-                                Sub-Total Kas Operasional Bersih (EBITDA Kas)
-                            </td>
-                            <td class="px-4 py-2.5 text-right font-mono text-slate-400 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap">-</td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-slate-900 font-bold border-r border-slate-200 whitespace-nowrap" x-text="formatRupiah(getOperasionalBersih(t))"></td>
-                            </template>
-                        </tr>
+                                <tr class="bg-rose-50/70 border-b border-rose-200 hover:bg-rose-100/60 transition-colors">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-50 z-20 border-r border-rose-200 text-rose-900 font-semibold">
+                                        Kas Keluar
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="opexPerTahun[t] ? formatRupiah(-opexPerTahun[t]) : '-'"></td>
+                                    </template>
+                                </tr>
 
-                        <!-- SEKSI 3: KEWAJIBAN PEMBAYARAN KREDIT (DEBT SERVICE) -->
-                        <tr class="bg-rose-100 text-rose-900 font-bold border-t border-b border-rose-200">
-                            <td class="px-4 py-2.5 text-xs uppercase tracking-wider text-rose-900 sticky left-0 bg-rose-100 shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20">
-                                3. KEWAJIBAN PEMBAYARAN KREDIT BANK (DEBT SERVICE)
-                            </td>
-                            <td :colspan="years.length + 1" class="bg-rose-100"></td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2.5 text-slate-700 font-medium sticky left-0 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20">
-                                Angsuran Pokok Pinjaman [-]
-                            </td>
-                            <td class="px-4 py-2.5 text-right font-mono text-slate-400 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap">-</td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-slate-700 border-r border-slate-100 whitespace-nowrap" x-text="getAngsuranPokok(t) > 0 ? formatRupiah(-getAngsuranPokok(t)) : '-'"></td>
-                            </template>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2.5 text-slate-700 font-medium sticky left-0 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.08)] z-20" x-text="'Beban Bunga Pinjaman (' + settings.suku_bunga_kredit + '% / Thn) [-]'"></td>
-                            <td class="px-4 py-2.5 text-right font-mono text-slate-400 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap">-</td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-slate-700 border-r border-slate-100 whitespace-nowrap" x-text="getBebanBunga(t) > 0 ? formatRupiah(-getBebanBunga(t)) : '-'"></td>
-                            </template>
-                        </tr>
+                                <!-- ================= ARUS KAS NON-OPERASIONAL ================= -->
+                                <tr class="bg-blue-100 text-blue-900 font-bold border-y border-blue-200">
+                                    <td class="px-4 py-2.5 sticky left-0 bg-blue-100 z-20 border-r border-blue-200 font-bold uppercase tracking-wider text-xs">
+                                        Arus Kas Non-Operasional
+                                    </td>
+                                    <td :colspan="years.length + 1" class="bg-blue-100"></td>
+                                </tr>
 
-                        <!-- SEKSI 4: REKAPITULASI KAS FINAL -->
-                        <tr class="bg-slate-200 font-bold text-slate-900 border-t-2 border-slate-400">
-                            <td class="px-4 py-3 sticky left-0 bg-slate-200 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
-                                NET CASH FLOW (ARUS KAS BERSIH)
-                            </td>
-                            <td class="px-4 py-3 text-right font-mono text-slate-800 bg-amber-100 border-x border-amber-300 whitespace-nowrap" x-text="formatRupiah(getNetCashflow(0))"></td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-3 text-right font-mono font-extrabold border-r border-slate-300 whitespace-nowrap" :class="getNetCashflow(t) >= 0 ? 'text-[#145239]' : 'text-rose-600'" x-text="formatRupiah(getNetCashflow(t))"></td>
-                            </template>
-                        </tr>
+                                <tr class="bg-[#EEF8F2] border-b border-[#CFE3D5] hover:bg-[#E7F2EB] transition-colors">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] text-[#145239] font-medium">
+                                        Setoran Modal
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="formatRupiah(getEquityAmount())"></td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
+                                    </template>
+                                </tr>
 
-                        <tr class="bg-slate-50 font-semibold">
-                            <td class="px-4 py-2.5 text-slate-700 sticky left-0 bg-slate-50 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
-                                Saldo Kas Awal
-                            </td>
-                            <td class="px-4 py-2.5 text-right font-mono text-slate-500 bg-amber-50/30 border-x border-amber-200/40 whitespace-nowrap">Rp 0,00</td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-2.5 text-right font-mono text-slate-600 border-r border-slate-100 whitespace-nowrap" x-text="formatRupiah(getSaldoAwalKas(t))"></td>
-                            </template>
-                        </tr>
+                                <tr class="bg-[#EEF8F2] border-b border-[#CFE3D5] hover:bg-[#E7F2EB] transition-colors">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] text-[#145239] font-medium">
+                                        Penarikan Kredit
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="formatRupiah(getDebtAmount())"></td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
+                                    </template>
+                                </tr>
 
-                        <tr class="bg-[#145239] font-black text-white border-t-2 border-[#0B5D3D]">
-                            <td class="px-4 py-3.5 text-sm uppercase tracking-wider sticky left-0 bg-[#145239] z-20 shadow-[2px_0_5px_rgba(0,0,0,0.15)]">
-                                SALDO AKHIR KAS (KUMULATIF)
-                            </td>
-                            <td class="px-4 py-3.5 text-right font-mono text-[#FFD54F] bg-amber-950/40 border-x border-amber-900/50 whitespace-nowrap" x-text="formatRupiah(getSaldoAkhirKas(0))"></td>
-                            <template x-for="t in years" :key="t">
-                                <td class="px-4 py-3.5 text-right font-mono text-base font-black border-r border-[#0B5D3D] whitespace-nowrap" :class="getSaldoAkhirKas(t) >= 0 ? 'text-[#FFD54F]' : 'text-rose-300'" x-text="formatRupiah(getSaldoAkhirKas(t))"></td>
-                            </template>
-                        </tr>
+                                <tr class="bg-[#E7F2EB] font-bold text-[#145239] border-b border-[#CFE3D5]">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] font-bold uppercase text-xs tracking-wider">
+                                        Kas Masuk Non-operasional
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-[#145239] font-bold border-r border-[#CFE3D5]" x-text="formatRupiah(getTotalKasMasukNonOps(0))"></td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
+                                    </template>
+                                </tr>
 
-                    </tbody>
-                </table>
-            </div>
+                                <tr class="bg-rose-50/70 border-b border-rose-200 hover:bg-rose-100/60 transition-colors">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-50 z-20 border-r border-rose-200 text-rose-900 font-medium">
+                                        Investasi
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="formatRupiah(-totalCapex)"></td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
+                                    </template>
+                                </tr>
+
+                                <tr class="bg-rose-50/70 border-b border-rose-200 hover:bg-rose-100/60 transition-colors">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-50 z-20 border-r border-rose-200 text-rose-900 font-medium">
+                                        Pokok
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="getAngsuranPokok(t) > 0 ? formatRupiah(-getAngsuranPokok(t)) : '-'"></td>
+                                    </template>
+                                </tr>
+
+                                <tr class="bg-rose-50/70 border-b border-rose-200 hover:bg-rose-100/60 transition-colors">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-50 z-20 border-r border-rose-200 text-rose-900 font-medium">
+                                        Bunga
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="getBebanBunga(t) > 0 ? formatRupiah(-getBebanBunga(t)) : '-'"></td>
+                                    </template>
+                                </tr>
+
+                                <tr class="bg-rose-100 font-bold text-rose-900 border-b border-rose-200">
+                                    <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-100 z-20 border-r border-rose-200 font-bold uppercase text-xs tracking-wider">
+                                        Kas Keluar Non-Operasional
+                                    </td>
+                                    <td class="px-4 py-2 text-right font-mono text-rose-900 font-bold border-r border-rose-200" x-text="formatRupiah(-totalCapex)"></td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2 text-right font-mono text-rose-900 font-bold border-r border-rose-200" x-text="(getAngsuranPokok(t) + getBebanBunga(t)) > 0 ? formatRupiah(-(getAngsuranPokok(t) + getBebanBunga(t))) : '-'"></td>
+                                    </template>
+                                </tr>
+
+                                <!-- ================= RINGKASAN SALDO ================= -->
+                                <tr class="bg-slate-200 font-bold text-slate-900 border-b border-slate-300">
+                                    <td class="px-4 py-2.5 sticky left-0 bg-slate-200 z-20 border-r border-slate-300 font-bold uppercase text-xs tracking-wider">
+                                        Saldo
+                                    </td>
+                                    <td class="px-4 py-2.5 text-right font-mono text-slate-900 font-bold border-r border-slate-300" x-text="formatRupiah(getNetCashflow(0))"></td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-2.5 text-right font-mono text-slate-900 font-bold border-r border-slate-300" x-text="formatRupiah(getNetCashflow(t))"></td>
+                                    </template>
+                                </tr>
+
+                                <tr class="bg-[#145239] border-y-2 border-[#0B5D3D] font-bold text-white">
+                                    <td class="px-4 py-3 sticky left-0 bg-[#145239] z-20 border-r border-[#0B5D3D] font-bold text-white text-base">
+                                        Akumulasi Saldo
+                                    </td>
+                                    <td class="px-4 py-3 text-right font-mono text-[#FFD54F] font-black border-r border-[#0B5D3D] text-base" x-text="formatRupiah(getAkumulasiSaldo(0))"></td>
+                                    <template x-for="t in years" :key="t">
+                                        <td class="px-4 py-3 text-right font-mono text-[#FFD54F] font-black border-r border-[#0B5D3D] text-base" x-text="formatRupiah(getAkumulasiSaldo(t))"></td>
+                                    </template>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
         </div>
     </div>
 
@@ -763,6 +795,13 @@
                 return 0;
             },
 
+            getTotalKasMasukNonOps(t) {
+                if (t === 0) {
+                    return this.getEquityAmount() + this.getDebtAmount();
+                }
+                return 0;
+            },
+
             getOperasionalBersih(year) {
                 const inc = parseFloat(this.pendapatanPerTahun[year]) || 0;
                 const opex = parseFloat(this.opexPerTahun[year]) || 0;
@@ -771,7 +810,7 @@
 
             getNetCashflow(year) {
                 if (year === 0) {
-                    return (this.getEquityAmount() + this.getDebtAmount()) - this.totalCapex;
+                    return -this.totalCapex;
                 }
                 const ops = this.getOperasionalBersih(year);
                 const pokok = this.getAngsuranPokok(year);
@@ -791,6 +830,14 @@
                     return this.getNetCashflow(0);
                 }
                 return this.getSaldoAwalKas(year) + this.getNetCashflow(year);
+            },
+
+            getAkumulasiSaldo(t) {
+                let cumulative = this.getNetCashflow(0);
+                for (let i = 1; i <= t; i++) {
+                    cumulative += this.getNetCashflow(i);
+                }
+                return cumulative;
             }
         }));
     });
