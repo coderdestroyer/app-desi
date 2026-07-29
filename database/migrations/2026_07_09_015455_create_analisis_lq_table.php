@@ -10,21 +10,32 @@ return new class extends Migration
     {
         Schema::create('analisis_lq', function (Blueprint $table) {
             $table->id();
-            $table->string('tingkat_wilayah', 50);
-            $table->string('daerah_analisis', 255);
-            $table->string('daerah_pembanding', 255);
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->unsignedBigInteger('provinsi_id')->nullable();
+            $table->unsignedBigInteger('kabupaten_id')->nullable();
             $table->unsignedBigInteger('sektor_id');
+            $table->string('tingkat_wilayah', 50)->nullable();
+            $table->string('daerah_analisis', 255)->nullable();
+            $table->string('daerah_pembanding', 255)->nullable();
             $table->integer('tahun');
-            $table->decimal('pdrb_sektor_analisis', 20, 2);
-            $table->decimal('total_pdrb_analisis', 20, 2);
-            $table->decimal('pdrb_sektor_pembanding', 20, 2);
-            $table->decimal('total_pdrb_pembanding', 20, 2);
-            $table->decimal('nilai_lq', 10, 4);
+            $table->decimal('pdrb_sektor_analisis', 25, 2)->default(0);
+            $table->decimal('total_pdrb_analisis', 25, 2)->default(0);
+            $table->decimal('pdrb_sektor_pembanding', 25, 2)->default(0);
+            $table->decimal('total_pdrb_pembanding', 25, 2)->default(0);
+            $table->decimal('nilai_lq', 15, 6)->default(0);
             $table->string('kategori', 50);
             $table->text('keterangan')->nullable();
             $table->timestamps();
 
-            $table->foreign('sektor_id')->references('sektor_id')->on('sektor')->cascadeOnDelete();
+            $table->foreign('provinsi_id')->references('provinsi_id')->on('provinsi')->cascadeOnUpdate()->nullOnDelete();
+            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->cascadeOnUpdate()->nullOnDelete();
+            $table->foreign('sektor_id')->references('sektor_id')->on('sektor')->cascadeOnUpdate()->cascadeOnDelete();
+
+            $table->index('user_id');
+            $table->index('provinsi_id');
+            $table->index('kabupaten_id');
+            $table->index('sektor_id');
+            $table->index('tahun');
         });
     }
 

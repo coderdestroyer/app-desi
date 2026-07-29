@@ -252,75 +252,225 @@ CREATE TABLE pdrb_kabupaten (
 
 ---
 
-### DOMAIN 5: Output Analisis Makroekonomi
+### DOMAIN 5: Output Analisis Makroekonomi (Dual-Layer Architecture)
 
-#### 15. Tabel `analisis_lq`
+Sistem menggunakan **Dual-Layer Architecture** untuk memisahkan konteks data publik (Guest) dan riwayat kalkulasi per pengguna (Operator):
+
+---
+
+#### LAYER A: Master Baseline Data Publik (Read-Only / Guest Peta Investasi)
+
+##### 15. Tabel `hasil_lq`
+Data acuan resmi hasil perhitungan Location Quotient per Kabupaten/Kota.
 ```sql
-CREATE TABLE analisis_lq (
-    id BIGSERIAL PRIMARY KEY,
-    tingkat_wilayah VARCHAR(50) NOT NULL,
-    daerah_analisis VARCHAR(255) NOT NULL,
-    daerah_pembanding VARCHAR(255) NOT NULL,
-    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
+CREATE TABLE hasil_lq (
+    hasil_lq_id BIGSERIAL PRIMARY KEY,
+    kab_id BIGINT NOT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE ON UPDATE CASCADE,
     tahun INT NOT NULL,
-    pdrb_sektor_analisis NUMERIC(20, 2) NOT NULL,
-    total_pdrb_analisis NUMERIC(20, 2) NOT NULL,
-    pdrb_sektor_pembanding NUMERIC(20, 2) NOT NULL,
-    total_pdrb_pembanding NUMERIC(20, 2) NOT NULL,
-    nilai_lq NUMERIC(10, 4) NOT NULL,
-    kategori VARCHAR(50) NOT NULL, -- 'Basis' / 'Non-Basis'
-    keterangan TEXT NULL,
+    nilai_lq NUMERIC(10, 5) NOT NULL,
+    kategori VARCHAR(50) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_hasil_lq UNIQUE(kab_id, sektor_id, tahun)
 );
 ```
 
-#### 16. Tabel `analisis_ss` (Shift-Share Analysis)
+##### 16. Tabel `hasil_ssa`
+Data acuan resmi Shift-Share Analysis (komponen $r_n, r_{in}, r_{ij}, m_{ij}, c_{ij}$).
 ```sql
-CREATE TABLE analisis_ss (
-    id BIGSERIAL PRIMARY KEY,
-    kabupaten_id BIGINT NOT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE,
-    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
-    tahun_awal INT NOT NULL,
-    tahun_akhir INT NOT NULL,
-    komponen_n NUMERIC(20, 2) NOT NULL, -- Regional Growth
-    komponen_p NUMERIC(20, 2) NOT NULL, -- Proportional Shift
-    komponen_d NUMERIC(20, 2) NOT NULL, -- Differential Shift
-    total_shift NUMERIC(20, 2) NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-#### 17. Tabel `analisis_tipologi` (Matriks Tipologi Sektor)
-```sql
-CREATE TABLE analisis_tipologi (
-    id BIGSERIAL PRIMARY KEY,
-    kabupaten_id BIGINT NOT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE,
-    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
+CREATE TABLE hasil_ssa (
+    hasil_ssa_id BIGSERIAL PRIMARY KEY,
+    kab_id BIGINT NOT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE ON UPDATE CASCADE,
     tahun INT NOT NULL,
-    kuadran VARCHAR(20) NOT NULL, -- 'Kuadran I', 'Kuadran II', 'Kuadran III', 'Kuadran IV'
-    kategori_sektor VARCHAR(100) NOT NULL, -- 'Sektor Prima', 'Sektor Berkembang', etc.
+    rn NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    rin NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    rij NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    mij NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    cij NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    nij NUMERIC(20, 5) NULL,
+    dij NUMERIC(20, 5) NULL,
+    komponen_n NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    komponen_p NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    komponen_d NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    total_shift NUMERIC(20, 5) NOT NULL DEFAULT 0,
+    kategori_pertumbuhan VARCHAR(100) NULL,
+    kategori_daya_saing VARCHAR(100) NULL,
+    periode TEXT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_hasil_ssa UNIQUE(kab_id, sektor_id, tahun)
 );
 ```
 
-#### 18. Tabel `analisis_klassen` (Tipologi Klassen Daerah/Sektor)
+##### 17. Tabel `hasil_tipologi_sektor` (Tabel Turunan LQ & SSA)
+Matriks tipologi sektor yang **menghubungkan Foreign Key turunan** `hasil_lq_id` dan `hasil_ssa_id`.
 ```sql
-CREATE TABLE analisis_klassen (
+CREATE TABLE hasil_tipologi_sektor (
     id BIGSERIAL PRIMARY KEY,
-    kabupaten_id BIGINT NOT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE,
-    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
-    laju_pertumbuhan NUMERIC(8, 4) NOT NULL,
-    kontribusi_pdrb NUMERIC(8, 4) NOT NULL,
-    kuadran VARCHAR(20) NOT NULL,
+    hasil_lq_id BIGINT NULL REFERENCES hasil_lq(hasil_lq_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    hasil_ssa_id BIGINT NULL REFERENCES hasil_ssa(hasil_ssa_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    kab_id BIGINT NOT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tahun INT NOT NULL,
+    lq NUMERIC(10, 5) NULL,
+    cij NUMERIC(20, 5) NULL,
+    kuadran VARCHAR(30) NOT NULL,
+    kategori_sektor VARCHAR(100) NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_hasil_tipologi_sektor UNIQUE(kab_id, sektor_id, tahun)
+);
+```
+
+##### 18. Tabel `hasil_tipologi_klassen` (Tabel Turunan Indikator)
+Pengelompokan Klassen daerah yang **menghubungkan Foreign Key turunan** `indikator_provinsi_id` dan `indikator_kabupaten_id`.
+```sql
+CREATE TABLE hasil_tipologi_klassen (
+    id BIGSERIAL PRIMARY KEY,
+    indikator_provinsi_id BIGINT NULL REFERENCES indikator_provinsi(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    indikator_kabupaten_id BIGINT NULL REFERENCES indikator_kabupaten(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    kab_id BIGINT NOT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tahun INT NOT NULL,
+    laju_pertumbuhan NUMERIC(10, 5) NULL,
+    kontribusi_pdrb NUMERIC(10, 5) NULL,
+    pertumbuhan_kabupaten NUMERIC(10, 5) NULL,
+    pertumbuhan_provinsi NUMERIC(10, 5) NULL,
+    kontribusi_kabupaten NUMERIC(10, 5) NULL,
+    kontribusi_provinsi NUMERIC(10, 5) NULL,
+    kuadran VARCHAR(30) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_hasil_tipologi_klassen UNIQUE(kab_id, sektor_id, tahun)
 );
 ```
 
 ---
+
+#### LAYER B: Interactive Operator Sandbox (Per-User Calculation Storage)
+
+##### 19. Tabel `analisis_lq`
+Menampung riwayat kalkulasi LQ khusus yang dieksekusi oleh **Operator (`user_id`)**.
+```sql
+CREATE TABLE analisis_lq (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    provinsi_id BIGINT NULL REFERENCES provinsi(provinsi_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tingkat_wilayah VARCHAR(50) NULL,
+    daerah_analisis VARCHAR(255) NULL,
+    daerah_pembanding VARCHAR(255) NULL,
+    tahun INT NOT NULL,
+    pdrb_sektor_analisis NUMERIC(25, 2) NOT NULL DEFAULT 0,
+    total_pdrb_analisis NUMERIC(25, 2) NOT NULL DEFAULT 0,
+    pdrb_sektor_pembanding NUMERIC(25, 2) NOT NULL DEFAULT 0,
+    total_pdrb_pembanding NUMERIC(25, 2) NOT NULL DEFAULT 0,
+    nilai_lq NUMERIC(15, 6) NOT NULL DEFAULT 0,
+    kategori VARCHAR(50) NOT NULL,
+    keterangan TEXT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_analisis_lq_user ON analisis_lq(user_id);
+```
+
+##### 20. Tabel `analisis_ss`
+Menampung riwayat kalkulasi Shift-Share khusus yang dieksekusi oleh Operator.
+```sql
+CREATE TABLE analisis_ss (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    provinsi_id BIGINT NULL REFERENCES provinsi(provinsi_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tingkat_wilayah VARCHAR(50) NULL,
+    daerah_analisis VARCHAR(255) NULL,
+    daerah_pembanding VARCHAR(255) NULL,
+    tahun_awal INT NOT NULL,
+    tahun_akhir INT NOT NULL,
+    rij NUMERIC(15, 6) NOT NULL DEFAULT 0,
+    rin NUMERIC(15, 6) NOT NULL DEFAULT 0,
+    rn NUMERIC(15, 6) NOT NULL DEFAULT 0,
+    nij NUMERIC(30, 10) NOT NULL DEFAULT 0,
+    mij NUMERIC(30, 10) NOT NULL DEFAULT 0,
+    cij NUMERIC(30, 10) NOT NULL DEFAULT 0,
+    dij NUMERIC(30, 10) NOT NULL DEFAULT 0,
+    komponen_n NUMERIC(20, 2) NOT NULL DEFAULT 0,
+    komponen_p NUMERIC(20, 2) NOT NULL DEFAULT 0,
+    komponen_d NUMERIC(20, 2) NOT NULL DEFAULT 0,
+    total_shift NUMERIC(20, 2) NOT NULL DEFAULT 0,
+    status_pertumbuhan VARCHAR(100) NULL,
+    status_daya_saing VARCHAR(100) NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_analisis_ss_user ON analisis_ss(user_id);
+```
+
+##### 21. Tabel `analisis_tipologi`
+Menampung riwayat matriks tipologi khusus hasil simulasi Operator.
+```sql
+CREATE TABLE analisis_tipologi (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    provinsi_id BIGINT NULL REFERENCES provinsi(provinsi_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tingkat_wilayah VARCHAR(50) NULL,
+    daerah_analisis VARCHAR(255) NULL,
+    daerah_pembanding VARCHAR(255) NULL,
+    tahun_awal INT NULL,
+    tahun_akhir INT NULL,
+    tahun INT NULL,
+    nilai_ss NUMERIC(15, 6) NULL DEFAULT 0,
+    nilai_lq NUMERIC(15, 6) NULL DEFAULT 0,
+    kuadran VARCHAR(30) NULL,
+    kategori_sektor VARCHAR(100) NULL,
+    tipologi VARCHAR(100) NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_analisis_tipologi_user ON analisis_tipologi(user_id);
+```
+
+##### 22. Tabel `analisis_klassen`
+Menampung riwayat tipologi Klassen khusus hasil simulasi Operator.
+```sql
+CREATE TABLE analisis_klassen (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    provinsi_id BIGINT NULL REFERENCES provinsi(provinsi_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    tingkat_wilayah VARCHAR(50) NULL,
+    daerah_analisis VARCHAR(255) NULL,
+    daerah_pembanding VARCHAR(255) NULL,
+    tahun_awal INT NULL,
+    tahun_akhir INT NULL,
+    tahun INT NULL,
+    laju_pertumbuhan NUMERIC(15, 6) NULL DEFAULT 0,
+    kontribusi_pdrb NUMERIC(15, 6) NULL DEFAULT 0,
+    ri NUMERIC(15, 6) NULL DEFAULT 0,
+    r NUMERIC(15, 6) NULL DEFAULT 0,
+    yi NUMERIC(15, 6) NULL DEFAULT 0,
+    y NUMERIC(15, 6) NULL DEFAULT 0,
+    kuadran VARCHAR(30) NULL,
+    klasifikasi VARCHAR(150) NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_analisis_klassen_user ON analisis_klassen(user_id);
+```
+
+---
+
 
 ### DOMAIN 6: Mikrosistem Kalkulasi Finansial Proyek (IPRO Engine)
 
