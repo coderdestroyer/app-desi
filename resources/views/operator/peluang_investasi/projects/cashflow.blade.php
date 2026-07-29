@@ -106,114 +106,114 @@
                 <tbody class="divide-y divide-slate-100">
 
                     <!-- ================= ARUS KAS OPERASIONAL ================= -->
-                    <tr class="bg-[#EEF8F2] text-[#145239] font-bold border-y border-[#CFE3D5]">
-                        <td class="px-4 py-2.5 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] font-bold">
+                    <tr class="bg-[#E7F2EB] text-[#145239] font-bold border-y border-[#CFE3D5]">
+                        <td class="px-4 py-2.5 sticky left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] font-bold uppercase tracking-wider text-xs">
                             Arus Kas Operasional
                         </td>
-                        <td :colspan="jangkaWaktu.length + 1" class="bg-[#EEF8F2]"></td>
+                        <td :colspan="jangkaWaktu.length + 1" class="bg-[#E7F2EB]"></td>
                     </tr>
                     
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 text-slate-700">
+                    <tr class="bg-[#EEF8F2] border-b border-[#CFE3D5] hover:bg-[#E7F2EB] transition-colors">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] text-[#145239] font-semibold">
                             Kas Masuk
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-slate-100">-</td>
+                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-800 border-r border-slate-100" x-text="pendapatanPerTahun[t] ? formatRupiah(pendapatanPerTahun[t]) : '-'"></td>
+                            <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="pendapatanPerTahun[t] ? formatRupiah(pendapatanPerTahun[t]) : '-'"></td>
                         </template>
                     </tr>
 
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 text-slate-700">
+                    <tr class="bg-rose-50/70 border-b border-rose-200 hover:bg-rose-100/60 transition-colors">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-50 z-20 border-r border-rose-200 text-rose-900 font-semibold">
                             Kas Keluar
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-slate-100">-</td>
+                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-800 border-r border-slate-100" x-text="opexPerTahun[t] ? formatRupiah(-opexPerTahun[t]) : '-'"></td>
+                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="opexPerTahun[t] ? formatRupiah(-opexPerTahun[t]) : '-'"></td>
                         </template>
                     </tr>
 
                     <!-- ================= ARUS KAS NON-OPERASIONAL ================= -->
-                    <tr class="bg-[#EEF8F2] text-[#145239] font-bold border-y border-[#CFE3D5]">
-                        <td class="px-4 py-2.5 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] font-bold">
+                    <tr class="bg-blue-100 text-blue-900 font-bold border-y border-blue-200">
+                        <td class="px-4 py-2.5 sticky left-0 bg-blue-100 z-20 border-r border-blue-200 font-bold uppercase tracking-wider text-xs">
                             Arus Kas Non-Operasional
                         </td>
-                        <td :colspan="jangkaWaktu.length + 1" class="bg-[#EEF8F2]"></td>
+                        <td :colspan="jangkaWaktu.length + 1" class="bg-blue-100"></td>
                     </tr>
 
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 text-slate-700">
+                    <tr class="bg-[#EEF8F2] border-b border-[#CFE3D5] hover:bg-[#E7F2EB] transition-colors">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] text-[#145239] font-medium">
                             Setoran Modal
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-800 border-r border-slate-100" x-text="formatRupiah(getEquityAmount())"></td>
+                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="formatRupiah(getEquityAmount())"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-slate-100">-</td>
+                            <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
                         </template>
                     </tr>
 
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 text-slate-700">
+                    <tr class="bg-[#EEF8F2] border-b border-[#CFE3D5] hover:bg-[#E7F2EB] transition-colors">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] text-[#145239] font-medium">
                             Penarikan Kredit
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-800 border-r border-slate-100" x-text="formatRupiah(getDebtAmount())"></td>
+                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="formatRupiah(getDebtAmount())"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-slate-100">-</td>
+                            <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
                         </template>
                     </tr>
 
-                    <tr class="bg-slate-100/80 font-bold text-slate-800 border-b border-slate-200">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-slate-100 z-20 border-r border-slate-200 font-bold">
+                    <tr class="bg-[#E7F2EB] font-bold text-[#145239] border-b border-[#CFE3D5]">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] font-bold uppercase text-xs tracking-wider">
                             Kas Masuk Non-operasional
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-800 font-bold border-r border-slate-200" x-text="formatRupiah(getTotalKasMasukNonOps(0))"></td>
+                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-bold border-r border-[#CFE3D5]" x-text="formatRupiah(getTotalKasMasukNonOps(0))"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-slate-200">-</td>
+                            <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
                         </template>
                     </tr>
 
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 text-slate-700">
+                    <tr class="bg-rose-50/70 border-b border-rose-200 hover:bg-rose-100/60 transition-colors">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-50 z-20 border-r border-rose-200 text-rose-900 font-medium">
                             Investasi
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-800 border-r border-slate-100" x-text="formatRupiah(-totalCapex)"></td>
+                        <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="formatRupiah(-totalCapex)"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-slate-100">-</td>
+                            <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
                         </template>
                     </tr>
 
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 text-slate-700">
+                    <tr class="bg-rose-50/70 border-b border-rose-200 hover:bg-rose-100/60 transition-colors">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-50 z-20 border-r border-rose-200 text-rose-900 font-medium">
                             Pokok
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-slate-100">-</td>
+                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-800 border-r border-slate-100" x-text="getAngsuranPokok(t) > 0 ? formatRupiah(-getAngsuranPokok(t)) : '-'"></td>
+                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="getAngsuranPokok(t) > 0 ? formatRupiah(-getAngsuranPokok(t)) : '-'"></td>
                         </template>
                     </tr>
 
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-white z-20 border-r border-slate-200 text-slate-700">
+                    <tr class="bg-rose-50/70 border-b border-rose-200 hover:bg-rose-100/60 transition-colors">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-50 z-20 border-r border-rose-200 text-rose-900 font-medium">
                             Bunga
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-slate-100">-</td>
+                        <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-800 border-r border-slate-100" x-text="getBebanBunga(t) > 0 ? formatRupiah(-getBebanBunga(t)) : '-'"></td>
+                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="getBebanBunga(t) > 0 ? formatRupiah(-getBebanBunga(t)) : '-'"></td>
                         </template>
                     </tr>
 
-                    <tr class="bg-slate-100/80 font-bold text-slate-800 border-b border-slate-200">
-                        <td class="px-4 py-2 pl-8 sticky left-0 bg-slate-100 z-20 border-r border-slate-200 font-bold">
+                    <tr class="bg-rose-100 font-bold text-rose-900 border-b border-rose-200">
+                        <td class="px-4 py-2 pl-8 sticky left-0 bg-rose-100 z-20 border-r border-rose-200 font-bold uppercase text-xs tracking-wider">
                             Kas Keluar Non-Operasional
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-slate-800 font-bold border-r border-slate-200" x-text="formatRupiah(-totalCapex)"></td>
+                        <td class="px-4 py-2 text-right font-mono text-rose-900 font-bold border-r border-rose-200" x-text="formatRupiah(-totalCapex)"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-slate-800 font-bold border-r border-slate-200" x-text="(getAngsuranPokok(t) + getBebanBunga(t)) > 0 ? formatRupiah(-(getAngsuranPokok(t) + getBebanBunga(t))) : '-'"></td>
+                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-bold border-r border-rose-200" x-text="(getAngsuranPokok(t) + getBebanBunga(t)) > 0 ? formatRupiah(-(getAngsuranPokok(t) + getBebanBunga(t))) : '-'"></td>
                         </template>
                     </tr>
 
                     <!-- ================= RINGKASAN SALDO ================= -->
-                    <tr class="bg-slate-100 font-bold text-slate-900 border-b border-slate-300">
-                        <td class="px-4 py-2.5 sticky left-0 bg-slate-100 z-20 border-r border-slate-300 font-bold">
+                    <tr class="bg-slate-200 font-bold text-slate-900 border-b border-slate-300">
+                        <td class="px-4 py-2.5 sticky left-0 bg-slate-200 z-20 border-r border-slate-300 font-bold uppercase text-xs tracking-wider">
                             Saldo
                         </td>
                         <td class="px-4 py-2.5 text-right font-mono text-slate-900 font-bold border-r border-slate-300" x-text="formatRupiah(getNetCashflow(0))"></td>
@@ -222,13 +222,13 @@
                         </template>
                     </tr>
 
-                    <tr class="bg-[#EEF8F2] border-y-2 border-[#CFE3D5] font-bold text-[#145239]">
-                        <td class="px-4 py-3 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] font-bold">
+                    <tr class="bg-[#145239] border-y-2 border-[#0B5D3D] font-bold text-white">
+                        <td class="px-4 py-3 sticky left-0 bg-[#145239] z-20 border-r border-[#0B5D3D] font-bold text-white text-base">
                             Akumulasi Saldo
                         </td>
-                        <td class="px-4 py-3 text-right font-mono text-[#145239] font-black border-r border-[#CFE3D5]" x-text="formatRupiah(getAkumulasiSaldo(0))"></td>
+                        <td class="px-4 py-3 text-right font-mono text-[#FFD54F] font-black border-r border-[#0B5D3D] text-base" x-text="formatRupiah(getAkumulasiSaldo(0))"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-3 text-right font-mono text-[#145239] font-black border-r border-[#CFE3D5]" x-text="formatRupiah(getAkumulasiSaldo(t))"></td>
+                            <td class="px-4 py-3 text-right font-mono text-[#FFD54F] font-black border-r border-[#0B5D3D] text-base" x-text="formatRupiah(getAkumulasiSaldo(t))"></td>
                         </template>
                     </tr>
 
