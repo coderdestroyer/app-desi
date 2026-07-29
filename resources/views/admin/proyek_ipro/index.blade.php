@@ -1,0 +1,210 @@
+@extends('layouts.admin')
+
+@section('title', 'Dokumen Kelayakan IPRO - Admin')
+
+@section('content')
+<div class="min-h-screen bg-[#F7FAF8] p-5 md:p-7 lg:p-8">
+
+    <!-- Top Header & Breadcrumb Bar -->
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                <a href="{{ route('admin.dashboard') }}" class="hover:text-[#145239] font-medium">Dashboard Admin</a>
+                <span>/</span>
+                <span class="text-slate-800 font-semibold">Dokumen IPRO</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-[#17201C] tracking-tight">Dokumen Kelayakan Proyek IPRO</h1>
+            <p class="text-xs md:text-sm text-[#667069] mt-0.5">Peninjauan dan evaluasi kelayakan finansial proyek investasi yang telah diinput oleh Operator.</p>
+        </div>
+
+        <div class="flex items-center gap-3 shrink-0">
+            <a href="{{ route('admin.dashboard') }}" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-[#CFE3D5] shadow-xs transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Kembali ke Dashboard</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Banner Header Stat -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0B5D3D] to-[#1E5D41] p-7 md:p-8 shadow-xl text-white mb-8">
+        <div class="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-400 opacity-20 blur-3xl mix-blend-overlay"></div>
+        <div class="absolute bottom-0 right-32 h-40 w-40 rounded-full bg-[#FFD54F] opacity-20 blur-3xl mix-blend-overlay"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-900/60 border border-emerald-500/30 text-emerald-100 text-xs font-semibold mb-3 backdrop-blur-sm">
+                    <i class="fa-solid fa-file-invoice-dollar text-[#FFD54F]"></i>
+                    Peninjauan Finansial Proyek (Database Riil)
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold text-white mb-1">Pusat Peninjauan Dokumen Proyek IPRO</h2>
+                <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
+                    Lihat struktur Estimasi CAPEX, Proyeksi Laba Rugi (P&L), dan Simulasi Arus Kas yang disajikan secara terintegrasi dari database.
+                </p>
+            </div>
+
+            <div class="text-right hidden md:block">
+                <span class="text-xs uppercase font-bold text-[#FFD54F] tracking-wider block mb-1">Total Proyek Terdaftar</span>
+                <span class="text-3xl font-black text-white">{{ $projects->total() }} Dokumen</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="bg-white rounded-2xl p-5 shadow-xs border border-[#CFE3D5] mb-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+        <form method="GET" action="{{ route('admin.proyek-ipro.index') }}" class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input 
+                type="text" 
+                name="search" 
+                value="{{ request('search') }}"
+                placeholder="Cari nama proyek atau deskripsi..." 
+                class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] text-sm placeholder:text-slate-400 outline-none"
+            >
+        </form>
+        
+        <form method="GET" action="{{ route('admin.proyek-ipro.index') }}" class="flex flex-wrap items-center gap-3">
+            @if(request('search'))
+                <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
+
+            <select name="kabupaten_id" onchange="this.form.submit()" class="px-3.5 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white outline-none">
+                <option value="">Semua Kabupaten/Kota</option>
+                @foreach($kabupatens as $kab)
+                    <option value="{{ $kab->kab_id }}" {{ request('kabupaten_id') == $kab->kab_id ? 'selected' : '' }}>
+                        {{ $kab->nama_kabupaten }}
+                    </option>
+                @endforeach
+            </select>
+
+            <select name="sektor_id" onchange="this.form.submit()" class="px-3.5 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white outline-none">
+                <option value="">Semua Sektor Ekonomi</option>
+                @foreach($sektors as $sek)
+                    <option value="{{ $sek->sektor_id }}" {{ request('sektor_id') == $sek->sektor_id ? 'selected' : '' }}>
+                        {{ $sek->nama_sektor }}
+                    </option>
+                @endforeach
+            </select>
+
+            @if(request('search') || request('kabupaten_id') || request('sektor_id'))
+                <a href="{{ route('admin.proyek-ipro.index') }}" class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold">
+                    Reset Filter
+                </a>
+            @endif
+        </form>
+    </div>
+
+    <!-- TABEL MEMANJANG (WIDE ROW TABLE VIEW - DARI STRUCTURE OPERATOR) -->
+    <div class="bg-white rounded-2xl shadow-xs border border-[#CFE3D5] overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+                <thead class="bg-[#F7FAF8] border-b border-[#CFE3D5]">
+                    <tr>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider min-w-[50px]">No</th>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider min-w-[280px]">Nama Proyek & Deskripsi</th>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider min-w-[160px]">Kabupaten / Kota</th>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider min-w-[180px]">Sektor Ekonomi</th>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider text-center min-w-[130px]">Tahun & Tenor</th>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider min-w-[160px]">Penginput (Operator)</th>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider text-center min-w-[180px]">Modul Dokumen</th>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider text-center min-w-[110px]">Status</th>
+                        <th scope="col" class="px-5 py-4 text-xs font-bold text-[#17201C] uppercase tracking-wider text-center min-w-[150px]">Aksi Tinjau</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#CFE3D5]">
+                    @forelse($projects as $index => $project)
+                        <tr class="hover:bg-[#F7FAF8] transition-colors">
+                            
+                            <td class="px-5 py-4 text-slate-500 font-mono font-semibold">{{ $projects->firstItem() + $index }}</td>
+                            
+                            <td class="px-5 py-4">
+                                <a href="{{ route('admin.proyek-ipro.show', $project->id) }}" class="font-bold text-[#17201C] hover:text-[#145239] transition-colors text-sm block mb-0.5">
+                                    {{ $project->nama_proyek }}
+                                </a>
+                                @if($project->deskripsi)
+                                    <p class="text-xs text-[#667069] line-clamp-1" title="{{ $project->deskripsi }}">
+                                        {{ $project->deskripsi }}
+                                    </p>
+                                @endif
+                            </td>
+
+                            <td class="px-5 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#E7F2EB] text-[#145239] border border-[#CFE3D5]">
+                                    <i class="fa-solid fa-location-dot text-[10px] mr-1"></i>
+                                    {{ $project->kabupaten ? $project->kabupaten->nama_kabupaten : 'Wilayah Sumut' }}
+                                </span>
+                            </td>
+
+                            <td class="px-5 py-4">
+                                <span class="text-xs font-semibold text-[#17201C] block truncate max-w-[180px]">
+                                    {{ $project->sektor ? $project->sektor->nama_sektor : '-' }}
+                                </span>
+                            </td>
+
+                            <td class="px-5 py-4 text-center whitespace-nowrap">
+                                <div class="text-xs font-mono font-bold text-slate-800">{{ $project->tahun_awal }}</div>
+                                <div class="text-[11px] text-[#1E5D41] font-semibold">{{ $project->jangka_waktu_tahun }} Tahun</div>
+                            </td>
+
+                            <td class="px-5 py-4 whitespace-nowrap">
+                                <span class="font-semibold text-slate-800 text-xs block">{{ $project->user ? $project->user->name : 'Operator' }}</span>
+                                <span class="text-[11px] text-slate-400 block">{{ $project->updated_at ? $project->updated_at->diffForHumans() : '-' }}</span>
+                            </td>
+
+                            <td class="px-5 py-4 text-center whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1">
+                                    <span class="px-2 py-1 rounded-md bg-[#E7F2EB] text-[#145239] text-[10px] font-bold border border-[#CFE3D5]">
+                                        CAPEX ({{ $project->capexComponents->count() }})
+                                    </span>
+                                    <span class="px-2 py-1 rounded-md bg-amber-50 text-[#D4A017] text-[10px] font-bold border border-amber-200">
+                                        P&L
+                                    </span>
+                                    <span class="px-2 py-1 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                                        Cashflow
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="px-5 py-4 text-center whitespace-nowrap">
+                                @if($project->status_publikasi === 'published')
+                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        Published
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
+                                        Draft
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td class="px-5 py-4 text-center whitespace-nowrap">
+                                <a href="{{ route('admin.proyek-ipro.show', $project->id) }}" class="px-3.5 py-1.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold transition-colors shadow-xs inline-flex items-center gap-1.5">
+                                    <i class="fa-solid fa-eye text-[11px]"></i>
+                                    <span>Tinjau</span>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" class="text-center py-12 text-slate-400">
+                                <div class="w-12 h-12 rounded-2xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center mx-auto mb-3 text-xl">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                </div>
+                                <p class="font-bold text-slate-700 text-sm">Belum Ada Dokumen Proyek Investasi</p>
+                                <p class="text-xs text-slate-400 mt-1">Data proyek yang diinput oleh Operator akan otomatis muncul di halaman peninjauan Admin ini.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if($projects->hasPages())
+        <div class="mt-4">
+            {{ $projects->links() }}
+        </div>
+    @endif
+
+</div>
+@endsection

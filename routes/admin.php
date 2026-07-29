@@ -10,14 +10,26 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\MoneyCurrencyController;
 use App\Http\Controllers\Admin\DataKbkiController;
+use App\Http\Controllers\Admin\AdminProyekIproController;
 
-Route::middleware(['auth', 'verified', 'role:admin'])
+Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Review Dokumen Proyek IPRO (CAPEX, P&L, Arus Kas)
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/proyek-ipro', [AdminProyekIproController::class, 'index'])
+            ->name('proyek-ipro.index');
+
+        Route::get('/proyek-ipro/{id}', [AdminProyekIproController::class, 'show'])
+            ->name('proyek-ipro.show');
 
         /*
         |--------------------------------------------------------------------------
