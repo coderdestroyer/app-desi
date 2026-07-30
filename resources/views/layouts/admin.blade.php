@@ -238,6 +238,10 @@
             text-align: left;
             font-size: 13px;
             font-weight: 500;
+            transition:
+                background 0.18s ease,
+                color 0.18s ease,
+                transform 0.18s ease;
         }
 
         .profile-dropdown-link i {
@@ -248,6 +252,7 @@
 
         .profile-dropdown-link:hover {
             background: rgba(255, 255, 255, 0.08);
+            transform: translateX(2px);
         }
 
         .profile-dropdown-divider {
@@ -530,10 +535,7 @@
                 >
             </div>
 
-            <div
-                id="adminProfile"
-                class="sidebar-profile"
-            >
+            <div id="adminProfile" class="sidebar-profile">
                 <button
                     type="button"
                     id="adminProfileToggle"
@@ -577,7 +579,7 @@
                             class="profile-dropdown-link
                                 {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}"
                         >
-                            <i class="fa-regular fa-user"></i>
+                            <i class="fa-solid fa-user"></i>
                             <span>Profile</span>
                         </a>
 
@@ -605,6 +607,22 @@
             </div>
 
             <nav class="sidebar-content">
+                <div class="sidebar-section-title">
+                    Menu Utama
+                </div>
+
+                <ul class="sidebar-menu">
+                    <li>
+                        <a
+                            href="{{ route('home') }}"
+                            class="sidebar-link"
+                        >
+                            <i class="fa-solid fa-house"></i>
+                            <span>Beranda</span>
+                        </a>
+                    </li>
+                </ul>
+
                 <div class="sidebar-section-title">
                     Menu Admin
                 </div>
@@ -690,22 +708,6 @@
                             <i class="fa-solid fa-circle-dollar-to-slot"></i>
 
                             <span>Konversi Mata Uang</span>
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="sidebar-section-title">
-                    Menu Utama
-                </div>
-
-                <ul class="sidebar-menu">
-                    <li>
-                        <a
-                            href="{{ route('home') }}"
-                            class="sidebar-link"
-                        >
-                            <i class="fa-solid fa-house"></i>
-                            <span>Beranda</span>
                         </a>
                     </li>
                 </ul>
