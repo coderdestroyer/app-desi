@@ -850,7 +850,7 @@
                                     id="status"
                                     name="status"
                                     required
-                                    class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                                    class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                                 >
                                     <option
                                         value="Aktif"
@@ -872,6 +872,7 @@
                                         Nonaktif
                                     </option>
                                 </select>
+                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
 
                                 @error('status')
                                     <p class="mb-0 mt-1.5 text-xs text-red-600">

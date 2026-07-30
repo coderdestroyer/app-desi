@@ -74,6 +74,17 @@
             font-family: inherit;
         }
 
+        select {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            background-image: none !important;
+        }
+
+        select::-ms-expand {
+            display: none !important;
+        }
+
         .admin-shell {
             min-height: 100vh;
             display: flex;

@@ -64,6 +64,17 @@
         box-sizing: border-box;
     }
 
+    select {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        background-image: none !important;
+    }
+
+    select::-ms-expand {
+        display: none !important;
+    }
+
     html {
         scroll-behavior: smooth;
     }
