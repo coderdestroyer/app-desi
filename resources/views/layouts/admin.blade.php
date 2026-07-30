@@ -781,11 +781,18 @@
             function closeSidebar() {
                 sidebar?.classList.remove('open');
                 sidebarBackdrop?.classList.remove('show');
+                if (sidebarButton) {
+                    sidebarButton.style.display = '';
+                }
             }
 
             sidebarButton?.addEventListener('click', function () {
-                sidebar?.classList.toggle('open');
-                sidebarBackdrop?.classList.toggle('show');
+                const isOpen = sidebar?.classList.toggle('open');
+                sidebarBackdrop?.toggleAttribute('show', isOpen);
+                sidebarBackdrop?.classList.toggle('show', isOpen);
+                if (sidebarButton) {
+                    sidebarButton.style.display = isOpen ? 'none' : '';
+                }
             });
 
             sidebarBackdrop?.addEventListener('click', closeSidebar);
