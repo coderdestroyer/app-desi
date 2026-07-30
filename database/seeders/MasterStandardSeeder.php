@@ -120,14 +120,16 @@ class MasterStandardSeeder extends Seeder
             if (count($row) < 14) continue;
 
             $kode = trim($row[4]);
-            if (empty($kode)) continue;
+            if ($kode === '') continue;
+
+            $kodeInduk = isset($row[5]) && trim($row[5]) !== '' ? trim($row[5]) : null;
 
             $batch[] = [
                 'level' => (int) $row[2],
                 'kode' => $kode,
-                'kode_induk' => !empty($row[5]) ? trim($row[5]) : null,
+                'kode_induk' => $kodeInduk,
                 'nama' => trim($row[13]),
-                'deskripsi' => isset($row[18]) && !empty($row[18]) ? trim($row[18]) : null,
+                'deskripsi' => isset($row[18]) && trim($row[18]) !== '' ? trim($row[18]) : null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -144,6 +146,7 @@ class MasterStandardSeeder extends Seeder
 
         fclose($handle);
     }
+
 
     private function seedHsCode(): void
     {
