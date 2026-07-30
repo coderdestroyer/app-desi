@@ -6,14 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('analisis_klassen', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->unsignedBigInteger('provinsi_id')->nullable();
-            $table->unsignedBigInteger('kabupaten_id')->nullable();
-            $table->unsignedBigInteger('sektor_id');
+            $table->foreignId('provinsi_id')->nullable()->constrained('provinsi', 'provinsi_id')->cascadeOnUpdate()->nullOnDelete();
+            $table->foreignId('kabupaten_id')->nullable()->constrained('kabupaten', 'kab_id')->cascadeOnUpdate()->nullOnDelete();
+            $table->foreignId('sektor_id')->constrained('sektor', 'sektor_id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('tingkat_wilayah', 50)->nullable();
             $table->string('daerah_analisis', 255)->nullable();
             $table->string('daerah_pembanding', 255)->nullable();
@@ -29,10 +31,6 @@ return new class extends Migration
             $table->string('kuadran', 30)->nullable();
             $table->string('klasifikasi', 150)->nullable();
             $table->timestamps();
-
-            $table->foreign('provinsi_id')->references('provinsi_id')->on('provinsi')->cascadeOnUpdate()->nullOnDelete();
-            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->cascadeOnUpdate()->nullOnDelete();
-            $table->foreign('sektor_id')->references('sektor_id')->on('sektor')->cascadeOnUpdate()->cascadeOnDelete();
 
             $table->index('user_id');
             $table->index('provinsi_id');

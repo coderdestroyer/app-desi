@@ -6,15 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('kecamatan', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('kabupaten_id');
+            $table->foreignId('kabupaten_id')->constrained('kabupaten', 'kab_id')->cascadeOnDelete();
             $table->string('nama_kecamatan', 255)->index();
             $table->timestamps();
-
-            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->cascadeOnDelete();
         });
     }
 

@@ -6,17 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('lokasi', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('kabupaten_id')->nullable();
-            $table->string('nama', 255)->index();
+            $table->foreignId('kabupaten_id')->nullable()->constrained('kabupaten', 'kab_id')->nullOnDelete();
+            $table->string('nama');
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
             $table->timestamps();
-
-            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->nullOnDelete();
         });
     }
 

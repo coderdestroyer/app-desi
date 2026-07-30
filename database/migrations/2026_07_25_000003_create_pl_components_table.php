@@ -6,24 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('pl_components', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            $table->string('tipe_kategori'); // PENDAPATAN, BIAYA_OPERASIONAL
-            $table->foreignId('parent_id')->nullable()->constrained('pl_components')->onDelete('cascade');
+            $table->foreignId('project_id')->constrained()->cascadeOnDelete();
+            $table->string('tipe_kategori', 30);
+            $table->foreignId('parent_id')->nullable()->constrained('pl_components')->cascadeOnDelete();
             $table->string('nama_komponen');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('pl_components');

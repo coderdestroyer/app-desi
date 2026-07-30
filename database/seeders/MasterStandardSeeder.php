@@ -13,6 +13,7 @@ class MasterStandardSeeder extends Seeder
         $this->seedLokasi();
         $this->seedKbli();
         $this->seedKbki();
+        $this->seedHsCode();
     }
 
     private function seedSektor(): void
@@ -143,4 +144,51 @@ class MasterStandardSeeder extends Seeder
 
         fclose($handle);
     }
+
+    private function seedHsCode(): void
+    {
+        $file = database_path('data/data_hs_code.csv');
+        if (!file_exists($file)) return;
+
+        $handle = fopen($file, 'r');
+        $header = fgetcsv($handle);
+
+        $batch = [];
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count($row) < 7) continue;
+
+            $hsCode = trim($row[6]);
+            if (empty($hsCode)) continue;
+
+            $uraianBarang = isset($row[7]) ? trim($row[7]) : '';
+
+            $batch[] = [
+                'kode_kategori' => !empty($row[1]) ? mb_substr(trim($row[1]), 0, 50) : null,
+                'kode_kelompok' => !empty($row[2]) ? mb_substr(trim($row[2]), 0, 50) : null,
+                'uraian_kelompok' => !empty($row[3]) ? trim($row[3]) : null,
+                'kode_subkelompok' => !empty($row[4]) ? mb_substr(trim($row[4]), 0, 50) : null,
+                'uraian_subkelompok' => !empty($row[5]) ? trim($row[5]) : null,
+                'hs_code' => mb_substr($hsCode, 0, 100),
+                'uraian_barang' => $uraianBarang,
+                'code' => mb_substr($hsCode, 0, 100),
+                'description' => $uraianBarang,
+                'category' => !empty($row[3]) ? trim($row[3]) : null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            if (count($batch) >= 500) {
+                DB::table('data_hs_code')->insertOrIgnore($batch);
+                $batch = [];
+            }
+        }
+
+        if (!empty($batch)) {
+            DB::table('data_hs_code')->insertOrIgnore($batch);
+        }
+
+        fclose($handle);
+    }
+
 }
+

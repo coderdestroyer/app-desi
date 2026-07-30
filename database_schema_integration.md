@@ -208,18 +208,30 @@ CREATE TABLE data_kbki (
 ```
 
 #### 12. Tabel `data_hs_code`
-Harmonized System Code untuk ekspor-impor.
+Harmonized System Code (HS Code) untuk ekspor-impor komoditas perdagangan.
 
 ```sql
 CREATE TABLE data_hs_code (
     id BIGSERIAL PRIMARY KEY,
-    code VARCHAR(20) NOT NULL UNIQUE,
-    description TEXT NOT NULL,
+    kode_kategori VARCHAR(20) NULL,
+    kode_kelompok VARCHAR(20) NULL,
+    uraian_kelompok TEXT NULL,
+    kode_subkelompok VARCHAR(20) NULL,
+    uraian_subkelompok TEXT NULL,
+    hs_code VARCHAR(50) NOT NULL,
+    uraian_barang TEXT NULL,
+    code VARCHAR(50) NULL,
+    description TEXT NULL,
     category VARCHAR(255) NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_hs_code ON data_hs_code(hs_code);
+CREATE INDEX idx_hs_kategori ON data_hs_code(kode_kategori);
+CREATE INDEX idx_hs_kelompok ON data_hs_code(kode_kelompok);
 ```
+
 
 ---
 

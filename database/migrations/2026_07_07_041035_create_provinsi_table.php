@@ -6,9 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Membuat tabel provinsi.
-     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('provinsi', function (Blueprint $table) {
@@ -18,9 +17,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Menghapus tabel provinsi.
-     */
     public function down(): void
     {
         Schema::dropIfExists('provinsi');
