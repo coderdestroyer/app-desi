@@ -68,10 +68,22 @@ class DataKbkiController extends Controller
             return $this->exportCsv($request);
         }
 
-        $sections = DB::table($this->table)
-            ->where('struktur', 'Seksi')
+        $hasStruktur = Schema::hasColumn($this->table, 'struktur');
+        $hasJudul = Schema::hasColumn($this->table, 'judul');
+
+        $sectionsQuery = DB::table($this->table);
+        if ($hasStruktur) {
+            $sectionsQuery->where('struktur', 'Seksi');
+        } else {
+            $sectionsQuery->where('level', 1);
+        }
+
+        $sections = $sectionsQuery
             ->orderBy('kode')
-            ->get(['kode', 'judul']);
+            ->get([
+                'kode',
+                $hasJudul ? 'judul' : DB::raw('nama AS judul'),
+            ]);
 
         $isFormOpen = in_array($mode, ['create', 'edit'], true)
             || $request->filled('edit');
@@ -84,8 +96,12 @@ class DataKbkiController extends Controller
             && ! $request->filled('status');
 
         if ($hierarchyMode) {
-            $sectionQuery = DB::table($this->table)
-                ->where('struktur', 'Seksi');
+            $sectionQuery = DB::table($this->table);
+            if ($hasStruktur) {
+                $sectionQuery->where('struktur', 'Seksi');
+            } else {
+                $sectionQuery->where('level', 1);
+            }
 
             if ($request->filled('seksi')) {
                 $sectionQuery->where(
@@ -107,14 +123,24 @@ class DataKbkiController extends Controller
             if ($sectionCodes->isEmpty()) {
                 $dataKbki = collect();
             } elseif ($isFormOpen) {
-                $dataKbki = $this->hierarchyRowsQuery()
-                    ->where('k.struktur', 'Seksi')
+                $dataKbkiQuery = $this->hierarchyRowsQuery();
+                if ($hasStruktur) {
+                    $dataKbkiQuery->where('k.struktur', 'Seksi');
+                } else {
+                    $dataKbkiQuery->where('k.level', 1);
+                }
+                $dataKbki = $dataKbkiQuery
                     ->whereIn('k.kode', $sectionCodes)
                     ->orderBy('k.kode')
                     ->get();
             } else {
-                $dataKbki = $this->hierarchyRowsQuery()
-                    ->whereIn('k.seksi_kode', $sectionCodes)
+                $dataKbkiQuery = $this->hierarchyRowsQuery();
+                if (Schema::hasColumn($this->table, 'seksi_kode')) {
+                    $dataKbkiQuery->whereIn('k.seksi_kode', $sectionCodes);
+                } else {
+                    $dataKbkiQuery->whereIn(DB::raw('SUBSTRING(k.kode, 1, 1)'), $sectionCodes);
+                }
+                $dataKbki = $dataKbkiQuery
                     ->orderBy('k.kode')
                     ->get();
             }
@@ -178,21 +204,38 @@ class DataKbkiController extends Controller
             $query->where('kode', '!=', trim($validated['exclude']));
         }
 
+        $hasStruktur = Schema::hasColumn($this->table, 'struktur');
+        $hasJudul = Schema::hasColumn($this->table, 'judul');
+
+        $selectFields = [
+            'kode',
+            'kode_induk',
+            'level',
+            $hasJudul ? 'judul' : DB::raw('nama AS judul'),
+        ];
+        if ($hasStruktur) {
+            $selectFields[] = 'struktur';
+        }
+
         $options = $query
-            ->get([
-                'kode',
-                'kode_induk',
-                'struktur',
-                'level',
-                'judul',
-            ])
-            ->map(static function ($item) {
+            ->get($selectFields)
+            ->map(function ($item) {
+                $levelMap = [
+                    1 => 'Seksi',
+                    2 => 'Divisi',
+                    3 => 'Kelompok',
+                    4 => 'Kelas',
+                    5 => 'Subkelas',
+                    6 => 'Kelompok Komoditas',
+                    7 => 'Komoditas',
+                ];
+
                 return [
                     'kode' => (string) $item->kode,
                     'kode_induk' => $item->kode_induk
                         ? (string) $item->kode_induk
                         : null,
-                    'struktur' => (string) $item->struktur,
+                    'struktur' => $item->struktur ?? ($levelMap[$item->level] ?? 'Komoditas'),
                     'level' => (int) $item->level,
                     'judul' => (string) $item->judul,
                 ];
@@ -209,7 +252,7 @@ class DataKbkiController extends Controller
         if (! $this->tableReady()) {
             return redirect()
                 ->route('admin.data-kbki.index')
-                ->with('error', 'Struktur tabel data_kbki belum sesuai dengan dataset KBKI 2015.');
+                ->with('error', 'Struktur tabel data_kbki belum sesuai.');
         }
 
         $data = $this->validatedData($request);
@@ -235,7 +278,7 @@ class DataKbkiController extends Controller
         if (! $this->tableReady()) {
             return redirect()
                 ->route('admin.data-kbki.index')
-                ->with('error', 'Struktur tabel data_kbki belum sesuai dengan dataset KBKI 2015.');
+                ->with('error', 'Struktur tabel data_kbki belum sesuai.');
         }
 
         $current = $this->findRow($id);
@@ -260,7 +303,7 @@ class DataKbkiController extends Controller
         if (! $this->tableReady()) {
             return redirect()
                 ->route('admin.data-kbki.index')
-                ->with('error', 'Struktur tabel data_kbki belum sesuai dengan dataset KBKI 2015.');
+                ->with('error', 'Struktur tabel data_kbki belum sesuai.');
         }
 
         $row = $this->findRow($id);
@@ -298,30 +341,107 @@ class DataKbkiController extends Controller
 
     private function selectColumns(): array
     {
-        return [
+        $hasStruktur = Schema::hasColumn($this->table, 'struktur');
+        $hasJudul = Schema::hasColumn($this->table, 'judul');
+        $hasCatatan = Schema::hasColumn($this->table, 'catatan');
+        $hasDeskripsi = Schema::hasColumn($this->table, 'deskripsi');
+        $hasStatus = Schema::hasColumn($this->table, 'status');
+        $hasSeksiKode = Schema::hasColumn($this->table, 'seksi_kode');
+        $hasJumlahDigit = Schema::hasColumn($this->table, 'jumlah_digit');
+
+        $cols = [
             'k.id',
-            'k.struktur',
             'k.level',
-            'k.jumlah_digit',
             'k.kode',
             'k.kode_induk',
-            'k.seksi_kode',
-            'k.divisi_kode',
-            'k.kelompok_kode',
-            'k.kelas_kode',
-            'k.subkelas_kode',
-            'k.kelompok_komoditas_kode',
-            'k.komoditas_kode',
-            'k.judul',
-            'k.halaman',
-            'k.sumber_sheet',
-            'k.baris_asli',
-            'k.kode_asli',
-            'k.catatan',
-            'k.status',
             'k.created_at',
             'k.updated_at',
         ];
+
+        if ($hasStruktur) {
+            $cols[] = 'k.struktur';
+        } else {
+            $cols[] = DB::raw("CASE k.level
+                WHEN 1 THEN 'Seksi'
+                WHEN 2 THEN 'Divisi'
+                WHEN 3 THEN 'Kelompok'
+                WHEN 4 THEN 'Kelas'
+                WHEN 5 THEN 'Subkelas'
+                WHEN 6 THEN 'Kelompok Komoditas'
+                WHEN 7 THEN 'Komoditas'
+                ELSE 'Komoditas'
+            END AS struktur");
+        }
+
+        if ($hasJumlahDigit) {
+            $cols[] = 'k.jumlah_digit';
+        } else {
+            $cols[] = DB::raw('LENGTH(k.kode) AS jumlah_digit');
+        }
+
+        if ($hasSeksiKode) {
+            $cols[] = 'k.seksi_kode';
+            $cols[] = 'k.divisi_kode';
+            $cols[] = 'k.kelompok_kode';
+            $cols[] = 'k.kelas_kode';
+            $cols[] = 'k.subkelas_kode';
+            $cols[] = 'k.kelompok_komoditas_kode';
+            $cols[] = 'k.komoditas_kode';
+        } else {
+            $cols[] = DB::raw('SUBSTRING(k.kode, 1, 1) AS seksi_kode');
+            $cols[] = DB::raw('CASE WHEN k.level >= 2 THEN SUBSTRING(k.kode, 1, 2) ELSE NULL END AS divisi_kode');
+            $cols[] = DB::raw('CASE WHEN k.level >= 3 THEN SUBSTRING(k.kode, 1, 3) ELSE NULL END AS kelompok_kode');
+            $cols[] = DB::raw('CASE WHEN k.level >= 4 THEN SUBSTRING(k.kode, 1, 4) ELSE NULL END AS kelas_kode');
+            $cols[] = DB::raw('CASE WHEN k.level >= 5 THEN SUBSTRING(k.kode, 1, 5) ELSE NULL END AS subkelas_kode');
+            $cols[] = DB::raw('CASE WHEN k.level >= 6 THEN SUBSTRING(k.kode, 1, 7) ELSE NULL END AS kelompok_komoditas_kode');
+            $cols[] = DB::raw('CASE WHEN k.level >= 7 THEN k.kode ELSE NULL END AS komoditas_kode');
+        }
+
+        if ($hasJudul) {
+            $cols[] = 'k.judul';
+        } else {
+            $cols[] = DB::raw('k.nama AS judul');
+        }
+
+        if ($hasCatatan) {
+            $cols[] = 'k.catatan';
+        } elseif ($hasDeskripsi) {
+            $cols[] = DB::raw('k.deskripsi AS catatan');
+        } else {
+            $cols[] = DB::raw('NULL AS catatan');
+        }
+
+        if ($hasStatus) {
+            $cols[] = 'k.status';
+        } else {
+            $cols[] = DB::raw("'Aktif' AS status");
+        }
+
+        if (Schema::hasColumn($this->table, 'halaman')) {
+            $cols[] = 'k.halaman';
+        } else {
+            $cols[] = DB::raw('NULL AS halaman');
+        }
+
+        if (Schema::hasColumn($this->table, 'sumber_sheet')) {
+            $cols[] = 'k.sumber_sheet';
+        } else {
+            $cols[] = DB::raw("'Dataset KBKI 2015' AS sumber_sheet");
+        }
+
+        if (Schema::hasColumn($this->table, 'baris_asli')) {
+            $cols[] = 'k.baris_asli';
+        } else {
+            $cols[] = DB::raw('NULL AS baris_asli');
+        }
+
+        if (Schema::hasColumn($this->table, 'kode_asli')) {
+            $cols[] = 'k.kode_asli';
+        } else {
+            $cols[] = DB::raw('k.kode AS kode_asli');
+        }
+
+        return $cols;
     }
 
     private function filteredQuery(Request $request)
@@ -330,27 +450,35 @@ class DataKbkiController extends Controller
 
         if ($request->filled('search')) {
             $search = '%' . mb_strtolower(trim((string) $request->query('search'))) . '%';
+            $titleCol = Schema::hasColumn($this->table, 'judul') ? 'k.judul' : 'k.nama';
 
-            $query->where(function ($subQuery) use ($search) {
+            $query->where(function ($subQuery) use ($search, $titleCol) {
                 $subQuery
                     ->whereRaw('LOWER(CAST(k.kode AS TEXT)) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(CAST(k.judul AS TEXT)) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(CAST(k.sumber_sheet AS TEXT)) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(CAST(k.catatan AS TEXT)) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(CAST(k.status AS TEXT)) LIKE ?', [$search])
-                    ->orWhereRaw('LOWER(CAST(k.halaman AS TEXT)) LIKE ?', [$search]);
+                    ->orWhereRaw('LOWER(CAST(' . $titleCol . ' AS TEXT)) LIKE ?', [$search]);
             });
         }
 
         if ($request->filled('struktur')) {
-            $query->where('k.struktur', $request->query('struktur'));
+            if (Schema::hasColumn($this->table, 'struktur')) {
+                $query->where('k.struktur', $request->query('struktur'));
+            } else {
+                $levelConfig = $this->levels[$request->query('struktur')] ?? null;
+                if ($levelConfig) {
+                    $query->where('k.level', $levelConfig['level']);
+                }
+            }
         }
 
         if ($request->filled('seksi')) {
-            $query->where('k.seksi_kode', trim((string) $request->query('seksi')));
+            if (Schema::hasColumn($this->table, 'seksi_kode')) {
+                $query->where('k.seksi_kode', trim((string) $request->query('seksi')));
+            } else {
+                $query->whereRaw('SUBSTRING(k.kode, 1, 1) = ?', [trim((string) $request->query('seksi'))]);
+            }
         }
 
-        if ($request->filled('status')) {
+        if ($request->filled('status') && Schema::hasColumn($this->table, 'status')) {
             $query->where('k.status', $request->query('status'));
         }
 
@@ -360,28 +488,7 @@ class DataKbkiController extends Controller
     private function exportCsv(Request $request)
     {
         $query = $this->filteredQuery($request)
-            ->select([
-                'k.id',
-                'k.struktur',
-                'k.level',
-                'k.jumlah_digit',
-                'k.kode',
-                'k.kode_induk',
-                'k.seksi_kode',
-                'k.divisi_kode',
-                'k.kelompok_kode',
-                'k.kelas_kode',
-                'k.subkelas_kode',
-                'k.kelompok_komoditas_kode',
-                'k.komoditas_kode',
-                'k.judul',
-                'k.halaman',
-                'k.sumber_sheet',
-                'k.baris_asli',
-                'k.kode_asli',
-                'k.catatan',
-                'k.status',
-            ])
+            ->select($this->selectColumns())
             ->orderBy('k.kode');
 
         $filename = 'data-kbki-2015-' . now()->format('Y-m-d-His') . '.csv';
@@ -525,7 +632,8 @@ class DataKbkiController extends Controller
                 ->where('kode_induk', $current->kode)
                 ->exists();
 
-            $structureChanged = $data['struktur'] !== $current->struktur;
+            $hasStruktur = Schema::hasColumn($this->table, 'struktur');
+            $structureChanged = $hasStruktur ? ($data['struktur'] !== ($current->struktur ?? null)) : false;
             $codeChanged = $data['kode'] !== $current->kode;
             $parentChanged = ($data['kode_induk'] ?? null) !== ($current->kode_induk ?? null);
 
@@ -547,42 +655,116 @@ class DataKbkiController extends Controller
     {
         $level = $data['level'];
         $kode = $data['kode'];
+        $hasStruktur = Schema::hasColumn($this->table, 'struktur');
 
-        return [
-            'struktur' => $data['struktur'],
+        if ($hasStruktur) {
+            return [
+                'struktur' => $data['struktur'],
+                'level' => $level,
+                'jumlah_digit' => $data['jumlah_digit'],
+                'kode' => $kode,
+                'kode_induk' => $level === 1 ? null : $data['kode_induk'],
+                'seksi_kode' => substr($kode, 0, 1),
+                'divisi_kode' => $level >= 2 ? substr($kode, 0, 2) : null,
+                'kelompok_kode' => $level >= 3 ? substr($kode, 0, 3) : null,
+                'kelas_kode' => $level >= 4 ? substr($kode, 0, 4) : null,
+                'subkelas_kode' => $level >= 5 ? substr($kode, 0, 5) : null,
+                'kelompok_komoditas_kode' => $level >= 6 ? substr($kode, 0, 7) : null,
+                'komoditas_kode' => $level === 7 ? $kode : null,
+                'judul' => $data['judul'],
+                'halaman' => $data['halaman'],
+                'sumber_sheet' => $data['sumber_sheet'],
+                'kode_asli' => $kode,
+                'catatan' => $data['catatan'],
+                'status' => $data['status'],
+            ];
+        }
+
+        $payload = [
             'level' => $level,
-            'jumlah_digit' => $data['jumlah_digit'],
             'kode' => $kode,
             'kode_induk' => $level === 1 ? null : $data['kode_induk'],
-            'seksi_kode' => substr($kode, 0, 1),
-            'divisi_kode' => $level >= 2 ? substr($kode, 0, 2) : null,
-            'kelompok_kode' => $level >= 3 ? substr($kode, 0, 3) : null,
-            'kelas_kode' => $level >= 4 ? substr($kode, 0, 4) : null,
-            'subkelas_kode' => $level >= 5 ? substr($kode, 0, 5) : null,
-            'kelompok_komoditas_kode' => $level >= 6 ? substr($kode, 0, 7) : null,
-            'komoditas_kode' => $level === 7 ? $kode : null,
-            'judul' => $data['judul'],
-            'halaman' => $data['halaman'],
-            'sumber_sheet' => $data['sumber_sheet'],
-            'kode_asli' => $kode,
-            'catatan' => $data['catatan'],
-            'status' => $data['status'],
         ];
+
+        if (Schema::hasColumn($this->table, 'nama')) {
+            $payload['nama'] = $data['judul'];
+        } elseif (Schema::hasColumn($this->table, 'judul')) {
+            $payload['judul'] = $data['judul'];
+        }
+
+        if (Schema::hasColumn($this->table, 'deskripsi')) {
+            $payload['deskripsi'] = $data['catatan'];
+        } elseif (Schema::hasColumn($this->table, 'catatan')) {
+            $payload['catatan'] = $data['catatan'];
+        }
+
+        return $payload;
     }
 
     private function findRow($id)
     {
-        return DB::table($this->table)
+        $hasJudul = Schema::hasColumn($this->table, 'judul');
+        $hasCatatan = Schema::hasColumn($this->table, 'catatan');
+        $hasDeskripsi = Schema::hasColumn($this->table, 'deskripsi');
+
+        $row = DB::table($this->table)
             ->where('id', $id)
             ->firstOrFail();
+
+        $levelMap = [
+            1 => 'Seksi',
+            2 => 'Divisi',
+            3 => 'Kelompok',
+            4 => 'Kelas',
+            5 => 'Subkelas',
+            6 => 'Kelompok Komoditas',
+            7 => 'Komoditas',
+        ];
+
+        if (! isset($row->struktur)) {
+            $row->struktur = $levelMap[$row->level] ?? 'Komoditas';
+        }
+        if (! isset($row->judul)) {
+            $row->judul = $row->nama ?? '';
+        }
+        if (! isset($row->catatan)) {
+            $row->catatan = $row->deskripsi ?? '';
+        }
+
+        return $row;
     }
 
     private function stats(): array
     {
-        $counts = DB::table($this->table)
-            ->select('struktur', DB::raw('COUNT(*) AS total'))
-            ->groupBy('struktur')
-            ->pluck('total', 'struktur');
+        $hasStruktur = Schema::hasColumn($this->table, 'struktur');
+
+        if ($hasStruktur) {
+            $counts = DB::table($this->table)
+                ->select('struktur', DB::raw('COUNT(*) AS total'))
+                ->groupBy('struktur')
+                ->pluck('total', 'struktur');
+        } else {
+            $levelCounts = DB::table($this->table)
+                ->select('level', DB::raw('COUNT(*) AS total'))
+                ->groupBy('level')
+                ->pluck('total', 'level');
+
+            $levelMap = [
+                1 => 'Seksi',
+                2 => 'Divisi',
+                3 => 'Kelompok',
+                4 => 'Kelas',
+                5 => 'Subkelas',
+                6 => 'Kelompok Komoditas',
+                7 => 'Komoditas',
+            ];
+
+            $counts = collect();
+            foreach ($levelCounts as $lvl => $cnt) {
+                $stName = $levelMap[$lvl] ?? 'Komoditas';
+                $counts[$stName] = ($counts[$stName] ?? 0) + (int) $cnt;
+            }
+        }
 
         $total = (int) $counts->sum();
 
@@ -616,25 +798,8 @@ class DataKbkiController extends Controller
     {
         return Schema::hasTable($this->table) && Schema::hasColumns($this->table, [
             'id',
-            'struktur',
-            'level',
-            'jumlah_digit',
             'kode',
-            'kode_induk',
-            'seksi_kode',
-            'divisi_kode',
-            'kelompok_kode',
-            'kelas_kode',
-            'subkelas_kode',
-            'kelompok_komoditas_kode',
-            'komoditas_kode',
-            'judul',
-            'halaman',
-            'sumber_sheet',
-            'baris_asli',
-            'kode_asli',
-            'catatan',
-            'status',
+            'level',
         ]);
     }
 

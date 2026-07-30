@@ -793,7 +793,7 @@
 
                                 <i
                                     id="provinsiChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"
+                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"
                                 ></i>
                             </div>
 
@@ -876,7 +876,7 @@
 
                                 <i
                                     id="kabupatenChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"
+                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"
                                 ></i>
                             </div>
 
@@ -958,7 +958,7 @@
 
                                 <i
                                     id="kecamatanChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"
+                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"
                                 ></i>
                             </div>
 
@@ -1040,7 +1040,7 @@
 
                                 <i
                                     id="desaChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"
+                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"
                                 ></i>
                             </div>
 

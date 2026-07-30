@@ -230,7 +230,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
                 <div class="relative min-w-0 xl:col-span-2">
@@ -245,7 +245,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
                 <div class="relative min-w-0 xl:col-span-2">
@@ -257,7 +257,7 @@
                         <option value="Aktif" @selected(request('status') === 'Aktif')>Aktif</option>
                         <option value="Nonaktif" @selected(request('status') === 'Nonaktif')>Nonaktif</option>
                     </select>
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
                 <div class="relative min-w-0 xl:col-span-1">
@@ -271,7 +271,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
                 <div class="flex min-w-0 gap-2 md:col-span-1 xl:col-span-2">

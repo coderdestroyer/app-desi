@@ -11,7 +11,28 @@ use Illuminate\Validation\ValidationException;
 
 class DataHsCodeController extends Controller
 {
-    private string $table = 'hs_codes';
+    private string $table;
+
+    public function __construct()
+    {
+        $this->table = $this->resolveTableName();
+    }
+
+    private function resolveTableName(): string
+    {
+        foreach ([
+            'data_hs_code',
+            'hs_codes',
+            'hs_code',
+            'hscode',
+        ] as $tableName) {
+            if (Schema::hasTable($tableName)) {
+                return $tableName;
+            }
+        }
+
+        return 'data_hs_code';
+    }
 
     public function index(Request $request)
     {
@@ -240,7 +261,7 @@ class DataHsCodeController extends Controller
                 ->route('admin.hs-code.index')
                 ->with(
                     'error',
-                    'Tabel hs_codes belum tersedia di Supabase.'
+                    'Tabel ' . $this->table . ' belum tersedia di Supabase.'
                 );
         }
 
