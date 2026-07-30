@@ -26,7 +26,7 @@
 
         <div class="date">
 
-            {{ now()->translatedFormat('d F Y') }}
+            {{ now()->locale('id')->translatedFormat('d F Y') }}
 
             <small>TANGGAL HARI INI</small>
 

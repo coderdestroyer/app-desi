@@ -219,7 +219,7 @@
                             md:text-3xl
                         "
                     >
-                        {{ now()->translatedFormat('d F Y') }}
+                        {{ now()->locale('id')->translatedFormat('d F Y') }}
                     </span>
 
                     <span
