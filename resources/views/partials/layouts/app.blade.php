@@ -8,9 +8,9 @@
     <title>{{ config('app.name', 'DPMPTSP Provinsi Sumatera Utara') }}</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-dpmptsp.png') }}">
-    <link rel="shortcut icon" href="{{ asset('images/logo-dpmptsp.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo-dpmptsp.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logo-sumut.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo-sumut.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

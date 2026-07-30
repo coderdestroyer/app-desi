@@ -7,6 +7,10 @@
 
     <title>@yield('title')</title>
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+
     @vite([
         'resources/css/app.css',
         'resources/css/user.css',

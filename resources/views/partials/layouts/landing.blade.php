@@ -18,6 +18,10 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         @yield('title', 'DPMPTSP Provinsi Sumatera Utara')
     </title>
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+
 
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -19,6 +19,10 @@
         @yield('title', config('app.name', 'DPMPTSP WebGIS'))
     </title>
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+
     {{-- Fonts --}}
     <link
         rel="preconnect"
