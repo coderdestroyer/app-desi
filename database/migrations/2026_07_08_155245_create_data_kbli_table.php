@@ -6,14 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('data_kbli', function (Blueprint $table) {
             $table->id();
-            $table->string('struktur', 20);
+            $table->string('struktur', 20)->index();
             $table->unsignedSmallInteger('level');
             $table->string('kode', 10)->unique();
-            $table->string('kode_induk', 10)->nullable();
+            $table->string('kode_induk', 10)->nullable()->index();
             $table->string('kategori_kode', 2)->nullable();
             $table->string('golongan_pokok_kode', 2)->nullable();
             $table->string('golongan_kode', 3)->nullable();
@@ -26,9 +28,6 @@ return new class extends Migration
             $table->string('kode_asli', 10)->nullable();
             $table->text('catatan')->nullable();
             $table->timestamps();
-
-            $table->index('kode_induk');
-            $table->index('struktur');
         });
     }
 

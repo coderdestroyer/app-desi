@@ -6,18 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('indikator_kabupaten', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('kabupaten_id');
+            $table->foreignId('kabupaten_id')->constrained('kabupaten', 'kab_id')->cascadeOnDelete();
             $table->integer('tahun');
             $table->string('nama_indikator', 255);
-            $table->decimal('nilai', 20, 2);
-            $table->string('satuan', 50)->nullable();
+            $table->decimal('nilai', 10, 4);
+            $table->string('satuan', 50)->default('%');
             $table->timestamps();
-
-            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->cascadeOnDelete();
         });
     }
 

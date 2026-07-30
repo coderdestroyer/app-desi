@@ -6,9 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Membuat tabel sektor.
-     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('sektor', function (Blueprint $table) {
@@ -18,9 +17,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Menghapus tabel sektor.
-     */
     public function down(): void
     {
         Schema::dropIfExists('sektor');

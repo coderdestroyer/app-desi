@@ -6,17 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('analysis_results', function (Blueprint $table) {
             $table->id();
-            $table->string('type', 50);
-            $table->unsignedBigInteger('kabupaten_id')->nullable();
-            $table->integer('tahun');
-            $table->json('payload');
+            $table->string('type');
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->json('results');
             $table->timestamps();
-
-            $table->foreign('kabupaten_id')->references('kab_id')->on('kabupaten')->cascadeOnDelete();
         });
     }
 

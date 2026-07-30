@@ -6,27 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('capex_components', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            $table->foreignId('parent_id')->nullable()->constrained('capex_components')->onDelete('cascade');
+            $table->foreignId('project_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('capex_components')->cascadeOnDelete();
             $table->string('nama_komponen');
-            $table->decimal('volume', 15, 4)->nullable();
-            $table->string('satuan')->nullable();
-            $table->decimal('luas', 15, 4)->nullable();
+            $table->decimal('volume', 15, 2)->nullable();
+            $table->string('satuan', 50)->nullable();
+            $table->decimal('luas', 15, 2)->nullable();
             $table->decimal('harga_m2', 20, 2)->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('capex_components');

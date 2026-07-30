@@ -6,18 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('data_kbki', function (Blueprint $table) {
             $table->id();
             $table->string('kode', 20)->unique();
-            $table->string('kode_induk', 20)->nullable();
+            $table->string('kode_induk', 20)->nullable()->index();
             $table->unsignedSmallInteger('level');
             $table->text('nama');
             $table->text('deskripsi')->nullable();
             $table->timestamps();
-
-            $table->index('kode_induk');
         });
     }
 
