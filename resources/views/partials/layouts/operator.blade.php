@@ -21,470 +21,14 @@
     <script src="{{ asset('js/data-wilayah.js') }}"></script>
 
     <style>
-        :root {
-            --sidebar-dark: #075936;
-            --sidebar-main: #08794d;
-            --sidebar-light: #10935e;
-            --yellow: #ffd457;
-            --yellow-dark: #e9b930;
-            --white: #ffffff;
-            --background: #f7f9fb;
-            --text-dark: #202b3c;
-            --text-muted: #758096;
-            --border: #e6eaf0;
-            --danger: #e05252;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            min-height: 100%;
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-dark);
-            background: var(--background);
-        }
-
-        body.modal-open {
-            overflow: hidden;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font-family: inherit;
-        }
-
-        .admin-shell {
-            min-height: 100vh;
-            display: flex;
-        }
-
-        .admin-sidebar {
-            position: fixed;
-            inset: 0 auto 0 0;
-            z-index: 100;
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            color: #ffffff;
-            background:
-                radial-gradient(circle at 20% 0%,
-                    rgba(255, 255, 255, 0.08),
-                    transparent 28%),
-                linear-gradient(180deg,
-                    #075735 0%,
-                    #087849 48%,
-                    #0c8d58 100%);
-            box-shadow: 10px 0 30px rgba(5, 66, 40, 0.12);
-        }
-
-        /* Custom Scrollbar for Sidebar */
-        .admin-sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .admin-sidebar::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .admin-sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-
-        .admin-sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .sidebar-logo {
-            padding: 24px 28px 18px;
-        }
-
-        .sidebar-logo img {
-            display: block;
-            width: 220px;
-            max-width: 100%;
-            height: 72px;
-            object-fit: contain;
-            object-position: left center;
-        }
-
-        .sidebar-profile {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-        }
-
-        .profile-toggle {
-            width: 100%;
-            min-height: 82px;
-            padding: 14px 28px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            color: #ffffff;
-            background: transparent;
-            border: 0;
-            cursor: pointer;
-            text-align: left;
-        }
-
-        .profile-toggle:hover {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .profile-avatar {
-            width: 48px;
-            height: 48px;
-            flex: 0 0 48px;
-            display: grid;
-            place-items: center;
-            border-radius: 50%;
-            color: #1c6744;
-            background: var(--yellow);
-            border: 2px solid rgba(255, 255, 255, 0.82);
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .profile-copy {
-            min-width: 0;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: center;
-        }
-
-        .profile-name {
-            display: block;
-            max-width: 100%;
-            overflow: hidden;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 600;
-            line-height: 1.35;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-
-        .profile-role {
-            display: block;
-            margin-top: 3px;
-            color: var(--yellow);
-            font-size: 12px;
-            font-weight: 500;
-            line-height: 1.25;
-            text-transform: lowercase;
-        }
-
-        .profile-chevron {
-            color: var(--yellow);
-            font-size: 13px;
-            transition: transform 0.22s ease;
-        }
-
-        .sidebar-profile.open .profile-chevron {
-            transform: rotate(180deg);
-        }
-
-        .profile-dropdown {
-            max-height: 0;
-            overflow: hidden;
-            background: rgba(1, 47, 29, 0.23);
-            transition: max-height 0.25s ease;
-        }
-
-        .sidebar-profile.open .profile-dropdown {
-            max-height: 240px;
-        }
-
-        .profile-dropdown-inner {
-            padding: 6px 18px 12px;
-        }
-
-        .profile-dropdown-link {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            padding: 11px 10px;
-            color: #ffffff;
-            background: transparent;
-            border: 0;
-            border-radius: 9px;
-            text-decoration: none;
-            cursor: pointer;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .profile-dropdown-link i {
-            width: 18px;
-            color: var(--yellow);
-            text-align: center;
-        }
-
-        .profile-dropdown-link:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .profile-dropdown-divider {
-            height: 1px;
-            margin: 8px 0;
-            background: rgba(255, 255, 255, 0.16);
-        }
-
-        .profile-dropdown-link.logout {
-            color: #ffaaaa;
-        }
-
-        .profile-dropdown-link.logout i {
-            color: #ff8f8f;
-        }
-
-        .sidebar-content {
-            padding: 0 17px 28px;
-        }
-
-        .sidebar-section-title {
-            margin: 18px 12px 10px;
-            color: var(--yellow);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 5px;
-        }
-
-        .sidebar-link {
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 15px;
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition:
-                background 0.18s ease,
-                color 0.18s ease,
-                transform 0.18s ease;
-        }
-
-        .sidebar-link i {
-            width: 21px;
-            color: rgba(255, 255, 255, 0.76);
-            text-align: center;
-            font-size: 17px;
-        }
-
-        .sidebar-link:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.09);
-            transform: translateX(2px);
-        }
-
-        .sidebar-link.active {
-            color: #176541;
-            background: var(--yellow);
-            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.11);
-        }
-
-        .sidebar-link.active i {
-            color: #176541;
-        }
-
-        .admin-main {
-            width: calc(100% - 300px);
-            min-height: 100vh;
-            margin-left: 300px;
-            background: var(--background);
-        }
-
-        .admin-main.selection-screen {
-            width: 100% !important;
-            margin-left: 0 !important;
-        }
-
-        .mobile-sidebar-button {
-            display: none;
-            position: fixed;
-            top: 14px;
-            left: 14px;
-            z-index: 120;
-            width: 44px;
-            height: 44px;
-            place-items: center;
-            border: 0;
-            border-radius: 12px;
-            color: #ffffff;
-            background: #08794d;
-            box-shadow: 0 8px 22px rgba(5, 80, 47, 0.2);
-            cursor: pointer;
-        }
-
-        .sidebar-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 90;
-            background: rgba(15, 23, 42, 0.46);
-        }
-
-        .logout-modal[hidden] {
-            display: none !important;
-        }
-
-        .logout-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            display: grid;
-            place-items: center;
-            padding: 24px;
-        }
-
-        .logout-modal-backdrop {
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.52);
-            backdrop-filter: blur(3px);
-        }
-
-        .logout-modal-card {
-            position: relative;
-            width: min(420px, 100%);
-            padding: 30px 28px 27px;
-            border-radius: 22px;
-            background: #ffffff;
-            text-align: center;
-            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.25);
-            animation: modalAppear 0.2s ease-out;
-        }
-
-        .logout-modal-icon {
-            width: 68px;
-            height: 68px;
-            margin: 0 auto 18px;
-            display: grid;
-            place-items: center;
-            border-radius: 20px;
-            color: #dc2626;
-            background: #fee2e2;
-            font-size: 26px;
-        }
-
-        .logout-modal-card h3 {
-            margin: 0;
-            color: #202b3c;
-            font-size: 21px;
-            font-weight: 700;
-        }
-
-        .logout-modal-card p {
-            margin: 10px auto 0;
-            max-width: 340px;
-            color: #758096;
-            font-size: 13px;
-            line-height: 1.7;
-        }
-
-        .logout-modal-actions {
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .logout-modal-actions button {
-            min-width: 128px;
-            height: 44px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .logout-cancel {
-            color: #475467;
-            background: #ffffff;
-            border: 1px solid #d9dee8;
-        }
-
-        .logout-confirm {
-            color: #ffffff;
-            background: #dc2626;
-            border: 1px solid #dc2626;
-        }
-
-        .logout-confirm:hover {
-            background: #b91c1c;
-        }
-
         @keyframes modalAppear {
             from {
                 opacity: 0;
                 transform: translateY(10px) scale(0.97);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .admin-sidebar {
-                width: 280px;
-                transform: translateX(-100%);
-                transition: transform 0.25s ease;
-            }
-
-            .admin-sidebar.open {
-                transform: translateX(0);
-            }
-
-            .admin-main {
-                width: 100%;
-                margin-left: 0;
-            }
-
-            .mobile-sidebar-button {
-                display: grid;
-            }
-
-            .sidebar-backdrop.show {
-                display: block;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .admin-sidebar {
-                width: min(285px, 88vw);
-            }
-
-            .logout-modal-actions {
-                flex-direction: column-reverse;
-            }
-
-            .logout-modal-actions button {
-                width: 100%;
             }
         }
     </style>
@@ -492,151 +36,151 @@
     @stack('styles')
 </head>
 
-<body>
+<body class="font-['Poppins',sans-serif] text-[#202b3c] bg-[#f7f9fb] min-h-screen m-0">
     @php
     $isSelectionScreen = request()->routeIs('operator.dashboard');
     $isPeluangInvestasi = request()->routeIs('operator.peluang-investasi*') || request()->routeIs('operator.projects*');
     @endphp
 
     @if(!$isSelectionScreen)
-    <button type="button" id="mobileSidebarButton" class="mobile-sidebar-button" aria-label="Buka menu">
+    <button type="button" id="mobileSidebarButton" class="hidden fixed top-[14px] left-[14px] z-[120] w-[44px] h-[44px] border-0 rounded-[12px] text-white bg-[#08794d] shadow-[0_8px_22px_rgba(5,80,47,0.2)] cursor-pointer max-lg:grid max-lg:place-items-center" aria-label="Buka menu">
         <i class="fa-solid fa-bars"></i>
     </button>
-    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+    <div id="sidebarBackdrop" class="hidden fixed inset-0 z-[90] bg-[#0f172a]/[0.46] [&.show]:block"></div>
     @endif
 
-    <div class="admin-shell">
+    <div class="min-h-screen flex">
         @if(!$isSelectionScreen)
-        <aside id="adminSidebar" class="admin-sidebar">
-            <div class="sidebar-logo">
-                <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo DPMPTSP Sumatera Utara">
+        <aside id="adminSidebar" class="fixed inset-y-0 left-0 right-auto z-[100] w-[300px] flex flex-col overflow-y-auto text-white bg-[radial-gradient(circle_at_20%_0%,rgba(255,255,255,0.08),transparent_28%),linear-gradient(180deg,#075735_0%,#087849_48%,#0c8d58_100%)] shadow-[10px_0_30px_rgba(5,66,40,0.12)] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-white/[0.05] [&::-webkit-scrollbar-thumb]:bg-white/[0.2] [&::-webkit-scrollbar-thumb]:rounded-[10px] hover:[&::-webkit-scrollbar-thumb]:bg-white/[0.3] max-lg:w-[280px] max-lg:-translate-x-full max-lg:transition-transform max-lg:duration-[250ms] max-lg:ease-in-out max-lg:[&.open]:translate-x-0 max-[520px]:w-[min(285px,88vw)]">
+            <div class="pt-6 px-7 pb-[18px]">
+                <img src="{{ asset('images/logo-dpmptsp.png') }}" alt="Logo DPMPTSP Sumatera Utara" class="block w-[220px] max-w-full h-[72px] object-contain object-left">
             </div>
 
             <div class="px-5 py-3 border-b border-white/10">
-                <a href="{{ route('operator.dashboard') }}" class="sidebar-link hover:bg-white/15 transition-all text-xs font-semibold text-[#FFD54F] border border-[#FFD54F]/30 rounded-xl">
-                    <i class="fa-solid fa-arrow-left text-[#FFD54F]"></i>
+                <a href="{{ route('operator.dashboard') }}" class="min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] hover:bg-white/15 transition-all text-xs font-semibold text-[#FFD54F] border border-[#FFD54F]/30 rounded-xl">
+                    <i class="fa-solid fa-arrow-left w-[21px] text-[#FFD54F] text-center text-[17px]"></i>
                     <span>Pilih Ruang Kerja</span>
                 </a>
             </div>
 
-            <div id="adminProfile" class="sidebar-profile">
-                <button type="button" id="adminProfileToggle" class="profile-toggle">
-                    <span class="profile-avatar" style="overflow: hidden; padding: 0; display: block;">
-                        <img src="{{ Auth::user()?->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()?->name ?? 'Siti') . '&background=FFD54F&color=145239' }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+            <div id="adminProfile" class="border-b border-white/[0.16] group">
+                <button type="button" id="adminProfileToggle" class="w-full min-h-[82px] py-3.5 px-7 flex items-center gap-3.5 text-white bg-transparent border-0 cursor-pointer text-left hover:bg-white/[0.06]">
+                    <span class="w-12 h-12 shrink-0 block overflow-hidden p-0 rounded-full text-[#1c6744] bg-[#ffd457] border-2 border-white/[0.82] text-[15px] font-semibold">
+                        <img src="{{ Auth::user()?->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()?->name ?? 'Siti') . '&background=FFD54F&color=145239' }}" alt="Profile" class="w-full h-full object-cover">
                     </span>
 
-                    <span class="profile-copy">
-                        <span class="profile-name">
+                    <span class="min-w-0 flex-1 flex flex-col items-start justify-center">
+                        <span class="block max-w-full truncate text-white text-[15px] font-semibold leading-[1.35]">
                             {{ Auth::user()?->name ?? 'Operator' }}
                         </span>
-                        <span class="profile-role">
+                        <span class="block mt-[3px] text-[#ffd457] text-xs font-medium leading-[1.25] lowercase">
                             {{ auth()->user()->role ?? 'operator' }}
                         </span>
                     </span>
 
-                    <i class="fa-solid fa-chevron-down profile-chevron"></i>
+                    <i class="fa-solid fa-chevron-down text-[#ffd457] text-[13px] transition-transform duration-[220ms] ease-out group-[.open]:rotate-180"></i>
                 </button>
 
-                <div class="profile-dropdown">
-                    <div class="profile-dropdown-inner">
-                        <a href="{{ route('operator.profile') }}" class="profile-dropdown-link {{ request()->routeIs('operator.profile') ? 'active' : '' }}">
-                            <i class="fa-regular fa-user"></i>
+                <div class="max-h-0 overflow-hidden bg-[#012f1d]/[0.23] transition-[max-height] duration-[250ms] ease-in-out group-[.open]:max-h-[240px]">
+                    <div class="pt-[6px] px-[18px] pb-[12px]">
+                        <a href="{{ route('operator.profile') }}" class="w-full flex items-center gap-[13px] py-[11px] px-[10px] text-white bg-transparent border-0 rounded-[9px] no-underline cursor-pointer text-left text-[13px] font-medium hover:bg-white/[0.08] transition-colors {{ request()->routeIs('operator.profile') ? 'active' : '' }}">
+                            <i class="fa-regular fa-user w-[18px] text-[#ffd457] text-center"></i>
                             <span>Profile</span>
                         </a>
 
-                        <a href="{{ route('operator.settings') }}" class="profile-dropdown-link {{ request()->routeIs('operator.settings') ? 'active' : '' }}">
-                            <i class="fa-solid fa-gear"></i>
+                        <a href="{{ route('operator.settings') }}" class="w-full flex items-center gap-[13px] py-[11px] px-[10px] text-white bg-transparent border-0 rounded-[9px] no-underline cursor-pointer text-left text-[13px] font-medium hover:bg-white/[0.08] transition-colors {{ request()->routeIs('operator.settings') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gear w-[18px] text-[#ffd457] text-center"></i>
                             <span>Settings</span>
                         </a>
 
-                        <div class="profile-dropdown-divider"></div>
+                        <div class="h-[1px] my-2 bg-white/[0.16]"></div>
 
-                        <button type="button" class="openLogoutModalBtn profile-dropdown-link logout">
-                            <i class="fa-solid fa-right-from-bracket"></i>
+                        <button type="button" class="openLogoutModalBtn w-full flex items-center gap-[13px] py-[11px] px-[10px] text-[#ffaaaa] bg-transparent border-0 rounded-[9px] no-underline cursor-pointer text-left text-[13px] font-medium hover:bg-white/[0.08] transition-colors">
+                            <i class="fa-solid fa-right-from-bracket w-[18px] text-[#ff8f8f] text-center"></i>
                             <span>Logout</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <nav class="sidebar-content">
+            <nav class="pt-0 px-[17px] pb-7">
+                <div class="mt-[18px] mx-[12px] mb-[10px] text-[#ffd457] text-xs font-bold uppercase">
+                    Menu Utama
+                </div>
+
+                <ul class="list-none m-0 p-0">
+                    <li class="mb-[5px]">
+                        <a href="{{ url('/') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->is('/') ? 'active' : '' }}">
+                            <i class="fa-solid fa-house w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
+                            <span>Beranda</span>
+                        </a>
+                    </li>
+                </ul>
+                
                 @if($isPeluangInvestasi)
                 <!-- SIDEBAR MENU PELUANG INVESTASI (IPRO) -->
-                <div class="sidebar-section-title">
+                <div class="mt-[18px] mx-[12px] mb-[10px] text-[#ffd457] text-xs font-bold uppercase">
                     Modul Peluang Investasi
                 </div>
 
-                <ul class="sidebar-menu">
-                    <li>
-                        <a href="{{ route('operator.peluang-investasi') }}" class="sidebar-link {{ request()->routeIs('operator.peluang-investasi') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-line"></i>
+                <ul class="list-none m-0 p-0">
+                    <li class="mb-[5px]">
+                        <a href="{{ route('operator.peluang-investasi') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.peluang-investasi') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-line w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
                             <span>Dashboard Peluang</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('operator.projects.index') }}" class="sidebar-link {{ request()->routeIs('operator.projects.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-calculator"></i>
+                    <li class="mb-[5px]">
+                        <a href="{{ route('operator.projects.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.projects.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-calculator w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
                             <span>Kalkulasi & Daftar Proyek</span>
                         </a>
                     </li>
                 </ul>
                 @else
                 <!-- SIDEBAR MENU POTENSI UNGGULAN (MAKRO) -->
-                <div class="sidebar-section-title">
+                <div class="mt-[18px] mx-[12px] mb-[10px] text-[#ffd457] text-xs font-bold uppercase">
                     Potensi Unggulan Daerah
                 </div>
 
-                <ul class="sidebar-menu">
-                    <li>
-                        <a href="{{ route('operator.potensi-unggulan') }}" class="sidebar-link {{ request()->routeIs('operator.potensi-unggulan') ? 'active' : '' }}">
-                            <i class="fa-solid fa-table-cells-large"></i>
+                <ul class="list-none m-0 p-0">
+                    <li class="mb-[5px]">
+                        <a href="{{ route('operator.potensi-unggulan') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.potensi-unggulan') ? 'active' : '' }}">
+                            <i class="fa-solid fa-table-cells-large w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
                             <span>Dashboard Potensi</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('operator.lq.index') }}" class="sidebar-link {{ request()->routeIs('operator.lq.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-line"></i>
+                    <li class="mb-[5px]">
+                        <a href="{{ route('operator.lq.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.lq.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-line w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
                             <span>Analisis LQ</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('operator.ss.index') }}" class="sidebar-link {{ request()->routeIs('operator.ss.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-pie"></i>
+                    <li class="mb-[5px]">
+                        <a href="{{ route('operator.ss.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.ss.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-pie w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
                             <span>Analisis SS</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('operator.tipologi.index') }}" class="sidebar-link {{ request()->routeIs('operator.tipologi.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-layer-group"></i>
+                    <li class="mb-[5px]">
+                        <a href="{{ route('operator.tipologi.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.tipologi.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-layer-group w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
                             <span>Analisis Tipologi Sektor</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('operator.klassen.index') }}" class="sidebar-link {{ request()->routeIs('operator.klassen.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-bar"></i>
+                    <li class="mb-[5px]">
+                        <a href="{{ route('operator.klassen.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.klassen.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-bar w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
                             <span>Analisis Klassen</span>
                         </a>
                     </li>
                 </ul>
                 @endif
-
-                <div class="sidebar-section-title">
-                    Menu Utama
-                </div>
-
-                <ul class="sidebar-menu">
-                    <li>
-                        <a href="{{ url('/') }}" class="sidebar-link">
-                            <i class="fa-solid fa-house"></i>
-                            <span>Beranda</span>
-                        </a>
-                    </li>
-                </ul>
             </nav>
         </aside>
         @endif
 
-        <main class="admin-main {{ $isSelectionScreen ? 'selection-screen' : '' }}">
+        <main class="min-h-screen bg-[#f7f9fb] {{ $isSelectionScreen ? 'w-full ml-0' : 'w-[calc(100%-300px)] ml-[300px] max-lg:w-full max-lg:ml-0' }}">
             @if($isSelectionScreen)
             <!-- TOPBAR UNTUK SELECTION SCREEN (TANPA SIDEBAR) -->
             <header class="bg-white border-b border-[#CFE3D5] px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
@@ -669,17 +213,17 @@
         @csrf
     </form>
 
-    <div id="logoutModal" class="logout-modal" hidden>
-        <div class="logout-modal-backdrop" data-close-logout></div>
-        <div class="logout-modal-card">
-            <div class="logout-modal-icon">
+    <div id="logoutModal" class="fixed inset-0 z-[1000] grid place-items-center p-6 [&[hidden]]:!hidden" hidden>
+        <div class="absolute inset-0 bg-[#0f172a]/[0.52] backdrop-blur-[3px]" data-close-logout></div>
+        <div class="relative w-[min(420px,100%)] pt-[30px] px-[28px] pb-[27px] rounded-[22px] bg-white text-center shadow-[0_30px_80px_rgba(15,23,42,0.25)] animate-[modalAppear_0.2s_ease-out]">
+            <div class="w-[68px] h-[68px] my-0 mx-auto mb-[18px] grid place-items-center rounded-[20px] text-[#dc2626] bg-[#fee2e2] text-[26px]">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </div>
-            <h3>Keluar dari akun?</h3>
-            <p>Anda akan keluar dari halaman operator dan perlu login kembali untuk mengakses dashboard.</p>
-            <div class="logout-modal-actions">
-                <button type="button" class="logout-cancel" data-close-logout>Batal</button>
-                <button type="button" id="confirmLogout" class="logout-confirm">Ya, Keluar</button>
+            <h3 class="m-0 text-[#202b3c] text-[21px] font-bold">Keluar dari akun?</h3>
+            <p class="mt-2.5 mx-auto mb-0 max-w-[340px] text-[#758096] text-[13px] leading-[1.7]">Anda akan keluar dari halaman operator dan perlu login kembali untuk mengakses dashboard.</p>
+            <div class="mt-[25px] flex justify-center gap-3 max-[520px]:flex-col-reverse">
+                <button type="button" class="min-w-[128px] h-[44px] rounded-[12px] text-[13px] font-semibold cursor-pointer max-[520px]:w-full text-[#475467] bg-white border border-[#d9dee8]" data-close-logout>Batal</button>
+                <button type="button" id="confirmLogout" class="min-w-[128px] h-[44px] rounded-[12px] text-[13px] font-semibold cursor-pointer max-[520px]:w-full text-white bg-[#dc2626] border border-[#dc2626] hover:bg-[#b91c1c]">Ya, Keluar</button>
             </div>
         </div>
     </div>
@@ -734,7 +278,7 @@
                 }
 
                 logoutModal.hidden = false;
-                document.body.classList.add('modal-open');
+                document.body.classList.add('overflow-hidden');
             }
 
             function closeLogoutModal() {
@@ -743,7 +287,7 @@
                 }
 
                 logoutModal.hidden = true;
-                document.body.classList.remove('modal-open');
+                document.body.classList.remove('overflow-hidden');
             }
 
             closeLogoutButtons.forEach(function(button) {
