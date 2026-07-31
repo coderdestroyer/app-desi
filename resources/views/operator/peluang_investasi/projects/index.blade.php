@@ -230,7 +230,7 @@
                             <select name="kabupaten_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white">
                                 <option value="">Pilih Kabupaten/Kota</option>
                                 @foreach($kabupatens as $kab)
-                                    <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}</option>
+                                    <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}@if($kab->latitude && $kab->longitude) ({{ $kab->latitude }}, {{ $kab->longitude }})@endif</option>
                                 @endforeach
                             </select>
                         </div>
@@ -257,13 +257,8 @@
                     </div>
 
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Titik Koordinat Lokasi GIS</label>
-                        <select name="lokasi_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white">
-                            <option value="">Pilih Titik Lokasi GIS</option>
-                            @foreach($lokasis as $lok)
-                                <option value="{{ $lok->id }}">{{ $lok->nama }} ({{ $lok->latitude }}, {{ $lok->longitude }})</option>
-                            @endforeach
-                        </select>
+                        <label class="block font-semibold text-slate-700 mb-1">Alamat / Lokasi Spesifik GIS</label>
+                        <input type="text" name="alamat_lokasi" placeholder="Contoh: Jl. Lintas Sumatera Km 45, Medan / Koordinat GIS" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm">
                     </div>
 
                     <div>
