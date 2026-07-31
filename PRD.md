@@ -210,10 +210,7 @@ Sistem mengadopsi palet warna resmi **DPMPTSP Modern Government Portal & Investm
 * **Approval Akun Operator (`/admin/operator-approval`)**: Tabel daftar registrasi calon Operator berstatus `pending` dengan tombol aksi `Approve` atau `Reject`.
 * **Buat Akun Operator Direct (`/admin/pengguna/create`)**: Form pendaftaran langsung Operator oleh Admin tanpa melalui pending.
 * **Monitoring Dokumen Proyek IPRO (`/admin/proyek-ipro`)**: Halaman viewer & peninjauan seluruh data proyek IPRO (CAPEX, P&L, Arus Kas) yang diinput dan disimpan oleh Operator.
-* **Management Master Data**:
-  * Data Wilayah Berjenjang 4 Level (Provinsi $\rightarrow$ Kabupaten $\rightarrow$ Kecamatan $\rightarrow$ Desa).
-  * Data KBLI (5 Digit) & Data KBKI (Hierarki Komoditas).
-  * Data HS Code (Komoditas Ekspor-Impor).
+* **Management Master Data**: Pengelolaan hirarki Wilayah (Provinsi $\rightarrow$ Desa dengan Koordinat GIS), KBLI, KBKI, & HS Code.
 * **Money Currency Converter (`/admin/money-currency`)**: Kalkulator nilai tukar mata uang investasi.
 * **Pengaturan Keamanan**: Profil Admin, ubah sandi, & konfigurasi 2FA.
 
@@ -221,19 +218,19 @@ Sistem mengadopsi palet warna resmi **DPMPTSP Modern Government Portal & Investm
 
 ## 7. Spesifikasi Database Terintegrasi (PostgreSQL)
 
-Database menggunakan DBMS **PostgreSQL 15+** dengan 22 tabel terintegrasi yang terbagi ke dalam 6 Domain Utama:
+Database menggunakan DBMS **PostgreSQL 15+** dengan tabel terintegrasi yang terbagi ke dalam 5 Domain Utama:
 
 ```
 📂 DATABASE SCHEMA (PostgreSQL)
 ├── 👥 Domain 1: Security & Users (users, activity_logs, import_histories)
-├── 🗺️ Domain 2: Regional & GIS (provinsi, kabupaten, kecamatan, kelurahan_desa, lokasi)
+├── 🗺️ Domain 2: Regional & GIS (provinsi, kabupaten, kecamatan, kelurahan_desa)
 ├── 📋 Domain 3: Master Standards (sektor, data_kbli, data_kbki, data_hs_code)
-├── 📊 Domain 4: Macro Indicators (pdrb_sumut, pdrb_kabupaten, indikator_provinsi, indikator_kabupaten)
+├── 📊 Domain 4: Macro Indicators (pdb_nasional, pdrb_sumatera_provinsi, pdrb_sumatera_kabupaten, indikator_provinsi, indikator_kabupaten)
 ├── 📈 Domain 5: Macro Analysis Outputs (analisis_lq, analisis_ss, analisis_tipologi, analisis_klassen, analysis_results)
 └── 💼 Domain 6: Micro Financial Projects (projects, capex_components, pl_components, pl_yearly_data)
 ```
 
-Detail spesifikasi teknis DDL PostgreSQL lengkap tersedia pada artefak [database_schema_integration.md](file:///C:/Users/ASUS/.gemini/antigravity-ide/brain/4e5075ef-81c3-4a57-8125-c4f4aa0dfef6/database_schema_integration.md).
+Detail spesifikasi teknis DDL PostgreSQL lengkap tersedia pada file [database_schema_integration.md](file:///c:/code/DPMPTSP/app-desi/database_schema_integration.md).
 
 ---
 

@@ -12,18 +12,23 @@ return new class extends Migration
     {
         Schema::create('data_hs_code', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_kategori', 50)->nullable()->index();
-            $table->string('kode_kelompok', 50)->nullable()->index();
+            $table->string('kode_kategori', 50)->nullable();
+            $table->string('kode_kelompok', 50)->nullable();
             $table->text('uraian_kelompok')->nullable();
-            $table->string('kode_subkelompok', 50)->nullable()->index();
+            $table->string('kode_subkelompok', 50)->nullable();
             $table->text('uraian_subkelompok')->nullable();
-            $table->string('hs_code', 100)->nullable()->index();
+            $table->string('hs_code', 100)->nullable();
             $table->text('uraian_barang')->nullable();
 
             $table->string('code', 100)->nullable();
             $table->text('description')->nullable();
             $table->text('category')->nullable();
             $table->timestamps();
+
+            $table->index('hs_code');
+            $table->index('kode_kategori');
+            $table->index('kode_kelompok');
+            $table->index('kode_subkelompok');
         });
     }
 

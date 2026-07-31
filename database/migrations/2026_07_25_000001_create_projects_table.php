@@ -14,8 +14,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('kabupaten_id')->nullable()->constrained('kabupaten', 'kab_id')->nullOnDelete();
+            $table->foreignId('kecamatan_id')->nullable()->constrained('kecamatan')->nullOnDelete();
             $table->foreignId('sektor_id')->nullable()->constrained('sektor', 'sektor_id')->nullOnDelete();
-            $table->foreignId('lokasi_id')->nullable()->constrained('lokasi')->nullOnDelete();
+            $table->text('alamat_lokasi')->nullable();
             $table->string('nama_proyek');
             $table->text('deskripsi')->nullable();
             $table->integer('tahun_awal');

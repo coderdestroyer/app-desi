@@ -19,7 +19,7 @@ class ProjectController extends Controller
     {
         $user = Auth::user();
         $projects = $user->projects()
-            ->with(['kabupaten', 'sektor', 'lokasi', 'capexComponents', 'plComponents'])
+            ->with(['kabupaten', 'kecamatan', 'sektor', 'capexComponents', 'plComponents'])
             ->latest()
             ->get();
 
@@ -27,9 +27,8 @@ class ProjectController extends Controller
 
         $kabupatens = Kabupaten::orderBy('nama_kabupaten')->get();
         $sektors = Sektor::orderBy('nama_sektor')->get();
-        $lokasis = Lokasi::orderBy('nama')->get();
 
-        return view('operator.peluang_investasi.dashboard', compact('projects', 'recentProjects', 'kabupatens', 'sektors', 'lokasis'));
+        return view('operator.peluang_investasi.dashboard', compact('projects', 'recentProjects', 'kabupatens', 'sektors'));
     }
 
     /**
@@ -39,15 +38,14 @@ class ProjectController extends Controller
     {
         $user = Auth::user();
         $projects = $user->projects()
-            ->with(['kabupaten', 'sektor', 'lokasi', 'capexComponents', 'plComponents'])
+            ->with(['kabupaten', 'kecamatan', 'sektor', 'capexComponents', 'plComponents'])
             ->latest()
             ->get();
 
         $kabupatens = Kabupaten::orderBy('nama_kabupaten')->get();
         $sektors = Sektor::orderBy('nama_sektor')->get();
-        $lokasis = Lokasi::orderBy('nama')->get();
 
-        return view('operator.peluang_investasi.projects.index', compact('projects', 'kabupatens', 'sektors', 'lokasis'));
+        return view('operator.peluang_investasi.projects.index', compact('projects', 'kabupatens', 'sektors'));
     }
 
     /**
@@ -58,8 +56,9 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'nama_proyek' => 'required|string|max:255',
             'kabupaten_id' => 'nullable|exists:kabupaten,kab_id',
+            'kecamatan_id' => 'nullable|exists:kecamatan,id',
             'sektor_id' => 'nullable|exists:sektor,sektor_id',
-            'lokasi_id' => 'nullable|exists:lokasi,id',
+            'alamat_lokasi' => 'nullable|string',
             'deskripsi' => 'nullable|string',
             'tahun_awal' => 'required|integer|min:2000|max:2100',
             'jangka_waktu_tahun' => 'required|integer|min:1|max:50',
@@ -81,7 +80,7 @@ class ProjectController extends Controller
     {
         $this->authorizeProjectOwner($project);
         
-        $project->load(['kabupaten', 'sektor', 'lokasi', 'capexComponents', 'plComponents']);
+        $project->load(['kabupaten', 'kecamatan', 'sektor', 'capexComponents', 'plComponents']);
         return view('operator.peluang_investasi.projects.show', compact('project'));
     }
 
@@ -95,8 +94,9 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'nama_proyek' => 'required|string|max:255',
             'kabupaten_id' => 'nullable|exists:kabupaten,kab_id',
+            'kecamatan_id' => 'nullable|exists:kecamatan,id',
             'sektor_id' => 'nullable|exists:sektor,sektor_id',
-            'lokasi_id' => 'nullable|exists:lokasi,id',
+            'alamat_lokasi' => 'nullable|string',
             'deskripsi' => 'nullable|string',
             'tahun_awal' => 'required|integer|min:2000|max:2100',
             'jangka_waktu_tahun' => 'required|integer|min:1|max:50',
