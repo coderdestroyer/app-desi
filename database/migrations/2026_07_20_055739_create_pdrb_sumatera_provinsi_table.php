@@ -10,9 +10,9 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::create('pdrb_kabupaten', function (Blueprint $table) {
+        Schema::create('pdrb_sumatera_provinsi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kabupaten_id')->constrained('kabupaten', 'kab_id')->cascadeOnDelete();
+            $table->foreignId('provinsi_id')->constrained('provinsi', 'provinsi_id')->cascadeOnDelete();
             $table->foreignId('sektor_id')->constrained('sektor', 'sektor_id')->cascadeOnDelete();
             $table->integer('tahun');
             $table->decimal('nilai_pdrb', 20, 2)->default(0);
@@ -22,6 +22,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('pdrb_kabupaten');
+        Schema::dropIfExists('pdrb_sumatera_provinsi');
     }
 };

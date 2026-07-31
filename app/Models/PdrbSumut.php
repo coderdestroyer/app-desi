@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PdrbSumut extends Model
 {
-    protected $table='pdrb_sumut';
+    protected $table='pdrb_sumatera_provinsi';
 
     protected $primaryKey='pdrb_sumut_id';
 

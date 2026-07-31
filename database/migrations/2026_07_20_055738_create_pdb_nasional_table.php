@@ -10,18 +10,18 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::create('lokasi', function (Blueprint $table) {
+        Schema::create('pdb_nasional', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kabupaten_id')->nullable()->constrained('kabupaten', 'kab_id')->nullOnDelete();
-            $table->string('nama');
-            $table->decimal('latitude', 10, 8);
-            $table->decimal('longitude', 11, 8);
+            $table->string('kode_wilayah', 10)->default('00');
+            $table->foreignId('sektor_id')->constrained('sektor', 'sektor_id')->cascadeOnDelete();
+            $table->integer('tahun');
+            $table->decimal('nilai', 20, 2)->default(0);
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('lokasi');
+        Schema::dropIfExists('pdb_nasional');
     }
 };

@@ -28,9 +28,11 @@ class BaseAnalysisService
         int $tahun
     ): float {
 
-        return (float) PdrbKabupaten::where('kab_id',$kabId)
-            ->where('tahun',$tahun)
-            ->sum('nilai');
+        return (float) PdrbKabupaten::where(function ($q) use ($kabId) {
+                $q->where('kabupaten_id', $kabId)->orWhere('kab_id', $kabId);
+            })
+            ->where('tahun', $tahun)
+            ->sum('nilai_pdrb');
 
     }
 
@@ -42,9 +44,9 @@ class BaseAnalysisService
         int $tahun
     ): float {
 
-        return (float) PdrbSumut::where('provinsi_id',$provinsiId)
-            ->where('tahun',$tahun)
-            ->sum('nilai');
+        return (float) PdrbSumut::where('provinsi_id', $provinsiId)
+            ->where('tahun', $tahun)
+            ->sum('nilai_pdrb');
 
     }
 
@@ -57,8 +59,10 @@ class BaseAnalysisService
     ) {
 
         return PdrbKabupaten::with('sektor')
-            ->where('kab_id',$kabId)
-            ->where('tahun',$tahun)
+            ->where(function ($q) use ($kabId) {
+                $q->where('kabupaten_id', $kabId)->orWhere('kab_id', $kabId);
+            })
+            ->where('tahun', $tahun)
             ->get();
 
     }
@@ -72,9 +76,9 @@ class BaseAnalysisService
         int $tahun
     ) {
 
-        return PdrbSumut::where('provinsi_id',$provinsiId)
-            ->where('sektor_id',$sektorId)
-            ->where('tahun',$tahun)
+        return PdrbSumut::where('provinsi_id', $provinsiId)
+            ->where('sektor_id', $sektorId)
+            ->where('tahun', $tahun)
             ->first();
 
     }
@@ -88,9 +92,11 @@ class BaseAnalysisService
         int $tahun
     ) {
 
-        return PdrbKabupaten::where('kab_id',$kabId)
-            ->where('sektor_id',$sektorId)
-            ->where('tahun',$tahun)
+        return PdrbKabupaten::where(function ($q) use ($kabId) {
+                $q->where('kabupaten_id', $kabId)->orWhere('kab_id', $kabId);
+            })
+            ->where('sektor_id', $sektorId)
+            ->where('tahun', $tahun)
             ->first();
 
     }
@@ -152,7 +158,9 @@ class BaseAnalysisService
     )
     {
         return PdrbKabupaten::with('sektor')
-            ->where('kab_id', $kabId)
+            ->where(function ($q) use ($kabId) {
+                $q->where('kabupaten_id', $kabId)->orWhere('kab_id', $kabId);
+            })
             ->where('tahun', $tahun)
             ->get();
     }
