@@ -55,4 +55,8 @@ class Kabupaten extends Model
         return $this->hasMany(HasilTipologiKlassen::class,'kab_id');
     }
 
+    public function kecamatan()
+    {
+        return $this->hasMany(Kecamatan::class, 'kabupaten_id', 'kab_id');
+    }
 }
