@@ -64,7 +64,7 @@
             </div>
 
             <div id="adminProfile" class="border-b border-white/[0.16] group">
-                <button type="button" id="adminProfileToggle" class="w-full min-h-[82px] py-3.5 px-7 flex items-center gap-3.5 text-white bg-transparent border-0 cursor-pointer text-left hover:bg-white/[0.06]">
+                <button type="button" id="adminProfileToggle" class="w-full min-h-[82px] py-3.5 px-7 flex items-center gap-3.5 text-white bg-transparent border-0 cursor-pointer text-left hover:bg-white/[0.06] transition-colors">
                     <span class="w-12 h-12 shrink-0 block overflow-hidden p-0 rounded-full text-[#1c6744] bg-[#ffd457] border-2 border-white/[0.82] text-[15px] font-semibold">
                         <img src="{{ Auth::user()?->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()?->name ?? 'Siti') . '&background=FFD54F&color=145239' }}" alt="Profile" class="w-full h-full object-cover">
                     </span>
