@@ -17,7 +17,7 @@ class WilayahSeeder extends Seeder
 
     private function seedProvinsi(): void
     {
-        $file = database_path('data/provinsi_rows.csv');
+        $file = database_path('data/Sumatera_Provinsi.csv');
         if (!file_exists($file)) return;
 
         $handle = fopen($file, 'r');
@@ -29,6 +29,8 @@ class WilayahSeeder extends Seeder
             $batch[] = [
                 'provinsi_id' => (int) $row[0],
                 'nama_provinsi' => trim($row[1]),
+                'latitude' => isset($row[2]) && $row[2] !== '' ? (float) $row[2] : null,
+                'longitude' => isset($row[3]) && $row[3] !== '' ? (float) $row[3] : null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -46,7 +48,7 @@ class WilayahSeeder extends Seeder
 
     private function seedKabupaten(): void
     {
-        $file = database_path('data/kabupaten_rows.csv');
+        $file = database_path('data/Sumatera_Kabupaten.csv');
         if (!file_exists($file)) return;
 
         $handle = fopen($file, 'r');
@@ -59,6 +61,8 @@ class WilayahSeeder extends Seeder
                 'kab_id' => (int) $row[0],
                 'provinsi_id' => (int) $row[1],
                 'nama_kabupaten' => trim($row[2]),
+                'latitude' => isset($row[3]) && $row[3] !== '' ? (float) $row[3] : null,
+                'longitude' => isset($row[4]) && $row[4] !== '' ? (float) $row[4] : null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -76,7 +80,7 @@ class WilayahSeeder extends Seeder
 
     private function seedKecamatan(): void
     {
-        $file = database_path('data/kecamatan_rows.csv');
+        $file = database_path('data/Sumatera_Kecamatan.csv');
         if (!file_exists($file)) return;
 
         // Load valid kab_id set to ensure FK integrity
@@ -115,7 +119,7 @@ class WilayahSeeder extends Seeder
 
     private function seedKelurahanDesa(): void
     {
-        $file = database_path('data/kelurahan_desa_rows.csv');
+        $file = database_path('data/Sumatera_Kelurahan_Desa.csv');
         if (!file_exists($file)) return;
 
         // Load valid kec_id set to ensure FK integrity

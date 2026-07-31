@@ -14,7 +14,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('action');
+            $table->string('module')->nullable();
             $table->text('description')->nullable();
+            $table->text('desc')->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->timestamps();

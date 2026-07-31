@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PdrbKabupaten extends Model
 {
-    protected $table='pdrb_kabupaten';
-
-    protected $primaryKey='pdrb_kab_id';
+    protected $table='pdrb_sumatera_kabupaten';
 
     public $timestamps=false;
 
@@ -16,7 +14,7 @@ class PdrbKabupaten extends Model
 
     public function kabupaten()
     {
-        return $this->belongsTo(Kabupaten::class,'kab_id');
+        return $this->belongsTo(Kabupaten::class,'kabupaten_id','kab_id');
     }
 
     public function sektor()

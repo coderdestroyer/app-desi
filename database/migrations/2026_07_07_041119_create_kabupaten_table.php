@@ -14,6 +14,8 @@ return new class extends Migration
             $table->id('kab_id');
             $table->foreignId('provinsi_id')->constrained('provinsi', 'provinsi_id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('nama_kabupaten', 255)->index();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
             $table->timestamps();
         });
     }
