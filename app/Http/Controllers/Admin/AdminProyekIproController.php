@@ -15,7 +15,7 @@ class AdminProyekIproController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Project::with(['user', 'kabupaten', 'sektor', 'lokasi', 'capexComponents', 'plComponents'])
+        $query = Project::with(['user', 'kabupaten', 'kecamatan', 'sektor', 'capexComponents', 'plComponents'])
             ->latest();
 
         if ($request->filled('search')) {
@@ -49,8 +49,8 @@ class AdminProyekIproController extends Controller
         $project = Project::with([
             'user', 
             'kabupaten', 
+            'kecamatan',
             'sektor', 
-            'lokasi', 
             'capexComponents', 
             'plComponents.yearlyData'
         ])->findOrFail($id);

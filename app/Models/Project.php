@@ -14,8 +14,9 @@ class Project extends Model
     protected $fillable = [
         'user_id',
         'kabupaten_id',
+        'kecamatan_id',
         'sektor_id',
-        'lokasi_id',
+        'alamat_lokasi',
         'nama_proyek',
         'deskripsi',
         'tahun_awal',
@@ -42,14 +43,14 @@ class Project extends Model
         return $this->belongsTo(Kabupaten::class, 'kabupaten_id', 'kab_id');
     }
 
+    public function kecamatan(): BelongsTo
+    {
+        return $this->belongsTo(Kecamatan::class, 'kecamatan_id', 'id');
+    }
+
     public function sektor(): BelongsTo
     {
         return $this->belongsTo(Sektor::class, 'sektor_id', 'sektor_id');
-    }
-
-    public function lokasi(): BelongsTo
-    {
-        return $this->belongsTo(Lokasi::class, 'lokasi_id', 'id');
     }
 
     public function capexComponents(): HasMany

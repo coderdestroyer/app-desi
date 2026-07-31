@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Lokasi;
+use App\Models\Kabupaten;
 use Illuminate\Support\Facades\DB;
 
 class InvestmentMapController extends Controller
@@ -12,7 +12,7 @@ class InvestmentMapController extends Controller
      */
     public function index()
     {
-        $lokasi = Lokasi::orderBy('nama')->get();
+        $lokasi = Kabupaten::whereNotNull('latitude')->orderBy('nama_kabupaten')->get();
 
         return view('landing.map', compact('lokasi'));
     }
