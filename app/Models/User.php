@@ -130,4 +130,48 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Project::class);
     }
+
+    public function wilayahScopes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserWilayahScope::class);
+    }
+
+    /**
+     * Cek apakah user berhak mengelola kabupaten tertentu (langsung atau via provinsi induk)
+     */
+    public function canAccessKabupaten(int $kabId): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        $kabupaten = Kabupaten::find($kabId);
+        if (!$kabupaten) {
+            return false;
+        }
+
+        return $this->wilayahScopes()
+            ->where(function ($q) use ($kabupaten) {
+                $q->where('kabupaten_id', $kabupaten->kab_id)
+                  ->orWhere(function ($q2) use ($kabupaten) {
+                      $q2->where('provinsi_id', $kabupaten->provinsi_id)
+                         ->whereNull('kabupaten_id');
+                  });
+            })
+            ->exists();
+    }
+
+    /**
+     * Cek apakah user berhak mengelola provinsi tertentu
+     */
+    public function canAccessProvinsi(int $provinsiId): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $this->wilayahScopes()
+            ->where('provinsi_id', $provinsiId)
+            ->exists();
+    }
 }
