@@ -376,6 +376,63 @@
                 </div>
             </div>
 
+            {{-- REGIONAL SCOPE SELECTION --}}
+            <div x-data="{ scopeType: '{{ old('scope_type', 'kabupaten') }}' }" class="space-y-3 pt-1 pb-2">
+                <div class="p-3.5 rounded-2xl bg-[#EEF8F2] border border-[#CFE3D5]">
+                    <label class="block text-xs font-bold text-[#1E5E3F] uppercase tracking-wider mb-1">
+                        Pengajuan Wilayah Kerja (Regional Scope) <span class="text-rose-500">*</span>
+                    </label>
+                    <p class="text-[11px] text-slate-600 mb-2.5">
+                        Pilih alokasi tingkat wilayah kerja data PDRB yang Anda ajukan ke Administrator:
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-2 mb-2.5">
+                        <label class="flex items-center gap-2 p-2 rounded-xl border bg-white cursor-pointer text-xs font-semibold"
+                            :class="scopeType === 'provinsi' ? 'border-[#1E5E3F] text-[#1E5E3F] ring-1 ring-[#1E5E3F]' : 'border-gray-200 text-gray-600'">
+                            <input type="radio" name="scope_type" value="provinsi" x-model="scopeType" class="text-[#1E5E3F] focus:ring-[#1E5E3F]">
+                            <span>Provinsi (+ Sub-Kab)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl border bg-white cursor-pointer text-xs font-semibold"
+                            :class="scopeType === 'kabupaten' ? 'border-[#1E5E3F] text-[#1E5E3F] ring-1 ring-[#1E5E3F]' : 'border-gray-200 text-gray-600'">
+                            <input type="radio" name="scope_type" value="kabupaten" x-model="scopeType" class="text-[#1E5E3F] focus:ring-[#1E5E3F]">
+                            <span>Kabupaten / Kota</span>
+                        </label>
+                    </div>
+
+                    {{-- PROVINSI SELECT --}}
+                    <div x-show="scopeType === 'provinsi'" class="space-y-1">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Pilih Provinsi</label>
+                        <select name="provinsi_id" class="w-full rounded-xl border-gray-300 focus:border-[#1E5E3F] focus:ring-[#1E5E3F] text-xs py-2 bg-white">
+                            <option value="">-- Pilih Provinsi --</option>
+                            @foreach($provinsis ?? [] as $prov)
+                                <option value="{{ $prov->provinsi_id }}" @selected(old('provinsi_id') == $prov->provinsi_id)>
+                                    {{ $prov->nama_provinsi }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('provinsi_id')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- KABUPATEN SELECT --}}
+                    <div x-show="scopeType === 'kabupaten'" class="space-y-1">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Pilih Kabupaten / Kota</label>
+                        <select name="kabupaten_id" class="w-full rounded-xl border-gray-300 focus:border-[#1E5E3F] focus:ring-[#1E5E3F] text-xs py-2 bg-white">
+                            <option value="">-- Pilih Kabupaten/Kota --</option>
+                            @foreach($kabupatens ?? [] as $kab)
+                                <option value="{{ $kab->kab_id }}" @selected(old('kabupaten_id') == $kab->kab_id)>
+                                    {{ $kab->nama_kabupaten }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('kabupaten_id')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
             {{-- REMEMBER & FORGOT --}}
             <div class="flex items-center justify-between pt-2 pb-4 text-xs font-semibold text-gray-400">
                 <label

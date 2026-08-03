@@ -29,4 +29,24 @@ class UserWilayahScope extends Model
     {
         return $this->belongsTo(Kabupaten::class, 'kabupaten_id', 'kab_id');
     }
+
+    public static function ensureTableExists(): bool
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('user_wilayah_scopes')) {
+            try {
+                \Illuminate\Support\Facades\Schema::create('user_wilayah_scopes', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+                    $table->foreignId('provinsi_id')->nullable()->constrained('provinsi', 'provinsi_id')->cascadeOnDelete();
+                    $table->foreignId('kabupaten_id')->nullable()->constrained('kabupaten', 'kab_id')->cascadeOnDelete();
+                    $table->timestamps();
+                    $table->unique(['user_id', 'provinsi_id', 'kabupaten_id']);
+                });
+                return true;
+            } catch (\Throwable $e) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

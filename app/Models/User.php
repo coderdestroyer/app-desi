@@ -145,6 +145,10 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('user_wilayah_scopes')) {
+            return true;
+        }
+
         $kabupaten = Kabupaten::find($kabId);
         if (!$kabupaten) {
             return false;
@@ -167,6 +171,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function canAccessProvinsi(int $provinsiId): bool
     {
         if ($this->isAdmin()) {
+            return true;
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('user_wilayah_scopes')) {
             return true;
         }
 
