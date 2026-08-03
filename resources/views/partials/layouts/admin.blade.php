@@ -121,6 +121,16 @@
 
                 <li class="mb-1.5">
                     <a
+                        href="{{ route('admin.pdrb.index') }}"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 {{ request()->is('admin/pdrb*') ? 'bg-[#e5f1e8] text-green-dark' : 'text-navy hover:bg-green-pale hover:text-green-dark' }}"
+                    >
+                        <i class="fa-solid fa-coins w-[22px] text-center text-lg"></i>
+                        <span>Data PDRB Daerah</span>
+                    </a>
+                </li>
+
+                <li class="mb-1.5">
+                    <a
                         href="{{ route('admin.data-wilayah.index') }}"
                         class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 {{ request()->is('admin/data-wilayah*') ? 'bg-[#e5f1e8] text-green-dark' : 'text-navy hover:bg-green-pale hover:text-green-dark' }}"
                     >

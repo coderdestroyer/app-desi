@@ -195,6 +195,16 @@
 
                     <li class="mb-[5px]">
                         <a
+                            href="{{ route('admin.pdrb.index') }}"
+                            class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('admin.pdrb.*') ? 'active' : '' }}"
+                        >
+                            <i class="fa-solid fa-coins w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
+                            <span>Data PDRB Daerah</span>
+                        </a>
+                    </li>
+
+                    <li class="mb-[5px]">
+                        <a
                             href="{{ route('admin.data-wilayah.index') }}"
                             class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('admin.data-wilayah.*') ? 'active' : '' }}"
                         >
