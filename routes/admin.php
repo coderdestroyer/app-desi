@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\MoneyCurrencyController;
 use App\Http\Controllers\Admin\DataKbkiController;
 use App\Http\Controllers\Admin\AdminProyekIproController;
+use App\Http\Controllers\Admin\AdminPdrbController;
 
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
@@ -177,4 +178,15 @@ Route::middleware(['auth', 'role:admin'])
             '/money-currency/convert',
             [MoneyCurrencyController::class, 'convert']
         )->name('money-currency.convert');
-                    });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kelola Data PDRB Daerah (Admin Full Access 33 Kab/Kota)
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/pdrb', [AdminPdrbController::class, 'index'])->name('pdrb.index');
+        Route::post('/pdrb/init', [AdminPdrbController::class, 'init'])->name('pdrb.init');
+        Route::get('/pdrb/entry/{kabupaten_id}/{tahun}', [AdminPdrbController::class, 'entry'])->name('pdrb.entry');
+        Route::post('/pdrb/save-entry', [AdminPdrbController::class, 'saveEntry'])->name('pdrb.save-entry');
+        Route::delete('/pdrb/group/{kabupaten_id}/{tahun}', [AdminPdrbController::class, 'destroyGroup'])->name('pdrb.destroy-group');
+    });
