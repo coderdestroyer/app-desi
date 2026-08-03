@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('partials.layouts.admin')
 
 @section('title', 'Dokumen Kelayakan IPRO - Admin')
 
