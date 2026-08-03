@@ -36,461 +36,143 @@
         'resources/js/app.js'
     ])
 
-    <style>
-        :root {
-            --green-dark: #255d3e;
-            --green-main: #2f6b48;
-            --green-soft: #eaf7ef;
-            --green-pale: #f6fbf7;
-            --yellow-main: #f4cf63;
-            --yellow-soft: #fff8e6;
-            --navy: #14213d;
-            --text-dark: #243042;
-            --text-soft: #667085;
-            --border-soft: #e5e7eb;
-            --bg-main: #f8faf8;
-            --white: #ffffff;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg-main);
-            color: var(--text-dark);
-        }
-
-        body {
-            min-height: 100vh;
-        }
-
-        .admin-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .admin-sidebar {
-            width: 290px;
-            background: var(--white);
-            border-right: 1px solid var(--border-soft);
-            padding: 24px 22px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            overflow-y: auto;
-            z-index: 20;
-        }
-
-        .admin-logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 26px;
-        }
-
-        .admin-logo img {
-            width: 160px;
-            height: auto;
-            object-fit: contain;
-            display: block;
-        }
-
-        .admin-profile {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 28px;
-            padding: 12px 0 6px;
-        }
-
-        .admin-avatar {
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            background: var(--green-dark);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .admin-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #101828;
-            line-height: 1.3;
-            margin-bottom: 2px;
-        }
-
-        .admin-role {
-            font-size: 14px;
-            font-weight: 400;
-            color: var(--text-soft);
-        }
-
-        .menu-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--navy);
-            margin: 22px 0 12px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 6px;
-        }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            text-decoration: none;
-            color: var(--navy);
-            padding: 14px 14px;
-            border-radius: 16px;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .sidebar-link i {
-            width: 22px;
-            text-align: center;
-            font-size: 18px;
-        }
-
-        .sidebar-link:hover {
-            background: var(--green-pale);
-            color: var(--green-dark);
-        }
-
-        .sidebar-link.active {
-            background: #e5f1e8;
-            color: var(--green-dark);
-        }
-
-        .admin-main {
-            margin-left: 290px;
-            width: calc(100% - 290px);
-            min-height: 100vh;
-            background: var(--bg-main);
-        }
-
-        @media (max-width: 992px) {
-            .admin-wrapper {
-                flex-direction: column;
-            }
-
-            .admin-sidebar {
-                position: relative;
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid var(--border-soft);
-            }
-
-            .admin-main {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-
-        .logout-sidebar-area {
-            margin-top: 22px;
-            padding-top: 18px;
-            border-top: 1px solid #edf2f7;
-        }
-
-        .logout-form {
-            margin: 0;
-        }
-
-        .logout-sidebar-button {
-            width: 100%;
-            border: none;
-            background: transparent;
-            font-family: 'Poppins', sans-serif;
-            cursor: pointer;
-            text-align: left;
-            color: #dc2626 !important;
-        }
-
-        .logout-sidebar-button i,
-        .logout-sidebar-button span {
-            color: #dc2626 !important;
-        }
-
-        .logout-sidebar-button:hover {
-            background: #fee2e2 !important;
-            color: #b91c1c !important;
-        }
-
-        .logout-sidebar-button:hover i,
-        .logout-sidebar-button:hover span {
-            color: #b91c1c !important;
-        }
-
-        /* POPUP LOGOUT */
-        .logout-confirm-modal[hidden] {
-            display: none !important;
-        }
-
-        .logout-confirm-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .logout-confirm-backdrop {
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(3px);
-        }
-
-        .logout-confirm-card {
-            position: relative;
-            width: min(430px, 100%);
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 30px 28px;
-            text-align: center;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
-            animation: logoutPopupIn 0.18s ease-out;
-        }
-
-        .logout-confirm-icon {
-            width: 72px;
-            height: 72px;
-            margin: 0 auto 18px;
-            border-radius: 22px;
-            background: #fee2e2;
-            color: #dc2626;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-        }
-
-        .logout-confirm-card h3 {
-            margin: 0;
-            color: #14213d;
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .logout-confirm-card p {
-            margin: 12px 0 0;
-            color: #667085;
-            font-size: 14px;
-            line-height: 1.7;
-        }
-
-        .logout-confirm-actions {
-            margin-top: 26px;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .logout-cancel-button,
-        .logout-submit-button {
-            min-width: 130px;
-            height: 46px;
-            border-radius: 14px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .logout-cancel-button {
-            border: 1px solid #d9dee8;
-            background: #ffffff;
-            color: #344054;
-        }
-
-        .logout-cancel-button:hover {
-            background: #f8fafc;
-        }
-
-        .logout-submit-button {
-            border: none;
-            background: #dc2626;
-            color: #ffffff;
-            box-shadow: 0 12px 28px rgba(220, 38, 38, 0.22);
-        }
-
-        .logout-submit-button:hover {
-            background: #b91c1c;
-        }
-
-        @keyframes logoutPopupIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px) scale(0.97);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-    </style>
 </head>
 
-<body>
-    <div class="admin-wrapper">
-        <aside class="admin-sidebar">
-            <div class="admin-logo">
+<body class="font-['Poppins',sans-serif] bg-bg-main text-text-dark min-h-screen m-0 p-0">
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        <aside class="w-full lg:w-[290px] bg-white border-b lg:border-b-0 lg:border-r border-border-soft py-6 px-[22px] lg:fixed relative top-0 left-0 lg:bottom-0 lg:overflow-y-auto z-20">
+            <div class="flex items-center mb-[26px]">
                 <img
                     src="{{ asset('images/logo-dpmptsp.png') }}"
                     alt="Logo DPMPTSP"
+                    class="w-[160px] h-auto object-contain block"
                 >
             </div>
 
-            <div class="admin-profile">
-                <div class="admin-avatar">
+            <div class="flex items-center gap-3.5 mb-7 py-3 pb-1.5">
+                <div class="w-[58px] h-[58px] rounded-full bg-green-dark text-white flex items-center justify-center text-2xl font-bold shrink-0">
                     {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
                 </div>
 
                 <div>
-                    <div class="admin-name">
+                    <div class="text-[15px] font-bold text-[#101828] leading-[1.3] mb-0.5">
                         {{ auth()->user()->name ?? 'Admin' }}
                     </div>
-                    <div class="admin-role">
+                    <div class="text-sm font-normal text-text-soft">
                         {{ ucfirst(auth()->user()->role ?? 'admin') }}
                     </div>
                 </div>
             </div>
 
-            <div class="menu-title">Menu Utama</div>
-            <ul class="sidebar-menu">
-                <li>
+            <div class="text-sm font-bold text-navy mt-[22px] mb-3">Menu Utama</div>
+            <ul class="list-none m-0 p-0">
+                <li class="mb-1.5">
                     <a
                         href="{{ route('home') }}"
-                        class="sidebar-link"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 text-navy hover:bg-green-pale hover:text-green-dark {{ request()->routeIs('home') ? 'bg-[#e5f1e8] text-green-dark' : '' }}"
                     >
-                        <i class="fa-solid fa-house"></i>
+                        <i class="fa-solid fa-house w-[22px] text-center text-lg"></i>
                         <span>Beranda</span>
                     </a>
                 </li>
 
-                <li>
+                <li class="mb-1.5">
                     <a
                         href="{{ route('about') }}"
-                        class="sidebar-link"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 text-navy hover:bg-green-pale hover:text-green-dark {{ request()->routeIs('about') ? 'bg-[#e5f1e8] text-green-dark' : '' }}"
                     >
-                        <i class="fa-solid fa-circle-info"></i>
+                        <i class="fa-solid fa-circle-info w-[22px] text-center text-lg"></i>
                         <span>Tentang</span>
                     </a>
                 </li>
             </ul>
 
-            <div class="menu-title">Menu Admin</div>
-            <ul class="sidebar-menu">
-                <li>
+            <div class="text-sm font-bold text-navy mt-[22px] mb-3">Menu Admin</div>
+            <ul class="list-none m-0 p-0">
+                <li class="mb-1.5">
                     <a
                         href="{{ route('admin.dashboard') }}"
-                        class="sidebar-link {{ request()->is('admin/dashboard*') ? 'active' : '' }}"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 {{ request()->is('admin/dashboard*') ? 'bg-[#e5f1e8] text-green-dark' : 'text-navy hover:bg-green-pale hover:text-green-dark' }}"
                     >
-                        <i class="fa-solid fa-chart-line"></i>
+                        <i class="fa-solid fa-chart-line w-[22px] text-center text-lg"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
 
-                <li>
+                <li class="mb-1.5">
                     <a
                         href="{{ route('admin.pengguna.index') }}"
-                        class="sidebar-link {{ request()->is('admin/pengguna*') ? 'active' : '' }}"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 {{ request()->is('admin/pengguna*') ? 'bg-[#e5f1e8] text-green-dark' : 'text-navy hover:bg-green-pale hover:text-green-dark' }}"
                     >
-                        <i class="fa-solid fa-users"></i>
+                        <i class="fa-solid fa-users w-[22px] text-center text-lg"></i>
                         <span>Pengguna</span>
                     </a>
                 </li>
 
-                <li>
+                <li class="mb-1.5">
                     <a
                         href="{{ route('admin.proyek-ipro.index') }}"
-                        class="sidebar-link {{ request()->is('admin/proyek-ipro*') ? 'active' : '' }}"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 {{ request()->is('admin/proyek-ipro*') ? 'bg-[#e5f1e8] text-green-dark' : 'text-navy hover:bg-green-pale hover:text-green-dark' }}"
                     >
-                        <i class="fa-solid fa-file-invoice-dollar text-[#0F8A5F]"></i>
+                        <i class="fa-solid fa-file-invoice-dollar w-[22px] text-center text-lg"></i>
                         <span>Dokumen IPRO</span>
                     </a>
                 </li>
 
-                <li>
+                <li class="mb-1.5">
                     <a
                         href="{{ route('admin.data-wilayah.index') }}"
-                        class="sidebar-link {{ request()->is('admin/data-wilayah*') ? 'active' : '' }}"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 {{ request()->is('admin/data-wilayah*') ? 'bg-[#e5f1e8] text-green-dark' : 'text-navy hover:bg-green-pale hover:text-green-dark' }}"
                     >
-                        <i class="fa-solid fa-map"></i>
+                        <i class="fa-solid fa-map w-[22px] text-center text-lg"></i>
                         <span>Data Wilayah</span>
                     </a>
                 </li>
 
-                <li>
+                <li class="mb-1.5">
                     <a
                         href="{{ route('admin.data-kbli.index') }}"
-                        class="sidebar-link {{ request()->is('admin/data-kbli*') ? 'active' : '' }}"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 {{ request()->is('admin/data-kbli*') ? 'bg-[#e5f1e8] text-green-dark' : 'text-navy hover:bg-green-pale hover:text-green-dark' }}"
                     >
-                        <i class="fa-solid fa-table-cells"></i>
+                        <i class="fa-solid fa-table-cells w-[22px] text-center text-lg"></i>
                         <span>Kode KBLI</span>
                     </a>
                 </li>
 
-                <li>
+                <li class="mb-1.5">
                     <a
                         href="{{ route('admin.hs-code.index') }}"
-                        class="sidebar-link {{ request()->is('admin/hs-code*') ? 'active' : '' }}"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 {{ request()->is('admin/hs-code*') ? 'bg-[#e5f1e8] text-green-dark' : 'text-navy hover:bg-green-pale hover:text-green-dark' }}"
                     >
-                        <i class="fa-solid fa-qrcode"></i>
+                        <i class="fa-solid fa-qrcode w-[22px] text-center text-lg"></i>
                         <span>Kode HS</span>
                     </a>
-                    <div class="logout-sidebar-area">
+                    <div class="mt-[22px] pt-[18px] border-t border-[#edf2f7]">
                         <form
                             id="logoutForm"
                             action="{{ route('logout') }}"
                             method="POST"
-                            class="logout-form"
+                            class="m-0"
                         >
                             @csrf
 
                             <button
                                 type="button"
                                 id="openLogoutModal"
-                                class="sidebar-link logout-sidebar-button"
+                                class="w-full flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 text-red-600 hover:bg-red-100 hover:text-red-700 border-0 bg-transparent cursor-pointer text-left"
                             >
-                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <i class="fa-solid fa-right-from-bracket w-[22px] text-center text-lg"></i>
                                 <span>Keluar</span>
                             </button>
                         </form>
                     </div>
                 </li>
-                
-                <li style="margin-top: 32px;">
-                    <form method="POST" action="{{ route('logout') }}" style="margin: 0; padding: 0;">
+
+                <li class="mt-8">
+                    <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
                         @csrf
-                        <button type="submit" class="sidebar-link" style="width: 100%; text-align: left; background: #fee2e2; border: none; cursor: pointer; color: #b91c1c;">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <button type="submit" class="w-full flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 text-red-700 bg-red-100 border-0 cursor-pointer text-left hover:bg-red-200">
+                            <i class="fa-solid fa-arrow-right-from-bracket w-[22px] text-center text-lg"></i>
                             <span>Logout</span>
                         </button>
                     </form>
@@ -498,50 +180,51 @@
             </ul>
         </aside>
 
-        <main class="admin-main">
+        <main class="lg:ml-[290px] w-full lg:w-[calc(100%-290px)] min-h-screen bg-bg-main">
             @yield('content')
         </main>
     </div>
+
     <div
-    id="logoutConfirmModal"
-    class="logout-confirm-modal"
-    hidden
->
-    <div
-        class="logout-confirm-backdrop"
-        data-close-logout
-    ></div>
+        id="logoutConfirmModal"
+        class="fixed inset-0 z-[99999] flex items-center justify-center p-6 [&[hidden]]:!hidden"
+        hidden
+    >
+        <div
+            class="absolute inset-0 bg-[#0f172a]/[0.45] backdrop-blur-[3px]"
+            data-close-logout
+        ></div>
 
-    <div class="logout-confirm-card">
-        <div class="logout-confirm-icon">
-            <i class="fa-solid fa-right-from-bracket"></i>
-        </div>
+        <div class="relative w-[min(430px,100%)] bg-white rounded-[24px] p-[30px_28px] text-center border border-border-soft shadow-[0_30px_80px_rgba(15,23,42,0.24)] animate-modalAppear">
+            <div class="w-[72px] h-[72px] mx-auto mb-[18px] rounded-[22px] bg-red-100 text-red-600 flex items-center justify-center text-3xl">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
 
-        <h3>Keluar dari akun?</h3>
+            <h3 class="m-0 text-navy text-[22px] font-bold tracking-[-0.02em]">Keluar dari akun?</h3>
 
-        <p>
-            Kamu akan keluar dari halaman admin dan perlu login kembali untuk mengakses dashboard.
-        </p>
+            <p class="mt-3 mb-0 text-text-soft text-sm leading-[1.7]">
+                Kamu akan keluar dari halaman admin dan perlu login kembali untuk mengakses dashboard.
+            </p>
 
-        <div class="logout-confirm-actions">
-            <button
-                type="button"
-                class="logout-cancel-button"
-                data-close-logout
-            >
-                Batal
-            </button>
+            <div class="mt-[26px] flex justify-center gap-3">
+                <button
+                    type="button"
+                    class="min-w-[130px] h-[46px] rounded-[14px] text-sm font-semibold cursor-pointer border border-[#d9dee8] bg-white text-[#344054] hover:bg-[#f8fafc]"
+                    data-close-logout
+                >
+                    Batal
+                </button>
 
-            <button
-                type="button"
-                id="confirmLogoutButton"
-                class="logout-submit-button"
-            >
-                Ya, Keluar
-            </button>
+                <button
+                    type="button"
+                    id="confirmLogoutButton"
+                    class="min-w-[130px] h-[46px] rounded-[14px] text-sm font-semibold cursor-pointer border-0 bg-red-600 text-white shadow-[0_12px_28px_rgba(220,38,38,0.22)] hover:bg-red-700"
+                >
+                    Ya, Keluar
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

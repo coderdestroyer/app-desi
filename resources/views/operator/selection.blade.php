@@ -23,7 +23,7 @@
 
         <div class="relative z-10 text-right hidden md:block">
             <span class="text-xs uppercase font-bold tracking-wider text-[#FFD54F] block mb-1">Tanggal Sistem</span>
-            <span class="text-2xl font-black text-white">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
+            <span class="text-2xl font-black text-white">{{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</span>
         </div>
     </div>
 

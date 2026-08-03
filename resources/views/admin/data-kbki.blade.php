@@ -63,64 +63,12 @@
         $selectedSource = old('sumber_sheet', $isEdit ? $editData->sumber_sheet : 'Input Web');
         $selectedNote = old('catatan', $isEdit ? $editData->catatan : '');
         $selectedStatus = old('status', $isEdit ? $editData->status : 'Aktif');
+        $editQueryParams = array_merge(request()->except(['edit', 'mode']), ['mode' => 'edit']);
+        $editBaseUrl = route('admin.data-kbki.index', $editQueryParams) . '&edit=';
+        $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
     @endphp
 
-    @push('styles')
-        <style>
-            .kbki-clamp-2 {
-                display: -webkit-box;
-                -webkit-box-orient: vertical;
-                -webkit-line-clamp: 2;
-                overflow: hidden;
-            }
 
-            .kbki-tree-cell {
-                position: relative;
-            }
-
-            .kbki-tree-line {
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                width: 1px;
-                background: #dbe3ec;
-            }
-
-            .kbki-tree-elbow {
-                position: absolute;
-                top: 50%;
-                height: 1px;
-                background: #dbe3ec;
-            }
-
-            [data-kbki-row][hidden] {
-                display: none !important;
-            }
-
-            #adminKbkiTableWrapper {
-                overflow-x: auto;
-            }
-
-            #adminKbkiTable {
-                min-width: 1260px;
-            }
-
-            .kbki-section-focus {
-                animation: kbkiSectionFocus 1.6s ease;
-            }
-
-            @keyframes kbkiSectionFocus {
-                0%, 100% {
-                    box-shadow: inset 0 0 0 0 rgba(5, 150, 105, 0);
-                    background: rgba(248, 250, 252, 0.8);
-                }
-                35%, 70% {
-                    box-shadow: inset 5px 0 0 0 rgb(5, 150, 105);
-                    background: rgba(209, 250, 229, 0.75);
-                }
-            }
-        </style>
-    @endpush
 
     <div class="min-h-screen bg-[#f7f9fc] p-4 sm:p-6 lg:p-8">
         <section class="rounded-2xl bg-gradient-to-r from-[#145239] via-[#0E8F62] to-[#1E5D41] p-6 shadow-lg sm:p-7 lg:p-8">
@@ -350,8 +298,8 @@
                 </div>
             </header>
 
-            <div id="adminKbkiTableWrapper">
-                <table id="adminKbkiTable" class="w-full border-collapse text-left">
+            <div id="adminKbkiTableWrapper" class="overflow-x-auto">
+                <table id="adminKbkiTable" class="w-full border-collapse text-left min-w-[1260px] [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_td]:!table-cell [&_th]:!whitespace-nowrap [&_tr[hidden]]:!hidden">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
                             <th class="w-[250px] px-5 py-3">Struktur</th>
@@ -381,12 +329,12 @@
                                 @if ($hierarchyMode && $level > 1) hidden @endif
                                 class="transition {{ $level === 1 ? 'bg-slate-50/80 hover:bg-emerald-50/60' : 'hover:bg-slate-50/80' }}"
                             >
-                                <td class="kbki-tree-cell px-5 py-4">
+                                <td class="relative px-5 py-4">
                                     @for ($treeLevel = 1; $treeLevel < $level; $treeLevel++)
-                                        <span class="kbki-tree-line" style="left: {{ 22 + (($treeLevel - 1) * 28) }}px"></span>
+                                        <span class="absolute top-0 bottom-0 w-[1px] bg-[#dbe3ec]" style="left: {{ 22 + (($treeLevel - 1) * 28) }}px"></span>
                                     @endfor
                                     @if ($level > 1)
-                                        <span class="kbki-tree-elbow" style="left: {{ 22 + (($level - 2) * 28) }}px; width: 20px"></span>
+                                        <span class="absolute top-1/2 h-[1px] bg-[#dbe3ec]" style="left: {{ 22 + (($level - 2) * 28) }}px; width: 20px"></span>
                                     @endif
                                     <div class="relative flex items-center gap-2" style="padding-left: {{ $indent }}px">
                                         @if ($hasChildren && $hierarchyMode)
@@ -415,7 +363,7 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <div class="kbki-clamp-2 font-bold leading-6 text-slate-700" title="{{ $item->judul }}">
+                                    <div class="line-clamp-2 font-bold leading-6 text-slate-700" title="{{ $item->judul }}">
                                         {{ $item->judul }}
                                     </div>
                                     @if ($item->catatan)
@@ -439,7 +387,7 @@
                                 <td class="px-4 py-4">
                                     <div class="flex items-center justify-center gap-2">
                                         <a
-                                            href="{{ route('admin.data-kbki.index', array_merge(request()->query(), ['edit' => $item->id, 'mode' => 'edit'])) }}"
+                                            href="{{ $editBaseUrl }}{{ $item->id }}"
                                             title="Edit KBKI"
                                             class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
                                         >
@@ -449,7 +397,7 @@
                                             type="button"
                                             title="Hapus KBKI"
                                             data-delete-kbki
-                                            data-delete-url="{{ route('admin.data-kbki.destroy', $item->id) }}"
+                                            data-delete-url="{{ str_replace('PLACEHOLDER', $item->id, $deleteBaseUrl) }}"
                                             data-delete-code="{{ $item->kode }}"
                                             data-delete-title="{{ $item->judul }}"
                                             data-delete-children="{{ (int) $item->child_count }}"
@@ -902,10 +850,10 @@
                     }
 
                     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    row.classList.add('kbki-section-focus');
+                    row.classList.add('animate-kbkiSectionFocus');
 
                     window.setTimeout(function () {
-                        row.classList.remove('kbki-section-focus');
+                        row.classList.remove('animate-kbkiSectionFocus');
                     }, 1600);
                 });
 

@@ -36,63 +36,7 @@
         ];
     @endphp
 
-    @push('styles')
-        <style>
-            #adminWilayahTableCard {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                position: relative !important;
-                width: 100% !important;
-                height: auto !important;
-                min-height: 100px !important;
-                overflow: hidden !important;
-                transform: none !important;
-            }
 
-            #adminWilayahTableWrapper {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                width: 100% !important;
-                overflow-x: auto !important;
-                overflow-y: visible !important;
-            }
-
-            #adminWilayahTable {
-                display: table !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                width: 100% !important;
-                min-width: 1150px !important;
-                border-collapse: collapse !important;
-                table-layout: auto !important;
-            }
-
-            #adminWilayahTable thead {
-                display: table-header-group !important;
-            }
-
-            #adminWilayahTable tbody {
-                display: table-row-group !important;
-            }
-
-            #adminWilayahTable tr {
-                display: table-row !important;
-            }
-
-            #adminWilayahTable th,
-            #adminWilayahTable td {
-                display: table-cell !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
-
-            #adminWilayahTable th {
-                white-space: nowrap !important;
-            }
-        </style>
-    @endpush
 
     <div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8">
         <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 shadow-lg md:p-8">
@@ -329,7 +273,7 @@
 
         <section
             id="adminWilayahTableCard"
-            class="mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
+            class="!block !visible !opacity-100 !relative !w-full !min-h-[100px] !h-auto !overflow-hidden !transform-none mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
         >
             <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
                 <div>
@@ -355,10 +299,10 @@
                 </div>
             </header>
 
-            <div id="adminWilayahTableWrapper">
+            <div id="adminWilayahTableWrapper" class="!block !visible !opacity-100 !w-full !overflow-x-auto !overflow-y-visible">
                 <table
                     id="adminWilayahTable"
-                    class="w-full min-w-[1150px] border-collapse text-left"
+                    class="!table !visible !opacity-100 !w-full !min-w-[1150px] !border-collapse !table-auto text-left [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_th]:!visible [&_th]:!opacity-100 [&_th]:!whitespace-nowrap [&_td]:!table-cell [&_td]:!visible [&_td]:!opacity-100"
                 >
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
