@@ -225,14 +225,93 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kabupaten / Kota</label>
-                            <select name="kabupaten_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white">
-                                <option value="">Pilih Kabupaten/Kota</option>
+                        <div x-data="{
+                            open: false,
+                            search: '',
+                            selectedId: '{{ old('kabupaten_id', '') }}',
+                            selectedName: '{{ old('kabupaten_id') ? ($kabupatens->firstWhere('kab_id', old('kabupaten_id'))->nama_kabupaten ?? '') : '' }}',
+                            items: [
                                 @foreach($kabupatens as $kab)
-                                    <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}@if($kab->latitude && $kab->longitude) ({{ $kab->latitude }}, {{ $kab->longitude }})@endif</option>
+                                    {
+                                        id: '{{ $kab->kab_id }}',
+                                        name: '{{ addslashes($kab->nama_kabupaten) }}',
+                                        coords: '{{ $kab->latitude && $kab->longitude ? "({$kab->latitude}, {$kab->longitude})" : "" }}'
+                                    },
                                 @endforeach
-                            </select>
+                            ],
+                            get filteredItems() {
+                                if (!this.search) return this.items;
+                                const q = this.search.toLowerCase();
+                                return this.items.filter(i => i.name.toLowerCase().includes(q) || i.coords.toLowerCase().includes(q));
+                            },
+                            selectItem(item) {
+                                this.selectedId = item.id;
+                                this.selectedName = item.name + (item.coords ? ' ' + item.coords : '');
+                                this.open = false;
+                                this.search = '';
+                            },
+                            clear() {
+                                this.selectedId = '';
+                                this.selectedName = '';
+                                this.open = false;
+                                this.search = '';
+                            }
+                        }" class="relative">
+                            <label class="block font-semibold text-slate-700 mb-1">
+                                Kabupaten / Kota <span class="text-[11px] text-[#145239] font-normal">(Scope Terdaftar)</span>
+                            </label>
+
+                            {{-- Input tersembunyi untuk dikirim saat form submit --}}
+                            <input type="hidden" name="kabupaten_id" :value="selectedId">
+
+                            {{-- Tombol Pemicu Dropdown --}}
+                            <div @click="open = !open; if(open) $nextTick(() => $refs.searchInput.focus())"
+                                class="w-full min-h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] bg-white text-sm flex items-center justify-between cursor-pointer hover:border-[#145239] transition-colors focus-within:ring-2 focus-within:ring-[#145239]/20 shadow-sm">
+                                <span x-text="selectedName || 'Pilih / Cari Kabupaten/Kota...'"
+                                    :class="selectedName ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                                <div class="flex items-center gap-1.5 text-slate-400">
+                                    <template x-if="selectedId">
+                                        <button type="button" @click.stop="clear()" class="hover:text-rose-500 p-0.5 rounded-full transition-colors" title="Hapus Pilihan">
+                                            <i class="fa-solid fa-xmark text-xs"></i>
+                                        </button>
+                                    </template>
+                                    <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                </div>
+                            </div>
+
+                            {{-- Menu Dropdown Dengan Pencarian --}}
+                            <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
+                                class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2">
+
+                                {{-- Input Pencarian --}}
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                                    <input type="text" x-model="search" x-ref="searchInput" @keydown.escape="open = false"
+                                        placeholder="Ketik untuk mencari kabupaten/kota..."
+                                        class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-[#CFE3D5] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] outline-none">
+                                </div>
+
+                                {{-- Daftar Opsi Kabupaten --}}
+                                <div class="max-h-52 overflow-y-auto space-y-0.5 text-xs divide-y divide-slate-50">
+                                    <template x-for="item in filteredItems" :key="item.id">
+                                        <div @click="selectItem(item)"
+                                            :class="selectedId == item.id ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                            class="px-3 py-2.5 rounded-lg cursor-pointer flex items-center justify-between transition-colors">
+                                            <div>
+                                                <span x-text="item.name"></span>
+                                                <span x-text="item.coords" class="text-[10px] text-slate-400 font-mono ml-1"></span>
+                                            </div>
+                                            <i x-show="selectedId == item.id" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="filteredItems.length === 0">
+                                        <div class="px-3 py-4 text-center text-xs text-slate-400">
+                                            Kabupaten/Kota tidak ditemukan
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Sektor Ekonomi</label>
