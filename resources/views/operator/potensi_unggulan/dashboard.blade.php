@@ -37,7 +37,7 @@
         <div class="relative z-10 flex items-center mt-4 md:mt-0">
             <div class="flex flex-col items-end justify-center">
                 <span
-                    class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
+                    class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</span>
                 <span class="text-xs font-semibold text-[#FFD54F] uppercase tracking-wider mt-1">Tanggal Hari Ini</span>
             </div>
         </div>
