@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Provinsi;
+use App\Models\Kabupaten;
+use App\Models\UserWilayahScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,8 +19,15 @@ class PenggunaController extends Controller
     {
         $hasRoleColumn = Schema::hasColumn('users', 'role');
         $hasStatusColumn = Schema::hasColumn('users', 'status');
+        $hasScopesTable = UserWilayahScope::ensureTableExists();
 
-        $query = User::query()->latest();
+        $query = User::query();
+
+        if ($hasScopesTable) {
+            $query->with(['wilayahScopes.provinsi', 'wilayahScopes.kabupaten']);
+        }
+
+        $query->latest();
 
         if ($request->filled('search')) {
             $search = strtolower(trim($request->search));
@@ -52,7 +62,6 @@ class PenggunaController extends Controller
             ->paginate(7)
             ->withQueryString();
 
-        // Warna kartu disamakan dengan palet dashboard: green / yellow / blue / red
         $stats = [
             [
                 'label' => 'Total Pengguna',
@@ -90,9 +99,16 @@ class PenggunaController extends Controller
         $editData = null;
 
         if ($request->filled('edit')) {
-            $editData = User::findOrFail($request->edit);
+            $editQuery = User::query();
+            if ($hasScopesTable) {
+                $editQuery->with(['wilayahScopes.provinsi', 'wilayahScopes.kabupaten']);
+            }
+            $editData = $editQuery->findOrFail($request->edit);
             $mode = 'edit';
         }
+
+        $provinsis = Provinsi::orderBy('nama_provinsi')->get();
+        $kabupatens = Kabupaten::orderBy('nama_kabupaten')->get();
 
         return view('admin.pengguna', compact(
             'pengguna',
@@ -100,7 +116,10 @@ class PenggunaController extends Controller
             'mode',
             'editData',
             'hasRoleColumn',
-            'hasStatusColumn'
+            'hasStatusColumn',
+            'hasScopesTable',
+            'provinsis',
+            'kabupatens'
         ));
     }
 
@@ -113,6 +132,9 @@ class PenggunaController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'scope_type' => ['nullable', 'in:provinsi,kabupaten,none'],
+            'provinsi_id' => ['nullable', 'exists:provinsi,provinsi_id'],
+            'kabupaten_id' => ['nullable', 'exists:kabupaten,kab_id'],
         ];
 
         if ($hasRoleColumn) {
@@ -151,7 +173,11 @@ class PenggunaController extends Controller
             $createData['status'] = $statusValue;
         }
 
-        User::create($createData);
+        $user = User::create($createData);
+
+        if (($data['role'] ?? 'operator') === 'operator' && !empty($data['scope_type'])) {
+            $this->syncWilayahScope($user, $data);
+        }
 
         return redirect()
             ->route('admin.pengguna.index')
@@ -172,6 +198,9 @@ class PenggunaController extends Controller
                 Rule::unique('users', 'email')->ignore($pengguna->id),
             ],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'scope_type' => ['nullable', 'in:provinsi,kabupaten,none'],
+            'provinsi_id' => ['nullable', 'exists:provinsi,provinsi_id'],
+            'kabupaten_id' => ['nullable', 'exists:kabupaten,kab_id'],
         ];
 
         if ($hasRoleColumn) {
@@ -236,9 +265,17 @@ class PenggunaController extends Controller
 
         $pengguna->update($updateData);
 
+        if (Schema::hasTable('user_wilayah_scopes')) {
+            if (($updateData['role'] ?? $pengguna->role) === 'operator') {
+                $this->syncWilayahScope($pengguna, $data);
+            } else {
+                $pengguna->wilayahScopes()->delete();
+            }
+        }
+
         return redirect()
             ->route('admin.pengguna.index')
-            ->with('success', 'Pengguna berhasil diperbarui.');
+            ->with('success', 'Pengguna dan penyesuaian wilayah kerja berhasil diperbarui.');
     }
 
     public function destroy(User $pengguna)
@@ -254,5 +291,33 @@ class PenggunaController extends Controller
         return redirect()
             ->route('admin.pengguna.index')
             ->with('success', 'Pengguna berhasil dihapus.');
+    }
+
+    private function syncWilayahScope(User $user, array $data): void
+    {
+        if (!Schema::hasTable('user_wilayah_scopes')) {
+            return;
+        }
+
+        $user->wilayahScopes()->delete();
+
+        $scopeType = $data['scope_type'] ?? null;
+
+        if ($scopeType === 'provinsi' && !empty($data['provinsi_id'])) {
+            UserWilayahScope::create([
+                'user_id' => $user->id,
+                'provinsi_id' => $data['provinsi_id'],
+                'kabupaten_id' => null,
+            ]);
+        } elseif ($scopeType === 'kabupaten' && !empty($data['kabupaten_id'])) {
+            $kabupaten = Kabupaten::find($data['kabupaten_id']);
+            if ($kabupaten) {
+                UserWilayahScope::create([
+                    'user_id' => $user->id,
+                    'provinsi_id' => $kabupaten->provinsi_id,
+                    'kabupaten_id' => $kabupaten->kab_id,
+                ]);
+            }
+        }
     }
 }

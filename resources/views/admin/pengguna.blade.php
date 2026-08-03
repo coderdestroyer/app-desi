@@ -714,6 +714,10 @@
                             </th>
 
                             <th class="px-5 py-3">
+                                Wilayah Kerja (Scope)
+                            </th>
+
+                            <th class="px-5 py-3">
                                 Status
                             </th>
 
@@ -857,6 +861,40 @@
                                     >
                                         {{ ucfirst($role) }}
                                     </span>
+                                </td>
+
+                                <td class="px-5 py-4">
+                                    @php
+                                        $scope = (!empty($hasScopesTable) && $item->relationLoaded('wilayahScopes'))
+                                            ? $item->wilayahScopes->first()
+                                            : (!empty($hasScopesTable) ? $item->wilayahScopes->first() : null);
+                                        $isPending = strtolower($item->status ?? '') === 'pending';
+                                    @endphp
+                                    @if ($role === 'admin')
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border border-amber-300 bg-amber-50 text-amber-800">
+                                            <i class="fa-solid fa-earth-asia text-[10px]"></i> Global (Semua Wilayah)
+                                        </span>
+                                    @elseif ($scope)
+                                        @if ($scope->kabupaten)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border {{ $isPending ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-sky-300 bg-sky-50 text-sky-800' }}" title="{{ $scope->kabupaten->nama_kabupaten }}">
+                                                <i class="fa-solid {{ $isPending ? 'fa-hourglass-half' : 'fa-location-dot' }} text-[10px]"></i>
+                                                {{ $isPending ? 'Pengajuan' : 'Scope' }} Kab: {{ $scope->kabupaten->nama_kabupaten }}
+                                            </span>
+                                        @elseif ($scope->provinsi)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border {{ $isPending ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-emerald-300 bg-emerald-50 text-emerald-800' }}" title="{{ $scope->provinsi->nama_provinsi }}">
+                                                <i class="fa-solid {{ $isPending ? 'fa-hourglass-half' : 'fa-map' }} text-[10px]"></i>
+                                                {{ $isPending ? 'Pengajuan' : 'Scope' }} Prov: {{ $scope->provinsi->nama_provinsi }} (+ Sub-Kab)
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200 bg-slate-100 text-slate-500">
+                                                Belum Set
+                                            </span>
+                                        @endif
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200 bg-slate-100 text-slate-500">
+                                            Belum Set
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <td class="px-5 py-4">
@@ -1012,7 +1050,7 @@
                         @empty
                             <tr>
                                 <td
-                                    colspan="6"
+                                    colspan="7"
                                     class="
                                         px-5
                                         py-14
@@ -1424,7 +1462,28 @@
                         @method('PUT')
                     @endif
 
+                    @php
+                        $editScope = (!empty($hasScopesTable) && $isEdit) ? $editData->wilayahScopes->first() : null;
+                        $initialScopeType = 'none';
+                        $initialProvId = '';
+                        $initialKabId = '';
+                        if ($editScope) {
+                            if ($editScope->kabupaten_id) {
+                                $initialScopeType = 'kabupaten';
+                                $initialKabId = $editScope->kabupaten_id;
+                                $initialProvId = $editScope->provinsi_id;
+                            } elseif ($editScope->provinsi_id) {
+                                $initialScopeType = 'provinsi';
+                                $initialProvId = $editScope->provinsi_id;
+                            }
+                        }
+                    @endphp
+
                     <div
+                        x-data="{
+                            role: '{{ old('role', $isEdit ? $editData->role : 'operator') }}',
+                            scopeType: '{{ old('scope_type', $initialScopeType) }}'
+                        }"
                         class="
                             grid
                             grid-cols-1
@@ -1560,6 +1619,7 @@
                                 <select
                                     id="role"
                                     name="role"
+                                    x-model="role"
                                     required
                                     class="
                                         h-11
@@ -1668,6 +1728,76 @@
                                 @enderror
                             </div>
                         @endif
+
+                        {{-- REGIONAL SCOPE ASSIGNMENT --}}
+                        <div x-show="role === 'operator'" class="md:col-span-2 p-4 rounded-2xl bg-[#EEF8F2] border border-[#CFE3D5] space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-bold text-[#1E5E3F] uppercase tracking-wider">
+                                    Alokasi Wilayah Kerja Operator (Regional Scope Authorization)
+                                </label>
+                            </div>
+
+                            @if ($editScope)
+                                <div class="p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-bell-concierge text-amber-600 text-sm"></i>
+                                        <div>
+                                            <span class="font-bold">Pengajuan Wilayah Saat Registrasi:</span>
+                                            @if ($editScope->kabupaten)
+                                                <span class="font-bold text-sky-900 bg-white px-2 py-0.5 rounded ml-1 border border-sky-200">
+                                                    📍 Kab/Kota: {{ $editScope->kabupaten->nama_kabupaten }}
+                                                </span>
+                                            @elseif ($editScope->provinsi)
+                                                <span class="font-bold text-emerald-900 bg-white px-2 py-0.5 rounded ml-1 border border-emerald-200">
+                                                    🗺️ Provinsi: {{ $editScope->provinsi->nama_provinsi }} (+ Sub-Kab)
+                                                </span>
+                                            @else
+                                                <span class="text-slate-500 ml-1">(Belum Memilih Scope)</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <p class="text-xs text-slate-600">
+                                Cek & sesuaikan alokasi wilayah kerja data PDRB yang diberikan kepada Operator ini:
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tingkat Wilayah Scope</label>
+                                    <select name="scope_type" x-model="scopeType" class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                        <option value="none">-- Belum Dialokasikan --</option>
+                                        <option value="provinsi">Tingkat Provinsi (+ Sub-Kabupaten)</option>
+                                        <option value="kabupaten">Tingkat Kabupaten / Kota Spesifik</option>
+                                    </select>
+                                </div>
+
+                                <div x-show="scopeType === 'provinsi' || scopeType === 'kabupaten'">
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Provinsi Scope</label>
+                                    <select name="provinsi_id" class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                        <option value="">-- Pilih Provinsi --</option>
+                                        @foreach($provinsis ?? [] as $prov)
+                                            <option value="{{ $prov->provinsi_id }}" @selected(old('provinsi_id', $initialProvId) == $prov->provinsi_id)>
+                                                {{ $prov->nama_provinsi }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div x-show="scopeType === 'kabupaten'">
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kabupaten / Kota Scope</label>
+                                    <select name="kabupaten_id" class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                        <option value="">-- Pilih Kabupaten / Kota --</option>
+                                        @foreach($kabupatens ?? [] as $kab)
+                                            <option value="{{ $kab->kab_id }}" @selected(old('kabupaten_id', $initialKabId) == $kab->kab_id)>
+                                                {{ $kab->nama_kabupaten }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
                         <div>
                             <label
