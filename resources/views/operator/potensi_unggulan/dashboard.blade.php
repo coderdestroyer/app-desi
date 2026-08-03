@@ -1,6 +1,30 @@
 @extends('partials.layouts.operator')
 
 @section('content')
+<div x-data="{ isPdrbModalOpen: false, inputMode: 'batch' }">
+    @if(session('success'))
+        <div class="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
 
     <!-- Welcome Header -->
     <div
@@ -23,22 +47,27 @@
                 <svg class="w-4 h-4 text-[#FFD54F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Dashboard Utama
+                Dashboard Utama Potensi Unggulan
             </div>
             <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">Selamat Datang, <span
-                    class="text-[#FFD54F]">Operator</span></h1>
+                    class="text-[#FFD54F]">{{ Auth::user()->name }}</span></h1>
             <p class="text-emerald-100/90 font-medium max-w-xl text-sm leading-relaxed">
-                Kelola dan pantau data serta hasil perhitungan analisis investasi dan ekonomi daerah Provinsi Sumatera
-                Utara.
+                Kelola dan pantau data serta hasil perhitungan analisis investasi dan ekonomi daerah Provinsi Sumatera Utara.
             </p>
         </div>
 
-        <!-- Right Side Info -->
-        <div class="relative z-10 flex items-center mt-4 md:mt-0">
-            <div class="flex flex-col items-end justify-center">
+        <!-- Right Side Action & Date Info -->
+        <div class="relative z-10 flex flex-col md:flex-row items-end md:items-center gap-4 mt-4 md:mt-0">
+            <button type="button" @click="isPdrbModalOpen = true"
+                class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                <i class="fa-solid fa-plus text-sm"></i>
+                <span>Tambah Data PDRB</span>
+            </button>
+
+            <div class="flex flex-col items-end justify-center hidden sm:flex">
                 <span
-                    class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
-                <span class="text-xs font-semibold text-[#FFD54F] uppercase tracking-wider mt-1">Tanggal Hari Ini</span>
+                    class="text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
+                <span class="text-xs font-semibold text-[#FFD54F] uppercase tracking-wider mt-0.5">Tanggal Hari Ini</span>
             </div>
         </div>
     </div>
@@ -280,4 +309,109 @@
         </div>
     </div>
 
+    <!-- MODAL INISIASI PDRB BARU (KABUPATEN & TAHUN ONLY) -->
+    <div x-show="isPdrbModalOpen" x-cloak class="fixed inset-0 z-[1000] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 relative" @click.outside="isPdrbModalOpen = false">
+            {{-- Modal Header --}}
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-plus-circle text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Inisiasi Data PDRB Baru</h3>
+                        <p class="text-xs text-slate-500">Pilih Daerah & Tahun yang belum terdaftar</p>
+                    </div>
+                </div>
+                <button type="button" @click="isPdrbModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('operator.pdrb.init') }}" method="POST" class="space-y-4 pt-4 text-sm">
+                @csrf
+
+                {{-- Kabupaten / Kota Dropdown --}}
+                <div x-data="{
+                    open: false,
+                    search: '',
+                    selectedId: '{{ old('kabupaten_id', $kabupatens->first()->kab_id ?? '') }}',
+                    selectedName: '{{ old('kabupaten_id') ? ($kabupatens->firstWhere('kab_id', old('kabupaten_id'))->nama_kabupaten ?? '') : ($kabupatens->first()->nama_kabupaten ?? '') }}',
+                    items: [
+                        @foreach($kabupatens as $kab)
+                            {
+                                id: '{{ $kab->kab_id }}',
+                                name: '{{ addslashes($kab->nama_kabupaten) }}'
+                            },
+                        @endforeach
+                    ],
+                    get filteredItems() {
+                        if (!this.search) return this.items;
+                        const q = this.search.toLowerCase();
+                        return this.items.filter(i => i.name.toLowerCase().includes(q));
+                    },
+                    selectItem(item) {
+                        this.selectedId = item.id;
+                        this.selectedName = item.name;
+                        this.open = false;
+                        this.search = '';
+                    }
+                }" class="relative">
+                    <label class="block font-semibold text-slate-700 mb-1">
+                        Kabupaten / Kota <span class="text-rose-500">*</span>
+                        <span class="text-[10px] text-[#145239] font-normal block">(Tersaring Sesuai Scope Otorisasi Operator)</span>
+                    </label>
+                    <input type="hidden" name="kabupaten_id" :value="selectedId" required>
+
+                    <div @click="open = !open; if(open) $nextTick(() => $refs.searchInput.focus())"
+                        class="w-full min-h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] bg-white text-sm flex items-center justify-between cursor-pointer hover:border-[#145239] transition-colors shadow-2xs">
+                        <span x-text="selectedName || 'Pilih Kabupaten/Kota...'" :class="selectedName ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                        <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                    </div>
+
+                    <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
+                        class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                            <input type="text" x-model="search" x-ref="searchInput" placeholder="Cari kabupaten/kota..."
+                                class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#CFE3D5] focus:border-[#145239] outline-none">
+                        </div>
+                        <div class="max-h-48 overflow-y-auto space-y-0.5 text-xs">
+                            <template x-for="item in filteredItems" :key="item.id">
+                                <div @click="selectItem(item)"
+                                    :class="selectedId == item.id ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                    class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                    <span x-text="item.name"></span>
+                                    <i x-show="selectedId == item.id" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Tahun PDRB --}}
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">
+                        Tahun PDRB <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="number" name="tahun" required value="{{ date('Y') - 1 }}" min="2000" max="2100" class="w-full h-[42px] rounded-xl border border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm font-mono px-3.5">
+                    <p class="text-[11px] text-slate-400 mt-1">
+                        Sistem akan mengecek apakah kombinasi Kabupaten & Tahun ini sudah pernah dibuat sebelumnya.
+                    </p>
+                </div>
+
+                {{-- Modal Footer --}}
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button" @click="isPdrbModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                        <span>Lanjut ke Input Nilai</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

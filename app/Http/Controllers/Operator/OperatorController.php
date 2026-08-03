@@ -50,11 +50,19 @@ class OperatorController extends Controller
 
     public function selection()
     {
-        return view('operator.selection');
+        $user = Auth::user();
+        $kabupatens = $this->getAuthorizedKabupatens($user);
+        $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
+
+        return view('operator.selection', compact('kabupatens', 'sektors'));
     }
 
     public function index()
     {
+        $user = Auth::user();
+        $kabupatens = $this->getAuthorizedKabupatens($user);
+        $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
+
         $countLq = \App\Models\LQ::count();
         $countSs = \App\Models\ShiftShare::count();
         $countTipologi = \App\Models\Tipologi::count();
@@ -74,8 +82,237 @@ class OperatorController extends Controller
         return view('operator.potensi_unggulan.dashboard', compact(
             'countLq', 'countSs', 'countTipologi', 'countKlassen', 'totalAnalisa',
             'statusLq', 'statusSs', 'statusTipologi', 'statusKlassen',
-            'activityLogs'
+            'activityLogs', 'kabupatens', 'sektors'
         ));
+    }
+
+    /**
+     * Mengambil daftar Kabupaten/Kota yang berhak diakses oleh operator berdasarkan Regional Scope.
+     */
+    private function getAuthorizedKabupatens($user)
+    {
+        if ($user->isAdmin()) {
+            return \App\Models\Kabupaten::orderBy('nama_kabupaten')->get();
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('user_wilayah_scopes')) {
+            return \App\Models\Kabupaten::orderBy('nama_kabupaten')->get();
+        }
+
+        $scopes = $user->wilayahScopes()->get();
+
+        if ($scopes->isEmpty()) {
+            return \App\Models\Kabupaten::orderBy('nama_kabupaten')->get();
+        }
+
+        $query = \App\Models\Kabupaten::query();
+
+        $query->where(function ($q) use ($scopes) {
+            foreach ($scopes as $scope) {
+                if ($scope->kabupaten_id) {
+                    $q->orWhere('kab_id', $scope->kabupaten_id);
+                } elseif ($scope->provinsi_id) {
+                    $q->orWhere('provinsi_id', $scope->provinsi_id);
+                }
+            }
+        });
+
+        return $query->orderBy('nama_kabupaten')->get();
+    }
+
+    /**
+     * Inisiasi pembuatan data PDRB baru dari Modal.
+     * Cek otorisasi scope dan cegah duplikasi (kabupaten_id + tahun).
+     */
+    public function initPdrb(Request $request)
+    {
+        $request->validate([
+            'kabupaten_id' => 'required|exists:kabupaten,kab_id',
+            'tahun' => 'required|integer|min:2000|max:2100',
+        ]);
+
+        $user = Auth::user();
+
+        // Otorisasi Hak Akses Wilayah Operator
+        if (!$user->canAccessKabupaten($request->kabupaten_id)) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses otorisasi untuk menambahkan data PDRB pada daerah ini.');
+        }
+
+        $kabupaten = \App\Models\Kabupaten::find($request->kabupaten_id);
+
+        // Cek apakah data PDRB (kabupaten_id + tahun) sudah ada di database
+        $exists = \App\Models\PdrbSumateraKabupaten::where('kabupaten_id', $request->kabupaten_id)
+            ->where('tahun', $request->tahun)
+            ->exists();
+
+        if ($exists) {
+            return redirect()->back()->with('error', "Data PDRB untuk {$kabupaten->nama_kabupaten} Tahun {$request->tahun} sudah ada di database! Silakan gunakan tombol Edit pada tabel untuk mengubah nilainya.");
+        }
+
+        return redirect()->route('operator.pdrb.entry', [
+            'kabupaten_id' => $request->kabupaten_id,
+            'tahun' => $request->tahun,
+        ])->with('info', "Silakan masukkan nilai PDRB per sektor untuk {$kabupaten->nama_kabupaten} Tahun {$request->tahun}.");
+    }
+
+    /**
+     * Menampilkan Halaman Khusus Dedicated Input / Edit Nilai Sektor PDRB.
+     */
+    public function entryPdrb($kabupaten_id, $tahun)
+    {
+        $user = Auth::user();
+
+        if (!$user->canAccessKabupaten($kabupaten_id)) {
+            return redirect()->route('operator.pdrb.index')->with('error', 'Anda tidak memiliki hak akses otorisasi untuk mengelola data PDRB daerah ini.');
+        }
+
+        $kabupaten = \App\Models\Kabupaten::findOrFail($kabupaten_id);
+        $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
+
+        $existingValues = \App\Models\PdrbSumateraKabupaten::where('kabupaten_id', $kabupaten_id)
+            ->where('tahun', $tahun)
+            ->pluck('nilai_pdrb', 'sektor_id')
+            ->toArray();
+
+        return view('operator.potensi_unggulan.pdrb_entry', compact(
+            'kabupaten', 'tahun', 'sektors', 'existingValues'
+        ));
+    }
+
+    /**
+     * Menyimpan nilai 17 sektor PDRB dari halaman khusus dedicated entry.
+     */
+    public function saveEntryPdrb(Request $request)
+    {
+        $request->validate([
+            'kabupaten_id' => 'required|exists:kabupaten,kab_id',
+            'tahun' => 'required|integer|min:2000|max:2100',
+            'sektor_values' => 'required|array',
+        ]);
+
+        $user = Auth::user();
+
+        if (!$user->canAccessKabupaten($request->kabupaten_id)) {
+            return redirect()->route('operator.pdrb.index')->with('error', 'Anda tidak memiliki hak akses otorisasi untuk mengubah data PDRB daerah ini.');
+        }
+
+        $kabupaten = \App\Models\Kabupaten::find($request->kabupaten_id);
+        $savedCount = 0;
+
+        foreach ($request->sektor_values as $sektorId => $nilai) {
+            if ($nilai !== null && $nilai !== '') {
+                \App\Models\PdrbSumateraKabupaten::updateOrCreate(
+                    [
+                        'kabupaten_id' => $request->kabupaten_id,
+                        'sektor_id' => $sektorId,
+                        'tahun' => $request->tahun,
+                    ],
+                    [
+                        'nilai_pdrb' => (float) $nilai,
+                    ]
+                );
+                $savedCount++;
+            }
+        }
+
+        self::logActivity(
+            'Data PDRB',
+            'diperbarui',
+            "Menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} ({$savedCount} sektor terisi)"
+        );
+
+        return redirect()->route('operator.pdrb.index')->with('success', "Berhasil menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
+    }
+
+    /**
+     * Menampilkan halaman Input / Kelola Data PDRB Daerah Operator.
+     */
+    public function pdrbIndex(Request $request)
+    {
+        $user = Auth::user();
+        $kabupatens = $this->getAuthorizedKabupatens($user);
+        $kabIds = $kabupatens->pluck('kab_id')->toArray();
+        $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
+
+        $query = \App\Models\PdrbSumateraKabupaten::selectRaw('kabupaten_id, tahun, COUNT(*) as total_sektor, SUM(nilai_pdrb) as total_pdrb')
+            ->whereIn('kabupaten_id', $kabIds)
+            ->groupBy('kabupaten_id', 'tahun')
+            ->with('kabupaten');
+
+        if ($request->filled('kabupaten_id')) {
+            $query->where('kabupaten_id', $request->kabupaten_id);
+        }
+
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
+        $pdrbGroups = $query->orderBy('tahun', 'desc')
+            ->orderBy('kabupaten_id')
+            ->paginate(12)
+            ->withQueryString();
+
+        $availableYears = \App\Models\PdrbSumateraKabupaten::whereIn('kabupaten_id', $kabIds)
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+
+        return view('operator.potensi_unggulan.pdrb', compact(
+            'pdrbGroups', 'kabupatens', 'sektors', 'availableYears'
+        ));
+    }
+
+    /**
+     * Menghapus seluruh data PDRB per Kabupaten & Tahun.
+     */
+    public function destroyGroupPdrb($kabupaten_id, $tahun)
+    {
+        $user = Auth::user();
+
+        if (!$user->canAccessKabupaten($kabupaten_id)) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses otorisasi untuk menghapus data PDRB daerah ini.');
+        }
+
+        $kabupaten = \App\Models\Kabupaten::find($kabupaten_id);
+        $namaKab = $kabupaten->nama_kabupaten ?? 'Kabupaten';
+
+        \App\Models\PdrbSumateraKabupaten::where('kabupaten_id', $kabupaten_id)
+            ->where('tahun', $tahun)
+            ->delete();
+
+        self::logActivity(
+            'Data PDRB',
+            'dihapus',
+            "Menghapus seluruh data PDRB {$namaKab} Tahun {$tahun}"
+        );
+
+        return redirect()->back()->with('success', "Seluruh data PDRB {$namaKab} Tahun {$tahun} berhasil dihapus.");
+    }
+
+    /**
+     * Menghapus record PDRB tunggal oleh Operator.
+     */
+    public function destroyPdrb($id)
+    {
+        $user = Auth::user();
+        $pdrb = \App\Models\PdrbSumateraKabupaten::findOrFail($id);
+
+        if (!$user->canAccessKabupaten($pdrb->kabupaten_id)) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses otorisasi untuk menghapus data PDRB daerah ini.');
+        }
+
+        $namaKab = $pdrb->kabupaten->nama_kabupaten ?? 'Kabupaten';
+        $tahun = $pdrb->tahun;
+
+        $pdrb->delete();
+
+        self::logActivity(
+            'Data PDRB',
+            'dihapus',
+            "Menghapus record PDRB {$namaKab} Tahun {$tahun}"
+        );
+
+        return redirect()->back()->with('success', "Record PDRB {$namaKab} Tahun {$tahun} berhasil dihapus.");
     }
 
     public function profile()
