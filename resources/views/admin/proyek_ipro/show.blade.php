@@ -1,4 +1,4 @@
-@extends('partials.layouts.admin')
+@extends('layouts.admin')
 
 @section('title', 'Peninjauan Dokumen IPRO: ' . $project->nama_proyek)
 

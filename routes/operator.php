@@ -20,6 +20,12 @@ Route::middleware([
     ->group(function () {
         Route::get('/dashboard', [OperatorController::class, 'selection'])->name('dashboard');
         Route::get('/potensi-unggulan', [OperatorController::class, 'index'])->name('potensi-unggulan');
+        Route::get('/pdrb', [OperatorController::class, 'pdrbIndex'])->name('pdrb.index');
+        Route::post('/pdrb/init', [OperatorController::class, 'initPdrb'])->name('pdrb.init');
+        Route::get('/pdrb/entry/{kabupaten_id}/{tahun}', [OperatorController::class, 'entryPdrb'])->name('pdrb.entry');
+        Route::post('/pdrb/save-entry', [OperatorController::class, 'saveEntryPdrb'])->name('pdrb.save-entry');
+        Route::delete('/pdrb/group/{kabupaten_id}/{tahun}', [OperatorController::class, 'destroyGroupPdrb'])->name('pdrb.destroy-group');
+        Route::delete('/pdrb/{id}', [OperatorController::class, 'destroyPdrb'])->name('pdrb.destroy');
         
         // Modul Peluang Investasi (IPRO Engine)
         Route::get('/peluang-investasi', [ProjectController::class, 'dashboard'])->name('peluang-investasi');

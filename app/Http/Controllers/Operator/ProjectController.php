@@ -8,6 +8,7 @@ use App\Models\Kabupaten;
 use App\Models\Sektor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class ProjectController extends Controller
 {
@@ -24,7 +25,7 @@ class ProjectController extends Controller
 
         $recentProjects = $projects->take(5);
 
-        $kabupatens = Kabupaten::orderBy('nama_kabupaten')->get();
+        $kabupatens = $this->getAuthorizedKabupatens($user);
         $sektors = Sektor::orderBy('nama_sektor')->get();
 
         return view('operator.peluang_investasi.dashboard', compact('projects', 'recentProjects', 'kabupatens', 'sektors'));
@@ -41,10 +42,44 @@ class ProjectController extends Controller
             ->latest()
             ->get();
 
-        $kabupatens = Kabupaten::orderBy('nama_kabupaten')->get();
+        $kabupatens = $this->getAuthorizedKabupatens($user);
         $sektors = Sektor::orderBy('nama_sektor')->get();
 
         return view('operator.peluang_investasi.projects.index', compact('projects', 'kabupatens', 'sektors'));
+    }
+
+    /**
+     * Mengambil daftar Kabupaten/Kota yang berhak diakses oleh user berdasarkan Regional Scope.
+     */
+    private function getAuthorizedKabupatens($user)
+    {
+        if ($user->isAdmin()) {
+            return Kabupaten::orderBy('nama_kabupaten')->get();
+        }
+
+        if (!Schema::hasTable('user_wilayah_scopes')) {
+            return Kabupaten::orderBy('nama_kabupaten')->get();
+        }
+
+        $scopes = $user->wilayahScopes()->get();
+
+        if ($scopes->isEmpty()) {
+            return Kabupaten::orderBy('nama_kabupaten')->get();
+        }
+
+        $query = Kabupaten::query();
+
+        $query->where(function ($q) use ($scopes) {
+            foreach ($scopes as $scope) {
+                if ($scope->kabupaten_id) {
+                    $q->orWhere('kab_id', $scope->kabupaten_id);
+                } elseif ($scope->provinsi_id) {
+                    $q->orWhere('provinsi_id', $scope->provinsi_id);
+                }
+            }
+        });
+
+        return $query->orderBy('nama_kabupaten')->get();
     }
 
     /**

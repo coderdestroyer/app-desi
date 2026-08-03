@@ -1,4 +1,4 @@
-@extends('partials.layouts.admin')
+@extends('layouts.admin')
 
 @section('title', 'Data HS Code')
 
