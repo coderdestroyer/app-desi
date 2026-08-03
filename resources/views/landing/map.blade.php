@@ -46,7 +46,7 @@
                 <p>
 
                     Jelajahi persebaran potensi investasi setiap
-                    Kabupaten/Kota di Provinsi Sumatera Utara.
+                    Kabupaten/Kota dan Provinsi di Sumatera Utara.
 
                     Klik marker pada peta untuk melihat informasi
                     daerah.
@@ -63,7 +63,7 @@
                 <input
                     type="text"
                     id="searchKabupaten"
-                    placeholder="Cari Kabupaten / Kota..."
+                    placeholder="Cari Kabupaten/Kota atau Provinsi..."
                 >
 
             </div>

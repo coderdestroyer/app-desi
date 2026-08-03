@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kabupaten;
+use App\Models\Provinsi;
 use Illuminate\Support\Facades\DB;
 
 class InvestmentMapController extends Controller
@@ -12,333 +13,152 @@ class InvestmentMapController extends Controller
      */
     public function index()
     {
-        $lokasi = Kabupaten::whereNotNull('latitude')->orderBy('nama_kabupaten')->get();
+        // Ambil Provinsi yang memiliki koordinat
+        $provinsi = Provinsi::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderBy('nama_provinsi')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->provinsi_id,
+                    'nama' => $item->nama_provinsi,
+                    'latitude' => (float)$item->latitude,
+                    'longitude' => (float)$item->longitude,
+                    'type' => 'provinsi',
+                ];
+            });
+
+        // Ambil Kabupaten yang memiliki koordinat
+        $kabupaten = Kabupaten::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderBy('nama_kabupaten')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->kab_id,
+                    'nama' => $item->nama_kabupaten,
+                    'latitude' => (float)$item->latitude,
+                    'longitude' => (float)$item->longitude,
+                    'type' => 'kabupaten',
+                ];
+            });
+
+        // Gabungkan keduanya
+        $lokasi = $provinsi->concat($kabupaten);
 
         return view('landing.map', compact('lokasi'));
     }
 
-
     /**
-     * Ambil sektor unggulan berdasarkan kabupaten/kota
+     * Ambil sektor unggulan berdasarkan wilayah (kabupaten/provinsi)
      */
     public function analysis($nama)
     {
         try {
-
-            // =====================================================
-            // 1. BERSIHKAN NAMA DARI MARKER
-            // =====================================================
-
             $nama = trim($nama);
 
+            // 1. Cek apakah ini Provinsi
+            $provinsi = Provinsi::whereRaw('UPPER(TRIM(nama_provinsi)) = ?', [strtoupper($nama)])->first();
 
-            // =====================================================
-            // 2. MAPPING NAMA KHUSUS
-            // =====================================================
-            //
-            // Digunakan kalau nama pada tabel "lokasi"
-            // berbeda dengan tabel "kabupaten".
-            //
-
-            $namaMapping = [
-
-                // lokasi:
-                // Kota Padangsidimpuan
-                //
-                // database:
-                // KOTA PADANG SIDEMPUAN
-                'Kota Padangsidimpuan'
-                    => 'KOTA PADANG SIDEMPUAN',
-
-
-                // lokasi:
-                // Kabupaten Nias Tengah
-                //
-                // database:
-                // KAB. NIAS TENGAH
-                'Kabupaten Nias Tengah'
-                    => 'KAB. NIAS TENGAH',
-
-            ];
-
-
-            // =====================================================
-            // 3. CEK APAKAH ADA MAPPING KHUSUS
-            // =====================================================
-
-            if (isset($namaMapping[$nama])) {
-
-                $namaDatabase =
-                    $namaMapping[$nama];
-
-            }
-
-            // =====================================================
-            // 4. NORMALISASI KABUPATEN
-            // =====================================================
-
-            elseif (
-                stripos(
-                    $nama,
-                    'Kabupaten '
-                ) === 0
-            ) {
-
-                $namaKabupaten =
-                    substr(
-                        $nama,
-                        strlen('Kabupaten ')
-                    );
-
-                $namaDatabase =
-                    'KAB. ' .
-                    strtoupper(
-                        trim($namaKabupaten)
-                    );
-
-            }
-
-            // =====================================================
-            // 5. NORMALISASI KOTA
-            // =====================================================
-
-            elseif (
-                stripos(
-                    $nama,
-                    'Kota '
-                ) === 0
-            ) {
-
-                $namaKota =
-                    substr(
-                        $nama,
-                        strlen('Kota ')
-                    );
-
-                $namaDatabase =
-                    'KOTA ' .
-                    strtoupper(
-                        trim($namaKota)
-                    );
-
-            }
-
-            // =====================================================
-            // 6. FALLBACK
-            // =====================================================
-
-            else {
-
-                $namaDatabase =
-                    strtoupper($nama);
-
-            }
-
-
-            // =====================================================
-            // DEBUG
-            // =====================================================
-
-            \Log::info(
-                'Peta Investasi - Pencarian Kabupaten',
-                [
-                    'nama_marker' =>
-                        $nama,
-
-                    'nama_database' =>
-                        $namaDatabase,
-                ]
-            );
-
-
-            // =====================================================
-            // 7. CARI KABUPATEN/KOTA
-            // =====================================================
-
-            $kabupaten =
-                DB::table('kabupaten')
-
-                    ->whereRaw(
-                        'UPPER(TRIM(nama_kabupaten)) = ?',
-                        [
-                            strtoupper(
-                                trim($namaDatabase)
-                            )
-                        ]
-                    )
-
-                    ->first();
-
-
-            // =====================================================
-            // 8. KABUPATEN TIDAK DITEMUKAN
-            // =====================================================
-
-            if (!$kabupaten) {
-
-                return response()->json([
-                    'success' => false,
-
-                    'message' =>
-                        'Data analisis daerah belum tersedia.',
-
-                    'nama_marker' =>
-                        $nama,
-
-                    'nama_dicari' =>
-                        $namaDatabase,
-
-                ], 404);
-            }
-
-
-            // =====================================================
-            // 9. CARI TAHUN TERBARU
-            // =====================================================
-
-            $tahunTerbaru =
-                DB::table(
-                    'hasil_tipologi_sektor'
-                )
-
-                    ->where(
-                        'kab_id',
-                        $kabupaten->kab_id
-                    )
-
+            if ($provinsi) {
+                $tahunTerbaru = DB::table('pdrb_sumatera_provinsi')
+                    ->where('provinsi_id', $provinsi->provinsi_id)
                     ->max('tahun');
 
+                if (!$tahunTerbaru) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Belum ada data PDRB untuk provinsi ini.',
+                        'kabupaten' => $provinsi->nama_provinsi,
+                    ]);
+                }
 
-            // =====================================================
-            // 10. BELUM ADA HASIL ANALISIS
-            // =====================================================
-
-            if (!$tahunTerbaru) {
+                // Ambil 3 sektor terbesar berdasarkan nilai PDRB
+                $sektorUnggulan = DB::table('pdrb_sumatera_provinsi as psp')
+                    ->join('sektor as s', 's.sektor_id', '=', 'psp.sektor_id')
+                    ->where('psp.provinsi_id', $provinsi->provinsi_id)
+                    ->where('psp.tahun', $tahunTerbaru)
+                    ->orderByDesc('psp.nilai_pdrb')
+                    ->select('s.nama_sektor')
+                    ->take(3)
+                    ->get();
 
                 return response()->json([
-                    'success' => false,
-
-                    'message' =>
-                        'Belum ada hasil analisis untuk daerah ini.',
-
-                    'kabupaten' =>
-                        $kabupaten->nama_kabupaten,
-
+                    'success' => true,
+                    'kabupaten' => $provinsi->nama_provinsi,
+                    'tahun' => $tahunTerbaru,
+                    'kategori' => 'Sektor PDRB Terbesar',
+                    'jumlah_sektor' => $sektorUnggulan->count(),
+                    'sektor' => $sektorUnggulan->pluck('nama_sektor')->values(),
                 ]);
             }
 
+            // 2. Cek apakah ini Kabupaten
+            $namaMapping = [
+                'Kota Padangsidimpuan' => 'KOTA PADANG SIDEMPUAN',
+                'Kabupaten Nias Tengah' => 'KAB. NIAS TENGAH',
+            ];
 
-            // =====================================================
-            // 11. AMBIL SEKTOR UNGGULAN
-            // =====================================================
-            //
-            // Definisi:
-            //
-            // Kuadran I =
-            // Sektor Cepat Maju dan Cepat Tumbuh
-            //
-            // Hanya data tahun terbaru yang digunakan.
-            //
+            if (isset($namaMapping[$nama])) {
+                $namaDatabase = $namaMapping[$nama];
+            } elseif (stripos($nama, 'Kabupaten ') === 0) {
+                $namaKabupaten = substr($nama, strlen('Kabupaten '));
+                $namaDatabase = 'KAB. ' . strtoupper(trim($namaKabupaten));
+            } elseif (stripos($nama, 'Kota ') === 0) {
+                $namaKota = substr($nama, strlen('Kota '));
+                $namaDatabase = 'KOTA ' . strtoupper(trim($namaKota));
+            } else {
+                $namaDatabase = strtoupper($nama);
+            }
 
-            $sektorUnggulan =
-                DB::table(
-                    'hasil_tipologi_sektor as hts'
-                )
+            $kabupaten = Kabupaten::whereRaw('UPPER(TRIM(nama_kabupaten)) = ?', [strtoupper(trim($namaDatabase))])->first();
 
-                    ->join(
-                        'sektor as s',
-                        's.sektor_id',
-                        '=',
-                        'hts.sektor_id'
-                    )
+            if (!$kabupaten) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data analisis daerah belum tersedia.',
+                    'nama_marker' => $nama,
+                ], 404);
+            }
 
-                    ->where(
-                        'hts.kab_id',
-                        $kabupaten->kab_id
-                    )
+            // Ambil analisis tipologi sektor untuk kabupaten tersebut
+            $tahunTerbaru = DB::table('hasil_tipologi_sektor')
+                ->where('kab_id', $kabupaten->kab_id)
+                ->max('tahun');
 
-                    ->where(
-                        'hts.tahun',
-                        $tahunTerbaru
-                    )
+            if (!$tahunTerbaru) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Belum ada hasil analisis untuk daerah ini.',
+                    'kabupaten' => $kabupaten->nama_kabupaten,
+                ]);
+            }
 
-                    ->where(
-                        'hts.kuadran',
-                        'Kuadran I'
-                    )
-
-                    ->select(
-                        's.sektor_id',
-                        's.nama_sektor'
-                    )
-
-                    ->distinct()
-
-                    ->orderBy(
-                        's.nama_sektor'
-                    )
-
-                    ->get();
-
-
-            // =====================================================
-            // 12. RESPONSE
-            // =====================================================
+            $sektorUnggulan = DB::table('hasil_tipologi_sektor as hts')
+                ->join('sektor as s', 's.sektor_id', '=', 'hts.sektor_id')
+                ->where('hts.kab_id', $kabupaten->kab_id)
+                ->where('hts.tahun', $tahunTerbaru)
+                ->where('hts.kuadran', 'Kuadran I')
+                ->select('s.nama_sektor')
+                ->distinct()
+                ->orderBy('s.nama_sektor')
+                ->get();
 
             return response()->json([
-
                 'success' => true,
-
-                'kabupaten' =>
-                    $kabupaten->nama_kabupaten,
-
-                'tahun' =>
-                    $tahunTerbaru,
-
-                'kategori' =>
-                    'Sektor Cepat Maju dan Cepat Tumbuh',
-
-                'jumlah_sektor' =>
-                    $sektorUnggulan->count(),
-
-                'sektor' =>
-                    $sektorUnggulan
-                        ->pluck('nama_sektor')
-                        ->values(),
-
+                'kabupaten' => $kabupaten->nama_kabupaten,
+                'tahun' => $tahunTerbaru,
+                'kategori' => 'Sektor Cepat Maju dan Cepat Tumbuh',
+                'jumlah_sektor' => $sektorUnggulan->count(),
+                'sektor' => $sektorUnggulan->pluck('nama_sektor')->values(),
             ]);
 
-        }
-
-        // =========================================================
-        // ERROR SERVER
-        // =========================================================
-
-        catch (\Throwable $e) {
-
-            \Log::error(
-                'Peta Investasi Error',
-                [
-                    'nama' =>
-                        $nama,
-
-                    'error' =>
-                        $e->getMessage(),
-                ]
-            );
-
-
+        } catch (\Throwable $e) {
+            \Log::error('Peta Investasi Error: ' . $e->getMessage());
             return response()->json([
-
                 'success' => false,
-
-                'message' =>
-                    'Terjadi kesalahan saat mengambil data.',
-
-                // Untuk debugging sementara
-                'error' =>
-                    $e->getMessage(),
-
+                'message' => 'Terjadi kesalahan saat mengambil data.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

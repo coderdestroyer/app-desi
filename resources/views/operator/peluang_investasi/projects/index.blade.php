@@ -77,19 +77,29 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-                <select x-model="filterKabupaten" class="px-3.5 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white">
-                    <option value="">Semua Kabupaten/Kota</option>
-                    @foreach($kabupatens as $kab)
-                        <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}</option>
-                    @endforeach
-                </select>
+                <div class="relative">
+                    <select x-model="filterKabupaten" class="px-3.5 pr-10 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white appearance-none">
+                        <option value="">Semua Kabupaten/Kota</option>
+                        @foreach($kabupatens as $kab)
+                            <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                        <svg class="w-4 h-4 text-slate-500 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                    </div>
+                </div>
 
-                <select x-model="filterSektor" class="px-3.5 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white">
-                    <option value="">Semua Sektor Ekonomi</option>
-                    @foreach($sektors as $sek)
-                        <option value="{{ $sek->sektor_id }}">{{ $sek->nama_sektor }}</option>
-                    @endforeach
-                </select>
+                <div class="relative">
+                    <select x-model="filterSektor" class="px-3.5 pr-10 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white appearance-none">
+                        <option value="">Semua Sektor Ekonomi</option>
+                        @foreach($sektors as $sek)
+                            <option value="{{ $sek->sektor_id }}">{{ $sek->nama_sektor }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                        <svg class="w-4 h-4 text-slate-500 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -227,21 +237,31 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Kabupaten / Kota</label>
-                            <select name="kabupaten_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white">
-                                <option value="">Pilih Kabupaten/Kota</option>
-                                @foreach($kabupatens as $kab)
-                                    <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}@if($kab->latitude && $kab->longitude) ({{ $kab->latitude }}, {{ $kab->longitude }})@endif</option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <select name="kabupaten_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white pr-10 appearance-none">
+                                    <option value="">Pilih Kabupaten/Kota</option>
+                                    @foreach($kabupatens as $kab)
+                                        <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}@if($kab->latitude && $kab->longitude) ({{ $kab->latitude }}, {{ $kab->longitude }})@endif</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5">
+                                    <svg class="w-4 h-4 text-slate-500 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Sektor Ekonomi</label>
-                            <select name="sektor_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white">
-                                <option value="">Pilih Sektor</option>
-                                @foreach($sektors as $sek)
-                                    <option value="{{ $sek->sektor_id }}">{{ $sek->nama_sektor }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <select name="sektor_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white pr-10 appearance-none">
+                                    <option value="">Pilih Sektor</option>
+                                    @foreach($sektors as $sek)
+                                        <option value="{{ $sek->sektor_id }}">{{ $sek->nama_sektor }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5">
+                                    <svg class="w-4 h-4 text-slate-500 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -263,7 +283,7 @@
 
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Deskripsi Ringkas</label>
-                        <textarea name="deskripsi" rows="3" placeholder="Tuliskan gambaran umum potensi dan ruang lingkup proyek..." class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm"></textarea>
+                        <textarea name="deskripsi" rows="3" placeholder="Tuliskan gambaran umum potensi dan ruang lingkup proyek..." class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm resize-none"></textarea>
                     </div>
 
                     <div class="pt-4 border-t border-[#EEF8F2] flex items-center justify-end gap-3">
@@ -309,7 +329,7 @@
 
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Deskripsi</label>
-                        <textarea name="deskripsi" x-model="selectedProject.deskripsi" rows="3" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm"></textarea>
+                        <textarea name="deskripsi" x-model="selectedProject.deskripsi" rows="3" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm resize-none"></textarea>
                     </div>
 
                     <div class="pt-4 border-t border-[#EEF8F2] flex items-center justify-end gap-3">
