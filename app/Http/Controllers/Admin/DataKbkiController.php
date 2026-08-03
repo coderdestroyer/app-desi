@@ -110,42 +110,7 @@ class DataKbkiController extends Controller
                 );
             }
 
-            $paginator = $sectionQuery
-                ->orderBy('kode')
-                ->paginate($perPage)
-                ->withQueryString();
-
-            $sectionCodes = collect($paginator->items())
-                ->pluck('kode')
-                ->filter()
-                ->values();
-
-            if ($sectionCodes->isEmpty()) {
-                $dataKbki = collect();
-            } elseif ($isFormOpen) {
-                $dataKbkiQuery = $this->hierarchyRowsQuery();
-                if ($hasStruktur) {
-                    $dataKbkiQuery->where('k.struktur', 'Seksi');
-                } else {
-                    $dataKbkiQuery->where('k.level', 1);
-                }
-                $dataKbki = $dataKbkiQuery
-                    ->whereIn('k.kode', $sectionCodes)
-                    ->orderBy('k.kode')
-                    ->get();
-            } else {
-                $dataKbkiQuery = $this->hierarchyRowsQuery();
-                if (Schema::hasColumn($this->table, 'seksi_kode')) {
-                    $dataKbkiQuery->whereIn('k.seksi_kode', $sectionCodes);
-                } else {
-                    $dataKbkiQuery->whereIn(DB::raw('SUBSTRING(k.kode, 1, 1)'), $sectionCodes);
-                }
-                $dataKbki = $dataKbkiQuery
-                    ->orderBy('k.kode')
-                    ->get();
-            }
-        } else {
-            $paginator = $this->filteredQuery($request)
+        $paginator = $this->filteredQuery($request)
                 ->select($this->selectColumns())
                 ->selectSub(function ($subQuery) {
                     $subQuery

@@ -20,18 +20,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="{{ asset('js/data-wilayah.js') }}"></script>
 
-    <style>
-        @keyframes modalAppear {
-            from {
-                opacity: 0;
-                transform: translateY(10px) scale(0.97);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-    </style>
+
 
     @stack('styles')
 </head>
@@ -215,7 +204,7 @@
 
     <div id="logoutModal" class="fixed inset-0 z-[1000] grid place-items-center p-6 [&[hidden]]:!hidden" hidden>
         <div class="absolute inset-0 bg-[#0f172a]/[0.52] backdrop-blur-[3px]" data-close-logout></div>
-        <div class="relative w-[min(420px,100%)] pt-[30px] px-[28px] pb-[27px] rounded-[22px] bg-white text-center shadow-[0_30px_80px_rgba(15,23,42,0.25)] animate-[modalAppear_0.2s_ease-out]">
+        <div class="relative w-[min(420px,100%)] pt-[30px] px-[28px] pb-[27px] rounded-[22px] bg-white text-center shadow-[0_30px_80px_rgba(15,23,42,0.25)] animate-modalAppear">
             <div class="w-[68px] h-[68px] my-0 mx-auto mb-[18px] grid place-items-center rounded-[20px] text-[#dc2626] bg-[#fee2e2] text-[26px]">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </div>

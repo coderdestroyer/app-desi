@@ -67,65 +67,12 @@
         $selectedCakupan = old('cakupan', $isEdit ? $editData->cakupan : '');
         $selectedTidakCakupan = old('tidak_cakupan', $isEdit ? $editData->tidak_cakupan : '');
         $selectedCatatan = old('catatan', $isEdit ? $editData->catatan : '');
+        $editQueryParams = array_merge(request()->except(['edit', 'mode']), ['mode' => 'edit']);
+        $editBaseUrl = route('admin.data-kbli.index', $editQueryParams) . '&edit=';
+        $deleteBaseUrl = route('admin.data-kbli.destroy', 'PLACEHOLDER');
     @endphp
 
-    @push('styles')
-        <style>
-            .kbli-clamp-2 {
-                display: -webkit-box;
-                -webkit-box-orient: vertical;
-                -webkit-line-clamp: 2;
-                overflow: hidden;
-            }
 
-            .kbli-tree-cell {
-                position: relative;
-            }
-
-            .kbli-tree-line {
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                width: 1px;
-                background: #dbe3ec;
-            }
-
-            .kbli-tree-elbow {
-                position: absolute;
-                top: 50%;
-                height: 1px;
-                background: #dbe3ec;
-            }
-
-            [data-kbli-row][hidden] {
-                display: none !important;
-            }
-
-            #adminKbliTableWrapper {
-                overflow-x: auto;
-            }
-
-            #adminKbliTable {
-                min-width: 1320px;
-            }
-
-
-            .kbli-category-focus {
-                animation: kbliCategoryFocus 1.6s ease;
-            }
-
-            @keyframes kbliCategoryFocus {
-                0%, 100% {
-                    box-shadow: inset 0 0 0 0 rgba(5, 150, 105, 0);
-                    background: rgba(248, 250, 252, 0.8);
-                }
-                35%, 70% {
-                    box-shadow: inset 5px 0 0 0 rgb(5, 150, 105);
-                    background: rgba(209, 250, 229, 0.75);
-                }
-            }
-        </style>
-    @endpush
 
     <div class="min-h-screen bg-[#f7f9fc] p-4 sm:p-6 lg:p-8">
         <section class="rounded-2xl bg-gradient-to-r from-[#145239] via-[#0E8F62] to-[#1E5D41] p-6 shadow-lg sm:p-7 lg:p-8">
@@ -347,8 +294,8 @@
                 </div>
             </header>
 
-            <div id="adminKbliTableWrapper">
-                <table id="adminKbliTable" class="w-full border-collapse text-left">
+            <div id="adminKbliTableWrapper" class="overflow-x-auto">
+                <table id="adminKbliTable" class="w-full border-collapse text-left min-w-[1320px] [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_td]:!table-cell [&_th]:!whitespace-nowrap [&_tr[hidden]]:!hidden">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
                             <th class="w-[230px] px-5 py-3">Struktur</th>
@@ -376,12 +323,12 @@
                                 @if ($hierarchyMode && $level > 1) hidden @endif
                                 class="transition {{ $level === 1 ? 'bg-slate-50/80 hover:bg-emerald-50/60' : 'hover:bg-slate-50/80' }}"
                             >
-                                <td class="kbli-tree-cell px-5 py-4">
+                                <td class="relative px-5 py-4">
                                     @for ($treeLevel = 1; $treeLevel < $level; $treeLevel++)
-                                        <span class="kbli-tree-line" style="left: {{ 22 + (($treeLevel - 1) * 28) }}px"></span>
+                                        <span class="absolute top-0 bottom-0 w-[1px] bg-[#dbe3ec]" style="left: {{ 22 + (($treeLevel - 1) * 28) }}px"></span>
                                     @endfor
                                     @if ($level > 1)
-                                        <span class="kbli-tree-elbow" style="left: {{ 22 + (($level - 2) * 28) }}px; width: 20px"></span>
+                                        <span class="absolute top-1/2 h-[1px] bg-[#dbe3ec]" style="left: {{ 22 + (($level - 2) * 28) }}px; width: 20px"></span>
                                     @endif
                                     <div class="relative flex items-center gap-2" style="padding-left: {{ $indent }}px">
                                         @if ($hasChildren && $hierarchyMode)
@@ -421,19 +368,19 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-4 align-top">
-                                    <div class="kbli-clamp-2 max-w-[320px] text-xs leading-relaxed text-slate-500" title="{{ $item->cakupan }}">
+                                    <div class="line-clamp-2 max-w-[320px] text-xs leading-relaxed text-slate-500" title="{{ $item->cakupan }}">
                                         {{ $item->cakupan ?: '-' }}
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 align-top">
-                                    <div class="kbli-clamp-2 max-w-[320px] text-xs leading-relaxed text-slate-500" title="{{ $item->tidak_cakupan }}">
+                                    <div class="line-clamp-2 max-w-[320px] text-xs leading-relaxed text-slate-500" title="{{ $item->tidak_cakupan }}">
                                         {{ $item->tidak_cakupan ?: '-' }}
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center justify-center gap-2">
                                         <a
-                                            href="{{ route('admin.data-kbli.index', array_merge(request()->query(), ['edit' => $item->id, 'mode' => 'edit'])) }}"
+                                            href="{{ $editBaseUrl }}{{ $item->id }}"
                                             title="Edit data"
                                             class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
                                         >
@@ -443,7 +390,7 @@
                                             type="button"
                                             title="Hapus data"
                                             data-delete-kbli
-                                            data-delete-url="{{ route('admin.data-kbli.destroy', $item->id) }}"
+                                            data-delete-url="{{ str_replace('PLACEHOLDER', $item->id, $deleteBaseUrl) }}"
                                             data-delete-code="{{ $item->kode }}"
                                             data-delete-title="{{ $item->judul }}"
                                             data-delete-children="{{ (int) $item->child_count }}"
@@ -913,10 +860,10 @@
                     }
 
                     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    row.classList.add('kbli-category-focus');
+                    row.classList.add('animate-kbliCategoryFocus');
 
                     window.setTimeout(function () {
-                        row.classList.remove('kbli-category-focus');
+                        row.classList.remove('animate-kbliCategoryFocus');
                     }, 1600);
                 });
 
