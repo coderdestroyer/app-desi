@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('partials.layouts.admin')
 
 @section('title', 'Konversi Mata Uang')
 
