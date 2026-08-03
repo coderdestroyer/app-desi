@@ -35,24 +35,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // =====================================================
-    // ICON MARKER HIJAU
+    // ICON MARKERS
     // =====================================================
-    const greenIcon = L.icon({
-
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
-
-        shadowUrl:
-            "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-
+    // Green Icon for Kabupaten
+    const kabupatenIcon = L.icon({
+        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
         iconSize: [25, 41],
-
         iconAnchor: [12, 41],
-
         popupAnchor: [1, -34],
-
         shadowSize: [41, 41],
+    });
 
+    // Gold/Yellow Icon for Provinsi
+    const provinsiIcon = L.icon({
+        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
     });
 
 
@@ -78,6 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const namaDaerah =
             document.getElementById("namaDaerah");
 
+        const jenisDaerah =
+            document.getElementById("jenisDaerah");
+
         const statusDaerah =
             document.getElementById("statusDaerah");
 
@@ -101,10 +106,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         // =================================================
-        // NAMA DAERAH
+        // NAMA & JENIS DAERAH
         // =================================================
         if (namaDaerah) {
             namaDaerah.innerText = item.nama;
+        }
+
+        if (jenisDaerah) {
+            jenisDaerah.innerText = item.type === "provinsi" ? "Provinsi" : "Kabupaten / Kota";
         }
 
 
@@ -149,66 +158,66 @@ document.addEventListener("DOMContentLoaded", () => {
             },
         })
 
-        .then(async (response) => {
+            .then(async (response) => {
 
-            const data = await response.json();
+                const data = await response.json();
 
-            console.log("SERVER RESPONSE:", data);
+                console.log("SERVER RESPONSE:", data);
 
-            if (!response.ok) {
+                if (!response.ok) {
 
-                throw new Error(
-                    data.message ||
-                    "Terjadi kesalahan pada server."
-                );
-
-            }
-
-            return data;
-
-        })
-
-        .then((data) => {
-
-            // =============================================
-            // API GAGAL / DATA TIDAK DITEMUKAN
-            // =============================================
-            if (!data.success) {
-
-                if (sektorDaerah) {
-
-                    sektorDaerah.innerText =
+                    throw new Error(
                         data.message ||
-                        "Belum ada sektor unggulan";
+                        "Terjadi kesalahan pada server."
+                    );
 
                 }
 
-                if (statusDaerah) {
+                return data;
 
-                    statusDaerah.innerText =
-                        "Belum ada data";
+            })
 
+            .then((data) => {
+
+                // =============================================
+                // API GAGAL / DATA TIDAK DITEMUKAN
+                // =============================================
+                if (!data.success) {
+
+                    if (sektorDaerah) {
+
+                        sektorDaerah.innerText =
+                            data.message ||
+                            "Belum ada sektor unggulan";
+
+                    }
+
+                    if (statusDaerah) {
+
+                        statusDaerah.innerText =
+                            "Belum ada data";
+
+                    }
+
+                    return;
                 }
 
-                return;
-            }
+
+                // =============================================
+                // AMBIL DATA SEKTOR
+                // =============================================
+                const sektor = data.sektor;
 
 
-            // =============================================
-            // AMBIL DATA SEKTOR
-            // =============================================
-            const sektor = data.sektor;
+                // =============================================
+                // JIKA SEKTOR BERUPA ARRAY
+                // =============================================
+                if (Array.isArray(sektor) && sektor.length > 0) {
 
+                    sektorDaerah.innerHTML = sektor
+                        .map((namaSektor, index) => {
 
-            // =============================================
-            // JIKA SEKTOR BERUPA ARRAY
-            // =============================================
-            if (Array.isArray(sektor) && sektor.length > 0) {
-
-                sektorDaerah.innerHTML = sektor
-                    .map((namaSektor, index) => {
-
-                        return `
+                            return `
                             <div class="sektor-item">
 
                                 <span class="sektor-number">
@@ -222,41 +231,32 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                         `;
 
-                    })
-                    .join("");
+                        })
+                        .join("");
 
-            }
-
-
-            // =============================================
-            // JIKA BACKEND MASIH MENGIRIM STRING
-            // =============================================
-            else if (
-                typeof sektor === "string" &&
-                sektor.trim() !== ""
-            ) {
-
-                /*
-                 * Kalau backend mengirim:
-                 *
-                 * "PERTANIAN<br>PERTAMBANGAN"
-                 *
-                 * atau dipisahkan newline,
-                 * kita coba pecah menjadi array.
-                 */
-
-                const daftarSektor = sektor
-                    .split(/<br\s*\/?>|\n/i)
-                    .map(item => item.trim())
-                    .filter(item => item !== "");
+                }
 
 
-                if (daftarSektor.length > 0) {
+                // =============================================
+                // JIKA BACKEND MASIH MENGIRIM STRING
+                // =============================================
+                else if (
+                    typeof sektor === "string" &&
+                    sektor.trim() !== ""
+                ) {
 
-                    sektorDaerah.innerHTML = daftarSektor
-                        .map((namaSektor, index) => {
+                    const daftarSektor = sektor
+                        .split(/<br\s*\/?>|\n/i)
+                        .map(item => item.trim())
+                        .filter(item => item !== "");
 
-                            return `
+
+                    if (daftarSektor.length > 0) {
+
+                        sektorDaerah.innerHTML = daftarSektor
+                            .map((namaSektor, index) => {
+
+                                return `
                                 <div class="sektor-item">
 
                                     <span class="sektor-number">
@@ -270,75 +270,76 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </div>
                             `;
 
-                        })
-                        .join("");
+                            })
+                            .join("");
 
-                } else {
+                    } else {
+
+                        sektorDaerah.innerText =
+                            "Belum ada sektor unggulan";
+
+                    }
+
+                }
+
+
+                // =============================================
+                // TIDAK ADA SEKTOR
+                // =============================================
+                else {
 
                     sektorDaerah.innerText =
                         "Belum ada sektor unggulan";
 
                 }
 
-            }
 
+                // =============================================
+                // STATUS
+                // =============================================
+                if (statusDaerah) {
 
-            // =============================================
-            // TIDAK ADA SEKTOR
-            // =============================================
-            else {
+                    let status =
+                        data.status ||
+                        data.kategori ||
+                        "Sektor Cepat Maju dan Cepat Tumbuh";
 
-                sektorDaerah.innerText =
-                    "Belum ada sektor unggulan";
+                    if (data.tahun) {
 
-            }
+                        status += `\nTahun ${data.tahun}`;
 
+                    }
 
-            // =============================================
-            // STATUS
-            // =============================================
-            if (statusDaerah) {
-
-                let status =
-                    data.status ||
-                    "Sektor Cepat Maju dan Cepat Tumbuh";
-
-                if (data.tahun) {
-
-                    status += `\nTahun ${data.tahun}`;
+                    statusDaerah.innerText = status;
 
                 }
 
-                statusDaerah.innerText = status;
+            })
 
-            }
+            .catch((error) => {
 
-        })
-
-        .catch((error) => {
-
-            console.error(
-                "ERROR MENGAMBIL ANALISIS:",
-                error
-            );
+                console.error(
+                    "ERROR MENGAMBIL ANALISIS:",
+                    error
+                );
 
 
-            if (sektorDaerah) {
+                if (sektorDaerah) {
 
-                sektorDaerah.innerText =
-                    "Gagal mengambil data.";
+                    sektorDaerah.innerText =
+                        "Gagal mengambil data.";
 
-            }
+                }
 
 
-            if (statusDaerah) {
+                if (statusDaerah) {
 
-                statusDaerah.innerText =
-                    "Terjadi kesalahan";
+                    statusDaerah.innerText =
+                        "Terjadi kesalahan";
 
-            }
+                }
 
-        });
+            });
 
     }
 
@@ -373,12 +374,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         // =============================================
+        // PILIH ICON BERDASARKAN TYPE (PROVINSI / KABUPATEN)
+        // =============================================
+        const icon = item.type === "provinsi" ? provinsiIcon : kabupatenIcon;
+
+
+        // =============================================
         // BUAT MARKER
         // =============================================
+        const zIndexOffset = item.type === "provinsi" ? 1000 : 0;
         const marker = L.marker(
             [latitude, longitude],
             {
-                icon: greenIcon,
+                icon: icon,
+                zIndexOffset: zIndexOffset,
             }
         ).addTo(group);
 
@@ -386,12 +395,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // =============================================
         // POPUP
         // =============================================
+        const labelTipe = item.type === "provinsi" ? "Provinsi" : "Kabupaten / Kota";
         marker.bindPopup(`
 
             <div class="popup-card">
 
                 <div class="popup-title">
-                    📍 ${item.nama}
+                    📍 ${item.nama} (${labelTipe})
                 </div>
 
                 <div class="popup-desc">
