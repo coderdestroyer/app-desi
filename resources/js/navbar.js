@@ -25,7 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const navHome = document.getElementById("nav-home");
         const navAbout = document.getElementById("nav-about");
 
+        let isScrollingFromClick = false;
+        let scrollTimeout;
+
         function setActive() {
+            if (isScrollingFromClick) return;
             if (!tentang) return;
 
             if (window.scrollY < tentang.offsetTop - 150) {
@@ -37,10 +41,35 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+        function handleLinkClick(activeLink, inactiveLink) {
+            isScrollingFromClick = true;
+            activeLink?.classList.add("active");
+            inactiveLink?.classList.remove("active");
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                isScrollingFromClick = false;
+            }, 1000);
+        }
+        navHome?.addEventListener("click", () => handleLinkClick(navHome, navAbout));
+        navAbout?.addEventListener("click", () => handleLinkClick(navAbout, navHome));
+        
         setActive();
         window.addEventListener("scroll", setActive);
     }
+    
+    function handleLinkClick(activeLink, inactiveLink) {
+            isScrollingFromClick = true;
+            activeLink?.classList.add("active");
+            inactiveLink?.classList.remove("active");
 
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                isScrollingFromClick = false;
+            }, 1000);
+    }
+
+        navHome?.addEventListener("click", () => handleLinkClick(navHome, navAbout));
+        navAbout?.addEventListener("click", () => handleLinkClick(navAbout, navHome));
     // ===============================
     // Mobile Hamburger Menu
     // ===============================
