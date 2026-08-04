@@ -1,5 +1,7 @@
 @extends('partials.layouts.operator')
 
+@section('title', 'Analisis Tipologi Klassen')
+
 @section('content')
 <div>
     <!-- Alert Messages -->

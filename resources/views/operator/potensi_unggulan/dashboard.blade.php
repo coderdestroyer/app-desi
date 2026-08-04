@@ -1,5 +1,7 @@
 @extends('partials.layouts.operator')
 
+@section('title', 'Potensi Unggulan Daerah')
+
 @section('content')
 <div x-data="{ isPdrbModalOpen: false, inputMode: 'batch' }">
     @if(session('success'))

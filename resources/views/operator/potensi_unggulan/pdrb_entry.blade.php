@@ -1,5 +1,7 @@
 @extends('partials.layouts.operator')
 
+@section('title', 'Input Data PDRB Daerah')
+
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6" x-data="pdrbEntryData()">
 

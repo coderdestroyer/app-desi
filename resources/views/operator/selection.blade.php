@@ -1,5 +1,7 @@
 @extends('partials.layouts.operator')
 
+@section('title', 'Pusat Kerja Operator')
+
 @section('content')
 <div class="max-w-6xl mx-auto py-6 px-4">
     <!-- Welcome Header -->

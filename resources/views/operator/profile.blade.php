@@ -1,5 +1,7 @@
 @extends('partials.layouts.operator')
 
+@section('title', 'Profil Operator')
+
 @section('content')
     <!-- Header -->
     <div class="mb-8">
