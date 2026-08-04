@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Kabupaten;
 use App\Models\PdrbKabupaten;
 use App\Models\PdrbSumut;
+use App\Models\PdbNasional;
 use App\Services\Concerns\DeterminesQuadrants;
 
 class BaseAnalysisService
@@ -37,6 +38,14 @@ class BaseAnalysisService
         return (float) PdrbSumut::where('provinsi_id', $provinsiId)
             ->where('tahun', $tahun)
             ->sum('nilai_pdrb');
+    }
+
+    /**
+     * Total PDB Nasional
+     */
+    protected function getTotalNasional(int $tahun): float
+    {
+        return (float) PdbNasional::where('tahun', $tahun)->sum('nilai');
     }
 
     /**
@@ -105,6 +114,13 @@ class BaseAnalysisService
     {
         return PdrbKabupaten::with('sektor')
             ->where('kabupaten_id', $kabId)
+            ->where('tahun', $tahun)
+            ->get();
+    }
+
+    protected function getPdbNasionalByTahun(int $tahun)
+    {
+        return PdbNasional::with('sektor')
             ->where('tahun', $tahun)
             ->get();
     }
