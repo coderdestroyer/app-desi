@@ -78,40 +78,42 @@ class LqController extends Controller
                 ];
             });
         } else {
-            // Default ke Tahun Terbaru untuk performa kilat (< 50ms)
             $maxTahun = DB::table('pdrb_sumatera_kabupaten')->whereIn('kabupaten_id', $authorizedIds)->max('tahun') ?? 2024;
             $selectedTahun = $request->has('tahun') && !empty($request->tahun) ? (int)$request->tahun : (int)$maxTahun;
+            $cacheKey = 'calc_lq_' . md5(implode('_', $authorizedIds) . '_' . $selectedTahun);
 
-            $mappedRows = [];
-            $idCounter = 1;
+            $mappedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $selectedTahun) {
+                $mappedRows = [];
+                $idCounter = 1;
 
-            foreach ($authorizedKabupatens as $kab) {
-                $dynamicLq = $this->lqService->calculateLq($kab->kab_id, $selectedTahun);
-                foreach ($dynamicLq as $item) {
-                    $mappedRows[] = [
-                        'id' => $idCounter++,
-                        'tingkat_wilayah' => 'Kabupaten/Kota',
-                        'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                        'daerah_pembanding' => 'SUMATERA UTARA',
-                        'provinsi' => 'SUMATERA UTARA',
-                        'kabupaten' => strtoupper($kab->nama_kabupaten),
-                        'sektor' => $item['sektor']->nama_sektor ?? '-',
-                        'tahun' => $item['tahun'],
-                        'pdrb_sektor_analisis' => $item['persen_kabupaten'],
-                        'total_pdrb_analisis' => 100,
-                        'pdrb_sektor_pembanding' => $item['persen_provinsi'],
-                        'total_pdrb_pembanding' => 100,
-                        'nilai_lq' => $item['nilai_lq'],
-                        'keterangan' => $item['kategori'] === 'Basis'
-                            ? 'Sektor Unggulan (LQ >= 1). Peranannya di daerah lebih dominan dibanding rata-rata acuan.'
-                            : 'Sektor Non-Unggulan (LQ < 1). Peranannya lebih rendah dibanding rata-rata acuan.',
-                        'kategori' => strtoupper($item['kategori']),
-                        'riwayat' => 'Kalkulasi Otomatis',
-                    ];
+                foreach ($authorizedKabupatens as $kab) {
+                    $dynamicLq = $this->lqService->calculateLq($kab->kab_id, $selectedTahun);
+                    foreach ($dynamicLq as $item) {
+                        $mappedRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Kabupaten/Kota',
+                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                            'daerah_pembanding' => 'SUMATERA UTARA',
+                            'provinsi' => 'SUMATERA UTARA',
+                            'kabupaten' => strtoupper($kab->nama_kabupaten),
+                            'sektor' => $item['sektor']->nama_sektor ?? '-',
+                            'tahun' => $item['tahun'],
+                            'pdrb_sektor_analisis' => $item['persen_kabupaten'],
+                            'total_pdrb_analisis' => 100,
+                            'pdrb_sektor_pembanding' => $item['persen_provinsi'],
+                            'total_pdrb_pembanding' => 100,
+                            'nilai_lq' => $item['nilai_lq'],
+                            'keterangan' => $item['kategori'] === 'Basis'
+                                ? 'Sektor Unggulan (LQ >= 1). Peranannya di daerah lebih dominan dibanding rata-rata acuan.'
+                                : 'Sektor Non-Unggulan (LQ < 1). Peranannya lebih rendah dibanding rata-rata acuan.',
+                            'kategori' => strtoupper($item['kategori']),
+                            'riwayat' => 'Kalkulasi Otomatis',
+                        ];
+                    }
                 }
-            }
 
-            $mappedData = collect($mappedRows);
+                return collect($mappedRows);
+            });
         }
 
         if ($request->has('search') && !empty($request->search)) {
@@ -224,6 +226,7 @@ class LqController extends Controller
         ]);
 
         OperatorController::logActivity('Analisis LQ', 'ditambah', "Menambah data perhitungan LQ untuk daerah {$newData['daerah_analisis']} tahun {$newData['tahun']}");
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('operator.lq.index')->with('success', 'Data perhitungan LQ berhasil disimpan secara permanen!');
     }
@@ -248,6 +251,7 @@ class LqController extends Controller
         ]);
 
         OperatorController::logActivity('Analisis LQ', 'diubah', "Mengubah data perhitungan LQ daerah {$updatedData['daerah_analisis']}");
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('operator.lq.index')->with('success', 'Data perhitungan LQ berhasil diperbarui secara permanen!');
     }
@@ -260,6 +264,7 @@ class LqController extends Controller
             $daerah = $res->results['daerah_analisis'] ?? 'Daerah';
             $res->delete();
             OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus data perhitungan LQ daerah {$daerah}");
+            \Illuminate\Support\Facades\Cache::flush();
         }
 
         return back()->with('success', 'Data perhitungan LQ berhasil dihapus secara permanen!');
@@ -269,6 +274,7 @@ class LqController extends Controller
     {
         AnalysisResult::where('type', 'lq')->delete();
         OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus semua data perhitungan LQ");
+        \Illuminate\Support\Facades\Cache::flush();
         return back()->with('success', 'Semua data perhitungan LQ berhasil dihapus secara permanen!');
     }
 
@@ -279,6 +285,7 @@ class LqController extends Controller
             $count = count($ids);
             AnalysisResult::where('type', 'lq')->whereIn('id', $ids)->delete();
             OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus {$count} data perhitungan LQ secara massal");
+            \Illuminate\Support\Facades\Cache::flush();
             return back()->with('success', "{$count} data perhitungan LQ berhasil dihapus secara massal!");
         }
         return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');

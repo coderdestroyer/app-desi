@@ -89,44 +89,47 @@ class SsController extends Controller
         } else {
             $maxTahun = DB::table('pdrb_sumatera_kabupaten')->whereIn('kabupaten_id', $authorizedIds)->max('tahun') ?? 2024;
             $selectedTahun = $request->has('tahun') && !empty($request->tahun) ? (int)$request->tahun : (int)$maxTahun;
+            $cacheKey = 'calc_ss_' . md5(implode('_', $authorizedIds) . '_' . $selectedTahun);
 
-            $mappedRows = [];
-            $idCounter = 1;
+            $mappedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $selectedTahun) {
+                $mappedRows = [];
+                $idCounter = 1;
 
-            foreach ($authorizedKabupatens as $kab) {
-                $dynamicSsa = $this->ssaService->calculateSsa($kab->kab_id, $selectedTahun);
-                foreach ($dynamicSsa as $item) {
-                    $mappedRows[] = [
-                        'id' => $idCounter++,
-                        'tingkat_wilayah' => 'Kabupaten/Kota',
-                        'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                        'daerah_pembanding' => 'SUMATERA UTARA',
-                        'provinsi' => 'SUMATERA UTARA',
-                        'kabupaten' => strtoupper($kab->nama_kabupaten),
-                        'sektor' => $item['sektor']->nama_sektor ?? '-',
-                        'tahun_awal' => $selectedTahun - 1,
-                        'tahun_akhir' => $selectedTahun,
-                        'pdrb_sektor_analisis_awal' => 0,
-                        'pdrb_sektor_analisis_akhir' => 0,
-                        'pdrb_sektor_pembanding_awal' => 0,
-                        'pdrb_sektor_pembanding_akhir' => 0,
-                        'total_pdrb_pembanding_awal' => 0,
-                        'total_pdrb_pembanding_akhir' => 0,
-                        'rij' => number_format($item['rij'], 4, '.', ''),
-                        'rin' => number_format($item['rin'], 4, '.', ''),
-                        'rn' => number_format($item['rn'], 4, '.', ''),
-                        'nij' => $item['nij'],
-                        'mij' => $item['mij'],
-                        'cij' => $item['cij'],
-                        'dij' => $item['dij'],
-                        'status_pertumbuhan' => $item['kategori_pertumbuhan'],
-                        'status_daya_saing' => $item['kategori_daya_saing'],
-                        'riwayat' => 'Kalkulasi Otomatis',
-                    ];
+                foreach ($authorizedKabupatens as $kab) {
+                    $dynamicSsa = $this->ssaService->calculateSsa($kab->kab_id, $selectedTahun);
+                    foreach ($dynamicSsa as $item) {
+                        $mappedRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Kabupaten/Kota',
+                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                            'daerah_pembanding' => 'SUMATERA UTARA',
+                            'provinsi' => 'SUMATERA UTARA',
+                            'kabupaten' => strtoupper($kab->nama_kabupaten),
+                            'sektor' => $item['sektor']->nama_sektor ?? '-',
+                            'tahun_awal' => $selectedTahun - 1,
+                            'tahun_akhir' => $selectedTahun,
+                            'pdrb_sektor_analisis_awal' => 0,
+                            'pdrb_sektor_analisis_akhir' => 0,
+                            'pdrb_sektor_pembanding_awal' => 0,
+                            'pdrb_sektor_pembanding_akhir' => 0,
+                            'total_pdrb_pembanding_awal' => 0,
+                            'total_pdrb_pembanding_akhir' => 0,
+                            'rij' => number_format($item['rij'], 4, '.', ''),
+                            'rin' => number_format($item['rin'], 4, '.', ''),
+                            'rn' => number_format($item['rn'], 4, '.', ''),
+                            'nij' => $item['nij'],
+                            'mij' => $item['mij'],
+                            'cij' => $item['cij'],
+                            'dij' => $item['dij'],
+                            'status_pertumbuhan' => $item['kategori_pertumbuhan'],
+                            'status_daya_saing' => $item['kategori_daya_saing'],
+                            'riwayat' => 'Kalkulasi Otomatis',
+                        ];
+                    }
                 }
-            }
 
-            $mappedData = collect($mappedRows);
+                return collect($mappedRows);
+            });
         }
 
         if ($request->has('search') && !empty($request->search)) {
@@ -242,6 +245,7 @@ class SsController extends Controller
         ]);
 
         OperatorController::logActivity('Analisis SS', 'ditambah', "Menambah data Shift Share {$newData['daerah_analisis']}");
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('operator.ss.index')->with('success', 'Data perhitungan Shift-Share berhasil disimpan secara permanen!');
     }
@@ -266,6 +270,7 @@ class SsController extends Controller
         ]);
 
         OperatorController::logActivity('Analisis SS', 'diubah', "Mengubah data Shift Share {$updatedData['daerah_analisis']}");
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('operator.ss.index')->with('success', 'Data perhitungan Shift-Share berhasil diperbarui secara permanen!');
     }
@@ -278,6 +283,7 @@ class SsController extends Controller
             $daerah = $res->results['daerah_analisis'] ?? 'Daerah';
             $res->delete();
             OperatorController::logActivity('Analisis SS', 'dihapus', "Menghapus data Shift Share {$daerah}");
+            \Illuminate\Support\Facades\Cache::flush();
         }
 
         return back()->with('success', 'Data perhitungan Shift-Share berhasil dihapus secara permanen!');
@@ -287,6 +293,7 @@ class SsController extends Controller
     {
         AnalysisResult::where('type', 'shift_share')->delete();
         OperatorController::logActivity('Analisis SS', 'dihapus', "Menghapus semua data Shift Share");
+        \Illuminate\Support\Facades\Cache::flush();
         return back()->with('success', 'Semua data perhitungan Shift-Share berhasil dihapus secara permanen!');
     }
 
@@ -297,6 +304,7 @@ class SsController extends Controller
             $count = count($ids);
             AnalysisResult::where('type', 'shift_share')->whereIn('id', $ids)->delete();
             OperatorController::logActivity('Analisis SS', 'dihapus', "Menghapus {$count} data Shift Share secara massal");
+            \Illuminate\Support\Facades\Cache::flush();
             return back()->with('success', "{$count} data Shift Share berhasil dihapus secara massal!");
         }
         return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
