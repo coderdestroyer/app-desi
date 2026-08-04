@@ -1,6 +1,6 @@
 @extends('partials.layouts.operator')
 
-@section('title', 'Daftar Proyek Investasi (IPRO Engine) - DPMPTSP')
+@section('title', 'Daftar Proyek Investasi')
 @section('page_heading', 'Daftar Proyek Investasi')
 
 @section('content')

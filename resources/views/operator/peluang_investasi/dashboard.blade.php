@@ -1,6 +1,6 @@
 @extends('partials.layouts.operator')
 
-@section('title', 'Dashboard Peluang Investasi (IPRO Engine) - DPMPTSP')
+@section('title', 'Dashboard Peluang Investasi')
 @section('page_heading', 'Dashboard Peluang Investasi')
 
 @section('content')
@@ -16,7 +16,7 @@
         <div class="relative z-10 text-white flex-1">
             <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-900/60 border border-emerald-500/30 text-amber-300 text-xs font-bold mb-4 backdrop-blur-sm">
                 <i class="fa-solid fa-chart-line text-xs text-[#FFD54F]"></i>
-                Dashboard Peluang Investasi (IPRO Engine)
+                Dashboard Peluang Investasi
             </div>
             <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
                 Selamat Datang, <span class="text-[#FFD54F]">{{ Auth::user()->name }}</span>
