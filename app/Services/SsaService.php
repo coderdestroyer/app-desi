@@ -2,282 +2,87 @@
 
 namespace App\Services;
 
-use App\Models\HasilSsa;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 
 class SsaService extends BaseAnalysisService
 {
     /**
-     * Generate hasil SSA
+     * Hitung Shift-Share Analysis secara dinamis (On-The-Fly) dari data PDRB
      */
-    public function generate(
-        int $kabId,
-        int $tahun
-    ): void {
-
-        DB::transaction(function () use ($kabId, $tahun) {
-
-            $this->calculateSsa(
-                $kabId,
-                $tahun
-            );
-
-        });
-
-    }
-
-    /**
-     * Hitung seluruh SSA
-     */
-    private function calculateSsa(
-        int $kabId,
-        int $tahun
-    ): void {
-
+    public function calculateSsa(int $kabId, int $tahun): Collection
+    {
         $tahunLalu = $tahun - 1;
-
         $provinsiId = $this->getProvinsiId($kabId);
 
-        /**
-         * ============================================
-         * TOTAL PROVINSI
-         * ============================================
-         */
-
-        $totalProvinsiSekarang = $this->getTotalProvinsi(
-            $provinsiId,
-            $tahun
-        );
-
-        $totalProvinsiLalu = $this->getTotalProvinsi(
-            $provinsiId,
-            $tahunLalu
-        );
+        $totalProvinsiSekarang = $this->getTotalProvinsi($provinsiId, $tahun);
+        $totalProvinsiLalu = $this->getTotalProvinsi($provinsiId, $tahunLalu);
 
         if ($totalProvinsiLalu <= 0) {
-            return;
+            return collect();
         }
 
-        /**
-         * ============================================
-         * Rn
-         * ============================================
-         */
+        $rn = $this->calculateGrowth($totalProvinsiSekarang, $totalProvinsiLalu);
 
-        $rn = $this->calculateGrowth(
-            $totalProvinsiSekarang,
-            $totalProvinsiLalu
-        );
+        $kabupatenSekarang = $this->getPdrbKabupatenByTahun($kabId, $tahun)->keyBy('sektor_id');
+        $kabupatenLalu = $this->getPdrbKabupatenByTahun($kabId, $tahunLalu)->keyBy('sektor_id');
 
-        /**
-         * ============================================
-         * DATA KABUPATEN
-         * ============================================
-         */
-
-        $kabupatenSekarang = $this->getPdrbKabupatenByTahun(
-            $kabId,
-            $tahun
-        )->keyBy('sektor_id');
-
-        $kabupatenLalu = $this->getPdrbKabupatenByTahun(
-            $kabId,
-            $tahunLalu
-        )->keyBy('sektor_id');
-
-        /**
-         * ============================================
-         * DATA PROVINSI
-         * ============================================
-         */
-
-        $provinsiSekarang = $this->getPdrbProvinsiByTahun(
-            $provinsiId,
-            $tahun
-        )->keyBy('sektor_id');
-
-        $provinsiLalu = $this->getPdrbProvinsiByTahun(
-            $provinsiId,
-            $tahunLalu
-        )->keyBy('sektor_id');
-
-        /**
-         * ============================================
-         * ROW UPSERT
-         * ============================================
-         */
+        $provinsiSekarang = $this->getPdrbProvinsiByTahun($provinsiId, $tahun)->keyBy('sektor_id');
+        $provinsiLalu = $this->getPdrbProvinsiByTahun($provinsiId, $tahunLalu)->keyBy('sektor_id');
 
         $rows = [];
 
-        /**
-         * ============================================
-         * LOOP SELURUH SEKTOR
-         * ============================================
-         */
-
         foreach ($kabupatenSekarang as $sektorId => $kabSekarang) {
-
             $kabLalu = $kabupatenLalu->get($sektorId);
-
             $provSekarang = $provinsiSekarang->get($sektorId);
-
             $provLalu = $provinsiLalu->get($sektorId);
 
-            if (
-                !$kabLalu ||
-                !$provSekarang ||
-                !$provLalu
-            ) {
+            if (!$kabLalu || !$provSekarang || !$provLalu) {
                 continue;
             }
 
-            if ($this->hasNullValue(
-                $kabSekarang->nilai,
-                $kabLalu->nilai,
-                $provSekarang->nilai,
-                $provLalu->nilai
-            )) {
+            $nilaiKabSekarang = $kabSekarang->nilai_pdrb ?? 0;
+            $nilaiKabLalu = $kabLalu->nilai_pdrb ?? 0;
+            $nilaiProvSekarang = $provSekarang->nilai_pdrb ?? 0;
+            $nilaiProvLalu = $provLalu->nilai_pdrb ?? 0;
+
+            if ($this->hasNullValue($nilaiKabSekarang, $nilaiKabLalu, $nilaiProvSekarang, $nilaiProvLalu)) {
                 continue;
             }
 
-            /**
-             * ============================================
-             * Growth
-             * ============================================
-             */
+            $rij = $this->calculateGrowth($nilaiKabSekarang, $nilaiKabLalu);
+            $rin = $this->calculateGrowth($nilaiProvSekarang, $nilaiProvLalu);
 
-            $rij = $this->calculateGrowth(
-                $kabSekarang->nilai,
-                $kabLalu->nilai
-            );
-
-            $rin = $this->calculateGrowth(
-                $provSekarang->nilai,
-                $provLalu->nilai
-            );
-
-            /**
-             * ============================================
-             * Yij
-             * Mengikuti PDF BKPM
-             * Menggunakan nilai tahun sebelumnya
-             * ============================================
-             */
-
-            $yij = $kabLalu->nilai;
-
-            /**
-             * ============================================
-             * SSA
-             * Mengikuti rumus PDF BKPM
-             * ============================================
-             */
+            $yij = $nilaiKabLalu;
 
             $nij = $yij * $rn;
-
             $mij = $yij * ($rin - $rn);
-
-            // Mengikuti PDF BKPM
-            $cij = $yij * ($rij - $rn);
-
+            $cij = $yij * ($rij - $rin);
             $dij = $nij + $mij + $cij;
 
-            /**
-             * ============================================
-             * Kategori
-             * ============================================
-             */
-
-            $kategoriPertumbuhan =
-
-                $dij >= 0
-
-                ? 'Pertumbuhan Cepat'
-
-                : 'Pertumbuhan Lambat';
-
-            $kategoriDayaSaing =
-
-                $cij >= 0
-
-                ? 'Daya Saing Baik'
-
-                : 'Tidak Dapat Bersaing';
-
-            /**
-             * ============================================
-             * ROW
-             * ============================================
-             */
+            $kategoriPertumbuhan = $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat';
+            $kategoriDayaSaing = $cij >= 0 ? 'Daya Saing Baik' : 'Tidak Dapat Bersaing';
 
             $rows[] = [
-
                 'kab_id' => $kabId,
-
                 'sektor_id' => $sektorId,
-
+                'sektor' => $kabSekarang->sektor,
                 'tahun' => $tahun,
-
-                'rn' => round($rn,6),
-
-                'rin' => round($rin,6),
-
-                'rij' => round($rij,6),
-
-                'nij' => round($nij,4),
-
-                'mij' => round($mij,4),
-
-                'cij' => round($cij,4),
-
-                'dij' => round($dij,4),
-
+                'rn' => round($rn, 6),
+                'rin' => round($rin, 6),
+                'rij' => round($rij, 6),
+                'nij' => round($nij, 2),
+                'mij' => round($mij, 2),
+                'cij' => round($cij, 2),
+                'dij' => round($dij, 2),
+                'komponen_n' => round($nij, 2),
+                'komponen_p' => round($mij, 2),
+                'komponen_d' => round($cij, 2),
+                'total_shift' => round($dij, 2),
                 'kategori_pertumbuhan' => $kategoriPertumbuhan,
-
                 'kategori_daya_saing' => $kategoriDayaSaing,
-
-                ...$this->timestamp()
-
             ];
-
         }
 
-        /**
-         * ============================================
-         * BULK UPSERT
-         * ============================================
-         */
-
-        if (!empty($rows)) {
-
-            HasilSsa::upsert(
-
-                $rows,
-
-                [
-                    'kab_id',
-                    'sektor_id',
-                    'tahun'
-                ],
-
-                [
-                    'rn',
-                    'rin',
-                    'rij',
-                    'nij',
-                    'mij',
-                    'cij',
-                    'dij',
-                    'kategori_pertumbuhan',
-                    'kategori_daya_saing',
-                    'updated_at'
-                ]
-
-            );
-
-        }
-
+        return collect($rows);
     }
-
 }
-

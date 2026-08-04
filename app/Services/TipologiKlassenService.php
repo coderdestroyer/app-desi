@@ -2,265 +2,82 @@
 
 namespace App\Services;
 
-use App\Models\HasilTipologiKlassen;
-use App\Models\IndikatorKabupaten;
-use App\Models\IndikatorProvinsi;
+use Illuminate\Support\Collection;
 
 class TipologiKlassenService extends BaseAnalysisService
 {
     /**
-     * ==========================================================
-     * Generate Tipologi Klassen
-     * ==========================================================
+     * Hitung Tipologi Klassen secara dinamis (On-The-Fly) dari data PDRB
      */
-    public function generate(
-        int $kabId,
-        int $tahun
-    ): void {
+    public function calculateKlassen(int $kabId, int $tahun): Collection
+    {
+        $tahunLalu = $tahun - 1;
+        $provinsiId = $this->getProvinsiId($kabId);
 
-        $this->calculateKlassen(
-            $kabId,
-            $tahun
-        );
+        $totalKabupatenSekarang = $this->getTotalKabupaten($kabId, $tahun);
+        $totalKabupatenLalu = $this->getTotalKabupaten($kabId, $tahunLalu);
 
-    }
+        $totalProvinsiSekarang = $this->getTotalProvinsi($provinsiId, $tahun);
+        $totalProvinsiLalu = $this->getTotalProvinsi($provinsiId, $tahunLalu);
 
-    /**
-     * ==========================================================
-     * Hitung Tipologi Klassen
-     * ==========================================================
-     */
-    private function calculateKlassen(
-        int $kabId,
-        int $tahun
-    ): void {
+        if ($totalKabupatenSekarang <= 0 || $totalProvinsiSekarang <= 0 || $totalKabupatenLalu <= 0 || $totalProvinsiLalu <= 0) {
+            return collect();
+        }
 
-        /**
-         * --------------------------------------------
-         * Provinsi
-         * --------------------------------------------
-         */
+        // Laju Pertumbuhan Total PDRB Wilayah Acuan (r)
+        $r_provinsi = $this->calculateGrowth($totalProvinsiSekarang, $totalProvinsiLalu);
 
-        $provinsiId =
+        $kabupatenSekarang = $this->getPdrbKabupatenByTahun($kabId, $tahun)->keyBy('sektor_id');
+        $kabupatenLalu = $this->getPdrbKabupatenByTahun($kabId, $tahunLalu)->keyBy('sektor_id');
 
-            $this->getProvinsiId(
-                $kabId
-            );
-
-        /**
-         * --------------------------------------------
-         * Ambil indikator kabupaten
-         * --------------------------------------------
-         */
-
-        $indikatorKabupaten =
-
-            IndikatorKabupaten::
-
-                where(
-                    'kab_id',
-                    $kabId
-                )
-
-                ->where(
-                    'tahun',
-                    $tahun
-                )
-
-                ->get();
-
-        /**
-         * --------------------------------------------
-         * Ambil indikator provinsi
-         * --------------------------------------------
-         */
-
-        $indikatorProvinsi =
-
-            IndikatorProvinsi::
-
-                where(
-                    'provinsi_id',
-                    $provinsiId
-                )
-
-                ->where(
-                    'tahun',
-                    $tahun
-                )
-
-                ->get()
-
-                ->keyBy(
-                    'sektor_id'
-                );
-
-        /**
-         * --------------------------------------------
-         * Row Upsert
-         * --------------------------------------------
-         */
+        $provinsiSekarang = $this->getPdrbProvinsiByTahun($provinsiId, $tahun)->keyBy('sektor_id');
 
         $rows = [];
 
-        /**
-         * --------------------------------------------
-         * Loop seluruh sektor
-         * --------------------------------------------
-         */
+        foreach ($kabupatenSekarang as $sektorId => $kabSekarang) {
+            $kabLalu = $kabupatenLalu->get($sektorId);
+            $provSekarang = $provinsiSekarang->get($sektorId);
 
-        foreach (
-
-            $indikatorKabupaten
-
-            as
-
-            $kabupaten
-
-        ) {
-
-            $provinsi =
-
-                $indikatorProvinsi->get(
-
-                    $kabupaten->sektor_id
-
-                );
-
-            if (!$provinsi) {
-
+            if (!$kabLalu || !$provSekarang) {
                 continue;
-
             }
 
-            /**
-             * Kuadran
-             */
+            $nilaiKabSekarang = $kabSekarang->nilai_pdrb ?? 0;
+            $nilaiKabLalu = $kabLalu->nilai_pdrb ?? 0;
+            $nilaiProvSekarang = $provSekarang->nilai_pdrb ?? 0;
 
-            $kuadran =
+            // Laju Pertumbuhan Sektor i di Kabupaten (r_i)
+            $r_i = $this->calculateGrowth($nilaiKabSekarang, $nilaiKabLalu);
 
-                $this->determineTipologiKlassenQuadrant(
+            // Kontribusi/Share Sektor i di Kabupaten (y_i)
+            $y_i = $totalKabupatenSekarang > 0 ? ($nilaiKabSekarang / $totalKabupatenSekarang) : 0;
 
-                    $kabupaten->pertumbuhan,
+            // Kontribusi/Share Sektor i di Provinsi (y)
+            $y_provinsi = $totalProvinsiSekarang > 0 ? ($nilaiProvSekarang / $totalProvinsiSekarang) : 0;
 
-                    $provinsi->pertumbuhan,
+            $kuadran = $this->determineTipologiKlassenQuadrant($r_i, $r_provinsi, $y_i, $y_provinsi);
 
-                    $kabupaten->kontribusi,
-
-                    $provinsi->kontribusi
-
-                );
-
-            /**
-             * Row
-             */
-
-            $rows[] = [
-
-                'kab_id' =>
-
-                    $kabId,
-
-                'sektor_id' =>
-
-                    $kabupaten->sektor_id,
-
-                'tahun' =>
-
-                    $tahun,
-
-                'indikator_provinsi_id' =>
-
-                    $provinsi->id,
-
-                'indikator_kabupaten_id' =>
-
-                    $kabupaten->id,
-
-                'pertumbuhan_kabupaten' =>
-
-                    round(
-                        $kabupaten->pertumbuhan,
-                        6
-                    ),
-
-                'pertumbuhan_provinsi' =>
-
-                    round(
-                        $provinsi->pertumbuhan,
-                        6
-                    ),
-
-                'kontribusi_kabupaten' =>
-
-                    round(
-                        $kabupaten->kontribusi,
-                        6
-                    ),
-
-                'kontribusi_provinsi' =>
-
-                    round(
-                        $provinsi->kontribusi,
-                        6
-                    ),
-
-                'kuadran' =>
-
-                    $kuadran,
-
-                ...$this->timestamp()
-
+            $klasifikasiMap = [
+                'Kuadran I' => 'Sektor Maju dan Tumbuh Pesat',
+                'Kuadran II' => 'Sektor Maju tapi Tertekan',
+                'Kuadran III' => 'Sektor Berkembang Cepat / Potensial',
+                'Kuadran IV' => 'Sektor Relatif Tertinggal',
             ];
 
+            $rows[] = [
+                'kab_id' => $kabId,
+                'sektor_id' => $sektorId,
+                'sektor' => $kabSekarang->sektor,
+                'tahun' => $tahun,
+                'laju_pertumbuhan' => round($r_i * 100, 2),
+                'laju_pertumbuhan_acuan' => round($r_provinsi * 100, 2),
+                'kontribusi_pdrb' => round($y_i * 100, 2),
+                'kontribusi_acuan' => round($y_provinsi * 100, 2),
+                'kuadran' => $kuadran,
+                'klasifikasi_sektor' => $klasifikasiMap[$kuadran] ?? $kuadran,
+            ];
         }
 
-        /**
-         * --------------------------------------------
-         * Bulk Upsert
-         * --------------------------------------------
-         */
-
-        if (!empty($rows)) {
-
-            HasilTipologiKlassen::upsert(
-
-                $rows,
-
-                [
-
-                    'kab_id',
-
-                    'sektor_id',
-
-                    'tahun'
-
-                ],
-
-                [
-
-                    'indikator_provinsi_id',
-
-                    'indikator_kabupaten_id',
-
-                    'pertumbuhan_kabupaten',
-
-                    'pertumbuhan_provinsi',
-
-                    'kontribusi_kabupaten',
-
-                    'kontribusi_provinsi',
-
-                    'kuadran',
-
-                    'updated_at'
-
-                ]
-
-            );
-
-        }
-
+        return collect($rows);
     }
-
 }

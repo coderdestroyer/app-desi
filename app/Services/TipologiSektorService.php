@@ -2,180 +2,59 @@
 
 namespace App\Services;
 
-use App\Models\HasilLq;
-use App\Models\HasilSsa;
-use App\Models\HasilTipologiSektor;
+use Illuminate\Support\Collection;
 
 class TipologiSektorService extends BaseAnalysisService
 {
-    /**
-     * ==========================================================
-     * Generate Tipologi Sektor
-     * ==========================================================
-     */
-    public function generate(
-        int $kabId,
-        int $tahun
-    ): void {
+    protected LqService $lqService;
+    protected SsaService $ssaService;
 
-        $this->calculateTipologi(
-            $kabId,
-            $tahun
-        );
-
+    public function __construct(LqService $lqService, SsaService $ssaService)
+    {
+        $this->lqService = $lqService;
+        $this->ssaService = $ssaService;
     }
 
     /**
-     * ==========================================================
-     * Hitung Tipologi Sektor
-     * ==========================================================
+     * Hitung Tipologi Sektor secara dinamis (On-The-Fly) dari hasil LQ & SSA
      */
-    private function calculateTipologi(
-        int $kabId,
-        int $tahun
-    ): void {
-
-        /**
-         * --------------------------------------------
-         * Ambil seluruh hasil LQ
-         * --------------------------------------------
-         */
-
-        $hasilLq = HasilLq::where(
-            'kab_id',
-            $kabId
-        )
-        ->where(
-            'tahun',
-            $tahun
-        )
-        ->get();
-
-        /**
-         * --------------------------------------------
-         * Ambil seluruh hasil SSA
-         * --------------------------------------------
-         */
-
-        $hasilSsa = HasilSsa::where(
-            'kab_id',
-            $kabId
-        )
-        ->where(
-            'tahun',
-            $tahun
-        )
-        ->get()
-        ->keyBy('sektor_id');
-
-        /**
-         * --------------------------------------------
-         * Row Upsert
-         * --------------------------------------------
-         */
+    public function calculateTipologi(int $kabId, int $tahun): Collection
+    {
+        $hasilLq = $this->lqService->calculateLq($kabId, $tahun)->keyBy('sektor_id');
+        $hasilSsa = $this->ssaService->calculateSsa($kabId, $tahun)->keyBy('sektor_id');
 
         $rows = [];
 
-        /**
-         * --------------------------------------------
-         * Loop seluruh sektor
-         * --------------------------------------------
-         */
-
-        foreach ($hasilLq as $lq) {
-
-            $ssa = $hasilSsa->get(
-                $lq->sektor_id
-            );
-
+        foreach ($hasilLq as $sektorId => $lq) {
+            $ssa = $hasilSsa->get($sektorId);
             if (!$ssa) {
                 continue;
             }
 
-            /**
-             * Kuadran
-             */
+            $nilaiLq = $lq['nilai_lq'];
+            $cij = $ssa['cij'];
 
-            $kuadran =
+            $kuadran = $this->determineTipologiSektorQuadrant($nilaiLq, $cij);
 
-                $this->determineTipologiSektorQuadrant(
-
-                    $lq->nilai_lq,
-
-                    $ssa->cij
-
-                );
-
-            /**
-             * Row
-             */
-
-            $rows[] = [
-
-                'kab_id' => $kabId,
-
-                'sektor_id' => $lq->sektor_id,
-
-                'tahun' => $tahun,
-
-                'hasil_lq_id' => $lq->id,
-
-                'hasil_ssa_id' => $ssa->id,
-
-                'lq' => $lq->nilai_lq,
-
-                'cij' => $ssa->cij,
-
-                'kuadran' => $kuadran,
-
-                ...$this->timestamp()
-
+            $kategoriMap = [
+                'Kuadran I' => 'Maju dan Tumbuh Cepat',
+                'Kuadran II' => 'Potensial / Cepat Berkembang',
+                'Kuadran III' => 'Maju tapi Tertekan',
+                'Kuadran IV' => 'Relatif Tertinggal',
             ];
 
+            $rows[] = [
+                'kab_id' => $kabId,
+                'sektor_id' => $sektorId,
+                'sektor' => $lq['sektor'],
+                'tahun' => $tahun,
+                'lq' => $nilaiLq,
+                'cij' => $cij,
+                'kuadran' => $kuadran,
+                'kategori_sektor' => $kategoriMap[$kuadran] ?? $kuadran,
+            ];
         }
 
-        /**
-         * --------------------------------------------
-         * Bulk Upsert
-         * --------------------------------------------
-         */
-
-        if (!empty($rows)) {
-
-            HasilTipologiSektor::upsert(
-
-                $rows,
-
-                [
-
-                    'kab_id',
-
-                    'sektor_id',
-
-                    'tahun'
-
-                ],
-
-                [
-
-                    'hasil_lq_id',
-
-                    'hasil_ssa_id',
-
-                    'lq',
-
-                    'cij',
-
-                    'kuadran',
-
-                    'updated_at'
-
-                ]
-
-            );
-
-        }
-
+        return collect($rows);
     }
-
 }

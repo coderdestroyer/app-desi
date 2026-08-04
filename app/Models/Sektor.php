@@ -6,63 +6,31 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sektor extends Model
 {
-    protected $table='sektor';
+    protected $table = 'sektor';
 
-    protected $primaryKey='sektor_id';
+    protected $primaryKey = 'sektor_id';
 
-    public $timestamps=false;
+    public $timestamps = false;
 
-    protected $guarded=[];
+    protected $guarded = [];
     
     public function getNamaAttribute(): ?string
     {
         return $this->attributes['nama_sektor'] ?? null;
     }
 
+    public function pdbNasional()
+    {
+        return $this->hasMany(PdbNasional::class, 'sektor_id', 'sektor_id');
+    }
+
+    public function pdrbProvinsi()
+    {
+        return $this->hasMany(PdrbSumateraProvinsi::class, 'sektor_id', 'sektor_id');
+    }
+
     public function pdrbKabupaten()
     {
-        return $this->hasMany(PdrbKabupaten::class,'sektor_id');
-    }
-
-    public function pdrbSumut()
-    {
-        return $this->hasMany(PdrbSumut::class,'sektor_id');
-    }
-
-    public function hasilLq()
-    {
-        return $this->hasMany(HasilLq::class,'sektor_id');
-    }
-
-    public function hasilSsa()
-    {
-        return $this->hasMany(HasilSsa::class,'sektor_id');
-    }
-
-    public function tipologiSektor()
-    {
-        return $this->hasMany(HasilTipologiSektor::class,'sektor_id');
-    }
-
-    public function indikatorProvinsi()
-    {
-        return $this->hasMany(IndikatorProvinsi::class,'sektor_id');
-    }
-
-    public function indikatorKabupaten()
-    {
-        return $this->hasMany(IndikatorKabupaten::class,'sektor_id');
-    }
-
-    public function tipologiKlassen()
-    {
-        return $this->hasMany(HasilTipologiKlassen::class,'sektor_id');
-    }
-    
-    public const UPDATED_AT = null;
-
-    public function getIdAttribute()
-    {
-        return $this->sektor_id;
+        return $this->hasMany(PdrbSumateraKabupaten::class, 'sektor_id', 'sektor_id');
     }
 }
