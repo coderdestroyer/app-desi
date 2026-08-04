@@ -76,31 +76,34 @@ class TipologiController extends Controller
         } else {
             $maxTahun = DB::table('pdrb_sumatera_kabupaten')->whereIn('kabupaten_id', $authorizedIds)->max('tahun') ?? 2024;
             $selectedTahun = $request->has('tahun') && !empty($request->tahun) ? (int)$request->tahun : (int)$maxTahun;
+            $cacheKey = 'calc_tipologi_' . md5(implode('_', $authorizedIds) . '_' . $selectedTahun);
 
-            $mappedRows = [];
-            $idCounter = 1;
+            $mappedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $selectedTahun) {
+                $mappedRows = [];
+                $idCounter = 1;
 
-            foreach ($authorizedKabupatens as $kab) {
-                $dynamicTipologi = $this->tipologiSektorService->calculateTipologi($kab->kab_id, $selectedTahun);
-                foreach ($dynamicTipologi as $item) {
-                    $mappedRows[] = [
-                        'id' => $idCounter++,
-                        'tingkat_wilayah' => 'Kabupaten/Kota',
-                        'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                        'daerah_pembanding' => 'SUMATERA UTARA',
-                        'provinsi' => 'SUMATERA UTARA',
-                        'kabupaten' => strtoupper($kab->nama_kabupaten),
-                        'sektor' => $item['sektor']->nama_sektor ?? '-',
-                        'tahun' => $item['tahun'],
-                        'nilai_ss' => $item['cij'],
-                        'nilai_lq' => $item['lq'],
-                        'tipologi' => "{$item['kuadran']} ({$item['kategori_sektor']})",
-                        'riwayat' => 'Kalkulasi Otomatis',
-                    ];
+                foreach ($authorizedKabupatens as $kab) {
+                    $dynamicTipologi = $this->tipologiSektorService->calculateTipologi($kab->kab_id, $selectedTahun);
+                    foreach ($dynamicTipologi as $item) {
+                        $mappedRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Kabupaten/Kota',
+                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                            'daerah_pembanding' => 'SUMATERA UTARA',
+                            'provinsi' => 'SUMATERA UTARA',
+                            'kabupaten' => strtoupper($kab->nama_kabupaten),
+                            'sektor' => $item['sektor']->nama_sektor ?? '-',
+                            'tahun' => $item['tahun'],
+                            'nilai_ss' => $item['cij'],
+                            'nilai_lq' => $item['lq'],
+                            'tipologi' => "{$item['kuadran']} ({$item['kategori_sektor']})",
+                            'riwayat' => 'Kalkulasi Otomatis',
+                        ];
+                    }
                 }
-            }
 
-            $mappedData = collect($mappedRows);
+                return collect($mappedRows);
+            });
         }
 
         if ($request->has('search') && !empty($request->search)) {
@@ -192,6 +195,7 @@ class TipologiController extends Controller
         ]);
 
         OperatorController::logActivity('Analisis Tipologi', 'ditambah', "Menambah data Tipologi Sektor {$newData['daerah_analisis']}");
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('operator.tipologi.index')->with('success', 'Data perhitungan Tipologi Sektor berhasil disimpan secara permanen!');
     }
@@ -216,6 +220,7 @@ class TipologiController extends Controller
         ]);
 
         OperatorController::logActivity('Analisis Tipologi', 'diubah', "Mengubah data Tipologi Sektor {$updatedData['daerah_analisis']}");
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('operator.tipologi.index')->with('success', 'Data perhitungan Tipologi Sektor berhasil diperbarui secara permanen!');
     }
@@ -228,6 +233,7 @@ class TipologiController extends Controller
             $daerah = $res->results['daerah_analisis'] ?? 'Daerah';
             $res->delete();
             OperatorController::logActivity('Analisis Tipologi', 'dihapus', "Menghapus data Tipologi Sektor {$daerah}");
+            \Illuminate\Support\Facades\Cache::flush();
         }
 
         return back()->with('success', 'Data perhitungan Tipologi Sektor berhasil dihapus secara permanen!');
@@ -237,6 +243,7 @@ class TipologiController extends Controller
     {
         AnalysisResult::where('type', 'tipologi_sektor')->delete();
         OperatorController::logActivity('Analisis Tipologi', 'dihapus', "Menghapus semua data Tipologi Sektor");
+        \Illuminate\Support\Facades\Cache::flush();
         return back()->with('success', 'Semua data perhitungan Tipologi Sektor berhasil dihapus secara permanen!');
     }
 
@@ -247,6 +254,7 @@ class TipologiController extends Controller
             $count = count($ids);
             AnalysisResult::where('type', 'tipologi_sektor')->whereIn('id', $ids)->delete();
             OperatorController::logActivity('Analisis Tipologi', 'dihapus', "Menghapus {$count} data Tipologi Sektor secara massal");
+            \Illuminate\Support\Facades\Cache::flush();
             return back()->with('success', "{$count} data Tipologi Sektor berhasil dihapus secara massal!");
         }
         return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');

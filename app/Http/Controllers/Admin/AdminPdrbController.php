@@ -118,6 +118,8 @@ class AdminPdrbController extends Controller
             }
         }
 
+        \Illuminate\Support\Facades\Cache::flush();
+
         return redirect()->route('admin.pdrb.index')->with('success', "Berhasil menyimpan data PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
     }
 
@@ -132,6 +134,8 @@ class AdminPdrbController extends Controller
         PdrbSumateraKabupaten::where('kabupaten_id', $kabupaten_id)
             ->where('tahun', $tahun)
             ->delete();
+
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->back()->with('success', "Seluruh data PDRB {$namaKab} Tahun {$tahun} berhasil dihapus dari database.");
     }

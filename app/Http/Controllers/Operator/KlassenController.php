@@ -88,43 +88,46 @@ class KlassenController extends Controller
         } else {
             $maxTahun = DB::table('pdrb_sumatera_kabupaten')->whereIn('kabupaten_id', $authorizedIds)->max('tahun') ?? 2024;
             $selectedTahun = $request->has('tahun') && !empty($request->tahun) ? (int)$request->tahun : (int)$maxTahun;
+            $cacheKey = 'calc_klassen_' . md5(implode('_', $authorizedIds) . '_' . $selectedTahun);
 
-            $mappedRows = [];
-            $idCounter = 1;
+            $mappedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $selectedTahun) {
+                $mappedRows = [];
+                $idCounter = 1;
 
-            foreach ($authorizedKabupatens as $kab) {
-                $dynamicKlassen = $this->klassenService->calculateKlassen($kab->kab_id, $selectedTahun);
-                foreach ($dynamicKlassen as $item) {
-                    $mappedRows[] = [
-                        'id' => $idCounter++,
-                        'tingkat_wilayah' => 'Kabupaten/Kota',
-                        'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                        'daerah_pembanding' => 'SUMATERA UTARA',
-                        'provinsi' => 'SUMATERA UTARA',
-                        'kabupaten' => strtoupper($kab->nama_kabupaten),
-                        'sektor' => $item['sektor']->nama_sektor ?? '-',
-                        'tahun_awal' => $selectedTahun - 1,
-                        'tahun_akhir' => $selectedTahun,
-                        'pdrb_sektor_analisis_awal' => 0,
-                        'pdrb_sektor_analisis_akhir' => 0,
-                        'total_pdrb_analisis_awal' => 0,
-                        'total_pdrb_analisis_akhir' => 0,
-                        'pdrb_sektor_pembanding_awal' => 0,
-                        'pdrb_sektor_pembanding_akhir' => 0,
-                        'total_pdrb_pembanding_awal' => 0,
-                        'total_pdrb_pembanding_akhir' => 0,
-                        'ri' => number_format($item['laju_pertumbuhan'] ?? 0, 3, '.', ''),
-                        'r' => number_format($item['laju_pertumbuhan_acuan'] ?? 0, 3, '.', ''),
-                        'yi' => number_format($item['kontribusi_pdrb'] ?? 0, 3, '.', ''),
-                        'y' => number_format($item['kontribusi_acuan'] ?? 0, 3, '.', ''),
-                        'kuadran' => $item['kuadran'] ?? 'Kuadran IV',
-                        'klasifikasi' => $item['klasifikasi_sektor'] ?? 'Sektor Relatif Tertinggal',
-                        'riwayat' => 'Kalkulasi Otomatis',
-                    ];
+                foreach ($authorizedKabupatens as $kab) {
+                    $dynamicKlassen = $this->klassenService->calculateKlassen($kab->kab_id, $selectedTahun);
+                    foreach ($dynamicKlassen as $item) {
+                        $mappedRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Kabupaten/Kota',
+                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                            'daerah_pembanding' => 'SUMATERA UTARA',
+                            'provinsi' => 'SUMATERA UTARA',
+                            'kabupaten' => strtoupper($kab->nama_kabupaten),
+                            'sektor' => $item['sektor']->nama_sektor ?? '-',
+                            'tahun_awal' => $selectedTahun - 1,
+                            'tahun_akhir' => $selectedTahun,
+                            'pdrb_sektor_analisis_awal' => 0,
+                            'pdrb_sektor_analisis_akhir' => 0,
+                            'total_pdrb_analisis_awal' => 0,
+                            'total_pdrb_analisis_akhir' => 0,
+                            'pdrb_sektor_pembanding_awal' => 0,
+                            'pdrb_sektor_pembanding_akhir' => 0,
+                            'total_pdrb_pembanding_awal' => 0,
+                            'total_pdrb_pembanding_akhir' => 0,
+                            'ri' => number_format($item['laju_pertumbuhan'] ?? 0, 3, '.', ''),
+                            'r' => number_format($item['laju_pertumbuhan_acuan'] ?? 0, 3, '.', ''),
+                            'yi' => number_format($item['kontribusi_pdrb'] ?? 0, 3, '.', ''),
+                            'y' => number_format($item['kontribusi_acuan'] ?? 0, 3, '.', ''),
+                            'kuadran' => $item['kuadran'] ?? 'Kuadran IV',
+                            'klasifikasi' => $item['klasifikasi_sektor'] ?? 'Sektor Relatif Tertinggal',
+                            'riwayat' => 'Kalkulasi Otomatis',
+                        ];
+                    }
                 }
-            }
 
-            $mappedData = collect($mappedRows);
+                return collect($mappedRows);
+            });
         }
 
         if ($request->has('search') && !empty($request->search)) {
@@ -251,6 +254,7 @@ class KlassenController extends Controller
         ]);
 
         OperatorController::logActivity('Analisis Klassen', 'ditambah', "Menambah data Tipologi Klassen {$newData['daerah_analisis']}");
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('operator.klassen.index')->with('success', 'Data perhitungan Tipologi Klassen berhasil disimpan secara permanen!');
     }
@@ -275,6 +279,7 @@ class KlassenController extends Controller
         ]);
 
         OperatorController::logActivity('Analisis Klassen', 'diubah', "Mengubah data Tipologi Klassen {$updatedData['daerah_analisis']}");
+        \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('operator.klassen.index')->with('success', 'Data perhitungan Tipologi Klassen berhasil diperbarui secara permanen!');
     }
@@ -287,6 +292,7 @@ class KlassenController extends Controller
             $daerah = $res->results['daerah_analisis'] ?? 'Daerah';
             $res->delete();
             OperatorController::logActivity('Analisis Klassen', 'dihapus', "Menghapus data Tipologi Klassen {$daerah}");
+            \Illuminate\Support\Facades\Cache::flush();
         }
 
         return back()->with('success', 'Data perhitungan Tipologi Klassen berhasil dihapus secara permanen!');
@@ -296,6 +302,7 @@ class KlassenController extends Controller
     {
         AnalysisResult::where('type', 'tipologi_klassen')->delete();
         OperatorController::logActivity('Analisis Klassen', 'dihapus', "Menghapus semua data Tipologi Klassen");
+        \Illuminate\Support\Facades\Cache::flush();
         return back()->with('success', 'Semua data perhitungan Tipologi Klassen berhasil dihapus secara permanen!');
     }
 
@@ -306,6 +313,7 @@ class KlassenController extends Controller
             $count = count($ids);
             AnalysisResult::where('type', 'tipologi_klassen')->whereIn('id', $ids)->delete();
             OperatorController::logActivity('Analisis Klassen', 'dihapus', "Menghapus {$count} data Tipologi Klassen secara massal");
+            \Illuminate\Support\Facades\Cache::flush();
             return back()->with('success', "{$count} data Tipologi Klassen berhasil dihapus secara massal!");
         }
         return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');

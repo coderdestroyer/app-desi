@@ -12,12 +12,21 @@ class BaseAnalysisService
 {
     use DeterminesQuadrants;
 
+    protected static array $provinsiIdCache = [];
+    protected static array $totalProvinsiCache = [];
+    protected static array $totalNasionalCache = [];
+    protected static array $pdrbProvinsiByTahunCache = [];
+
     /**
      * Ambil provinsi dari kabupaten
      */
     protected function getProvinsiId(int $kabId): int
     {
-        return Kabupaten::where('kab_id', $kabId)->value('provinsi_id') ?? 12;
+        if (! isset(self::$provinsiIdCache[$kabId])) {
+            self::$provinsiIdCache[$kabId] = Kabupaten::where('kab_id', $kabId)->value('provinsi_id') ?? 12;
+        }
+
+        return self::$provinsiIdCache[$kabId];
     }
 
     /**
@@ -35,9 +44,14 @@ class BaseAnalysisService
      */
     protected function getTotalProvinsi(int $provinsiId, int $tahun): float
     {
-        return (float) PdrbSumut::where('provinsi_id', $provinsiId)
-            ->where('tahun', $tahun)
-            ->sum('nilai_pdrb');
+        $key = $provinsiId . '_' . $tahun;
+        if (! isset(self::$totalProvinsiCache[$key])) {
+            self::$totalProvinsiCache[$key] = (float) PdrbSumut::where('provinsi_id', $provinsiId)
+                ->where('tahun', $tahun)
+                ->sum('nilai_pdrb');
+        }
+
+        return self::$totalProvinsiCache[$key];
     }
 
     /**
@@ -45,7 +59,11 @@ class BaseAnalysisService
      */
     protected function getTotalNasional(int $tahun): float
     {
-        return (float) PdbNasional::where('tahun', $tahun)->sum('nilai');
+        if (! isset(self::$totalNasionalCache[$tahun])) {
+            self::$totalNasionalCache[$tahun] = (float) PdbNasional::where('tahun', $tahun)->sum('nilai');
+        }
+
+        return self::$totalNasionalCache[$tahun];
     }
 
     /**
@@ -104,10 +122,15 @@ class BaseAnalysisService
 
     protected function getPdrbProvinsiByTahun(int $provinsiId, int $tahun)
     {
-        return PdrbSumut::with('sektor')
-            ->where('provinsi_id', $provinsiId)
-            ->where('tahun', $tahun)
-            ->get();
+        $key = $provinsiId . '_' . $tahun;
+        if (! isset(self::$pdrbProvinsiByTahunCache[$key])) {
+            self::$pdrbProvinsiByTahunCache[$key] = PdrbSumut::with('sektor')
+                ->where('provinsi_id', $provinsiId)
+                ->where('tahun', $tahun)
+                ->get();
+        }
+
+        return self::$pdrbProvinsiByTahunCache[$key];
     }
 
     protected function getPdrbKabupatenByTahun(int $kabId, int $tahun)

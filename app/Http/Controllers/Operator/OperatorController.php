@@ -222,6 +222,8 @@ class OperatorController extends Controller
             }
         }
 
+        \Illuminate\Support\Facades\Cache::flush();
+
         self::logActivity(
             'Data PDRB',
             'diperbarui',
@@ -287,6 +289,8 @@ class OperatorController extends Controller
             ->where('tahun', $tahun)
             ->delete();
 
+        \Illuminate\Support\Facades\Cache::flush();
+
         self::logActivity(
             'Data PDRB',
             'dihapus',
@@ -312,6 +316,8 @@ class OperatorController extends Controller
         $tahun = $pdrb->tahun;
 
         $pdrb->delete();
+
+        \Illuminate\Support\Facades\Cache::flush();
 
         self::logActivity(
             'Data PDRB',
