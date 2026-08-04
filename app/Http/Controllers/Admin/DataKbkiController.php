@@ -81,7 +81,7 @@ class DataKbkiController extends Controller
         $sections = $sectionsQuery
             ->orderBy('kode')
             ->get([
-                'kode',
+                DB::raw('CAST(kode AS VARCHAR) AS kode'),
                 $hasJudul ? 'judul' : DB::raw('nama AS judul'),
             ]);
 
@@ -95,6 +95,14 @@ class DataKbkiController extends Controller
             && ! $request->filled('struktur')
             && ! $request->filled('status');
 
+        $perPageOptions = $hierarchyMode ? [1, 2, 5, 10] : [10, 25, 50, 100];
+        $perPageDefault = $hierarchyMode ? 1 : 10;
+        $perPage = (int) $request->query('per_page', $perPageDefault);
+
+        if (! in_array($perPage, $perPageOptions, true)) {
+            $perPage = $perPageDefault;
+        }
+
         if ($hierarchyMode) {
             $sectionQuery = DB::table($this->table);
             if ($hasStruktur) {
@@ -103,7 +111,7 @@ class DataKbkiController extends Controller
                 $sectionQuery->where('level', 1);
             }
 
-            if ($request->filled('seksi')) {
+            if ($request->has('seksi') && $request->query('seksi') !== null && trim((string) $request->query('seksi')) !== '') {
                 $sectionQuery->where(
                     'kode',
                     trim((string) $request->query('seksi'))
@@ -117,7 +125,8 @@ class DataKbkiController extends Controller
 
             $sectionCodes = collect($paginator->items())
                 ->pluck('kode')
-                ->filter()
+                ->map(fn ($k) => (string) $k)
+                ->filter(fn ($k) => $k !== '')
                 ->values();
 
             $hasSeksiKode = Schema::hasColumn($this->table, 'seksi_kode');
@@ -126,7 +135,7 @@ class DataKbkiController extends Controller
             if ($hasSeksiKode) {
                 $dataKbkiQuery->whereIn('k.seksi_kode', $sectionCodes);
             } else {
-                $dataKbkiQuery->whereIn(DB::raw('SUBSTRING(k.kode, 1, 1)'), $sectionCodes);
+                $dataKbkiQuery->whereIn(DB::raw('SUBSTRING(CAST(k.kode AS VARCHAR), 1, 1)'), $sectionCodes);
             }
 
             $dataKbki = $sectionCodes->isEmpty()
@@ -190,8 +199,8 @@ class DataKbkiController extends Controller
             ->where('level', (int) $validated['level'])
             ->orderBy('kode');
 
-        if (! empty($validated['exclude'])) {
-            $query->where('kode', '!=', trim($validated['exclude']));
+        if (isset($validated['exclude']) && trim((string) $validated['exclude']) !== '') {
+            $query->where('kode', '!=', trim((string) $validated['exclude']));
         }
 
         $hasStruktur = Schema::hasColumn($this->table, 'struktur');
@@ -325,7 +334,7 @@ class DataKbkiController extends Controller
                 $subQuery
                     ->from($this->table . ' as child')
                     ->selectRaw('COUNT(*)')
-                    ->whereColumn('child.kode_induk', 'k.kode');
+                    ->whereRaw('CAST(child.kode_induk AS VARCHAR) = CAST(k.kode AS VARCHAR)');
             }, 'child_count');
     }
 
@@ -342,8 +351,8 @@ class DataKbkiController extends Controller
         $cols = [
             'k.id',
             'k.level',
-            'k.kode',
-            'k.kode_induk',
+            DB::raw('CAST(k.kode AS VARCHAR) AS kode'),
+            DB::raw('CAST(k.kode_induk AS VARCHAR) AS kode_induk'),
             'k.created_at',
             'k.updated_at',
         ];
@@ -464,7 +473,7 @@ class DataKbkiController extends Controller
             if (Schema::hasColumn($this->table, 'seksi_kode')) {
                 $query->where('k.seksi_kode', trim((string) $request->query('seksi')));
             } else {
-                $query->whereRaw('SUBSTRING(k.kode, 1, 1) = ?', [trim((string) $request->query('seksi'))]);
+                $query->whereRaw('SUBSTRING(CAST(k.kode AS VARCHAR), 1, 1) = ?', [trim((string) $request->query('seksi'))]);
             }
         }
 
@@ -586,22 +595,22 @@ class DataKbkiController extends Controller
 
         if ($data['level'] === 1) {
             $data['kode_induk'] = null;
-        } elseif (! $data['kode_induk']) {
+        } elseif ($data['kode_induk'] === null || $data['kode_induk'] === '') {
             $errors['kode_induk'] = 'Data induk wajib dipilih.';
         }
 
         $parent = null;
 
-        if ($data['kode_induk']) {
+        if ($data['kode_induk'] !== null && $data['kode_induk'] !== '') {
             $parent = DB::table($this->table)
-                ->where('kode', $data['kode_induk'])
+                ->where('kode', (string) $data['kode_induk'])
                 ->first();
 
             if (! $parent) {
                 $errors['kode_induk'] = 'Data induk tidak ditemukan.';
             } elseif ((int) $parent->level !== $data['level'] - 1) {
                 $errors['kode_induk'] = 'Level data induk tidak sesuai dengan struktur yang dipilih.';
-            } elseif (! str_starts_with($data['kode'], $parent->kode)) {
+            } elseif (! str_starts_with((string) $data['kode'], (string) $parent->kode)) {
                 $errors['kode'] = 'Kode harus diawali dengan kode induk ' . $parent->kode . '.';
             }
         }
@@ -710,6 +719,11 @@ class DataKbkiController extends Controller
             6 => 'Kelompok Komoditas',
             7 => 'Komoditas',
         ];
+
+        $row->kode = (string) $row->kode;
+        if (isset($row->kode_induk) && $row->kode_induk !== null) {
+            $row->kode_induk = (string) $row->kode_induk;
+        }
 
         if (! isset($row->struktur)) {
             $row->struktur = $levelMap[$row->level] ?? 'Komoditas';
