@@ -8,15 +8,9 @@ class AnalysisResult extends Model
 {
     protected $table = 'analysis_results';
 
-    public $timestamps = false;
+    protected $guarded = [];
 
-    protected $fillable = [
-        'tahun',
-        'kabupaten_kota',
-        'sektor',
-        'lq',
-        'ssa',
-        'klassen',
-        'tipologi'
+    protected $casts = [
+        'results' => 'array',
     ];
 }

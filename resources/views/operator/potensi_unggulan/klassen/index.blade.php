@@ -46,27 +46,27 @@
             </div>
 
             <!-- Form -->
-            <form action="{{ $editData ? route('operator.klassen.update', $editData['id']) : route('operator.klassen.store') }}" method="POST" class="space-y-6" x-data="{ 
-                tingkat_wilayah: '{{ old('tingkat_wilayah', $editData['tingkat_wilayah'] ?? 'Kabupaten/Kota') }}',
-                provinsi: '{{ old('provinsi', $editData['provinsi'] ?? '') }}',
+            <form action="{{ $editItem ? route('operator.klassen.update', $editItem['id']) : route('operator.klassen.store') }}" method="POST" class="space-y-6" x-data="{ 
+                tingkat_wilayah: '{{ old('tingkat_wilayah', $editItem['tingkat_wilayah'] ?? 'Kabupaten/Kota') }}',
+                provinsi: '{{ old('provinsi', $editItem['provinsi'] ?? '') }}',
                 get listKabupaten() {
                     return window.daftarWilayah[this.provinsi] || [];
                 },
                 years: [
                     { 
-                        tahun: '{{ old('tahun_awal', $editData['tahun_awal'] ?? '') }}', 
-                        pdrb_sektor_analisis: '{{ old('pdrb_sektor_analisis_awal', $editData['pdrb_sektor_analisis_awal'] ?? '') }}'.split('.')[0], 
-                        total_pdrb_analisis: '{{ old('total_pdrb_analisis_awal', $editData['total_pdrb_analisis_awal'] ?? '') }}'.split('.')[0],
-                        pdrb_sektor_pembanding: '{{ old('pdrb_sektor_pembanding_awal', $editData['pdrb_sektor_pembanding_awal'] ?? '') }}'.split('.')[0], 
-                        total_pdrb_pembanding: '{{ old('total_pdrb_pembanding_awal', $editData['total_pdrb_pembanding_awal'] ?? '') }}'.split('.')[0],
+                        tahun: '{{ old('tahun_awal', $editItem['tahun_awal'] ?? '') }}', 
+                        pdrb_sektor_analisis: '{{ old('pdrb_sektor_analisis_awal', $editItem['pdrb_sektor_analisis_awal'] ?? '') }}'.split('.')[0], 
+                        total_pdrb_analisis: '{{ old('total_pdrb_analisis_awal', $editItem['total_pdrb_analisis_awal'] ?? '') }}'.split('.')[0],
+                        pdrb_sektor_pembanding: '{{ old('pdrb_sektor_pembanding_awal', $editItem['pdrb_sektor_pembanding_awal'] ?? '') }}'.split('.')[0], 
+                        total_pdrb_pembanding: '{{ old('total_pdrb_pembanding_awal', $editItem['total_pdrb_pembanding_awal'] ?? '') }}'.split('.')[0],
                         pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: ''
                     },
                     { 
-                        tahun: '{{ old('tahun_akhir', $editData['tahun_akhir'] ?? '') }}', 
-                        pdrb_sektor_analisis: '{{ old('pdrb_sektor_analisis_akhir', $editData['pdrb_sektor_analisis_akhir'] ?? '') }}'.split('.')[0], 
-                        total_pdrb_analisis: '{{ old('total_pdrb_analisis_akhir', $editData['total_pdrb_analisis_akhir'] ?? '') }}'.split('.')[0],
-                        pdrb_sektor_pembanding: '{{ old('pdrb_sektor_pembanding_akhir', $editData['pdrb_sektor_pembanding_akhir'] ?? '') }}'.split('.')[0], 
-                        total_pdrb_pembanding: '{{ old('total_pdrb_pembanding_akhir', $editData['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0],
+                        tahun: '{{ old('tahun_akhir', $editItem['tahun_akhir'] ?? '') }}', 
+                        pdrb_sektor_analisis: '{{ old('pdrb_sektor_analisis_akhir', $editItem['pdrb_sektor_analisis_akhir'] ?? '') }}'.split('.')[0], 
+                        total_pdrb_analisis: '{{ old('total_pdrb_analisis_akhir', $editItem['total_pdrb_analisis_akhir'] ?? '') }}'.split('.')[0],
+                        pdrb_sektor_pembanding: '{{ old('pdrb_sektor_pembanding_akhir', $editItem['pdrb_sektor_pembanding_akhir'] ?? '') }}'.split('.')[0], 
+                        total_pdrb_pembanding: '{{ old('total_pdrb_pembanding_akhir', $editItem['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0],
                         pdrb_sektor_analisis_fmt: '', total_pdrb_analisis_fmt: '', pdrb_sektor_pembanding_fmt: '', total_pdrb_pembanding_fmt: ''
                     }
                 ],
@@ -85,7 +85,7 @@
                 }
             }">
         @csrf
-        @if($editData)
+        @if($editItem)
             @method('PUT')
         @endif
         
@@ -108,7 +108,7 @@
             <div class="space-y-2 col-span-1">
                 <label class="op-label">Sektor</label>
                 <div class="relative">
-                    <input list="sektor-list" name="sektor" value="{{ old('sektor', $editData['sektor'] ?? '') }}" class="op-input op-input-icon op-datalist" placeholder="Pilih Sektor" required>
+                    <input list="sektor-list" name="sektor" value="{{ old('sektor', $editItem['sektor'] ?? '') }}" class="op-input op-input-icon op-datalist" placeholder="Pilih Sektor" required>
                     <datalist id="sektor-list">
                         <option value="PERTANIAN, KEHUTANAN, DAN PERIKANAN">
                         <option value="PERTAMBANGAN DAN PENGGALIAN">
@@ -149,7 +149,7 @@
             <div class="space-y-2 col-span-1" x-show="tingkat_wilayah === 'Kabupaten/Kota'">
                 <label class="op-label">Kabupaten / Kota</label>
                 <div class="relative">
-                    <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editData['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
+                    <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
                     <datalist id="kabupaten-list">
                         <template x-for="kab in listKabupaten" :key="kab">
                             <option :value="kab"></option>
@@ -224,11 +224,11 @@
         <div class="flex items-center gap-3">
             <button type="submit" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
-                {{ $editData ? 'Perbarui Data' : 'Hitung' }}
+                {{ $editItem ? 'Perbarui Data' : 'Hitung' }}
             </button>
-            @if($editData)
+            @if($editItem)
                 <a href="{{ route('operator.klassen.index') }}" class="px-6 py-2.5 rounded-xl font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">Batal</a>
             @endif
         </div>
