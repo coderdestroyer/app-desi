@@ -114,21 +114,15 @@
 
     white-space: nowrap;
 
-    transition: .3s;
+    transition: color 0.3s ease;
 
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active,
+.nav-link:active {
 
     color: #D4A017;
-
-}
-
-.nav-link.active {
-
-    color: #D4A017;
-
-    font-weight: 700;
 
 }
 
@@ -152,12 +146,13 @@
 
     transform: translateX(-50%);
 
-    transition: .35s;
+    transition: width 0.3s ease;
 
 }
 
 .nav-link:hover::after,
-.nav-link.active::after {
+.nav-link.active::after,
+.nav-link:active::after {
 
     width: 100%;
 
