@@ -1,5 +1,3 @@
-
-
 <section id="tentang" class="about">
     
         <div class="about-image">
@@ -762,12 +760,6 @@
 
         </iframe>
 
-            {{-- loading="lazy"
-
-            allowfullscreen>
-
-        </iframe> --}}
-
     </section>
 
 
@@ -777,28 +769,3 @@
     ========================== -->
 
     @include('partials.landing.footer')
-
-
-
-
-    <!-- =========================
-            BACK TO TOP
-    ========================== -->
-
-    {{-- <button id="topBtn">
-
-        <i class="fa-solid fa-arrow-up"></i>
-
-    </button> --}}
-
-
-
-    <!-- =========================
-            JAVASCRIPT
-    ========================== -->
-
-  
-
-{{-- </body>
-
-</html> --}}

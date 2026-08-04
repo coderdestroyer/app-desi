@@ -264,7 +264,7 @@ NAVBAR BRAND
     }
 
 
-    .nav-link {
+    /* .nav-link {
         position: relative;
 
         padding-inline: 13px;
@@ -337,7 +337,7 @@ NAVBAR BRAND
         gap: 10px;
 
         flex-shrink: 0;
-    }
+    } */
 
 
     .login-button {

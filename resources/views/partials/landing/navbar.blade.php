@@ -33,14 +33,14 @@
 
   <a
     id="nav-home"
-    href="{{ route('home') }}"
+    href="{{ request()->routeIs('home') ? '#hero' : route('home') }}"
     class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
     Beranda
 </a>
 
 <a
     id="nav-about"
-    href="{{ route('home') }}#tentang"
+    href="{{ request()->routeIs('home') ? '#tentang' : route('home') . '#tentang' }}"
     class="nav-link">
     Tentang
 </a>

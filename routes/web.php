@@ -22,12 +22,6 @@ Route::get('/', function () {
     return view('landing.home');
 })->name('home');
 
-
-// Route::get('/tentang', function () {
-//     return view('landing.about');
-// })->name('about');
-
-
 Route::get('/peta-investasi', [InvestmentMapController::class, 'index'])
     ->name('investment.map');
 
@@ -76,12 +70,6 @@ Route::get('/dashboard', function () {
 })
 ->middleware(['auth'])
 ->name('dashboard');
-
-
-Route::get('/about', function () {
-    return view('landing.about');
-})->name('about');
-
 
 Route::get('/not-verified', function () {
     return view('errors.not-verified');
