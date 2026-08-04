@@ -41,12 +41,13 @@ class InvestmentMapController extends Controller
                     'latitude' => (float)$item->latitude,
                     'longitude' => (float)$item->longitude,
                     'type' => 'provinsi',
+                    'provinsi' => $item->nama_provinsi,
                     'is_ibukota' => false,
                 ];
             });
 
         // Ambil Kabupaten yang memiliki koordinat
-        $kabupaten = Kabupaten::whereNotNull('latitude')
+        $kabupaten = Kabupaten::with('provinsi')->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->orderBy('nama_kabupaten')
             ->get()
@@ -58,6 +59,7 @@ class InvestmentMapController extends Controller
                     'latitude' => (float)$item->latitude,
                     'longitude' => (float)$item->longitude,
                     'type' => 'kabupaten',
+                    'provinsi' => $item->provinsi->nama_provinsi ?? 'Sumatera Utara',
                     'is_ibukota' => in_array($cleanName, $ibukotaNames),
                 ];
             });
