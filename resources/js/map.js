@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const detailDaerah = document.getElementById("detailDaerah");
         const namaDaerah = document.getElementById("namaDaerah");
         const jenisDaerah = document.getElementById("jenisDaerah");
+        const provinsiDaerah = document.getElementById("provinsiDaerah");
         const statusDaerah = document.getElementById("statusDaerah");
         const sektorDaerah = document.getElementById("sektorDaerah");
         const koordinatDaerah = document.getElementById("koordinatDaerah");
@@ -84,6 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (detailDaerah) detailDaerah.style.display = "block";
 
         if (namaDaerah) namaDaerah.innerText = item.nama;
+        if (provinsiDaerah) {
+            provinsiDaerah.innerText = item.provinsi || (item.type === "provinsi" ? "Provinsi" : "Sumatera Utara");
+        }
         if (jenisDaerah) {
             jenisDaerah.innerText = item.type === "provinsi" ? "Provinsi" : "Kabupaten / Kota";
         }

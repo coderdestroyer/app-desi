@@ -8,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Peta Investasi | DPMPTSP Provinsi Sumatera Utara</title>
+    <title>Peta Investasi | DPMPTSP Pulau Sumatera</title>
 
     @vite([
         'resources/css/navbar.css',
@@ -41,12 +41,12 @@
             {{-- HEADER --}}
             <div class="map-header">
 
-                <h1>Peta Investasi Sumatera Utara</h1>
+                <h1>Peta Investasi Sumatera</h1>
 
                 <p>
 
                     Jelajahi persebaran potensi investasi setiap
-                    Kabupaten/Kota dan Provinsi di Sumatera Utara.
+                    Kabupaten/Kota dan Provinsi di Pulau Sumatera.
 
                     Klik marker pada peta untuk melihat informasi
                     daerah.
@@ -113,7 +113,7 @@
 
                             <h2 id="namaDaerah"></h2>
 
-                            <span>Sumatera Utara</span>
+                            <span id="provinsiDaerah">Memuat...</span>
 
                         </div>
 
