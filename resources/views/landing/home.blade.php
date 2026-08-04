@@ -63,7 +63,7 @@
             <div class="hero-stats">
 
                 <div>
-                    <h3>33</h3>
+                    <h3>{{ \App\Models\Kabupaten::count() }}</h3>
                     <span>Kabupaten/Kota</span>
                 </div>
 

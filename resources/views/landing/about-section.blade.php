@@ -83,7 +83,7 @@
         <div class="card">
 
             <h1 class="counter"
-                data-target="33">
+                data-target="{{ \App\Models\Kabupaten::count() }}">
 
                 0
 
@@ -96,7 +96,7 @@
         <div class="card">
 
             <h1 class="counter"
-                data-target="17">
+                data-target="{{ \App\Models\Sektor::count() }}">
 
                 0
 
