@@ -45,12 +45,10 @@ document.querySelectorAll(".btn1,.btn2").forEach(button => {
 
 const about = document.querySelector("#tentang");
 
-let currentPath = window.location.pathname;
-
 if (hero && about) {
 
-    // Kalau user buka langsung /tentang
-    if (currentPath === "/tentang") {
+    // Kalau user buka langsung dengan hash #tentang
+    if (window.location.hash === "#tentang") {
 
         setTimeout(() => {
 
@@ -71,25 +69,21 @@ if (hero && about) {
 
     window.addEventListener("scroll", () => {
 
-        const trigger = about.offsetTop - 120;
+        const trigger = about.offsetTop - 150; // Align with navbar active trigger
 
         if (window.scrollY >= trigger) {
 
-            if (currentPath !== "/tentang") {
+            if (window.location.hash !== "#tentang") {
 
-                history.replaceState({}, "", "/tentang");
-
-                currentPath = "/tentang";
+                history.replaceState(null, null, "#tentang");
 
             }
 
         } else {
 
-            if (currentPath !== "/") {
+            if (window.location.hash === "#tentang") {
 
-                history.replaceState({}, "", "/");
-
-                currentPath = "/";
+                history.replaceState(null, null, window.location.pathname + window.location.search);
 
             }
 

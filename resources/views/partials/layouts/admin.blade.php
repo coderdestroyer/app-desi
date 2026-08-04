@@ -78,8 +78,8 @@
 
                 <li class="mb-1.5">
                     <a
-                        href="{{ route('about') }}"
-                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 text-navy hover:bg-green-pale hover:text-green-dark {{ request()->routeIs('about') ? 'bg-[#e5f1e8] text-green-dark' : '' }}"
+                        href="{{ route('home') }}#tentang"
+                        class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 text-navy hover:bg-green-pale hover:text-green-dark"
                     >
                         <i class="fa-solid fa-circle-info w-[22px] text-center text-lg"></i>
                         <span>Tentang</span>
