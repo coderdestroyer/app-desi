@@ -25,11 +25,11 @@ class OperatorController extends Controller
         ]);
     }
 
-    private function getLatestStatus($modelClass)
+    private function getLatestStatusByType(string $type)
     {
-        $latest = $modelClass::latest('updated_at')->first();
+        $latest = \App\Models\AnalysisResult::where('type', $type)->latest('updated_at')->first();
         if (!$latest) {
-            return ['date' => '-', 'action' => 'Kosong', 'color' => 'bg-slate-100 text-slate-500 border-slate-200'];
+            return ['date' => now()->format('d M Y'), 'action' => 'Real-Time', 'color' => 'bg-emerald-100 text-emerald-700 border-emerald-200'];
         }
 
         $action = ($latest->created_at == $latest->updated_at) ? 'ditambah' : 'diperbarui';
@@ -37,7 +37,6 @@ class OperatorController extends Controller
         $color = match ($action) {
             'ditambah' => 'bg-green-100 text-green-700 border-green-200',
             'diperbarui' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-            'diimpor' => 'bg-purple-100 text-purple-700 border-purple-200',
             default => 'bg-slate-100 text-slate-700 border-slate-200'
         };
 
@@ -63,16 +62,24 @@ class OperatorController extends Controller
         $kabupatens = $this->getAuthorizedKabupatens($user);
         $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
 
-        $countLq = \App\Models\LQ::count();
-        $countSs = \App\Models\ShiftShare::count();
-        $countTipologi = \App\Models\Tipologi::count();
-        $countKlassen = \App\Models\Klassen::count();
+        $savedLq = \App\Models\AnalysisResult::where('type', 'lq')->count();
+        $savedSs = \App\Models\AnalysisResult::where('type', 'shift_share')->count();
+        $savedTipologi = \App\Models\AnalysisResult::where('type', 'tipologi_sektor')->count();
+        $savedKlassen = \App\Models\AnalysisResult::where('type', 'tipologi_klassen')->count();
+
+        $totalSektorCount = $kabupatens->count() * 17;
+
+        $countLq = $savedLq > 0 ? $savedLq : $totalSektorCount;
+        $countSs = $savedSs > 0 ? $savedSs : $totalSektorCount;
+        $countTipologi = $savedTipologi > 0 ? $savedTipologi : $totalSektorCount;
+        $countKlassen = $savedKlassen > 0 ? $savedKlassen : $totalSektorCount;
+
         $totalAnalisa = $countLq + $countSs + $countTipologi + $countKlassen;
 
-        $statusLq = $this->getLatestStatus(\App\Models\LQ::class);
-        $statusSs = $this->getLatestStatus(\App\Models\ShiftShare::class);
-        $statusTipologi = $this->getLatestStatus(\App\Models\Tipologi::class);
-        $statusKlassen = $this->getLatestStatus(\App\Models\Klassen::class);
+        $statusLq = $this->getLatestStatusByType('lq');
+        $statusSs = $this->getLatestStatusByType('shift_share');
+        $statusTipologi = $this->getLatestStatusByType('tipologi_sektor');
+        $statusKlassen = $this->getLatestStatusByType('tipologi_klassen');
 
         $activityLogs = ActivityLog::whereNotIn('module', ['Autentikasi'])
             ->latest()
