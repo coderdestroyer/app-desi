@@ -2,15 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Kabupaten;
-use App\Models\PdrbKabupaten;
-use App\Models\PdrbSumateraProvinsi;
 use Illuminate\Support\Collection;
 
 class LqService extends BaseAnalysisService
 {
     /**
-     * Hitung LQ secara langsung (On-The-Fly) dari data PDRB
+     * Hitung LQ Kabupaten (Pembanding: Provinsi) secara dinamis
      */
     public function calculateLq(int $kabId, int $tahun): Collection
     {
@@ -52,6 +49,54 @@ class LqService extends BaseAnalysisService
                 'kategori' => $kategori,
                 'persen_kabupaten' => round($persenKabupaten * 100, 2),
                 'persen_provinsi' => round($persenProvinsi * 100, 2),
+            ];
+        }
+
+        return collect($rows);
+    }
+
+    /**
+     * Hitung LQ Provinsi (Pembanding: PDB Nasional) secara dinamis
+     */
+    public function calculateLqProvinsi(int $provinsiId, int $tahun): Collection
+    {
+        $totalProvinsi = $this->getTotalProvinsi($provinsiId, $tahun);
+        $totalNasional = $this->getTotalNasional($tahun);
+
+        if ($totalProvinsi <= 0 || $totalNasional <= 0) {
+            return collect();
+        }
+
+        $dataProvinsi = $this->getPdrbProvinsiByTahun($provinsiId, $tahun);
+        $dataNasional = $this->getPdbNasionalByTahun($tahun)->keyBy('sektor_id');
+
+        $rows = [];
+
+        foreach ($dataProvinsi as $item) {
+            $nasional = $dataNasional->get($item->sektor_id);
+            if (!$nasional || $nasional->nilai == 0) {
+                continue;
+            }
+
+            $persenProvinsi = $item->nilai_pdrb / $totalProvinsi;
+            $persenNasional = $nasional->nilai / $totalNasional;
+
+            if ($persenNasional == 0) {
+                continue;
+            }
+
+            $nilaiLq = round($persenProvinsi / $persenNasional, 4);
+            $kategori = $nilaiLq >= 1 ? 'Basis' : 'Non Basis';
+
+            $rows[] = [
+                'provinsi_id' => $provinsiId,
+                'sektor_id' => $item->sektor_id,
+                'sektor' => $item->sektor,
+                'tahun' => $tahun,
+                'nilai_lq' => $nilaiLq,
+                'kategori' => $kategori,
+                'persen_provinsi' => round($persenProvinsi * 100, 2),
+                'persen_nasional' => round($persenNasional * 100, 2),
             ];
         }
 

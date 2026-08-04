@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 class SsaService extends BaseAnalysisService
 {
     /**
-     * Hitung Shift-Share Analysis secara dinamis (On-The-Fly) dari data PDRB
+     * Hitung Shift-Share Analysis Kabupaten (Pembanding: Provinsi) secara dinamis
      */
     public function calculateSsa(int $kabId, int $tahun): Collection
     {
@@ -66,6 +66,85 @@ class SsaService extends BaseAnalysisService
                 'kab_id' => $kabId,
                 'sektor_id' => $sektorId,
                 'sektor' => $kabSekarang->sektor,
+                'tahun' => $tahun,
+                'rn' => round($rn, 6),
+                'rin' => round($rin, 6),
+                'rij' => round($rij, 6),
+                'nij' => round($nij, 2),
+                'mij' => round($mij, 2),
+                'cij' => round($cij, 2),
+                'dij' => round($dij, 2),
+                'komponen_n' => round($nij, 2),
+                'komponen_p' => round($mij, 2),
+                'komponen_d' => round($cij, 2),
+                'total_shift' => round($dij, 2),
+                'kategori_pertumbuhan' => $kategoriPertumbuhan,
+                'kategori_daya_saing' => $kategoriDayaSaing,
+            ];
+        }
+
+        return collect($rows);
+    }
+
+    /**
+     * Hitung Shift-Share Analysis Provinsi (Pembanding: PDB Nasional) secara dinamis
+     */
+    public function calculateSsaProvinsi(int $provinsiId, int $tahun): Collection
+    {
+        $tahunLalu = $tahun - 1;
+
+        $totalNasionalSekarang = $this->getTotalNasional($tahun);
+        $totalNasionalLalu = $this->getTotalNasional($tahunLalu);
+
+        if ($totalNasionalLalu <= 0) {
+            return collect();
+        }
+
+        $rn = $this->calculateGrowth($totalNasionalSekarang, $totalNasionalLalu);
+
+        $provinsiSekarang = $this->getPdrbProvinsiByTahun($provinsiId, $tahun)->keyBy('sektor_id');
+        $provinsiLalu = $this->getPdrbProvinsiByTahun($provinsiId, $tahunLalu)->keyBy('sektor_id');
+
+        $nasionalSekarang = $this->getPdbNasionalByTahun($tahun)->keyBy('sektor_id');
+        $nasionalLalu = $this->getPdbNasionalByTahun($tahunLalu)->keyBy('sektor_id');
+
+        $rows = [];
+
+        foreach ($provinsiSekarang as $sektorId => $provSekarang) {
+            $provLalu = $provinsiLalu->get($sektorId);
+            $nasSekarang = $nasionalSekarang->get($sektorId);
+            $nasLalu = $nasionalLalu->get($sektorId);
+
+            if (!$provLalu || !$nasSekarang || !$nasLalu) {
+                continue;
+            }
+
+            $nilaiProvSekarang = $provSekarang->nilai_pdrb ?? 0;
+            $nilaiProvLalu = $provLalu->nilai_pdrb ?? 0;
+            $nilaiNasSekarang = $nasSekarang->nilai ?? 0;
+            $nilaiNasLalu = $nasLalu->nilai ?? 0;
+
+            if ($this->hasNullValue($nilaiProvSekarang, $nilaiProvLalu, $nilaiNasSekarang, $nilaiNasLalu)) {
+                continue;
+            }
+
+            $rij = $this->calculateGrowth($nilaiProvSekarang, $nilaiProvLalu);
+            $rin = $this->calculateGrowth($nilaiNasSekarang, $nilaiNasLalu);
+
+            $yij = $nilaiProvLalu;
+
+            $nij = $yij * $rn;
+            $mij = $yij * ($rin - $rn);
+            $cij = $yij * ($rij - $rin);
+            $dij = $nij + $mij + $cij;
+
+            $kategoriPertumbuhan = $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat';
+            $kategoriDayaSaing = $cij >= 0 ? 'Daya Saing Baik' : 'Tidak Dapat Bersaing';
+
+            $rows[] = [
+                'provinsi_id' => $provinsiId,
+                'sektor_id' => $sektorId,
+                'sektor' => $provSekarang->sektor,
                 'tahun' => $tahun,
                 'rn' => round($rn, 6),
                 'rin' => round($rin, 6),
