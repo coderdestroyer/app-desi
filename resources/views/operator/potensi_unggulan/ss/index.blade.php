@@ -1,5 +1,7 @@
 @extends('partials.layouts.operator')
 
+@section('title', 'Analisis Shift-Share (SS)')
+
 @section('content')
 <div>
     <!-- Alert Messages -->

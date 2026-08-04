@@ -1,5 +1,7 @@
 @extends('partials.layouts.operator')
 
+@section('title', 'Analisis Location Quotient (LQ)')
+
 @section('content')
 <div>
     <!-- Alert Messages -->

@@ -1,5 +1,7 @@
 @extends('partials.layouts.operator')
 
+@section('title', 'Pengaturan Akun')
+
 @section('content')
     <!-- Header -->
     <div class="mb-8">
