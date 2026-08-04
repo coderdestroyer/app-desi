@@ -12,8 +12,6 @@ class PdrbIndikatorSeeder extends Seeder
         $this->seedPdbNasional();
         $this->seedPdrbSumateraProvinsi();
         $this->seedPdrbSumateraKabupaten();
-        $this->seedIndikatorProvinsi();
-        $this->seedIndikatorKabupaten();
     }
 
     private function parseKabId(string $rawCode): int
@@ -141,103 +139,6 @@ class PdrbIndikatorSeeder extends Seeder
         }
         if (!empty($batch)) {
             DB::table('pdrb_sumatera_kabupaten')->insert($batch);
-        }
-        fclose($handle);
-    }
-
-    private function seedIndikatorProvinsi(): void
-    {
-        $file = database_path('data/indikator_provinsi.csv');
-        if (!file_exists($file)) return;
-
-        $provIds = DB::table('provinsi')->pluck('provinsi_id')->flip()->toArray();
-
-        $handle = fopen($file, 'r');
-        $header = fgetcsv($handle);
-
-        $batch = [];
-        while (($row = fgetcsv($handle)) !== false) {
-            if (count($row) < 6) continue;
-
-            $provId = (int) $row[1];
-            if (!empty($provIds) && !isset($provIds[$provId])) continue;
-
-            $tahun = (int) $row[3];
-            $pertumbuhan = (float) $row[4];
-            $kontribusi = (float) $row[5];
-
-            $batch[] = [
-                'provinsi_id' => $provId,
-                'tahun' => $tahun,
-                'nama_indikator' => 'Laju Pertumbuhan PDRB',
-                'nilai' => $pertumbuhan,
-                'satuan' => '%',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-            $batch[] = [
-                'provinsi_id' => $provId,
-                'tahun' => $tahun,
-                'nama_indikator' => 'Kontribusi PDRB',
-                'nilai' => $kontribusi,
-                'satuan' => '%',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-        if (!empty($batch)) {
-            DB::table('indikator_provinsi')->insert($batch);
-        }
-        fclose($handle);
-    }
-
-    private function seedIndikatorKabupaten(): void
-    {
-        $file = database_path('data/indikator_kabupaten.csv');
-        if (!file_exists($file)) return;
-
-        $kabIds = DB::table('kabupaten')->pluck('kab_id')->flip()->toArray();
-
-        $handle = fopen($file, 'r');
-        $header = fgetcsv($handle);
-
-        $batch = [];
-        while (($row = fgetcsv($handle)) !== false) {
-            if (count($row) < 6) continue;
-
-            $kabId = $this->parseKabId($row[1]);
-            if (!empty($kabIds) && !isset($kabIds[$kabId])) continue;
-
-            $tahun = (int) $row[3];
-            $pertumbuhan = (float) $row[4];
-            $kontribusi = (float) $row[5];
-
-            $batch[] = [
-                'kabupaten_id' => $kabId,
-                'tahun' => $tahun,
-                'nama_indikator' => 'Laju Pertumbuhan PDRB',
-                'nilai' => $pertumbuhan,
-                'satuan' => '%',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-            $batch[] = [
-                'kabupaten_id' => $kabId,
-                'tahun' => $tahun,
-                'nama_indikator' => 'Kontribusi PDRB',
-                'nilai' => $kontribusi,
-                'satuan' => '%',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-
-            if (count($batch) >= 500) {
-                DB::table('indikator_kabupaten')->insert($batch);
-                $batch = [];
-            }
-        }
-        if (!empty($batch)) {
-            DB::table('indikator_kabupaten')->insert($batch);
         }
         fclose($handle);
     }

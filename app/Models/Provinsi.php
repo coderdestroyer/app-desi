@@ -22,17 +22,16 @@ class Provinsi extends Model
 
     public function kabupaten()
     {
-        return $this->hasMany(Kabupaten::class,'provinsi_id');
+        return $this->hasMany(Kabupaten::class, 'provinsi_id', 'provinsi_id');
+    }
+
+    public function pdrbProvinsi()
+    {
+        return $this->hasMany(PdrbSumateraProvinsi::class, 'provinsi_id', 'provinsi_id');
     }
 
     public function pdrbSumut()
     {
-        return $this->hasMany(PdrbSumut::class,'provinsi_id');
+        return $this->hasMany(PdrbSumateraProvinsi::class, 'provinsi_id', 'provinsi_id');
     }
-
-    public function indikatorProvinsi()
-    {
-        return $this->hasMany(IndikatorProvinsi::class,'provinsi_id');
-    }
-
 }

@@ -2,559 +2,180 @@
 
 namespace App\Services;
 
-use App\Models\HasilLq;
-use App\Models\HasilSsa;
-use App\Models\HasilTipologiKlassen;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ComparisonService
 {
+    protected LqService $lqService;
+    protected SsaService $ssaService;
+    protected TipologiKlassenService $tipologiKlassenService;
+    protected IndikatorService $indikatorService;
+
+    public function __construct(
+        LqService $lqService,
+        SsaService $ssaService,
+        TipologiKlassenService $tipologiKlassenService,
+        IndikatorService $indikatorService
+    ) {
+        $this->lqService = $lqService;
+        $this->ssaService = $ssaService;
+        $this->tipologiKlassenService = $tipologiKlassenService;
+        $this->indikatorService = $indikatorService;
+    }
+
     public function getDashboard(array $filter): array
     {
         $rows = $this->loadData($filter);
 
         return [
-
             'summary' => $this->getSummary($rows),
-
             'charts' => [
                 'growth'       => $this->getGrowthChart($rows),
                 'contribution' => $this->getContributionChart($rows),
                 'lq'           => $this->getLqChart($rows),
                 'ssa'          => $this->getSsaChart($rows),
             ],
-
             'table' => $this->getTrendTable($rows),
-
         ];
     }
 
     private function loadData(array $filter): Collection
     {
-        return HasilTipologiKlassen::query()
+        $kabId = (int) ($filter['kabupaten'] ?? 0);
+        $sektorId = isset($filter['sektor']) ? (int) $filter['sektor'] : null;
+        $tahunAwal = (int) ($filter['tahun_awal'] ?? 2021);
+        $tahunAkhir = (int) ($filter['tahun_akhir'] ?? 2024);
 
-            ->with([
-                'sektor:sektor_id,nama_sektor','indikatorKabupaten','indikatorProvinsi',
-            ])
+        if (!$kabId) {
+            return collect();
+        }
 
-            ->leftJoin(
-                'hasil_lq',
-                function ($join) {
+        $results = collect();
 
-                    $join
+        for ($y = $tahunAwal; $y <= $tahunAkhir; $y++) {
+            $lqRows = $this->lqService->calculateLq($kabId, $y)->keyBy('sektor_id');
+            $ssaRows = $this->ssaService->calculateSsa($kabId, $y)->keyBy('sektor_id');
+            $klassenRows = $this->tipologiKlassenService->calculateKlassen($kabId, $y)->keyBy('sektor_id');
 
-                        ->on(
-                            'hasil_tipologi_klassen.kab_id',
-                            '=',
-                            'hasil_lq.kab_id'
-                        )
-
-                        ->on(
-                            'hasil_tipologi_klassen.sektor_id',
-                            '=',
-                            'hasil_lq.sektor_id'
-                        )
-
-                        ->on(
-                            'hasil_tipologi_klassen.tahun',
-                            '=',
-                            'hasil_lq.tahun'
-                        );
-
+            foreach ($klassenRows as $sId => $klassen) {
+                if ($sektorId && $sId !== $sektorId) {
+                    continue;
                 }
-            )
 
-            ->leftJoin(
-                'hasil_ssa',
-                function ($join) {
+                $lq = $lqRows->get($sId);
+                $ssa = $ssaRows->get($sId);
 
-                    $join
+                $results->push((object) [
+                    'kab_id' => $kabId,
+                    'sektor_id' => $sId,
+                    'sektor' => (object) ['nama_sektor' => $klassen['sektor']->nama_sektor ?? 'Sektor ' . $sId],
+                    'tahun' => $y,
+                    'pertumbuhan_kabupaten' => $klassen['laju_pertumbuhan'],
+                    'pertumbuhan_provinsi' => $klassen['laju_pertumbuhan_acuan'],
+                    'kontribusi_kabupaten' => $klassen['kontribusi_pdrb'],
+                    'kontribusi_provinsi' => $klassen['kontribusi_acuan'],
+                    'kuadran' => $klassen['kuadran'],
+                    'nilai_lq' => $lq['nilai_lq'] ?? 0,
+                    'kategori' => $lq['kategori'] ?? 'Non Basis',
+                    'dij' => $ssa['dij'] ?? 0,
+                    'cij' => $ssa['cij'] ?? 0,
+                    'kategori_pertumbuhan' => $ssa['kategori_pertumbuhan'] ?? '-',
+                    'kategori_daya_saing' => $ssa['kategori_daya_saing'] ?? '-',
+                ]);
+            }
+        }
 
-                        ->on(
-                            'hasil_tipologi_klassen.kab_id',
-                            '=',
-                            'hasil_ssa.kab_id'
-                        )
-
-                        ->on(
-                            'hasil_tipologi_klassen.sektor_id',
-                            '=',
-                            'hasil_ssa.sektor_id'
-                        )
-
-                        ->on(
-                            'hasil_tipologi_klassen.tahun',
-                            '=',
-                            'hasil_ssa.tahun'
-                        );
-
-                }
-            )
-
-            ->when(
-                $filter['kabupaten'],
-                fn($q)=>$q->where(
-                    'hasil_tipologi_klassen.kab_id',
-                    $filter['kabupaten']
-                )
-            )
-
-            ->when(
-                $filter['sektor'],
-                fn($q)=>$q->where(
-                    'hasil_tipologi_klassen.sektor_id',
-                    $filter['sektor']
-                )
-            )
-
-            ->whereBetween(
-                'hasil_tipologi_klassen.tahun',
-                [
-                    $filter['tahun_awal'],
-                    $filter['tahun_akhir'],
-                ]
-            )
-
-            ->select([
-
-                'hasil_tipologi_klassen.*',
-
-                'hasil_lq.nilai_lq',
-
-                'hasil_lq.kategori',
-
-                'hasil_ssa.dij',
-
-                'hasil_ssa.kategori_pertumbuhan',
-
-                'hasil_ssa.kategori_daya_saing',
-
-            ])
-
-            ->orderBy('hasil_tipologi_klassen.tahun')
-
-            ->get();
-    }
-
-    private function getLqChart(Collection $rows): array
-    {
-        return [
-
-            'type' => 'line',
-
-            'title' => 'Tren Nilai LQ',
-
-            'labels' => $rows->pluck('tahun')->toArray(),
-
-            'datasets' => [
-
-                [
-
-                    'label' => 'LQ',
-
-                    'borderColor' => '#FFD54F',
-
-                    'backgroundColor' => '#FFD54F',
-
-                    'borderWidth' => 3,
-
-                    'tension' => 0.35,
-
-                    'pointRadius' => 4,
-
-                    'pointHoverRadius' => 6,
-
-                    'fill' => false,
-
-                    'data' => $rows
-                        ->pluck('nilai_lq')
-                        ->map(fn ($v) => round((float) $v, 2))
-                        ->toArray(),
-
-                ],
-
-            ],
-
-        ];
-    }
-
-    private function getSsaChart(Collection $rows): array
-    {
-        return [
-
-            'type' => 'line',
-
-            'title' => 'Tren Nilai SSA (Dij)',
-
-            'labels' => $rows->pluck('tahun')->toArray(),
-
-            'datasets' => [
-
-                [
-
-                    'label' => 'SSA',
-
-                    'borderColor' => '#FFD54F',
-
-                    'backgroundColor' => '#FFD54F',
-
-                    'borderWidth' => 3,
-
-                    'tension' => 0.35,
-
-                    'pointRadius' => 4,
-
-                    'pointHoverRadius' => 6,
-
-                    'fill' => false,
-
-                    'data' => $rows
-                        ->pluck('dij')
-                        ->map(fn ($v) => round((float) $v, 2))
-                        ->toArray(),
-
-                ],
-
-            ],
-
-        ];
+        return $results;
     }
 
     private function getSummary(Collection $rows): array
     {
-        $last = $rows->last();
-        $contributionAvg = $rows->avg(fn ($row) =>
-            ((float) ($row->indikatorKabupaten?->kontribusi ?? 0)) * 100
-        );
-
-        $contributionMax = $rows
-            ->sortByDesc(fn ($row) =>
-                ((float) ($row->indikatorKabupaten?->kontribusi ?? 0))
-            )
-            ->first();
-        $growthAvg = $rows->avg(fn ($row) =>
-            ((float) ($row->indikatorKabupaten?->pertumbuhan ?? 0)) * 100
-        );
-
-        $growthMax = $rows->sortByDesc(fn ($row) =>
-            (float) ($row->indikatorKabupaten?->pertumbuhan ?? 0)
-        )->first();
-
-        $previous = $rows->count() > 1
-            ? $rows[$rows->count() - 2]
-            : null;
-
-        $persentasePerubahanLq = 0;
-
-        if (
-            $previous &&
-            $previous->nilai_lq &&
-            $previous->nilai_lq != 0
-        ) {
-
-            $persentasePerubahanLq =
-                (
-                    ($last->nilai_lq - $previous->nilai_lq)
-                    /
-                    $previous->nilai_lq
-                ) * 100;
-
-        }
-        $first = $rows->first();
-        $last = $rows->last();
-
-        $rank = [
-            'Kuadran I'   => 4,
-            'Kuadran II'  => 3,
-            'Kuadran III' => 2,
-            'Kuadran IV'  => 1,
-        ];
-
-        $movement = "Tetap sejak {$first->tahun}";
-
-        // Cari perubahan terakhir
-        for ($i = $rows->count() - 1; $i > 0; $i--) {
-
-            $current = $rows[$i];
-            $before  = $rows[$i - 1];
-
-            if ($current->kuadran !== $before->kuadran) {
-
-                $currentRank = $rank[$current->kuadran] ?? 0;
-                $beforeRank  = $rank[$before->kuadran] ?? 0;
-
-                $selisih = $currentRank - $beforeRank;
-
-                $movement = match (true) {
-                    $selisih > 0 => "Naik {$selisih} tingkat pada {$current->tahun}",
-                    $selisih < 0 => "Turun " . abs($selisih) . " tingkat pada {$current->tahun}",
-                    default      => "Tetap sejak {$current->tahun}",
-                };
-
-                break;
-            }
-        }
         return [
-
-            'growth' => [
-
-                'average' => round($growthAvg, 2),
-
-                'highest' => [
-
-                    'tahun' => $growthMax->tahun,
-
-                    'nilai' => round(
-                        ((float) $growthMax->indikatorKabupaten->pertumbuhan) * 100,
-                        2
-                    )
-
-                ]
-
-            ],
-
-            'contribution' => [
-
-                'average' => round($contributionAvg, 2),
-
-                'highest' => [
-
-                    'tahun' => $contributionMax->tahun,
-
-                    'nilai' => round(
-                        ((float) $contributionMax->indikatorKabupaten->kontribusi) * 100,
-                        2
-                    )
-
-                ]
-
-            ],
-
-            'lq' => [
-
-                'nilai' => round((float) ($last->nilai_lq ?? 0), 2),
-
-                'tahun' => $last->tahun,
-
-                'status' => $last->kategori,
-
-                'change' => round($persentasePerubahanLq, 2),
-
-            ],
-
-            'tipologi' => [
-
-                'kuadran' => $last->kuadran,
-
-                'kategori' => match ($last->kuadran) {
-
-                    'Kuadran I' => 'Sektor Unggulan',
-
-                    'Kuadran II' => 'Sektor Berkembang',
-
-                    'Kuadran III' => 'Sektor Potensial',
-
-                    'Kuadran IV' => 'Sektor Terbelakang',
-
-                    default => '-',
-
-                },
-
-                'movement' => $movement,
-
-            ],
-
+            'total_tahun' => $rows->pluck('tahun')->unique()->count(),
+            'total_sektor' => $rows->pluck('sektor_id')->unique()->count(),
+            'avg_lq' => round($rows->avg('nilai_lq'), 2),
+            'avg_growth' => round($rows->avg('pertumbuhan_kabupaten'), 2),
         ];
     }
 
     private function getGrowthChart(Collection $rows): array
     {
         return [
-
             'type' => 'line',
-
-            'labels' => $rows->pluck('tahun')->toArray(),
-
+            'title' => 'Tren Pertumbuhan PDRB',
+            'labels' => $rows->pluck('tahun')->unique()->values()->toArray(),
             'datasets' => [
-
                 [
-
-                    'label' => 'Pertumbuhan (%)',
-
-                    'borderColor' => '#FFD54F',
-
-                    'backgroundColor' => '#FFD54F',
-
-                    'borderWidth' => 3,
-
-                    'tension' => 0.35,
-
-                    'pointRadius' => 4,
-
-                    'pointHoverRadius' => 6,
-
-                    'fill' => false,
-
-                    'data' => $rows
-                        ->map(fn ($row) =>
-                            round(
-                                (float) ($row->indikatorKabupaten?->pertumbuhan ?? 0),
-                                2
-                            )
-                        )
-                        ->toArray(),
-
+                    'label' => 'Pertumbuhan Kabupaten (%)',
+                    'data' => $rows->pluck('pertumbuhan_kabupaten')->toArray(),
+                    'borderColor' => '#3b82f6',
                 ],
-
             ],
-
         ];
     }
 
     private function getContributionChart(Collection $rows): array
     {
         return [
-
             'type' => 'line',
-
-            'labels' => $rows->pluck('tahun')->toArray(),
-
+            'title' => 'Tren Kontribusi PDRB',
+            'labels' => $rows->pluck('tahun')->unique()->values()->toArray(),
             'datasets' => [
-
                 [
-
-                    'label' => 'Kontribusi (%)',
-
-                    'borderColor' => '#FFD54F',
-
-                    'backgroundColor' => '#FFD54F',
-
-                    'borderWidth' => 3,
-
-                    'tension' => 0.35,
-
-                    'pointRadius' => 4,
-
-                    'pointHoverRadius' => 6,
-
-                    'fill' => false,
-
-                    'data' => $rows
-                        ->map(fn ($row) =>
-                            round(
-                                ((float) ($row->indikatorKabupaten?->kontribusi ?? 0)) * 100,
-                                2
-                            )
-                        )
-                        ->toArray(),
-
+                    'label' => 'Kontribusi Kabupaten (%)',
+                    'data' => $rows->pluck('kontribusi_kabupaten')->toArray(),
+                    'borderColor' => '#10b981',
                 ],
-
             ],
-
         ];
-    } 
+    }
 
-    private function getIndicatorChart(Collection $rows): array
+    private function getLqChart(Collection $rows): array
     {
         return [
-
             'type' => 'line',
-
-            'title' => 'Perbandingan Indikator',
-
-            'labels' =>
-
-                $rows->pluck('tahun')->toArray(),
-
+            'title' => 'Tren Nilai LQ',
+            'labels' => $rows->pluck('tahun')->unique()->values()->toArray(),
             'datasets' => [
-
                 [
-
-                    'label'=>'LQ',
-
-                    'data'=>$rows
-                        ->pluck('nilai_lq')
-                        ->map(fn($v)=>(float)$v)
-                        ->toArray(),
-
+                    'label' => 'Nilai LQ',
+                    'data' => $rows->pluck('nilai_lq')->toArray(),
+                    'borderColor' => '#8b5cf6',
                 ],
-
-                [
-
-                    'label'=>'SSA',
-
-                    'data'=>$rows
-                        ->pluck('dij')
-                        ->map(fn($v)=>(float)$v)
-                        ->toArray(),
-
-                ],
-
-                [
-
-                    'label'=>'Kontribusi',
-
-                    'data'=>
-                    $rows
-
-                        ->map(fn($row)=>
-
-                            (float)
-
-                            ($row->indikatorKabupaten?->kontribusi ?? 0) * 100
-
-                        )
-
-                        ->toArray()
-
-                ],
-
             ],
+        ];
+    }
 
+    private function getSsaChart(Collection $rows): array
+    {
+        return [
+            'type' => 'bar',
+            'title' => 'Komponen Shift-Share',
+            'labels' => $rows->pluck('tahun')->unique()->values()->toArray(),
+            'datasets' => [
+                [
+                    'label' => 'Total Shift (Dij)',
+                    'data' => $rows->pluck('dij')->toArray(),
+                    'backgroundColor' => '#f59e0b',
+                ],
+            ],
         ];
     }
 
     private function getTrendTable(Collection $rows): array
     {
-        return $rows
-            ->map(fn ($row) => [
-
-                'tahun' => $row->tahun,
-
-                'growth' => round(
-                    ((float) ($row->indikatorKabupaten?->pertumbuhan ?? 0)) * 100,
-                    2
-                ),
-
-                'contribution' => round(
-                    ((float) ($row->indikatorKabupaten?->kontribusi ?? 0)) * 100,
-                    2
-                ),
-
-                'lq' => round(
-                    (float) $row->nilai_lq,
-                    3
-                ),
-
-                'ssa' => round(
-                    (float) $row->dij,
-                    2
-                ),
-
-                'status_lq' => $row->kategori,
-
-                'kuadran' => $row->kuadran,
-
-                'kategori' => match ($row->kuadran) {
-                    'Kuadran I'   => 'Sektor Unggulan',
-                    'Kuadran II'  => 'Sektor Berkembang',
-                    'Kuadran III' => 'Sektor Potensial',
-                    'Kuadran IV'  => 'Sektor Relatif Tertinggal',
-                    default       => '-',
-                },
-
-            ])
-            ->toArray();
+        return $rows->map(function ($r) {
+            return [
+                'tahun' => $r->tahun,
+                'sektor' => $r->sektor->nama_sektor ?? '-',
+                'pertumbuhan' => $r->pertumbuhan_kabupaten . '%',
+                'kontribusi' => $r->kontribusi_kabupaten . '%',
+                'lq' => $r->nilai_lq,
+                'kategori_lq' => $r->kategori,
+                'dij' => $r->dij,
+                'kuadran' => $r->kuadran,
+            ];
+        })->toArray();
     }
 }

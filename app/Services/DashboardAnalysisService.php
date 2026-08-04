@@ -13,16 +13,31 @@ use App\Services\Concerns\BuildsTabs;
 use App\Services\Concerns\BuildsTables;
 use App\Services\Concerns\FormatsDashboard;
 
-use App\Models\HasilLq;
-use App\Models\HasilSsa;
-use App\Models\HasilTipologiSektor;
-use App\Models\HasilTipologiKlassen;
-use App\Models\IndikatorProvinsi;
-use App\Models\IndikatorKabupaten;
+use App\Services\LqService;
+use App\Services\SsaService;
+use App\Services\TipologiSektorService;
+use App\Services\TipologiKlassenService;
 
 class DashboardAnalysisService
 {
     use BuildsCharts, BuildsSummary, BuildsRanking, BuildsTabs, BuildsTables;
+
+    protected LqService $lqService;
+    protected SsaService $ssaService;
+    protected TipologiSektorService $tipologiSektorService;
+    protected TipologiKlassenService $tipologiKlassenService;
+
+    public function __construct(
+        LqService $lqService,
+        SsaService $ssaService,
+        TipologiSektorService $tipologiSektorService,
+        TipologiKlassenService $tipologiKlassenService
+    ) {
+        $this->lqService = $lqService;
+        $this->ssaService = $ssaService;
+        $this->tipologiSektorService = $tipologiSektorService;
+        $this->tipologiKlassenService = $tipologiKlassenService;
+    }
 
     /** Entry point: dispatch ke dashboard sesuai metode */
     public function getDashboard(int $kabId, string $metode, string|int $tahun = 'all'): array
@@ -36,101 +51,130 @@ class DashboardAnalysisService
         };
     }
 
-    protected function applyYearFilter(
-        Builder $query,
-        string|int $tahun,
-        string $column = 'tahun'
-    ): Builder
+    private function getAvailableYears(int $kabId): array
     {
-        if ($tahun !== 'all') {
-            $query->where($column, $tahun);
-        }
-
-        return $query;
+        return DB::table('pdrb_sumatera_kabupaten')
+            ->where('kabupaten_id', $kabId)
+            ->distinct()
+            ->pluck('tahun')
+            ->sort()
+            ->values()
+            ->toArray();
     }
 
-    /** ============ Base Queries ============ */
+    /** ============ Base Queries (Dynamic On-The-Fly Calculations) ============ */
 
     private function baseLqQuery(int $kabId, string|int $tahun): Collection
     {
-        $query = HasilLq::query()
-            ->with('sektor:sektor_id,nama_sektor')
-            ->where('kab_id', $kabId);
-        
-        return $this->applyYearFilter($query, $tahun)->get();
+        $years = $tahun === 'all' ? $this->getAvailableYears($kabId) : [(int) $tahun];
+        $results = collect();
+
+        foreach ($years as $y) {
+            $rows = $this->lqService->calculateLq($kabId, $y);
+            foreach ($rows as $item) {
+                // Convert array item to object format expected by dashboard builders
+                $results->push((object) [
+                    'kab_id' => $item['kab_id'],
+                    'sektor_id' => $item['sektor_id'],
+                    'sektor' => (object) ['nama_sektor' => $item['sektor']->nama_sektor ?? 'Sektor ' . $item['sektor_id']],
+                    'tahun' => $item['tahun'],
+                    'nilai_lq' => $item['nilai_lq'],
+                    'kategori' => $item['kategori'],
+                    'persen_kabupaten' => $item['persen_kabupaten'] ?? 0,
+                    'persen_provinsi' => $item['persen_provinsi'] ?? 0,
+                ]);
+            }
+        }
+
+        return $results;
     }
 
     private function baseSsaQuery(int $kabId, string|int $tahun): Collection
     {
+        $years = $tahun === 'all' ? $this->getAvailableYears($kabId) : [(int) $tahun];
+        $results = collect();
 
-        $query = HasilSsa::query()
+        foreach ($years as $y) {
+            $rows = $this->ssaService->calculateSsa($kabId, $y);
+            foreach ($rows as $item) {
+                $results->push((object) [
+                    'kab_id' => $item['kab_id'],
+                    'sektor_id' => $item['sektor_id'],
+                    'sektor' => (object) ['nama_sektor' => $item['sektor']->nama_sektor ?? 'Sektor ' . $item['sektor_id']],
+                    'tahun' => $item['tahun'],
+                    'rn' => $item['rn'],
+                    'rin' => $item['rin'],
+                    'rij' => $item['rij'],
+                    'nij' => $item['nij'],
+                    'mij' => $item['mij'],
+                    'cij' => $item['cij'],
+                    'dij' => $item['dij'],
+                    'komponen_n' => $item['komponen_n'],
+                    'komponen_p' => $item['komponen_p'],
+                    'komponen_d' => $item['komponen_d'],
+                    'total_shift' => $item['total_shift'],
+                    'kategori_pertumbuhan' => $item['kategori_pertumbuhan'],
+                    'kategori_daya_saing' => $item['kategori_daya_saing'],
+                ]);
+            }
+        }
 
-            ->with('sektor:sektor_id,nama_sektor')
-            ->where('kab_id', $kabId);
-
-        return $this->applyYearFilter(
-            $query,
-            $tahun,
-            'tahun'
-        )
-        ->orderBy('tahun')
-        ->orderBy('sektor_id')
-        ->get();
+        return $results;
     }
+
     private function baseTipologiQuery(int $kabId, string|int $tahun): Collection
     {
-        $query = HasilTipologiSektor::query()
-            ->with('sektor:sektor_id,nama_sektor')
-            ->leftJoin('hasil_lq', function ($join) {
-                $join->on('hasil_tipologi_sektor.kab_id', '=', 'hasil_lq.kab_id')
-                    ->on('hasil_tipologi_sektor.sektor_id', '=', 'hasil_lq.sektor_id')
-                    ->on('hasil_tipologi_sektor.tahun', '=', 'hasil_lq.tahun');
-            })
-            ->leftJoin('hasil_ssa', function ($join) {
-                $join->on('hasil_tipologi_sektor.kab_id', '=', 'hasil_ssa.kab_id')
-                    ->on('hasil_tipologi_sektor.sektor_id', '=', 'hasil_ssa.sektor_id')
-                    ->on('hasil_tipologi_sektor.tahun', '=', 'hasil_ssa.tahun');
-            })
-            ->select([
-                'hasil_tipologi_sektor.*',
+        $years = $tahun === 'all' ? $this->getAvailableYears($kabId) : [(int) $tahun];
+        $results = collect();
 
-                'hasil_lq.nilai_lq',
-                'hasil_lq.kategori as kategori_lq',
+        foreach ($years as $y) {
+            $rows = $this->tipologiSektorService->calculateTipologi($kabId, $y);
+            foreach ($rows as $item) {
+                $results->push((object) [
+                    'kab_id' => $item['kab_id'],
+                    'sektor_id' => $item['sektor_id'],
+                    'sektor' => (object) ['nama_sektor' => $item['sektor']->nama_sektor ?? 'Sektor ' . $item['sektor_id']],
+                    'tahun' => $item['tahun'],
+                    'nilai_lq' => $item['lq'],
+                    'lq' => $item['lq'],
+                    'cij' => $item['cij'],
+                    'kuadran' => $item['kuadran'],
+                    'kategori_sektor' => $item['kategori_sektor'],
+                    'kategori_lq' => $item['lq'] >= 1 ? 'Basis' : 'Non Basis',
+                    'kategori_daya_saing' => $item['cij'] >= 0 ? 'Daya Saing Baik' : 'Tidak Dapat Bersaing',
+                ]);
+            }
+        }
 
-                'hasil_ssa.cij',
-                'hasil_ssa.dij',
-                'hasil_ssa.kategori_pertumbuhan',
-                'hasil_ssa.kategori_daya_saing',
-            ])
-            ->where('hasil_tipologi_sektor.kab_id', $kabId);
-
-        return $this->applyYearFilter(
-            $query,
-            $tahun,
-            'hasil_tipologi_sektor.tahun'
-        )
-        ->orderBy('hasil_tipologi_sektor.tahun')
-        ->orderBy('hasil_tipologi_sektor.sektor_id')
-        ->get();
+        return $results;
     }
 
     private function baseKlassenQuery(int $kabId, string|int $tahun): Collection
     {
-        $query = HasilTipologiKlassen::query()
-            ->with([
-                'sektor:sektor_id,nama_sektor',
-                'indikatorProvinsi',
-                'indikatorKabupaten',
-            ])
-            ->where('kab_id', $kabId);
+        $years = $tahun === 'all' ? $this->getAvailableYears($kabId) : [(int) $tahun];
+        $results = collect();
 
-        return $this->applyYearFilter(
-            $query,
-            $tahun
-        )
-        ->orderBy('tahun')
-        ->orderBy('sektor_id')
-        ->get();
+        foreach ($years as $y) {
+            $rows = $this->tipologiKlassenService->calculateKlassen($kabId, $y);
+            foreach ($rows as $item) {
+                $results->push((object) [
+                    'kab_id' => $item['kab_id'],
+                    'sektor_id' => $item['sektor_id'],
+                    'sektor' => (object) ['nama_sektor' => $item['sektor']->nama_sektor ?? 'Sektor ' . $item['sektor_id']],
+                    'tahun' => $item['tahun'],
+                    'laju_pertumbuhan' => $item['laju_pertumbuhan'],
+                    'pertumbuhan_kabupaten' => $item['laju_pertumbuhan'],
+                    'pertumbuhan_provinsi' => $item['laju_pertumbuhan_acuan'],
+                    'kontribusi_pdrb' => $item['kontribusi_pdrb'],
+                    'kontribusi_kabupaten' => $item['kontribusi_pdrb'],
+                    'kontribusi_provinsi' => $item['kontribusi_acuan'],
+                    'kuadran' => $item['kuadran'],
+                    'klasifikasi_sektor' => $item['klasifikasi_sektor'],
+                ]);
+            }
+        }
+
+        return $results;
     }
 
     /** ============ Dashboard LQ ============ */
