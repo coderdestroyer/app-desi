@@ -3,41 +3,246 @@
 @section('title', 'Analisis Shift-Share (SS)')
 
 @section('content')
-<div>
+<div x-data="{ activeTab: '{{ $editItem ? 'simulasi' : 'real' }}' }" class="space-y-6">
+
     <!-- Alert Messages -->
     @if (session('success'))
-        <div class="mb-6 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-sm font-medium">{{ session('success') }}</p>
+        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center gap-3 shadow-xs">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <p class="text-sm font-semibold">{{ session('success') }}</p>
         </div>
     @endif
     @if (session('error'))
-        <div class="mb-6 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-sm font-medium">{{ session('error') }}</p>
+        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl flex items-center gap-3 shadow-xs">
+            <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+            <p class="text-sm font-semibold">{{ session('error') }}</p>
         </div>
     @endif
 
-    <!-- Form Container -->
-    <div class="op-card">
-        <div class="op-card-header">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <!-- Header & Mode Pill Switcher Card (55:45 Ratio & Multi-Line Flexible Buttons) -->
+    <div class="bg-white rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <!-- Title & Subtitle Section (~55% - 60% Width) -->
+        <div class="w-full lg:w-[55%] xl:w-[60%]">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold mb-2 border border-[#CFE3D5]">
+                <i class="fa-solid fa-chart-line text-[#D8A62A]"></i>
+                <span>Analisis Pertumbuhan & Daya Saing</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">Analisis Shift-Share (SS)</h1>
+            <p class="text-slate-500 text-xs md:text-sm mt-0.5">Analisis Komponen Pertumbuhan Nasional, Proproporsional & Keunggulan Kompetitif Sektor</p>
+        </div>
+
+        <!-- Pill Tabs Switcher (~45% Width with Multi-Line Text Wrapping) -->
+        <div class="w-full lg:w-[45%] xl:w-[40%] flex justify-start lg:justify-end">
+            <div class="inline-flex w-full p-1.5 bg-slate-100/90 rounded-xl border border-slate-200/90 shadow-inner">
+                <button type="button" @click="activeTab = 'real'" 
+                    :class="activeTab === 'real' ? 'bg-[#145239] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex-1 inline-flex flex-wrap items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg font-bold text-xs text-center leading-tight transition-all duration-200 cursor-pointer">
+                    <i class="fa-solid fa-chart-column text-[#FFD54F] shrink-0"></i>
+                    <span>Data Real PDRB</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-700/80 text-emerald-100 font-bold shrink-0">Otomatis</span>
+                </button>
+
+                <button type="button" @click="activeTab = 'simulasi'" 
+                    :class="activeTab === 'simulasi' ? 'bg-[#145239] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex-1 inline-flex flex-wrap items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg font-bold text-xs text-center leading-tight transition-all duration-200 cursor-pointer">
+                    <i class="fa-solid fa-vials text-[#FFD54F] shrink-0"></i>
+                    <span>Simulasi & Upload Excel</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-700/80 text-emerald-100 font-bold shrink-0">Custom</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 1: DATA REAL PDRB (Kalkulasi Otomatis) -->
+    <div x-show="activeTab === 'real'" x-transition class="space-y-6">
+        <!-- Info Banner -->
+        <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex items-start gap-3.5 text-slate-700 text-xs md:text-sm">
+            <div class="w-8 h-8 rounded-xl bg-[#145239] text-white flex items-center justify-center shrink-0 font-bold mt-0.5">
+                <i class="fa-solid fa-database text-[#FFD54F]"></i>
+            </div>
+            <div>
+                <span class="font-bold text-[#145239] block text-sm">Mode Data Real PDRB (Kalkulasi Otomatis)</span>
+                Menampilkan hasil perhitungan indikator Shift-Share secara otomatis yang ditarik langsung dari basis data PDRB resmi wilayah otorisasi Anda.
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-800">Analisis SS</h1>
-                    <p class="text-slate-600 mt-1">Masukkan Data SS (Shift Share)</p>
+                    <h2 class="text-xl font-bold text-slate-800">Hasil Analisis Shift-Share Data Real</h2>
+                    <p class="text-slate-500 text-xs mt-0.5">Kalkulasi Otomatis Komponen Pertumbuhan 17 Sektor Wilayah Otorisasi</p>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm shadow-sm">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        Unggah Excel
-                    </button>
+                <form action="{{ route('operator.ss.index') }}" method="GET" class="relative w-full md:w-80">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Daerah, Sektor, atau Tahun..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-[#145239] focus:ring-1 focus:ring-[#145239] outline-none transition-all">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </div>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+                <table id="ssTable" class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                        <tr>
+                            <th class="px-4 py-3.5 w-12 text-center">No</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">Daerah Analisis</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">Daerah Pembanding</th>
+                            <th class="px-4 py-3.5 min-w-[200px]">SEKTOR</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">PERIODE TAHUN</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Rij</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Rin</th>
+                            <th class="px-4 py-4 text-center whitespace-nowrap">Rn</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Nij</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Mij</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Cij</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Dij</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">STATUS PERTUMBUHAN & DAYA SAING</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">RIWAYAT</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+                        @forelse($ssData as $index => $data)
+                            <tr class="hover:bg-emerald-50/30 transition-colors">
+                                <td class="px-4 py-3.5 text-center font-mono font-semibold text-slate-500">{{ ($ssData->currentPage() - 1) * $ssData->perPage() + $loop->iteration }}</td>
+                                <td class="px-4 py-3.5 font-bold text-slate-800">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
+                                <td class="px-4 py-3.5 text-slate-600">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
+                                <td class="px-4 py-3.5 font-medium">{{ $data['sektor'] }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ $data['tahun_awal'] ?? '' }} - {{ $data['tahun_akhir'] ?? '' }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ $data['rij'] }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ $data['rin'] }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ $data['rn'] }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ number_format($data['nij'], 2, ',', '.') }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ number_format($data['mij'], 2, ',', '.') }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ number_format($data['cij'], 2, ',', '.') }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-extrabold text-[#145239]">{{ number_format($data['dij'], 2, ',', '.') }}</td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <div class="flex flex-col gap-1 items-center">
+                                        @if($data['status_pertumbuhan'] === 'Pertumbuhan Cepat')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                Pertumbuhan Cepat
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                Pertumbuhan Lambat
+                                            </span>
+                                        @endif
+                                        
+                                        @if(str_contains(strtolower($data['status_daya_saing']), 'tinggi') || str_contains(strtolower($data['status_daya_saing']), 'baik') || str_contains(strtolower($data['status_daya_saing']), 'kompetitif'))
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                Daya Saing Tinggi
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                                Daya Saing Rendah
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3.5 text-xs text-slate-500 whitespace-nowrap">{{ $data['riwayat'] }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="14" class="px-4 py-8 text-center text-slate-500 font-medium">
+                                    Belum ada data kalkulasi Shift-Share.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Section -->
+            @if ($ssData->total() > 0)
+                <footer class="mt-5 flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="m-0 text-xs text-slate-500">
+                        Menampilkan <strong class="text-slate-700">{{ $ssData->firstItem() }}</strong>–<strong class="text-slate-700">{{ $ssData->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($ssData->total(), 0, ',', '.') }}</strong> data
+                    </p>
+
+                    @if ($ssData->hasPages())
+                        <div class="flex flex-wrap items-center gap-2">
+                            @if ($ssData->onFirstPage())
+                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
+                                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                                </span>
+                            @else
+                                <a href="{{ $ssData->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
+                                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                                </a>
+                            @endif
+
+                            @php
+                                $currentPage = $ssData->currentPage();
+                                $lastPage = $ssData->lastPage();
+                                $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
+                                    ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
+                                    ->unique()
+                                    ->sort()
+                                    ->values();
+                                $previousPageNumber = null;
+                            @endphp
+
+                            @foreach ($pages as $page)
+                                @if ($previousPageNumber && $page - $previousPageNumber > 1)
+                                    <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">…</span>
+                                @endif
+
+                                @if ($page === $currentPage)
+                                    <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-[#145239] bg-[#145239] px-3 text-xs font-bold text-white">
+                                        {{ $page }}
+                                    </span>
+                                @else
+                                    <a href="{{ $ssData->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
+                                        {{ $page }}
+                                    </a>
+                                @endif
+
+                                @php
+                                    $previousPageNumber = $page;
+                                @endphp
+                            @endforeach
+
+                            @if ($ssData->hasMorePages())
+                                <a href="{{ $ssData->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </a>
+                            @else
+                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </span>
+                            @endif
+                        </div>
+                    @endif
+                </footer>
+            @endif
+        </div>
+    </div>
+
+    <!-- TAB 2: SIMULASI & UPLOAD EXCEL (Custom Mode) -->
+    <div x-show="activeTab === 'simulasi'" x-transition class="space-y-6">
+        <!-- Info Banner -->
+        <div class="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 flex items-start justify-between gap-4 text-slate-700 text-xs md:text-sm">
+            <div class="flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 font-bold mt-0.5">
+                    <i class="fa-solid fa-vials text-[#FFD54F]"></i>
                 </div>
+                <div>
+                    <span class="font-bold text-amber-900 block text-sm">Mode Simulasi & Upload Excel (Custom)</span>
+                    Gunakan form di bawah ini atau unggah berkas Excel untuk melakukan pengujian skenario Shift-Share custom tanpa mengubah data PDRB resmi.
+                </div>
+            </div>
+
+            <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl font-bold transition-all text-xs md:text-sm shadow-sm shrink-0">
+                <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
+                <span>Unggah Excel</span>
+            </button>
+        </div>
+
+        <!-- Form Card Container -->
+        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
+            <div class="mb-6 border-b border-slate-100 pb-4">
+                <h2 class="text-xl font-bold text-slate-800">{{ $editItem ? 'Edit Data Simulasi Shift-Share' : 'Tambah Simulasi Shift-Share Baru' }}</h2>
+                <p class="text-slate-500 text-xs mt-0.5">Masukkan variabel nilai PDRB tahun awal & akhir custom untuk diuji</p>
             </div>
 
             <form action="{{ $editItem ? route('operator.ss.update', $editItem['id']) : route('operator.ss.store') }}" method="POST" x-data="{ 
@@ -51,7 +256,6 @@
                 @if($editItem)
                     @method('PUT')
                 @endif
-                <!-- Row 1: Identitas -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 mb-6">
                     <div class="space-y-2 col-span-1">
                         <label class="op-label">Tingkat Wilayah</label>
@@ -101,7 +305,6 @@
                         <input type="number" name="tahun_akhir" value="{{ old('tahun_akhir', $editItem['tahun_akhir'] ?? '2022') }}" class="op-input" placeholder="Contoh: 2022" required>
                     </div>
 
-                    <!-- Provinsi -->
                     <div class="space-y-2 col-span-1">
                         <label class="op-label">Provinsi</label>
                         <div class="relative">
@@ -112,14 +315,11 @@
                                 </template>
                             </datalist>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
-                                    <path d="M7 10l5 5 5-5z" />
-                                </svg>
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Kabupaten / Kota -->
                     <div class="space-y-2 col-span-1" x-show="tingkat_wilayah === 'Kabupaten/Kota'">
                         <label class="op-label">Kabupaten / Kota</label>
                         <div class="relative">
@@ -130,324 +330,98 @@
                                 </template>
                             </datalist>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24">
-                                    <path d="M7 10l5 5 5-5z" />
-                                </svg>
+                                <svg class="w-4 h-4 text-slate-600 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Row 2: PDRB Sektor Awal & Akhir, PDB Sektor Awal & Akhir -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_analisis_awal', $editItem['pdrb_sektor_analisis_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'PDRB Sektor Kab Awal' : 'PDRB Sektor Prov Awal'">PDRB Sektor Analisis Awal</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">PDRB Sektor Analisis (Awal)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 100.000" required>
                         <input type="hidden" name="pdrb_sektor_analisis_awal" :value="val.replace(/\./g, '')">
                     </div>
 
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_analisis_akhir', $editItem['pdrb_sektor_analisis_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'PDRB Sektor Kab Akhir' : 'PDRB Sektor Prov Akhir'">PDRB Sektor Analisis Akhir</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">PDRB Sektor Analisis (Akhir)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 120.000" required>
                         <input type="hidden" name="pdrb_sektor_analisis_akhir" :value="val.replace(/\./g, '')">
                     </div>
 
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_pembanding_awal', $editItem['pdrb_sektor_pembanding_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'PDRB Sektor Prov Awal' : 'PDB Sektor Nas Awal'">PDRB Sektor Pembanding Awal</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">PDRB Sektor Pembanding (Awal)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 500.000" required>
                         <input type="hidden" name="pdrb_sektor_pembanding_awal" :value="val.replace(/\./g, '')">
                     </div>
 
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_pembanding_akhir', $editItem['pdrb_sektor_pembanding_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'PDRB Sektor Prov Akhir' : 'PDB Sektor Nas Akhir'">PDRB Sektor Pembanding Akhir</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
-                        <input type="hidden" name="pdrb_sektor_pembanding_akhir" :value="val.replace(/\./g, '')">
+                        <label class="op-label">PDRB Sektor Pembanding (Akhir)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 550.000" required>
+                        <input type="hidden" name="total_pdrb_pembanding_akhir" :value="val.replace(/\./g, '')">
                     </div>
-                </div>
 
-                <!-- Row 3: PDB Nasional Awal & Akhir -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('total_pdrb_pembanding_awal', $editItem['total_pdrb_pembanding_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'Total PDRB Prov Awal' : 'Total PDB Nas Awal'">Total PDRB Pembanding Awal</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">Total PDRB Pembanding (Awal)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 5.000.000" required>
                         <input type="hidden" name="total_pdrb_pembanding_awal" :value="val.replace(/\./g, '')">
                     </div>
 
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('total_pdrb_pembanding_akhir', $editItem['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
-                        <label class="op-label" x-text="tingkat_wilayah === 'Kabupaten/Kota' ? 'Total PDRB Prov Akhir' : 'Total PDB Nas Akhir'">Total PDRB Pembanding Akhir</label>
-                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 50.000" required>
+                        <label class="op-label">Total PDRB Pembanding (Akhir)</label>
+                        <input type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 5.500.000" required>
                         <input type="hidden" name="total_pdrb_pembanding_akhir" :value="val.replace(/\./g, '')">
                     </div>
                 </div>
 
-                <div class="flex gap-3">
-                    <button type="submit" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        {{ $editItem ? 'Perbarui SS' : 'Hitung' }}
+                <div class="flex items-center gap-3">
+                    <button type="submit" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm">
+                        <i class="fa-solid fa-floppy-disk text-[#FFD54F]"></i>
+                        <span>{{ $editItem ? 'Perbarui Data Simulasi' : 'Simpan Data Simulasi' }}</span>
                     </button>
                     @if($editItem)
-                        <a href="{{ route('operator.ss.index') }}" class="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-2.5 rounded-lg font-medium transition-colors shadow-sm text-sm">
-                            Batal
-                        </a>
+                        <a href="{{ route('operator.ss.index') }}" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">Batal Edit</a>
                     @endif
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Results Table Container -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
-        <div class="op-card-header">
-            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800 mb-2">Hasil Analisis SS</h2>
-                    <p class="text-slate-600 text-sm">Data Analisis SS Tersimpan</p>
-                </div>
-                <form action="{{ route('operator.ss.index') }}" method="GET" class="relative w-full md:w-72">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Daerah atau Sektor..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:border-[#D8A62A] focus:ring-1 focus:ring-[#D8A62A] outline-none transition-all shadow-sm">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                </form>
-            </div>
+        <!-- Saved Simulations Action Toolbar -->
+        <div class="flex flex-col md:flex-row justify-end items-center gap-3">
+            <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all shadow-xs w-full sm:w-auto">
+                <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
+                <span>Unduh Hasil Analisis (Excel)</span>
+            </button>
 
-            <div class="overflow-x-auto rounded-lg border border-slate-200">
-                <table class="w-full text-left" id="ssTable">
-                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-12 text-center">
-                                <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Daerah Analisis</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Daerah Pembanding</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Sektor</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Tahun</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Rij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Rin</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Rn</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Nij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Mij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Cij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Dij</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Status</th>
-                            <th class="px-4 py-4 whitespace-nowrap">Riwayat</th>
-                            <th class="px-4 py-4 whitespace-nowrap text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
-                        @forelse($ssData as $index => $data)
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-                                    <input type="checkbox" class="row-checkbox rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" value="{{ $data['id'] }}">
-                                </td>
-                                <td class="px-4 py-4">{{ ($ssData->currentPage() - 1) * $ssData->perPage() + $loop->iteration }}</td>
-                                <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
-                                <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
-                                <td class="px-4 py-4 min-w-[200px]">{{ $data['sektor'] }}</td>
-                                <td class="px-4 py-4 text-center text-slate-500 whitespace-nowrap">{{ $data['tahun_awal'] ?? '' }} - {{ $data['tahun_akhir'] ?? '' }}</td>
-                                <td class="px-4 py-4">{{ $data['rij'] }}</td>
-                                <td class="px-4 py-4">{{ $data['rin'] }}</td>
-                                <td class="px-4 py-4">{{ $data['rn'] }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['nij'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['mij'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['cij'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-4">{{ number_format($data['dij'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-4">
-                                    <div class="flex flex-col gap-1">
-                                        @if($data['status_pertumbuhan'] === 'Pertumbuhan Cepat')
-                                            <span class="inline-flex items-center justify-center px-2 py-1 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm whitespace-nowrap">
-                                                Pertumbuhan Cepat
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center justify-center px-2 py-1 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-sm whitespace-nowrap">
-                                                Pertumbuhan Lambat
-                                            </span>
-                                        @endif
-                                        
-                                        @if($data['status_daya_saing'] === 'Daya Saing Baik')
-                                            <span class="inline-flex items-center justify-center px-2 py-1 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm whitespace-nowrap">
-                                                Daya Saing Baik
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center justify-center px-2 py-1 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200 shadow-sm whitespace-nowrap">
-                                                Tidak Dapat Bersaing
-                                            </span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-xs whitespace-nowrap">{{ $data['riwayat'] }}</td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('operator.ss.index', ['edit' => $data['id']]) }}" class="p-1.5 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm" title="Edit">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </a>
-                                        <form action="{{ route('operator.ss.destroy', $data['id']) }}" method="POST" onsubmit="return confirmDelete(event, this);" class="inline-block">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-1.5 text-red-600 bg-red-50 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Hapus">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="16" class="px-4 py-8 text-center text-slate-500">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="w-12 h-12 text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                        </svg>
-                                        <p class="text-base font-medium text-slate-600">Belum ada data SS</p>
-                                        <p class="text-sm mt-1">Silakan hitung atau unggah data melalui form di atas.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination Section -->
-            @if ($ssData->total() > 0)
-                <footer class="mt-5 flex flex-col gap-4 border-t border-slate-200 bg-white rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between shadow-xs">
-                    <p class="m-0 text-xs text-slate-500">
-                        Menampilkan <strong class="text-slate-700">{{ $ssData->firstItem() }}</strong>–<strong class="text-slate-700">{{ $ssData->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($ssData->total(), 0, ',', '.') }}</strong> data
-                    </p>
-
-                    @if ($ssData->hasPages())
-                        <div class="flex flex-wrap items-center gap-2">
-                            @if ($ssData->onFirstPage())
-                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                                </span>
-                            @else
-                                <a href="{{ $ssData->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                                </a>
-                            @endif
-
-                            @php
-                                $currentPage = $ssData->currentPage();
-                                $lastPage = $ssData->lastPage();
-                                $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
-                                    ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
-                                    ->unique()
-                                    ->sort()
-                                    ->values();
-                                $previousPageNumber = null;
-                            @endphp
-
-                            @foreach ($pages as $page)
-                                @if ($previousPageNumber && $page - $previousPageNumber > 1)
-                                    <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">…</span>
-                                @endif
-
-                                @if ($page === $currentPage)
-                                    <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-emerald-600 bg-emerald-600 px-3 text-xs font-bold text-white">
-                                        {{ $page }}
-                                    </span>
-                                @else
-                                    <a href="{{ $ssData->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
-                                        {{ $page }}
-                                    </a>
-                                @endif
-
-                                @php
-                                    $previousPageNumber = $page;
-                                @endphp
-                            @endforeach
-
-                            @if ($ssData->hasMorePages())
-                                <a href="{{ $ssData->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                                </a>
-                            @else
-                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                                </span>
-                            @endif
-                        </div>
-                    @endif
-                </footer>
-            @endif
-
-            <!-- Legend / Keterangan -->
-            <div class="mt-8 border-t border-slate-200 pt-6 text-sm text-slate-800 w-full mt-2">
-                <h4 class="font-bold mb-3 text-base">Keterangan :</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 font-medium max-w-4xl">
-                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Rij</span> <span class="mr-2">:</span> <span>Pertumbuhan PDRB sektor i di daerah analisis (kab/kota atau provinsi)</span></div>
-                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Rin</span> <span class="mr-2">:</span> <span>Pertumbuhan PDRB sektor i di daerah pembanding (provinsi atau nasional)</span></div>
-                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Rn</span> <span class="mr-2">:</span> <span>Pertumbuhan PDRB total daerah pembanding</span></div>
-                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Nij</span> <span class="mr-2">:</span> <span>Komponen pertumbuhan nasional</span></div>
-                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Mij</span> <span class="mr-2">:</span> <span>Komponen pertumbuhan proporsional</span></div>
-                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Cij</span> <span class="mr-2">:</span> <span>Komponen keunggulan kompetitif</span></div>
-                    <div class="flex"><span class="w-[30px] font-semibold text-slate-800">Dij</span> <span class="mr-2">:</span> <span>Perubahan total (Nij + Mij + Cij)</span></div>
-                </div>
-            </div>
-
-            <!-- Export Buttons -->
-            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3 w-full">
-                <form id="bulkDeleteForm" action="{{ route('operator.ss.bulkDestroy') }}" method="POST" onsubmit="return confirmBulkDelete(event, this);" class="w-full sm:w-auto">
-                    @csrf
-                    @method('DELETE')
-                    <input type="hidden" name="ids" id="selectedIds">
-                    <button type="submit" id="bulkDeleteBtn" class="hidden w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Hapus Terpilih (<span id="bulkDeleteCount">0</span>)
-                    </button>
-                </form>
-
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Unduh Hasil Analisis (Excel)
+            <form action="{{ route('operator.ss.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all shadow-xs">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Hapus Semua Simulasi</span>
                 </button>
-
-                <form action="{{ route('operator.ss.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Hapus Semua Data
-                    </button>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
 
-    <x-import-modal action="{{ route('operator.ss.import') }}" type="ss" />
+</div>
+
+<x-import-modal action="{{ route('operator.ss.import') }}" type="ss" />
 
 <script>
     function exportToExcel() {
         var table = document.getElementById("ssTable");
         var clone = table.cloneNode(true);
         
-        // Remove 'Aksi' column (last column) before exporting
         var rows = clone.rows;
         for (var i = 0; i < rows.length; i++) {
             if(rows[i].cells.length > 0) {
-                rows[i].deleteCell(-1); // Delete Aksi column
-                rows[i].deleteCell(0);  // Delete Checkbox column
+                rows[i].deleteCell(-1); 
             }
         }
         
-        var wb = XLSX.utils.table_to_book(clone, {sheet: "Analisis SS"});
-        XLSX.writeFile(wb, "Hasil_Analisis_SS.xlsx");
+        var wb = XLSX.utils.table_to_book(clone, {sheet: "Analisis Shift-Share"});
+        XLSX.writeFile(wb, "Hasil_Analisis_Shift_Share.xlsx");
     }
 </script>
 @endsection
