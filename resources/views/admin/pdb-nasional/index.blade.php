@@ -1,0 +1,312 @@
+@extends('layouts.admin')
+
+@section('title', 'Data PDB Nasional')
+
+@section('content')
+<div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{ isPdbModalOpen: false }">
+
+    {{-- Flash Notifications --}}
+    @if(session('success'))
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+
+    @if(session('info'))
+        <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-sky-600 text-base"></i>
+                <span>{{ session('info') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-sky-500 hover:text-sky-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+
+    <!-- Header Banner -->
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="relative z-10 space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+                <i class="fa-solid fa-globe text-[#FFD54F]"></i>
+                <span>Administrator Central Access (Skala PDB Nasional)</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                Kelola Data PDB Nasional
+            </h1>
+            <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
+                Akses penuh Admin untuk mengelola, menginputkan, mengedit, dan menghapus seluruh basis data PDB (Produk Domestik Bruto) Nasional per 17 Sektor Lapangan Usaha sebagai pembanding analisis ekonomi regional.
+            </p>
+        </div>
+
+        <div class="relative z-10">
+            <button type="button" @click="isPdbModalOpen = true"
+                class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                <i class="fa-solid fa-plus text-sm"></i>
+                <span>Inisiasi Data PDB Baru</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Filter Section (Tanpa Search Bar) -->
+    <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <form
+            action="{{ route('admin.pdb-nasional.index') }}"
+            method="GET"
+            class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12"
+        >
+            {{-- Filter Tahun PDB (50%) --}}
+            <div class="relative min-w-0 md:col-span-1 xl:col-span-6">
+                <select
+                    name="tahun"
+                    id="filterTahun"
+                    class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium font-mono text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                >
+                    <option value="">Semua Tahun PDB</option>
+                    @foreach ($availableYears as $yr)
+                        <option
+                            value="{{ $yr }}"
+                            @selected(request('tahun') == $yr)
+                        >
+                            {{ $yr }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+            </div>
+
+            {{-- Action Buttons (50%) --}}
+            <div class="flex min-w-0 gap-2 md:col-span-1 xl:col-span-6">
+                <button
+                    type="submit"
+                    class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
+                >
+                    <i class="fa-solid fa-filter"></i>
+                    <span class="truncate">Terapkan</span>
+                </button>
+
+                <a
+                    href="{{ route('admin.pdb-nasional.index') }}"
+                    title="Reset filter"
+                    class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600 shadow-sm"
+                >
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <!-- Data Table Card -->
+    <div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+            <div>
+                <h2 class="text-lg font-bold text-slate-800">
+                    Daftar Record PDB Nasional Terdaftar
+                </h2>
+                <p class="mt-1 text-xs text-slate-500">
+                    Kelola data PDB Nasional per Tahun untuk 17 Sektor Lapangan Usaha.
+                </p>
+            </div>
+
+            <div class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                <i class="fa-solid fa-globe"></i>
+                {{ number_format($pdbGroups->total(), 0, ',', '.') }} Data
+            </div>
+        </header>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase tracking-wider">
+                        <th class="px-5 py-3.5 text-center w-12">No</th>
+                        <th class="px-5 py-3.5 text-center">Tahun PDB Nasional</th>
+                        <th class="px-5 py-3.5 text-center">Sektor Terisi</th>
+                        <th class="px-5 py-3.5 text-right">Total PDB Nasional (Rp Juta)</th>
+                        <th class="px-5 py-3.5 text-center w-36">Aksi & Manajemen</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    @forelse($pdbGroups as $index => $group)
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="px-5 py-4 text-center text-slate-400">
+                                {{ $pdbGroups->firstItem() + $index }}
+                            </td>
+                            <td class="px-5 py-4 text-center font-mono font-semibold">
+                                <span class="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-800">
+                                    {{ $group->tahun }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-[#145239] border border-emerald-200">
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                    {{ $group->total_sektor }} Sektor Terisi
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 text-right font-mono font-bold text-slate-900 text-sm">
+                                Rp {{ number_format($group->total_pdb, 2, ',', '.') }}
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    {{-- Edit Button (Icon Only) --}}
+                                    <a href="{{ route('admin.pdb-nasional.entry', ['tahun' => $group->tahun]) }}" 
+                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors shadow-2xs"
+                                        title="Edit Data PDB Nasional Tahun {{ $group->tahun }}">
+                                        <i class="fa-regular fa-pen-to-square text-xs"></i>
+                                    </a>
+
+                                    {{-- Delete Button (Icon Only) --}}
+                                    <form action="{{ route('admin.pdb-nasional.destroy-group', ['tahun' => $group->tahun]) }}" method="POST" onsubmit="return confirm('Hapus seluruh data PDB Nasional Tahun {{ $group->tahun }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors" title="Hapus Data Tahun Ini">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-5 py-12 text-center text-slate-400">
+                                <i class="fa-solid fa-folder-open text-3xl mb-2 block text-slate-300"></i>
+                                Belum ada data PDB Nasional yang terdaftar. Klik <strong>"Inisiasi Data PDB Baru"</strong> untuk menginputkan data tahun baru.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($pdbGroups->total() > 0)
+            <footer class="flex flex-col gap-4 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <p class="m-0 text-xs text-slate-500">
+                    Menampilkan <strong class="text-slate-700">{{ $pdbGroups->firstItem() }}</strong>–<strong class="text-slate-700">{{ $pdbGroups->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($pdbGroups->total(), 0, ',', '.') }}</strong> data
+                </p>
+
+                @if ($pdbGroups->hasPages())
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if ($pdbGroups->onFirstPage())
+                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </span>
+                        @else
+                            <a href="{{ $pdbGroups->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </a>
+                        @endif
+
+                        @php
+                            $currentPage = $pdbGroups->currentPage();
+                            $lastPage = $pdbGroups->lastPage();
+                            $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
+                                ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
+                                ->unique()
+                                ->sort()
+                                ->values();
+                            $previousPageNumber = null;
+                        @endphp
+
+                        @foreach ($pages as $page)
+                            @if ($previousPageNumber && $page - $previousPageNumber > 1)
+                                <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">…</span>
+                            @endif
+
+                            @if ($page === $currentPage)
+                                <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-emerald-600 bg-emerald-600 px-3 text-xs font-bold text-white">
+                                    {{ $page }}
+                                </span>
+                            @else
+                                <a href="{{ $pdbGroups->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
+                                    {{ $page }}
+                                </a>
+                            @endif
+
+                            @php
+                                $previousPageNumber = $page;
+                            @endphp
+                        @endforeach
+
+                        @if ($pdbGroups->hasMorePages())
+                            <a href="{{ $pdbGroups->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </a>
+                        @else
+                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </span>
+                        @endif
+                    </div>
+                @endif
+            </footer>
+        @endif
+    </div>
+
+    <!-- MODAL INISIASI PDB BARU -->
+    <template x-teleport="body">
+        <div x-show="isPdbModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
+            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 relative" @click.outside="isPdbModalOpen = false">
+                {{-- Modal Header --}}
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-plus-circle text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base">Inisiasi Data PDB Nasional</h3>
+                            <p class="text-xs text-slate-500">Pilih Tahun PDB Nasional baru</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="isPdbModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+
+                <form action="{{ route('admin.pdb-nasional.init') }}" method="POST" class="space-y-4 pt-4 text-sm">
+                    @csrf
+
+                    {{-- Tahun PDB --}}
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">
+                            Tahun PDB Nasional <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="number" name="tahun" required value="{{ date('Y') - 1 }}" min="2000" max="2100" class="w-full h-[42px] rounded-xl border border-slate-200 focus:border-emerald-600 focus:ring-emerald-600 text-sm font-mono px-3.5">
+                        <p class="text-[11px] text-slate-400 mt-1">
+                            Sistem akan mengecek apakah PDB Nasional Tahun ini sudah pernah didaftarkan.
+                        </p>
+                    </div>
+
+                    {{-- Modal Footer --}}
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                        <button type="button" @click="isPdbModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                            Batal
+                        </button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                            <span>Lanjut ke Input Nilai</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+</div>
+@endsection

@@ -45,13 +45,13 @@
         <div class="relative z-10 space-y-2">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                 <i class="fa-solid fa-shield-halved text-[#FFD54F]"></i>
-                <span>Administrator Central Access (33 Kab/Kota Sumut)</span>
+                <span>Administrator Central Access (Seluruh Provinsi & Kab/Kota Pulau Sumatera)</span>
             </div>
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
-                Kelola Data PDRB Daerah Sumatera Utara
+                Kelola Data PDRB Daerah Pulau Sumatera
             </h1>
             <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
-                Akses penuh Admin untuk mengelola, menginputkan, mengedit, dan menghapus seluruh basis data PDRB 33 Kabupaten/Kota di Sumatera Utara yang diinput oleh Operator maupun Administrator.
+                Akses penuh Admin untuk mengelola, menginputkan, mengedit, dan menghapus seluruh basis data PDRB Kabupaten/Kota se-Pulau Sumatera yang diinput oleh Operator maupun Administrator.
             </p>
         </div>
 
@@ -64,60 +64,142 @@
         </div>
     </section>
 
-    <!-- Filter Bar -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-        <form action="{{ route('admin.pdrb.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div>
-                <label class="block font-semibold text-slate-700 mb-1">Filter Kabupaten / Kota</label>
-                <select name="kabupaten_id" onchange="this.form.submit()" class="w-full rounded-xl border-slate-200 focus:border-[#145239] text-xs bg-white h-10">
-                    <option value="">-- Semua 33 Kab/Kota Sumut --</option>
-                    @foreach($kabupatens as $kab)
-                        <option value="{{ $kab->kab_id }}" @selected(request('kabupaten_id') == $kab->kab_id)>{{ $kab->nama_kabupaten }}</option>
+    <!-- Filter Section -->
+    <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+        <form
+            action="{{ route('admin.pdrb.index') }}"
+            method="GET"
+            class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12"
+        >
+            {{-- Filter Provinsi --}}
+            <div class="relative min-w-0 xl:col-span-3">
+                <select
+                    name="provinsi_id"
+                    id="filterProvinsi"
+                    onchange="this.form.submit()"
+                    class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                >
+                    <option value="">Semua Provinsi (Sumatera)</option>
+                    @foreach ($provinsis as $prov)
+                        <option
+                            value="{{ $prov->provinsi_id }}"
+                            @selected(($selectedProvinsiId ?? request('provinsi_id')) == $prov->provinsi_id)
+                        >
+                            {{ $prov->nama_provinsi }}
+                        </option>
                     @endforeach
                 </select>
+
+                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-            <div>
-                <label class="block font-semibold text-slate-700 mb-1">Filter Tahun PDRB</label>
-                <select name="tahun" onchange="this.form.submit()" class="w-full rounded-xl border-slate-200 focus:border-[#145239] text-xs bg-white h-10 font-mono">
-                    <option value="">-- Semua Tahun --</option>
-                    @foreach($availableYears as $yr)
-                        <option value="{{ $yr }}" @selected(request('tahun') == $yr)>{{ $yr }}</option>
+            {{-- Filter Kabupaten / Kota --}}
+            <div class="relative min-w-0 xl:col-span-3">
+                <select
+                    name="kabupaten_id"
+                    id="filterKabupaten"
+                    class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                >
+                    <option value="">Semua Kab/Kota</option>
+                    @foreach ($kabupatens as $kab)
+                        <option
+                            value="{{ $kab->kab_id }}"
+                            data-provinsi="{{ $kab->provinsi_id }}"
+                            @selected(request('kabupaten_id') == $kab->kab_id)
+                        >
+                            {{ $kab->nama_kabupaten }}
+                        </option>
                     @endforeach
                 </select>
+
+                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-            <div class="flex items-end gap-2">
-                <button type="submit" class="w-full h-10 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs">
-                    <i class="fa-solid fa-filter"></i>
-                    <span>Terapkan Filter</span>
+            {{-- Filter Tahun PDRB --}}
+            <div class="relative min-w-0 xl:col-span-2">
+                <select
+                    name="tahun"
+                    id="filterTahun"
+                    class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium font-mono text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                >
+                    <option value="">Semua Tahun</option>
+                    @foreach ($availableYears as $yr)
+                        <option
+                            value="{{ $yr }}"
+                            @selected(request('tahun') == $yr)
+                        >
+                            {{ $yr }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+            </div>
+
+            {{-- Input Search --}}
+            <div class="relative min-w-0 xl:col-span-2">
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari..."
+                    class="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                >
+
+                <button
+                    type="submit"
+                    aria-label="Cari PDRB"
+                    class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 transition hover:bg-emerald-100"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
-                @if(request()->anyFilled(['kabupaten_id', 'tahun']))
-                    <a href="{{ route('admin.pdrb.index') }}" class="h-10 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors" title="Reset Filter">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                @endif
+            </div>
+
+            {{-- Action Buttons --}}
+            <div class="flex min-w-0 gap-2 md:col-span-2 xl:col-span-2">
+                <button
+                    type="submit"
+                    class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
+                >
+                    <i class="fa-solid fa-filter"></i>
+                    <span class="truncate">Terapkan</span>
+                </button>
+
+                <a
+                    href="{{ route('admin.pdrb.index') }}"
+                    title="Reset filter"
+                    class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600 shadow-sm"
+                >
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
             </div>
         </form>
-    </div>
+    </section>
 
     <!-- Data Table Card -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <i class="fa-solid fa-coins text-[#145239]"></i>
-                Daftar Record PDRB Daerah Terdaftar (Seluruh Sumut)
-            </h3>
-            <span class="text-xs font-semibold text-[#145239] bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                Total: {{ $pdrbGroups->total() }} Data Daerah/Tahun
-            </span> 
-        </div>
+    <div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+            <div>
+                <h2 class="text-lg font-bold text-slate-800">
+                    Daftar Record PDRB Daerah Terdaftar
+                </h2>
+                <p class="mt-1 text-xs text-slate-500">
+                    Kelola data PDRB per Provinsi, Kabupaten/Kota, dan Tahun untuk seluruh wilayah se-Pulau Sumatera.
+                </p>
+            </div>
+
+            <div class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                <i class="fa-solid fa-coins"></i>
+                {{ number_format($pdrbGroups->total(), 0, ',', '.') }} Data
+            </div>
+        </header>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase tracking-wider">
                         <th class="px-5 py-3.5 text-center w-12">No</th>
+                        <th class="px-5 py-3.5">Provinsi</th>
                         <th class="px-5 py-3.5">Kabupaten / Kota</th>
                         <th class="px-5 py-3.5 text-center">Tahun PDRB</th>
                         <th class="px-5 py-3.5 text-center">Sektor Terisi</th>
@@ -130,6 +212,9 @@
                         <tr class="hover:bg-slate-50/70 transition-colors">
                             <td class="px-5 py-4 text-center text-slate-400">
                                 {{ $pdrbGroups->firstItem() + $index }}
+                            </td>
+                            <td class="px-5 py-4 text-slate-700 font-semibold">
+                                {{ $group->kabupaten->provinsi->nama_provinsi ?? '-' }}
                             </td>
                             <td class="px-5 py-4 text-slate-900 font-bold">
                                 {{ $group->kabupaten->nama_kabupaten ?? '-' }}
@@ -170,7 +255,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-12 text-center text-slate-400">
+                            <td colspan="7" class="px-5 py-12 text-center text-slate-400">
                                 <i class="fa-solid fa-folder-open text-3xl mb-2 block text-slate-300"></i>
                                 Belum ada data PDRB yang terdaftar. Klik <strong>"Inisiasi Data PDRB Baru"</strong> untuk menginputkan data daerah baru.
                             </td>
@@ -352,4 +437,21 @@
     </template>
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterKabupaten = document.getElementById('filterKabupaten');
+        const filterProvinsi = document.getElementById('filterProvinsi');
+
+        if (filterKabupaten && filterProvinsi) {
+            filterKabupaten.addEventListener('change', function () {
+                const selectedOption = filterKabupaten.options[filterKabupaten.selectedIndex];
+                const provId = selectedOption ? selectedOption.getAttribute('data-provinsi') : '';
+                if (provId) {
+                    filterProvinsi.value = provId;
+                }
+            });
+        }
+    });
+</script>
 @endsection
