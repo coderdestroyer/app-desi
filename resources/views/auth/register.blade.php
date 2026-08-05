@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout title="Register">
 
     <div class="w-full max-w-[480px] mx-auto bg-white">
 

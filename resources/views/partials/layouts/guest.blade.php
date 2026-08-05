@@ -15,9 +15,7 @@
         content="{{ csrf_token() }}"
     >
 
-    <title>
-        @yield('title', config('app.name', 'DPMPTSP WebGIS'))
-    </title>
+    <title>{{ $title ?? 'Login' }} | DPMPTSP Sumatera Utara</title>
 
     {{-- Favicon --}}
     <link rel="icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
