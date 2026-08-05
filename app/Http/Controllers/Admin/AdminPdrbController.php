@@ -5,22 +5,44 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kabupaten;
 use App\Models\PdrbSumateraKabupaten;
+use App\Models\Provinsi;
 use App\Models\Sektor;
 use Illuminate\Http\Request;
 
 class AdminPdrbController extends Controller
 {
     /**
-     * Menampilkan daftar pengelompokan data PDRB per Daerah & Tahun untuk Admin (Akses Seluruh Sumut).
+     * Menampilkan daftar pengelompokan data PDRB per Daerah & Tahun untuk Admin (Akses Seluruh Pulau Sumatera).
      */
     public function index(Request $request)
     {
-        $kabupatens = Kabupaten::orderBy('nama_kabupaten')->get();
+        $provinsis = Provinsi::orderBy('nama_provinsi')->get();
+
+        $selectedProvinsiId = $request->input('provinsi_id');
+        if (!$selectedProvinsiId && $request->filled('kabupaten_id')) {
+            $selectedKabupaten = Kabupaten::find($request->kabupaten_id);
+            if ($selectedKabupaten && $selectedKabupaten->provinsi_id) {
+                $selectedProvinsiId = $selectedKabupaten->provinsi_id;
+            }
+        }
+
+        $kabupatensQuery = Kabupaten::with('provinsi');
+        if ($selectedProvinsiId) {
+            $kabupatensQuery->where('provinsi_id', $selectedProvinsiId);
+        }
+        $kabupatens = $kabupatensQuery->orderBy('nama_kabupaten')->get();
+
         $sektors = Sektor::orderBy('sektor_id')->get();
 
         $query = PdrbSumateraKabupaten::selectRaw('kabupaten_id, tahun, COUNT(*) as total_sektor, SUM(nilai_pdrb) as total_pdrb')
             ->groupBy('kabupaten_id', 'tahun')
-            ->with('kabupaten');
+            ->with(['kabupaten.provinsi']);
+
+        if ($selectedProvinsiId) {
+            $query->whereHas('kabupaten', function ($q) use ($selectedProvinsiId) {
+                $q->where('provinsi_id', $selectedProvinsiId);
+            });
+        }
 
         if ($request->filled('kabupaten_id')) {
             $query->where('kabupaten_id', $request->kabupaten_id);
@@ -28,6 +50,21 @@ class AdminPdrbController extends Controller
 
         if ($request->filled('tahun')) {
             $query->where('tahun', $request->tahun);
+        }
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('kabupaten', function ($kq) use ($search) {
+                    $kq->where('nama_kabupaten', 'LIKE', "%{$search}%")
+                       ->orWhereHas('provinsi', function ($pq) use ($search) {
+                           $pq->where('nama_provinsi', 'LIKE', "%{$search}%");
+                       });
+                });
+                if (is_numeric($search)) {
+                    $q->orWhere('tahun', (int) $search);
+                }
+            });
         }
 
         $pdrbGroups = $query->orderBy('tahun', 'desc')
@@ -40,7 +77,7 @@ class AdminPdrbController extends Controller
             ->pluck('tahun');
 
         return view('admin.pdrb.index', compact(
-            'pdrbGroups', 'kabupatens', 'sektors', 'availableYears'
+            'pdrbGroups', 'provinsis', 'kabupatens', 'sektors', 'availableYears', 'selectedProvinsiId'
         ));
     }
 

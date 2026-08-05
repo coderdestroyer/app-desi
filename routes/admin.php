@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\MoneyCurrencyController;
 use App\Http\Controllers\Admin\DataKbkiController;
 use App\Http\Controllers\Admin\AdminProyekIproController;
 use App\Http\Controllers\Admin\AdminPdrbController;
+use App\Http\Controllers\Admin\AdminPdbNasionalController;
 
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
@@ -189,4 +190,15 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/pdrb/entry/{kabupaten_id}/{tahun}', [AdminPdrbController::class, 'entry'])->name('pdrb.entry');
         Route::post('/pdrb/save-entry', [AdminPdrbController::class, 'saveEntry'])->name('pdrb.save-entry');
         Route::delete('/pdrb/group/{kabupaten_id}/{tahun}', [AdminPdrbController::class, 'destroyGroup'])->name('pdrb.destroy-group');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kelola Data PDB Nasional (Admin Full Access)
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/pdb-nasional', [AdminPdbNasionalController::class, 'index'])->name('pdb-nasional.index');
+        Route::post('/pdb-nasional/init', [AdminPdbNasionalController::class, 'init'])->name('pdb-nasional.init');
+        Route::get('/pdb-nasional/entry/{tahun}', [AdminPdbNasionalController::class, 'entry'])->name('pdb-nasional.entry');
+        Route::post('/pdb-nasional/save-entry', [AdminPdbNasionalController::class, 'saveEntry'])->name('pdb-nasional.save-entry');
+        Route::delete('/pdb-nasional/group/{tahun}', [AdminPdbNasionalController::class, 'destroyGroup'])->name('pdb-nasional.destroy-group');
     });
