@@ -1,15 +1,15 @@
 @extends('partials.layouts.operator')
 
-@section('title', 'Input Data PDRB Daerah')
+@section('title', 'Input Data PDRB Provinsi')
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6" x-data="pdrbEntryData()">
 
     {{-- Breadcrumb & Action Bar --}}
     <div class="flex items-center justify-between">
-        <a href="{{ route('operator.pdrb.index') }}" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#CFE3D5] text-sm font-bold text-[#145239] hover:bg-[#EEF8F2] transition-colors shadow-sm">
+        <a href="{{ route('operator.pdrb-provinsi.index') }}" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#CFE3D5] text-sm font-bold text-[#145239] hover:bg-[#EEF8F2] transition-colors shadow-sm">
             <i class="fa-solid fa-arrow-left text-xs"></i>
-            <span>Kembali ke Daftar PDRB</span>
+            <span>Kembali ke Daftar PDRB Provinsi</span>
         </a>
     </div>
 
@@ -19,28 +19,28 @@
             @if($isReadOnly ?? false)
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-800/60 border border-sky-700/60 text-sky-100 text-xs font-bold backdrop-blur-sm">
                     <i class="fa-solid fa-eye text-[#FFD54F]"></i>
-                    <span>Mode Lihat Nilai Sektor PDRB (Read Only)</span>
+                    <span>Mode Lihat Nilai Sektor PDRB Provinsi (Read Only)</span>
                 </div>
             @else
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
-                    <i class="fa-solid fa-pen-to-square text-[#FFD54F]"></i>
-                    <span>Mode Input / Edit Nilai Sektor PDRB</span>
+                    <i class="fa-solid fa-building-columns text-[#FFD54F]"></i>
+                    <span>Mode Input / Edit Nilai Sektor PDRB Provinsi</span>
                 </div>
             @endif
             <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                {{ $kabupaten->nama_kabupaten }} &bull; Tahun {{ $tahun }}
+                Provinsi {{ $provinsi->nama_provinsi }} &bull; Tahun {{ $tahun }}
             </h1>
             <p class="text-emerald-100/90 text-sm md:text-base max-w-2xl leading-relaxed">
                 @if($isReadOnly ?? false)
-                    Melihat rincian nilai PDRB (dalam <strong>Rp Juta</strong>) untuk 17 Sektor Lapangan Usaha BPS di Kabupaten/Kota ini.
+                    Melihat rincian nilai PDRB Provinsi (dalam <strong>Rp Juta</strong>) untuk 17 Sektor Lapangan Usaha BPS.
                 @else
-                    Silakan isikan atau perbarui nilai PDRB (dalam <strong>Rp Juta</strong>) untuk 17 Sektor Lapangan Usaha BPS di bawah ini. Nilai otomatis diformat dengan pemisah ribuan (titik).
+                    Silakan isikan atau perbarui nilai PDRB Provinsi (dalam <strong>Rp Juta</strong>) untuk 17 Sektor Lapangan Usaha BPS di bawah ini. Nilai otomatis diformat dengan pemisah ribuan (titik).
                 @endif
             </p>
         </div>
 
         <div class="bg-white/15 border border-white/20 backdrop-blur-md p-5 rounded-2xl text-right shrink-0 relative z-10 shadow-inner">
-            <span class="block text-xs uppercase tracking-wider text-emerald-200 font-bold mb-1">Total PDRB</span>
+            <span class="block text-xs uppercase tracking-wider text-emerald-200 font-bold mb-1">Total PDRB Provinsi</span>
             <span class="text-2xl md:text-3xl font-mono font-black text-[#FFD54F]">
                 Rp <span x-text="grandTotal">0,00</span>
             </span>
@@ -48,9 +48,9 @@
     </div>
 
     {{-- Main Form Card --}}
-    <form action="{{ route('operator.pdrb.save-entry') }}" method="POST" class="bg-white rounded-2xl border border-[#CFE3D5] shadow-sm p-6 md:p-8 space-y-6">
+    <form action="{{ route('operator.pdrb-provinsi.save-entry') }}" method="POST" class="bg-white rounded-2xl border border-[#CFE3D5] shadow-sm p-6 md:p-8 space-y-6">
         @csrf
-        <input type="hidden" name="kabupaten_id" value="{{ $kabupaten->kab_id }}">
+        <input type="hidden" name="provinsi_id" value="{{ $provinsi->provinsi_id }}">
         <input type="hidden" name="tahun" value="{{ $tahun }}">
 
         <div class="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -102,14 +102,14 @@
 
         {{-- Action Buttons Footer --}}
         <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
-            <a href="{{ route('operator.pdrb.index') }}" class="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition-colors">
+            <a href="{{ route('operator.pdrb-provinsi.index') }}" class="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition-colors">
                 <i class="fa-solid fa-arrow-left text-xs mr-1"></i>
-                Kembali ke Daftar PDRB
+                Kembali ke Daftar PDRB Provinsi
             </a>
             @if(!($isReadOnly ?? false))
                 <button type="submit" class="px-8 py-3.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-sm font-extrabold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2.5 transform hover:-translate-y-0.5">
                     <i class="fa-solid fa-floppy-disk text-base"></i>
-                    <span>Simpan Seluruh Data PDRB ({{ $tahun }})</span>
+                    <span>Simpan Seluruh Data PDRB Provinsi ({{ $tahun }})</span>
                 </button>
             @endif
         </div>
@@ -119,43 +119,66 @@
 <script>
 function pdrbEntryData() {
     return {
-        formattedValues: {
-            @foreach($sektors as $sek)
-                '{{ $sek->sektor_id }}': '{{ isset($existingValues[$sek->sektor_id]) && $existingValues[$sek->sektor_id] !== '' ? number_format((float)$existingValues[$sek->sektor_id], 0, ',', '.') : '' }}',
-            @endforeach
-        },
-        rawValues: {
-            @foreach($sektors as $sek)
-                '{{ $sek->sektor_id }}': '{{ $existingValues[$sek->sektor_id] ?? '' }}',
-            @endforeach
-        },
-        formatInput(id, val) {
-            if (!val) {
-                this.formattedValues[id] = '';
-                this.rawValues[id] = '';
-                return;
-            }
-            // Remove non digits except comma
-            let clean = val.replace(/[^0-9,]/g, '');
-            let parts = clean.split(',');
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            if (parts.length > 2) parts = [parts[0], parts[1]]; // max 1 decimal separator
-            this.formattedValues[id] = parts.join(',');
+        rawValues: {},
+        formattedValues: {},
+        grandTotal: '0,00',
 
-            // Raw float string for backend
-            let rawStr = parts[0].replace(/\./g, '');
-            if (parts.length > 1 && parts[1] !== '') {
-                rawStr += '.' + parts[1];
-            }
-            this.rawValues[id] = rawStr;
+        init() {
+            const initialData = @json($existingValues);
+            @foreach($sektors as $sek)
+                const val_{{ $sek->sektor_id }} = initialData[{{ $sek->sektor_id }}] ?? null;
+                if (val_{{ $sek->sektor_id }} !== null && val_{{ $sek->sektor_id }} !== '') {
+                    const num = parseFloat(val_{{ $sek->sektor_id }});
+                    this.rawValues['{{ $sek->sektor_id }}'] = num;
+                    this.formattedValues['{{ $sek->sektor_id }}'] = this.formatNumber(num);
+                } else {
+                    this.rawValues['{{ $sek->sektor_id }}'] = '';
+                    this.formattedValues['{{ $sek->sektor_id }}'] = '';
+                }
+            @endforeach
+            this.recalculateTotal();
         },
-        get grandTotal() {
+
+        formatInput(sektorId, inputVal) {
+            let clean = inputVal.replace(/[^0-9,]/g, '');
+            const parts = clean.split(',');
+            if (parts.length > 2) {
+                clean = parts[0] + ',' + parts.slice(1).join('');
+            }
+
+            let intPart = parts[0] || '';
+            let decPart = parts.length > 1 ? ',' + parts[1].substring(0, 2) : '';
+
+            if (intPart) {
+                intPart = parseInt(intPart, 10).toLocaleString('id-ID');
+            }
+
+            this.formattedValues[sektorId] = intPart + decPart;
+
+            let numericStr = clean.replace(/\./g, '').replace(',', '.');
+            this.rawValues[sektorId] = numericStr !== '' ? parseFloat(numericStr) : '';
+
+            this.recalculateTotal();
+        },
+
+        formatNumber(num) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }).format(num);
+        },
+
+        recalculateTotal() {
             let sum = 0;
-            Object.values(this.rawValues).forEach(val => {
-                let num = parseFloat(val);
-                if (!isNaN(num)) sum += num;
+            Object.values(this.rawValues).forEach(v => {
+                if (typeof v === 'number' && !isNaN(v)) {
+                    sum += v;
+                }
             });
-            return sum.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            this.grandTotal = new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(sum);
         }
     }
 }

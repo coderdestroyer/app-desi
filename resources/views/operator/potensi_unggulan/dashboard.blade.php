@@ -60,12 +60,6 @@
 
         <!-- Right Side Action & Date Info -->
         <div class="relative z-10 flex flex-col md:flex-row items-end md:items-center gap-4 mt-4 md:mt-0">
-            <button type="button" @click="isPdrbModalOpen = true"
-                class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
-                <i class="fa-solid fa-plus text-sm"></i>
-                <span>Tambah Data PDRB</span>
-            </button>
-
             <div class="flex flex-col items-end justify-center hidden sm:flex">
                 <span
                     class="text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
