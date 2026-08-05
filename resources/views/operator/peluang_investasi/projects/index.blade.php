@@ -32,27 +32,30 @@
         }
     }">
 
-        <!-- Top Header & Breadcrumb Bar -->
-        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
-                    <a href="{{ route('operator.peluang-investasi') }}" class="hover:text-[#145239] font-medium">Peluang Investasi</a>
-                    <span>/</span>
-                    <span class="text-slate-800 font-semibold">Daftar Proyek (IPRO)</span>
+        <!-- Header & Action Buttons Card (55:45 Ratio & Multi-Line Flexible Buttons) -->
+        <div class="bg-white rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-6">
+            <!-- Title & Subtitle Section (~55% - 60% Width) -->
+            <div class="w-full lg:w-[55%] xl:w-[60%]">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold mb-2 border border-[#CFE3D5]">
+                    <i class="fa-solid fa-briefcase text-[#D8A62A]"></i>
+                    <span>Daftar Proyek (IPRO)</span>
                 </div>
-                <h1 class="text-2xl font-bold text-slate-900">Daftar Proyek Investasi Daerah</h1>
-                <p class="text-xs text-slate-500 mt-0.5">Kelola kelayakan proyek finansial daerah, komputasi CAPEX, Laba Rugi, dan Arus Kas.</p>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">Daftar Proyek Investasi Daerah</h1>
+                <p class="text-slate-500 text-xs md:text-sm mt-0.5">Kelola kelayakan proyek finansial daerah, komputasi CAPEX, Laba Rugi, dan Arus Kas.</p>
             </div>
 
-            <div class="flex items-center gap-3 shrink-0">
-                <a href="{{ route('operator.peluang-investasi') }}" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-[#CFE3D5] shadow-sm transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Kembali ke Dashboard</span>
-                </a>
-                <button @click="isCreateModalOpen = true" class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white font-bold text-xs shadow-md transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                    <span>Tambah Proyek Baru</span>
-                </button>
+            <!-- Action Buttons (~45% Width) -->
+            <div class="w-full lg:w-[45%] xl:w-[40%] flex justify-start lg:justify-end">
+                <div class="flex items-center gap-3 shrink-0">
+                    <a href="{{ route('operator.peluang-investasi') }}" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-[#CFE3D5] shadow-sm transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Kembali ke Dashboard</span>
+                    </a>
+                    <button @click="isCreateModalOpen = true" class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white font-bold text-xs shadow-md transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Tambah Proyek Baru</span>
+                    </button>
+                </div>
             </div>
         </div>
 
