@@ -166,7 +166,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Cek apakah user berhak mengelola provinsi tertentu
+     * Cek apakah user berhak mengelola provinsi tertentu (langsung via scope provinsi atau via kabupaten induk)
      */
     public function canAccessProvinsi(int $provinsiId): bool
     {
@@ -178,8 +178,75 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
+        $scopes = $this->wilayahScopes()->get();
+
+        if ($scopes->isEmpty()) {
+            return true;
+        }
+
+        foreach ($scopes as $scope) {
+            if ($scope->provinsi_id && $scope->provinsi_id == $provinsiId) {
+                return true;
+            }
+            if ($scope->kabupaten_id) {
+                $kab = Kabupaten::find($scope->kabupaten_id);
+                if ($kab && $kab->provinsi_id == $provinsiId) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Cek apakah user berhak mengolah / merubah (CRUD) Data PDRB Provinsi tertentu.
+     * Hanya Admin dan Operator dengan Scope Provinsi langsung yang berhak mengedit/menghapus.
+     */
+    public function canManageProvinsi(int $provinsiId): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('user_wilayah_scopes')) {
+            return true;
+        }
+
+        $scopes = $this->wilayahScopes()->get();
+
+        if ($scopes->isEmpty()) {
+            return true;
+        }
+
         return $this->wilayahScopes()
             ->where('provinsi_id', $provinsiId)
+            ->whereNull('kabupaten_id')
+            ->exists();
+    }
+
+    /**
+     * Cek apakah user secara umum memiliki minimal 1 scope tingkat Provinsi (bukan sekadar scope Kabupaten).
+     */
+    public function hasProvinsiScope(): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if (!\Illuminate\Support\Facades\Schema::hasTable('user_wilayah_scopes')) {
+            return true;
+        }
+
+        $scopes = $this->wilayahScopes()->get();
+
+        if ($scopes->isEmpty()) {
+            return true;
+        }
+
+        return $this->wilayahScopes()
+            ->whereNotNull('provinsi_id')
+            ->whereNull('kabupaten_id')
             ->exists();
     }
 }
