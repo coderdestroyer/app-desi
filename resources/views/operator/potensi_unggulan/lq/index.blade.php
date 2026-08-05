@@ -3,41 +3,232 @@
 @section('title', 'Analisis Location Quotient (LQ)')
 
 @section('content')
-<div>
+<div x-data="{ activeTab: '{{ $editItem ? 'simulasi' : 'real' }}' }" class="space-y-6">
+
     <!-- Alert Messages -->
     @if (session('success'))
-        <div class="mb-6 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-sm font-medium">{{ session('success') }}</p>
+        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center gap-3 shadow-xs">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <p class="text-sm font-semibold">{{ session('success') }}</p>
         </div>
     @endif
     @if (session('error'))
-        <div class="mb-6 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-sm font-medium">{{ session('error') }}</p>
+        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl flex items-center gap-3 shadow-xs">
+            <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+            <p class="text-sm font-semibold">{{ session('error') }}</p>
         </div>
     @endif
 
-    <!-- Form Container -->
-    <div class="op-card">
-        <div class="op-card-header">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <!-- Header & Mode Pill Switcher Card (55:45 Ratio & Multi-Line Flexible Buttons) -->
+    <div class="bg-white rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <!-- Title & Subtitle Section (~55% - 60% Width) -->
+        <div class="w-full lg:w-[55%] xl:w-[60%]">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold mb-2 border border-[#CFE3D5]">
+                <i class="fa-solid fa-chart-pie text-[#D8A62A]"></i>
+                <span>Analisis Makroekonomi Daerah</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">Analisis Location Quotient (LQ)</h1>
+            <p class="text-slate-500 text-xs md:text-sm mt-0.5">Identifikasi Sektor Basis & Non-Basis Wilayah Makroekonomi</p>
+        </div>
+
+        <!-- Pill Tabs Switcher (~45% Width with Multi-Line Text Wrapping) -->
+        <div class="w-full lg:w-[45%] xl:w-[40%] flex justify-start lg:justify-end">
+            <div class="inline-flex w-full p-1.5 bg-slate-100/90 rounded-xl border border-slate-200/90 shadow-inner">
+                <button type="button" @click="activeTab = 'real'" 
+                    :class="activeTab === 'real' ? 'bg-[#145239] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex-1 inline-flex flex-wrap items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg font-bold text-xs text-center leading-tight transition-all duration-200 cursor-pointer">
+                    <i class="fa-solid fa-chart-line text-[#FFD54F] shrink-0"></i>
+                    <span>Data Real PDRB</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-700/80 text-emerald-100 font-bold shrink-0">Otomatis</span>
+                </button>
+
+                <button type="button" @click="activeTab = 'simulasi'" 
+                    :class="activeTab === 'simulasi' ? 'bg-[#145239] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex-1 inline-flex flex-wrap items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg font-bold text-xs text-center leading-tight transition-all duration-200 cursor-pointer">
+                    <i class="fa-solid fa-vials text-[#FFD54F] shrink-0"></i>
+                    <span>Simulasi & Upload Excel</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-700/80 text-emerald-100 font-bold shrink-0">Custom</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 1: DATA REAL PDRB (Kalkulasi Otomatis) -->
+    <div x-show="activeTab === 'real'" x-transition class="space-y-6">
+        <!-- Info Banner -->
+        <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex items-start gap-3.5 text-slate-700 text-xs md:text-sm">
+            <div class="w-8 h-8 rounded-xl bg-[#145239] text-white flex items-center justify-center shrink-0 font-bold mt-0.5">
+                <i class="fa-solid fa-database text-[#FFD54F]"></i>
+            </div>
+            <div>
+                <span class="font-bold text-[#145239] block text-sm">Mode Data Real PDRB (Kalkulasi Otomatis)</span>
+                Menampilkan hasil perhitungan indikator makroekonomi LQ secara otomatis yang ditarik langsung dari basis data PDRB resmi wilayah otorisasi Anda.
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-800">Analisis LQ</h1>
-                    <p class="text-slate-600 mt-1">Masukkan Data LQ per Kabupaten/Kota</p>
+                    <h2 class="text-xl font-bold text-slate-800">Hasil Analisis LQ Data Real</h2>
+                    <p class="text-slate-500 text-xs mt-0.5">Kalkulasi Otomatis 17 Sektor PDRB Wilayah Otorisasi</p>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm shadow-sm">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        Unggah Excel
-                    </button>
+                <form action="{{ route('operator.lq.index') }}" method="GET" class="relative w-full md:w-80">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Daerah, Sektor, atau Tahun..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-[#145239] focus:ring-1 focus:ring-[#145239] outline-none transition-all">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </div>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+                <table id="lqTable" class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                        <tr>
+                            <th class="px-4 py-3.5 w-12 text-center">No</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">Tingkat Wilayah</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">KAB/KOTA</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">PROVINSI</th>
+                            <th class="px-4 py-3.5 min-w-[200px]">SEKTOR</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">TAHUN</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">NILAI LQ</th>
+                            <th class="px-4 py-3.5 min-w-[250px]">KETERANGAN</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KATEGORI</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">RIWAYAT</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+                        @forelse($lqData as $index => $data)
+                            <tr class="hover:bg-emerald-50/30 transition-colors">
+                                <td class="px-4 py-3.5 text-center font-mono font-semibold text-slate-500">{{ ($lqData->currentPage() - 1) * $lqData->perPage() + $loop->iteration }}</td>
+                                <td class="px-4 py-3.5 font-medium">{{ $data['tingkat_wilayah'] ?? '-' }}</td>
+                                <td class="px-4 py-3.5 font-bold text-slate-800">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
+                                <td class="px-4 py-3.5 text-slate-600">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
+                                <td class="px-4 py-3.5 font-medium">{{ $data['sektor'] }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ $data['tahun'] }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-extrabold text-[#145239]">{{ number_format($data['nilai_lq'] ?? 0, 2, ',', '.') }}</td>
+                                <td class="px-4 py-3.5 leading-relaxed text-xs text-slate-600">
+                                    {{ $data['keterangan'] }}
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    @if($data['kategori'] === 'BASIS')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            BASIS
+                                        </span>
+                                    @elseif($data['kategori'] === 'NON-BASIS')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                            NON-BASIS
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                            SEIMBANG
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3.5 text-xs text-slate-500 whitespace-nowrap">{{ $data['riwayat'] }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10" class="px-4 py-8 text-center text-slate-500 font-medium">
+                                    Belum ada data kalkulasi LQ.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Section -->
+            @if ($lqData->total() > 0)
+                <footer class="mt-5 flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="m-0 text-xs text-slate-500">
+                        Menampilkan <strong class="text-slate-700">{{ $lqData->firstItem() }}</strong>–<strong class="text-slate-700">{{ $lqData->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($lqData->total(), 0, ',', '.') }}</strong> data
+                    </p>
+
+                    @if ($lqData->hasPages())
+                        <div class="flex flex-wrap items-center gap-2">
+                            @if ($lqData->onFirstPage())
+                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
+                                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                                </span>
+                            @else
+                                <a href="{{ $lqData->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
+                                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                                </a>
+                            @endif
+
+                            @php
+                                $currentPage = $lqData->currentPage();
+                                $lastPage = $lqData->lastPage();
+                                $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
+                                    ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
+                                    ->unique()
+                                    ->sort()
+                                    ->values();
+                                $previousPageNumber = null;
+                            @endphp
+
+                            @foreach ($pages as $page)
+                                @if ($previousPageNumber && $page - $previousPageNumber > 1)
+                                    <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">…</span>
+                                @endif
+
+                                @if ($page === $currentPage)
+                                    <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-[#145239] bg-[#145239] px-3 text-xs font-bold text-white">
+                                        {{ $page }}
+                                    </span>
+                                @else
+                                    <a href="{{ $lqData->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
+                                        {{ $page }}
+                                    </a>
+                                @endif
+
+                                @php
+                                    $previousPageNumber = $page;
+                                @endphp
+                            @endforeach
+
+                            @if ($lqData->hasMorePages())
+                                <a href="{{ $lqData->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </a>
+                            @else
+                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </span>
+                            @endif
+                        </div>
+                    @endif
+                </footer>
+            @endif
+        </div>
+    </div>
+
+    <!-- TAB 2: SIMULASI & UPLOAD EXCEL (Custom Mode) -->
+    <div x-show="activeTab === 'simulasi'" x-transition class="space-y-6">
+        <!-- Info Banner -->
+        <div class="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 flex items-start justify-between gap-4 text-slate-700 text-xs md:text-sm">
+            <div class="flex items-start gap-3.5">
+                <div class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 font-bold mt-0.5">
+                    <i class="fa-solid fa-vials text-[#FFD54F]"></i>
                 </div>
+                <div>
+                    <span class="font-bold text-amber-900 block text-sm">Mode Simulasi & Upload Excel (Custom)</span>
+                    Gunakan form di bawah ini atau unggah berkas Excel untuk melakukan pengujian skenario custom tanpa mengubah data PDRB resmi.
+                </div>
+            </div>
+
+            <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl font-bold transition-all text-xs md:text-sm shadow-sm shrink-0">
+                <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
+                <span>Unggah Excel</span>
+            </button>
+        </div>
+
+        <!-- Form Card Container -->
+        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
+            <div class="mb-6 border-b border-slate-100 pb-4">
+                <h2 class="text-xl font-bold text-slate-800">{{ $editItem ? 'Edit Data Simulasi LQ' : 'Tambah Simulasi LQ Baru' }}</h2>
+                <p class="text-slate-500 text-xs mt-0.5">Masukkan variabel nilai PDRB custom untuk diuji</p>
             </div>
 
             <form action="{{ $editItem ? route('operator.lq.update', $editItem['id']) : route('operator.lq.store') }}" method="POST" x-data="{ 
@@ -161,234 +352,48 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <button type="submit" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        {{ $editItem ? 'Perbarui LQ' : 'Hitung LQ' }}
+                    <button type="submit" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm">
+                        <i class="fa-solid fa-floppy-disk text-[#FFD54F]"></i>
+                        <span>{{ $editItem ? 'Perbarui Data Simulasi' : 'Simpan Data Simulasi' }}</span>
                     </button>
                     @if($editItem)
-                        <a href="{{ route('operator.lq.index') }}" class="px-4 py-2 rounded-md text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors shadow-sm">Batal</a>
+                        <a href="{{ route('operator.lq.index') }}" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">Batal Edit</a>
                     @endif
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Table Container -->
-    <div class="op-card">
-        <div class="op-card-header">
-            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800">Hasil Analisis LQ</h2>
-                    <p class="text-slate-600 mt-1">Data Analisis LQ Tersimpan</p>
-                </div>
-                <form action="{{ route('operator.lq.index') }}" method="GET" class="relative w-full md:w-72">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Daerah atau Sektor..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:border-[#D8A62A] focus:ring-1 focus:ring-[#D8A62A] outline-none transition-all shadow-sm">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                </form>
-            </div>
+        <!-- Saved Simulations Action Toolbar -->
+        <div class="flex flex-col md:flex-row justify-end items-center gap-3">
+            <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all shadow-xs w-full sm:w-auto">
+                <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
+                <span>Unduh Hasil Analisis (Excel)</span>
+            </button>
 
-            <div class="overflow-x-auto border-t border-slate-200">
-                <table id="lqTable" class="w-full text-left border-collapse">
-                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-12 text-center">
-                                <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" onclick="toggleSelectAll(this)">
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider w-16">No</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Tingkat Wilayah</th>
-                            <th class="px-4 py-4 font-semibold whitespace-nowrap">KAB/KOTA</th>
-                            <th class="px-4 py-4 font-semibold whitespace-nowrap">PROVINSI</th>
-                            <th class="px-4 py-4 font-semibold min-w-[200px]">SEKTOR</th>
-                            <th class="px-4 py-4 font-semibold text-center whitespace-nowrap">TAHUN</th>
-                            <th class="px-4 py-4 font-semibold text-center whitespace-nowrap">NILAI LQ</th>
-                            <th class="px-4 py-4 font-semibold min-w-[250px]">KETERANGAN</th>
-                            <th class="px-4 py-4 font-semibold text-center whitespace-nowrap">KATEGORI</th>
-                            <th class="px-4 py-4 font-semibold whitespace-nowrap">RIWAYAT</th>
-                            <th class="px-4 py-4 font-semibold text-center whitespace-nowrap">AKSI</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
-                        @forelse($lqData as $index => $data)
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-                                    <input type="checkbox" class="row-checkbox rounded border-slate-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" value="{{ $data['id'] }}">
-                                </td>
-                                <td class="px-4 py-4">{{ ($lqData->currentPage() - 1) * $lqData->perPage() + $loop->iteration }}</td>
-                                <td class="px-4 py-4">{{ $data['tingkat_wilayah'] ?? '-' }}</td>
-                                <td class="px-4 py-4">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
-                                <td class="px-4 py-4">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
-                                <td class="px-4 py-4">{{ $data['sektor'] }}</td>
-                                <td class="px-4 py-4 text-center">{{ $data['tahun'] }}</td>
-                                <td class="px-4 py-4 text-center">{{ number_format($data['nilai_lq'] ?? 0, 2, ',', '.') }}</td>
-                                <td class="px-4 py-4 leading-relaxed text-xs">
-                                    {{ $data['keterangan'] }}
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    @if($data['kategori'] === 'BASIS')
-                                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm">
-                                            BASIS
-                                        </span>
-                                    @elseif($data['kategori'] === 'NON-BASIS')
-                                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200 shadow-sm">
-                                            NON-BASIS
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-sm">
-                                            SEIMBANG
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-4 text-xs whitespace-nowrap">{{ $data['riwayat'] }}</td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('operator.lq.index', ['edit' => $data['id']]) }}" class="p-1.5 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm" title="Edit">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </a>
-                                        <form action="{{ route('operator.lq.destroy', $data['id']) }}" method="POST" onsubmit="return confirmDelete(event, this);" class="inline-block">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-1.5 text-red-600 bg-red-50 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Hapus">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="9" class="px-4 py-8 text-center text-slate-500">
-                                    Belum ada data perhitungan LQ.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination Section -->
-            @if ($lqData->total() > 0)
-                <footer class="mt-5 flex flex-col gap-4 border-t border-slate-200 bg-white rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between shadow-xs">
-                    <p class="m-0 text-xs text-slate-500">
-                        Menampilkan <strong class="text-slate-700">{{ $lqData->firstItem() }}</strong>–<strong class="text-slate-700">{{ $lqData->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($lqData->total(), 0, ',', '.') }}</strong> data
-                    </p>
-
-                    @if ($lqData->hasPages())
-                        <div class="flex flex-wrap items-center gap-2">
-                            @if ($lqData->onFirstPage())
-                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                                </span>
-                            @else
-                                <a href="{{ $lqData->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                                </a>
-                            @endif
-
-                            @php
-                                $currentPage = $lqData->currentPage();
-                                $lastPage = $lqData->lastPage();
-                                $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
-                                    ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
-                                    ->unique()
-                                    ->sort()
-                                    ->values();
-                                $previousPageNumber = null;
-                            @endphp
-
-                            @foreach ($pages as $page)
-                                @if ($previousPageNumber && $page - $previousPageNumber > 1)
-                                    <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">…</span>
-                                @endif
-
-                                @if ($page === $currentPage)
-                                    <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-emerald-600 bg-emerald-600 px-3 text-xs font-bold text-white">
-                                        {{ $page }}
-                                    </span>
-                                @else
-                                    <a href="{{ $lqData->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
-                                        {{ $page }}
-                                    </a>
-                                @endif
-
-                                @php
-                                    $previousPageNumber = $page;
-                                @endphp
-                            @endforeach
-
-                            @if ($lqData->hasMorePages())
-                                <a href="{{ $lqData->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                                </a>
-                            @else
-                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                                </span>
-                            @endif
-                        </div>
-                    @endif
-                </footer>
-            @endif
-
-            <div class="mt-8 border-t border-slate-200 pt-6 flex flex-col md:flex-row justify-end gap-3 w-full">
-                <form id="bulkDeleteForm" action="{{ route('operator.lq.bulkDestroy') }}" method="POST" onsubmit="return confirmBulkDelete(event, this);" class="w-full sm:w-auto">
-                    @csrf
-                    @method('DELETE')
-                    <input type="hidden" name="ids" id="selectedIds">
-                    <button type="submit" id="bulkDeleteBtn" class="hidden w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Hapus Terpilih
-                    </button>
-                </form>
-
-                <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Unduh Hasil Analisis (Excel)
+            <form action="{{ route('operator.lq.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all shadow-xs">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Hapus Semua Simulasi</span>
                 </button>
-
-                <form action="{{ route('operator.lq.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Hapus Semua Data
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    <x-import-modal action="{{ route('operator.lq.import') }}" type="lq" />
+</div>
+
+<x-import-modal action="{{ route('operator.lq.import') }}" type="lq" />
 
 <script>
     function exportToExcel() {
         var table = document.getElementById("lqTable");
         var clone = table.cloneNode(true);
         
-        // Remove 'Aksi' column (last column) before exporting to avoid weird SVG characters
         var rows = clone.rows;
         for (var i = 0; i < rows.length; i++) {
             if(rows[i].cells.length > 0) {
-                rows[i].deleteCell(-1); // Delete Aksi column
-                rows[i].deleteCell(0);  // Delete Checkbox column
+                rows[i].deleteCell(-1); 
             }
         }
         
