@@ -29,25 +29,9 @@ class InvestmentMapController extends Controller
             'KOTA PANGKAL PINANG', 'KOTA PANGKALPINANG', 'KOTA TANJUNG PINANG', 'KOTA TANJUNGPINANG'
         ];
 
-        // Ambil Provinsi yang memiliki koordinat
-        $provinsi = Provinsi::whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->orderBy('nama_provinsi')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->provinsi_id,
-                    'nama' => $item->nama_provinsi,
-                    'latitude' => (float)$item->latitude,
-                    'longitude' => (float)$item->longitude,
-                    'type' => 'provinsi',
-                    'provinsi' => $item->nama_provinsi,
-                    'is_ibukota' => false,
-                ];
-            });
-
-        // Ambil Kabupaten yang memiliki koordinat
-        $kabupaten = Kabupaten::with('provinsi')->whereNotNull('latitude')
+        // Ambil Kabupaten/Kota yang memiliki koordinat
+        $lokasi = Kabupaten::with('provinsi')
+            ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->orderBy('nama_kabupaten')
             ->get()
@@ -59,13 +43,10 @@ class InvestmentMapController extends Controller
                     'latitude' => (float)$item->latitude,
                     'longitude' => (float)$item->longitude,
                     'type' => 'kabupaten',
-                    'provinsi' => $item->provinsi->nama_provinsi ?? 'Sumatera Utara',
+                    'provinsi' => $item->provinsi->nama_provinsi ?? 'Sumatera',
                     'is_ibukota' => in_array($cleanName, $ibukotaNames),
                 ];
             });
-
-        // Gabungkan keduanya
-        $lokasi = $provinsi->concat($kabupaten);
 
         return view('landing.map', compact('lokasi'));
     }

@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
         scrollWheelZoom: true,
     });
 
-    map.setView([2.9, 99.2], 7);
+    map.setView([0.5, 101.5], 6);
 
 
     // =====================================================
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // =====================================================
     // ICON MARKERS
     // =====================================================
-    // Green Icon for Kabupaten
+    // Green Icon untuk Kabupaten / Kota biasa
     const kabupatenIcon = L.icon({
         iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -47,9 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
         shadowSize: [41, 41],
     });
 
-    // Gold/Yellow Icon for Provinsi / Ibukota
-    const provinsiIcon = L.icon({
-        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
+    // Red Icon khusus Ibukota Provinsi (Tampil saat Zoom-Out)
+    const ibukotaIcon = L.icon({
+        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
         iconSize: [25, 41],
         iconAnchor: [12, 41],
@@ -61,8 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // =====================================================
     // GROUP MARKER PER LAYER (Dynamic Zoom Control)
     // =====================================================
-    const provinsiGroup = L.layerGroup().addTo(map);  // Selalu Tampil (Provinsi & Ibukota)
-    const kabupatenGroup = L.layerGroup().addTo(map); // Tampil hanya saat Zoom-In
+    const ibukotaGroup = L.layerGroup().addTo(map);   // Selalu Tampil (Hanya Ibukota Provinsi - Tag Merah)
+    const kabupatenGroup = L.layerGroup().addTo(map); // Tampil hanya saat Zoom-In (Kabupaten/Kota biasa - Tag Hijau)
 
     const markers = [];
 
@@ -86,10 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (namaDaerah) namaDaerah.innerText = item.nama;
         if (provinsiDaerah) {
-            provinsiDaerah.innerText = item.provinsi || (item.type === "provinsi" ? "Provinsi" : "Sumatera Utara");
+            provinsiDaerah.innerText = item.provinsi || "Sumatera";
         }
         if (jenisDaerah) {
-            jenisDaerah.innerText = item.type === "provinsi" ? "Provinsi" : "Kabupaten / Kota";
+            jenisDaerah.innerText = item.is_ibukota ? "Ibukota Provinsi" : "Kabupaten / Kota";
         }
 
         if (sektorDaerah) sektorDaerah.innerText = "Memuat data...";
@@ -176,6 +176,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // LOOP SEMUA LOKASI & PEMBAGIAN LAYER
     // =====================================================
     lokasi.forEach((item) => {
+        // Hapus/abaikan tag level provinsi
+        if (item.type === "provinsi") {
+            return;
+        }
+
         const latitude = parseFloat(item.latitude);
         const longitude = parseFloat(item.longitude);
 
@@ -184,11 +189,12 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Marker Provinsi & Ibukota Provinsi selalu masuk di Layer Utama
-        const isMainMarker = item.type === "provinsi" || item.is_ibukota;
-        const icon = item.type === "provinsi" ? provinsiIcon : kabupatenIcon;
-        const targetGroup = isMainMarker ? provinsiGroup : kabupatenGroup;
-        const zIndexOffset = item.type === "provinsi" ? 1000 : (item.is_ibukota ? 500 : 0);
+        // Ibukota Provinsi = Tag Merah (Selalu tampil)
+        // Kabupaten biasa = Tag Hijau (Tampil saat Zoom-In)
+        const isIbukota = item.is_ibukota;
+        const icon = isIbukota ? ibukotaIcon : kabupatenIcon;
+        const targetGroup = isIbukota ? ibukotaGroup : kabupatenGroup;
+        const zIndexOffset = isIbukota ? 1000 : 0;
 
         const marker = L.marker(
             [latitude, longitude],
@@ -198,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         ).addTo(targetGroup);
 
-        const labelTipe = item.type === "provinsi" ? "Provinsi" : (item.is_ibukota ? "Ibukota Provinsi" : "Kabupaten / Kota");
+        const labelTipe = isIbukota ? "Ibukota Provinsi" : "Kabupaten / Kota";
         marker.bindPopup(`
             <div class="popup-card">
                 <div class="popup-title">
@@ -234,12 +240,12 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Current Zoom Level:", currentZoom);
 
         if (currentZoom < ZOOM_THRESHOLD) {
-            // Zoom Out (Jauh): Sembunyikan kabupaten biasa
+            // Zoom Out (Jauh): Sembunyikan kabupaten biasa, tampilkan hanya ibukota (tag merah)
             if (map.hasLayer(kabupatenGroup)) {
                 map.removeLayer(kabupatenGroup);
             }
         } else {
-            // Zoom In (Dekat): Tampilkan seluruh kabupaten/kota
+            // Zoom In (Dekat): Tampilkan seluruh kabupaten/kota (tag hijau)
             if (!map.hasLayer(kabupatenGroup)) {
                 map.addLayer(kabupatenGroup);
             }
