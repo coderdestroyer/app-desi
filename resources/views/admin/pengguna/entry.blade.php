@@ -2,11 +2,12 @@
     $editScope = (!empty($hasScopesTable) && $isEdit) ? $editData->wilayahScopes->first() : null;
 @endphp
 
-<div x-show="isModalOpen" x-transition:enter="transition ease-out duration-300"
-    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
-    x-transition:leave-end="opacity-0 scale-95" @keydown.escape.window="closeModal()"
-    class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
+<template x-teleport="body">
+    <div x-show="isModalOpen" x-cloak x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95" @keydown.escape.window="closeModal()"
+        class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm">
 
     <div class="my-6 w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl"
         @click.outside="closeModal()">
@@ -228,3 +229,4 @@
         </form>
     </div>
 </div>
+</template>
