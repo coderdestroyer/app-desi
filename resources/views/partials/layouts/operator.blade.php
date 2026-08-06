@@ -187,29 +187,55 @@
                             <span>Data PDB Nasional</span>
                         </a>
                     </li>
-                    <li class="mb-[5px]">
-                        <a href="{{ route('operator.lq.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.lq.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-line w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
-                            <span>Analisis LQ</span>
-                        </a>
-                    </li>
-                    <li class="mb-[5px]">
-                        <a href="{{ route('operator.ss.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.ss.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-pie w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
-                            <span>Analisis SS</span>
-                        </a>
-                    </li>
-                    <li class="mb-[5px]">
-                        <a href="{{ route('operator.tipologi.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.tipologi.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-layer-group w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
-                            <span>Analisis Tipologi Sektor</span>
-                        </a>
-                    </li>
-                    <li class="mb-[5px]">
-                        <a href="{{ route('operator.klassen.index') }}" class="group min-h-[50px] flex items-center gap-3.5 py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color,transform] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] hover:translate-x-[2px] [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:shadow-[0_10px_22px_rgba(0,0,0,0.11)] {{ request()->routeIs('operator.klassen.index') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-bar w-[21px] text-white/[0.76] text-center text-[17px] transition-colors duration-[180ms] group-hover:text-white group-[.active]:text-[#176541]"></i>
-                            <span>Analisis Klassen</span>
-                        </a>
+                    {{-- COLLAPSIBLE GROUPING ANALISIS POTENSI --}}
+                    @php
+                        $isAnalisisGroupActive = request()->routeIs('operator.lq.*') 
+                                              || request()->routeIs('operator.ss.*') 
+                                              || request()->routeIs('operator.tipologi.*') 
+                                              || request()->routeIs('operator.klassen.*');
+                    @endphp
+                    <li class="mb-[5px]" x-data="{ open: {{ $isAnalisisGroupActive ? 'true' : 'false' }} }">
+                        <button type="button" @click="open = !open"
+                            class="w-full group min-h-[50px] flex items-center justify-between py-3 px-[15px] rounded-[10px] text-white/90 no-underline text-sm font-medium transition-[background,color] duration-[180ms] ease-in-out hover:text-white hover:bg-white/[0.09] {{ $isAnalisisGroupActive ? 'bg-white/10 text-white font-semibold' : '' }}">
+                            <div class="flex items-center gap-3.5">
+                                <i class="fa-solid fa-chart-line w-[21px] text-[#ffd457] text-center text-[17px]"></i>
+                                <span>Analisis Potensi</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-xs text-[#ffd457] transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                        </button>
+
+                        <div x-show="open" x-collapse x-cloak class="pt-1.5 pb-1 pl-3 my-1">
+                            <ul class="list-none m-0 p-0 space-y-1 border-l-2 border-[#ffd457]/40 pl-2">
+                                <li>
+                                    <a href="{{ route('operator.lq.index') }}"
+                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.lq.*') ? 'active' : '' }}">
+                                        <i class="fa-solid fa-chart-simple text-[12px] w-4 text-center"></i>
+                                        <span>Analisis LQ</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('operator.ss.index') }}"
+                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.ss.*') ? 'active' : '' }}">
+                                        <i class="fa-solid fa-chart-pie text-[12px] w-4 text-center"></i>
+                                        <span>Analisis Shift-Share (SS)</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('operator.tipologi.index') }}"
+                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.tipologi.*') ? 'active' : '' }}">
+                                        <i class="fa-solid fa-layer-group text-[12px] w-4 text-center"></i>
+                                        <span>Analisis Tipologi Sektor</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('operator.klassen.index') }}"
+                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.klassen.*') ? 'active' : '' }}">
+                                        <i class="fa-solid fa-chart-bar text-[12px] w-4 text-center"></i>
+                                        <span>Analisis Klassen</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
                 </ul>
                 @endif
