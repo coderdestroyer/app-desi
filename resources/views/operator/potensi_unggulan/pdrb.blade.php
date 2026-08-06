@@ -55,30 +55,30 @@
     @endif
 
     <!-- Header Banner -->
-    <div class="bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="relative z-10 text-white flex-1 space-y-2">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/50 border border-emerald-700/50 text-emerald-100 text-xs font-bold backdrop-blur-sm">
-                <i class="fa-solid fa-[#FFD54F] {{ ($tab ?? 'own') === 'own' ? 'fa-file-pen' : 'fa-eye' }}"></i>
+    <div class="bg-white rounded-2xl p-6 md:p-8 border border-[#CFE3D5] shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex-1 space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold border border-[#CFE3D5]">
+                <i class="fa-solid text-[#D8A62A] {{ ($tab ?? 'own') === 'own' ? 'fa-file-pen' : 'fa-eye' }}"></i>
                 <span>{{ ($tab ?? 'own') === 'own' ? 'Pengelolaan PDRB Scope Otorisasi' : 'Mode Lihat Data Makroekonomi' }}</span>
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">
                 {{ ($tab ?? 'own') === 'own' ? 'Kelola Data PDRB Kab/Kota' : 'Lihat Data PDRB Seluruh Provinsi di Sumatera' }}
             </h1>
-            <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
+            <p class="text-slate-500 text-xs md:text-sm max-w-2xl leading-relaxed">
                 {{ ($tab ?? 'own') === 'own' ? 'Kelola data PDRB daerah otorisasi Anda. Setiap tahun & daerah dapat diisi dan diedit.' : 'Melihat rincian nilai 17 sektor PDRB Kabupaten/Kota dan Provinsi di Sumatera.' }}
             </p>
         </div>
 
-        <div class="relative z-10">
+        <div class="shrink-0">
             @if(($tab ?? 'own') === 'own')
                 <button type="button" @click="isPdrbModalOpen = true"
-                    class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                    class="px-5 py-3 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white font-extrabold text-xs shadow-md transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5">
                     <i class="fa-solid fa-plus text-sm"></i>
                     <span>Inisiasi Data PDRB Baru</span>
                 </button>
             @else
-                <div class="px-4 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-emerald-100 text-xs font-semibold flex items-center gap-2">
-                    <i class="fa-solid fa-eye text-[#FFD54F]"></i>
+                <div class="px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-2 shadow-xs">
+                    <i class="fa-solid fa-eye text-[#D8A62A]"></i>
                     <span>Mode: Lihat Seluruh Data</span>
                 </div>
             @endif
