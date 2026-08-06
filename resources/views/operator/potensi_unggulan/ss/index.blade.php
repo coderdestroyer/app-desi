@@ -21,8 +21,8 @@
 
     <!-- Header & Mode Pill Switcher Card (55:45 Ratio & Multi-Line Flexible Buttons) -->
     <div class="bg-white rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <!-- Title & Subtitle Section (~55% - 60% Width) -->
-        <div class="w-full lg:w-[55%] xl:w-[60%]">
+        <!-- Title & Subtitle Section (55% Width) -->
+        <div class="w-full lg:w-[55%]">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold mb-2 border border-[#CFE3D5]">
                 <i class="fa-solid fa-chart-line text-[#D8A62A]"></i>
                 <span>Analisis Pertumbuhan & Daya Saing</span>
@@ -31,8 +31,8 @@
             <p class="text-slate-500 text-xs md:text-sm mt-0.5">Analisis Komponen Pertumbuhan Nasional, Proproporsional & Keunggulan Kompetitif Sektor</p>
         </div>
 
-        <!-- Pill Tabs Switcher (~45% Width with Multi-Line Text Wrapping) -->
-        <div class="w-full lg:w-[45%] xl:w-[40%] flex justify-start lg:justify-end">
+        <!-- Pill Tabs Switcher (45% Width with Multi-Line Text Wrapping) -->
+        <div class="w-full lg:w-[45%] flex justify-start lg:justify-end">
             <div class="inline-flex w-full p-1.5 bg-slate-100/90 rounded-xl border border-slate-200/90 shadow-inner">
                 <button type="button" @click="activeTab = 'real'" 
                     :class="activeTab === 'real' ? 'bg-[#145239] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'"
@@ -53,32 +53,25 @@
         </div>
     </div>
 
-    <!-- TAB 1: DATA REAL PDRB (Kalkulasi Otomatis) -->
+    <!-- TAB 1: DATA REAL PDRB (Ringkasan Multi-Tahun Per Daerah) -->
     <div x-show="activeTab === 'real'" x-transition class="space-y-6">
-        <!-- Info Banner -->
-        <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex items-start gap-3.5 text-slate-700 text-xs md:text-sm">
-            <div class="w-8 h-8 rounded-xl bg-[#145239] text-white flex items-center justify-center shrink-0 font-bold mt-0.5">
-                <i class="fa-solid fa-database text-[#FFD54F]"></i>
-            </div>
-            <div>
-                <span class="font-bold text-[#145239] block text-sm">Mode Data Real PDRB (Kalkulasi Otomatis)</span>
-                Menampilkan hasil perhitungan indikator Shift-Share secara otomatis yang ditarik langsung dari basis data PDRB resmi wilayah otorisasi Anda.
-            </div>
-        </div>
+
+        <!-- Component Filter Bar (Provinsi, Kabupaten, Tahun, Search) -->
+        <x-pdrb-filter-bar 
+            :action="route('operator.ss.index')"
+            :provinsis="$provinsis ?? []"
+            :kabupatens="$kabupatens ?? []"
+            :availableYears="$availableYears ?? []"
+            searchPlaceholder="Cari Wilayah atau Periode..."
+        />
 
         <!-- Table Container -->
         <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
             <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800">Hasil Analisis Shift-Share Data Real</h2>
-                    <p class="text-slate-500 text-xs mt-0.5">Kalkulasi Otomatis Komponen Pertumbuhan 17 Sektor Wilayah Otorisasi</p>
+                    <h2 class="text-xl font-bold text-slate-800">Ringkasan Analisis Shift-Share Per Wilayah & Periode</h2>
+                    <p class="text-slate-500 text-xs mt-0.5">Prioritas Wilayah Provinsi Ditampilkan Teratas untuk Setiap Tahun</p>
                 </div>
-                <form action="{{ route('operator.ss.index') }}" method="GET" class="relative w-full md:w-80">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Daerah, Sektor, atau Tahun..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-[#145239] focus:ring-1 focus:ring-[#145239] outline-none transition-all">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </div>
-                </form>
             </div>
 
             <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
@@ -86,65 +79,65 @@
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
                         <tr>
                             <th class="px-4 py-3.5 w-12 text-center">No</th>
-                            <th class="px-4 py-3.5 whitespace-nowrap">Daerah Analisis</th>
-                            <th class="px-4 py-3.5 whitespace-nowrap">Daerah Pembanding</th>
-                            <th class="px-4 py-3.5 min-w-[200px]">SEKTOR</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">Tingkat Wilayah</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">DAERAH ANALISIS</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">PEMBANDING</th>
                             <th class="px-4 py-3.5 text-center whitespace-nowrap">PERIODE TAHUN</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Rij</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Rin</th>
-                            <th class="px-4 py-4 text-center whitespace-nowrap">Rn</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Nij</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Mij</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Cij</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">Dij</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">STATUS PERTUMBUHAN & DAYA SAING</th>
-                            <th class="px-4 py-3.5 whitespace-nowrap">RIWAYAT</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">PERTUMBUHAN CEPAT</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">PERTUMBUHAN LAMBAT</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">DAYA SAING TINGGI</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
                         @forelse($ssData as $index => $data)
-                            <tr class="hover:bg-emerald-50/30 transition-colors">
+                            <tr class="hover:bg-emerald-50/30 transition-colors {{ !empty($data['is_provinsi']) ? 'bg-emerald-50/40 font-semibold' : '' }}">
                                 <td class="px-4 py-3.5 text-center font-mono font-semibold text-slate-500">{{ ($ssData->currentPage() - 1) * $ssData->perPage() + $loop->iteration }}</td>
-                                <td class="px-4 py-3.5 font-bold text-slate-800">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
-                                <td class="px-4 py-3.5 text-slate-600">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
-                                <td class="px-4 py-3.5 font-medium">{{ $data['sektor'] }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ $data['tahun_awal'] ?? '' }} - {{ $data['tahun_akhir'] ?? '' }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ $data['rij'] }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ $data['rin'] }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ $data['rn'] }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ number_format($data['nij'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ number_format($data['mij'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ number_format($data['cij'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono font-extrabold text-[#145239]">{{ number_format($data['dij'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3.5 text-center">
-                                    <div class="flex flex-col gap-1 items-center">
-                                        @if($data['status_pertumbuhan'] === 'Pertumbuhan Cepat')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                Pertumbuhan Cepat
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                                Pertumbuhan Lambat
-                                            </span>
-                                        @endif
-                                        
-                                        @if(str_contains(strtolower($data['status_daya_saing']), 'tinggi') || str_contains(strtolower($data['status_daya_saing']), 'baik') || str_contains(strtolower($data['status_daya_saing']), 'kompetitif'))
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                Daya Saing Tinggi
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                                                Daya Saing Rendah
-                                            </span>
-                                        @endif
-                                    </div>
+                                <td class="px-4 py-3.5">
+                                    @if(!empty($data['is_provinsi']) || $data['tingkat_wilayah'] === 'Provinsi')
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-[#145239] text-white border border-[#145239]">
+                                            <i class="fa-solid fa-building-columns text-[10px] text-[#FFD54F]"></i> Provinsi
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                            Kabupaten/Kota
+                                        </span>
+                                    @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-xs text-slate-500 whitespace-nowrap">{{ $data['riwayat'] }}</td>
+                                <td class="px-4 py-3.5 font-bold text-slate-800">{{ $data['daerah_analisis'] }}</td>
+                                <td class="px-4 py-3.5 text-slate-600 font-medium">{{ $data['daerah_pembanding'] }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ $data['tahun'] }}</td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        {{ $data['sektor_cepat_count'] ?? 0 }} Sektor
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                        {{ $data['sektor_lambat_count'] ?? 0 }} Sektor
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        {{ $data['daya_saing_tinggi_count'] ?? 0 }} Sektor
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <a href="{{ route('operator.ss.show', [
+                                        'tingkat_wilayah' => $data['tingkat_wilayah'],
+                                        'tahun' => $data['tahun_akhir'] ?? 2024,
+                                        'kabupaten_id' => $data['kabupaten_id'] ?? null,
+                                        'provinsi_id' => $data['provinsi_id'] ?? null
+                                    ]) }}" class="inline-flex items-center gap-1.5 bg-[#145239] hover:bg-[#0F8A5F] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs">
+                                        <i class="fa-solid fa-list-check text-[#FFD54F]"></i>
+                                        <span>Lihat Detail Sektor</span>
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="14" class="px-4 py-8 text-center text-slate-500 font-medium">
-                                    Belum ada data kalkulasi Shift-Share.
+                                <td colspan="9" class="px-4 py-8 text-center text-slate-500 font-medium">
+                                    Belum ada data ringkasan Shift-Share yang sesuai dengan filter.
                                 </td>
                             </tr>
                         @endforelse
@@ -152,7 +145,7 @@
                 </table>
             </div>
 
-            <!-- Pagination Section -->
+            <!-- Smart Pagination Section with Ellipsis (...) -->
             @if ($ssData->total() > 0)
                 <footer class="mt-5 flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
                     <p class="m-0 text-xs text-slate-500">
@@ -420,8 +413,8 @@
             }
         }
         
-        var wb = XLSX.utils.table_to_book(clone, {sheet: "Analisis Shift-Share"});
-        XLSX.writeFile(wb, "Hasil_Analisis_Shift_Share.xlsx");
+        var wb = XLSX.utils.table_to_book(clone, {sheet: "Ringkasan SS"});
+        XLSX.writeFile(wb, "Hasil_Ringkasan_Analisis_Shift_Share.xlsx");
     }
 </script>
 @endsection

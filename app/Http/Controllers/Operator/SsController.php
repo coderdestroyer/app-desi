@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Operator;
 use App\Http\Controllers\Controller;
 use App\Models\AnalysisResult;
 use App\Models\Kabupaten;
-use App\Models\Sektor;
+use App\Models\Provinsi;
 use App\Services\SsaService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class SsController extends Controller
@@ -23,27 +24,7 @@ class SsController extends Controller
 
     private function getAuthorizedKabupatens($user)
     {
-        if ($user->isAdmin()) {
-            return Kabupaten::orderBy('nama_kabupaten')->get();
-        }
-
-        if (!\Illuminate\Support\Facades\Schema::hasTable('user_wilayah_scopes')) {
-            return Kabupaten::orderBy('nama_kabupaten')->get();
-        }
-
-        $scope = \App\Models\UserWilayahScope::where('user_id', $user->id)->first();
-        if (!$scope) {
-            return Kabupaten::orderBy('nama_kabupaten')->get();
-        }
-
-        if ($scope->kabupaten_id) {
-            return Kabupaten::where('kab_id', $scope->kabupaten_id)->get();
-        }
-
-        if ($scope->provinsi_id) {
-            return Kabupaten::where('provinsi_id', $scope->provinsi_id)->orderBy('nama_kabupaten')->get();
-        }
-
+        // Read-only analysis mode: Always return all Kabupatens across Sumatera
         return Kabupaten::orderBy('nama_kabupaten')->get();
     }
 
@@ -58,86 +39,149 @@ class SsController extends Controller
         if ($savedResults->isNotEmpty()) {
             $mappedData = $savedResults->map(function ($item) {
                 $res = $item->results ?? [];
+                $isProv = ($res['tingkat_wilayah'] ?? '') === 'Provinsi';
+                $provName = strtoupper($res['provinsi'] ?? 'SUMATERA UTARA');
+                $pembanding = $isProv ? 'PDB NASIONAL' : 'PDRB ' . $provName;
+
                 return [
                     'id' => $item->id,
                     'tingkat_wilayah' => $res['tingkat_wilayah'] ?? 'Kabupaten/Kota',
                     'daerah_analisis' => $res['daerah_analisis'] ?? '-',
-                    'daerah_pembanding' => $res['daerah_pembanding'] ?? '-',
+                    'daerah_pembanding' => $pembanding,
                     'provinsi' => $res['provinsi'] ?? '-',
                     'kabupaten' => $res['kabupaten'] ?? '-',
-                    'sektor' => $res['sektor'] ?? '-',
-                    'tahun_awal' => $res['tahun_awal'] ?? '-',
-                    'tahun_akhir' => $res['tahun_akhir'] ?? '-',
-                    'pdrb_sektor_analisis_awal' => $res['pdrb_sektor_analisis_awal'] ?? 0,
-                    'pdrb_sektor_analisis_akhir' => $res['pdrb_sektor_analisis_akhir'] ?? 0,
-                    'pdrb_sektor_pembanding_awal' => $res['pdrb_sektor_pembanding_awal'] ?? 0,
-                    'pdrb_sektor_pembanding_akhir' => $res['pdrb_sektor_pembanding_akhir'] ?? 0,
-                    'total_pdrb_pembanding_awal' => $res['total_pdrb_pembanding_awal'] ?? 0,
-                    'total_pdrb_pembanding_akhir' => $res['total_pdrb_pembanding_akhir'] ?? 0,
-                    'rij' => number_format((float)($res['rij'] ?? 0), 4, '.', ''),
-                    'rin' => number_format((float)($res['rin'] ?? 0), 4, '.', ''),
-                    'rn' => number_format((float)($res['rn'] ?? 0), 4, '.', ''),
-                    'nij' => $res['nij'] ?? 0,
-                    'mij' => $res['mij'] ?? 0,
-                    'cij' => $res['cij'] ?? 0,
-                    'dij' => $res['dij'] ?? 0,
-                    'status_pertumbuhan' => $res['status_pertumbuhan'] ?? '-',
+                    'tahun' => ($res['tahun_awal'] ?? '') . ' - ' . ($res['tahun_akhir'] ?? ''),
+                    'tahun_akhir' => (int)($res['tahun_akhir'] ?? 2024),
+                    'sektor_cepat_count' => isset($res['status_pertumbuhan']) && str_contains($res['status_pertumbuhan'], 'Cepat') ? 1 : 0,
+                    'sektor_lambat_count' => isset($res['status_pertumbuhan']) && str_contains($res['status_pertumbuhan'], 'Lambat') ? 1 : 0,
                     'status_daya_saing' => $res['status_daya_saing'] ?? '-',
-                    'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
+                    'is_provinsi' => $isProv,
+                    'provinsi_id' => $res['provinsi_id'] ?? null,
+                    'kabupaten_id' => $res['kabupaten_id'] ?? null,
                 ];
             });
-        } else {
-            $maxTahun = DB::table('pdrb_sumatera_kabupaten')->whereIn('kabupaten_id', $authorizedIds)->max('tahun') ?? 2024;
-            $selectedTahun = $request->has('tahun') && !empty($request->tahun) ? (int)$request->tahun : (int)$maxTahun;
-            $cacheKey = 'calc_ss_' . md5(implode('_', $authorizedIds) . '_' . $selectedTahun);
 
-            $mappedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $selectedTahun) {
-                $mappedRows = [];
+            $allYears = $mappedData->pluck('tahun_akhir')->filter()->unique()->values()->toArray();
+        } else {
+            $cacheKey = 'calc_ss_summary_multi_year_all_regions_v2';
+
+            $allYears = DB::table('pdrb_sumatera_kabupaten')
+                ->select('tahun')
+                ->distinct()
+                ->orderBy('tahun', 'desc')
+                ->pluck('tahun');
+
+            if ($allYears->isEmpty()) {
+                $allYears = collect([2024, 2023, 2022, 2021, 2020]);
+            }
+
+            $mappedData = Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $allYears) {
+                $provinsiList = Provinsi::whereNotNull('latitude')->orderBy('nama_provinsi')->get();
+                if ($provinsiList->isEmpty()) {
+                    $provinsiList = Provinsi::orderBy('nama_provinsi')->get();
+                }
+
+                $summaryRows = [];
                 $idCounter = 1;
 
-                foreach ($authorizedKabupatens as $kab) {
-                    $dynamicSsa = $this->ssaService->calculateSsa($kab->kab_id, $selectedTahun);
-                    foreach ($dynamicSsa as $item) {
-                        $mappedRows[] = [
-                            'id' => $idCounter++,
-                            'tingkat_wilayah' => 'Kabupaten/Kota',
-                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                            'daerah_pembanding' => 'SUMATERA UTARA',
-                            'provinsi' => 'SUMATERA UTARA',
-                            'kabupaten' => strtoupper($kab->nama_kabupaten),
-                            'sektor' => $item['sektor']->nama_sektor ?? '-',
-                            'tahun_awal' => $selectedTahun - 1,
-                            'tahun_akhir' => $selectedTahun,
-                            'pdrb_sektor_analisis_awal' => 0,
-                            'pdrb_sektor_analisis_akhir' => 0,
-                            'pdrb_sektor_pembanding_awal' => 0,
-                            'pdrb_sektor_pembanding_akhir' => 0,
-                            'total_pdrb_pembanding_awal' => 0,
-                            'total_pdrb_pembanding_akhir' => 0,
-                            'rij' => number_format($item['rij'], 4, '.', ''),
-                            'rin' => number_format($item['rin'], 4, '.', ''),
-                            'rn' => number_format($item['rn'], 4, '.', ''),
-                            'nij' => $item['nij'],
-                            'mij' => $item['mij'],
-                            'cij' => $item['cij'],
-                            'dij' => $item['dij'],
-                            'status_pertumbuhan' => $item['kategori_pertumbuhan'],
-                            'status_daya_saing' => $item['kategori_daya_saing'],
-                            'riwayat' => 'Kalkulasi Otomatis',
-                        ];
+                foreach ($allYears as $tahun) {
+                    $tahunAwal = $tahun - 1;
+
+                    // 1. Data Provinsi Terlebih Dahulu (Prioritas Utama di Atas)
+                    foreach ($provinsiList as $prov) {
+                        $dynamicProv = $this->ssaService->calculateSsaProvinsi($prov->provinsi_id, $tahun);
+                        if ($dynamicProv->isNotEmpty()) {
+                            $cepatCount = $dynamicProv->where('kategori_pertumbuhan', 'Pertumbuhan Cepat')->count();
+                            $lambatCount = $dynamicProv->where('kategori_pertumbuhan', 'Pertumbuhan Lambat')->count();
+                            $dayaSaingTinggiCount = $dynamicProv->where('kategori_daya_saing', 'Daya Saing Baik')->count();
+
+                            $summaryRows[] = [
+                                'id' => $idCounter++,
+                                'tingkat_wilayah' => 'Provinsi',
+                                'provinsi_id' => $prov->provinsi_id,
+                                'kabupaten_id' => null,
+                                'daerah_analisis' => strtoupper($prov->nama_provinsi),
+                                'daerah_pembanding' => 'PDB NASIONAL',
+                                'provinsi' => strtoupper($prov->nama_provinsi),
+                                'kabupaten' => '-',
+                                'tahun_awal' => $tahunAwal,
+                                'tahun_akhir' => (int)$tahun,
+                                'tahun' => "{$tahunAwal} - {$tahun}",
+                                'sektor_cepat_count' => $cepatCount,
+                                'sektor_lambat_count' => $lambatCount,
+                                'daya_saing_tinggi_count' => $dayaSaingTinggiCount,
+                                'status_dominan' => $cepatCount >= $lambatCount ? 'Dominan Pertumbuhan Cepat' : 'Dominan Pertumbuhan Lambat',
+                                'is_provinsi' => true,
+                            ];
+                        }
+                    }
+
+                    // 2. Data Kabupaten/Kota di Bawahnya
+                    foreach ($authorizedKabupatens as $kab) {
+                        $dynamicKab = $this->ssaService->calculateSsa($kab->kab_id, $tahun);
+                        if ($dynamicKab->isNotEmpty()) {
+                            $cepatCount = $dynamicKab->where('kategori_pertumbuhan', 'Pertumbuhan Cepat')->count();
+                            $lambatCount = $dynamicKab->where('kategori_pertumbuhan', 'Pertumbuhan Lambat')->count();
+                            $dayaSaingTinggiCount = $dynamicKab->where('kategori_daya_saing', 'Daya Saing Baik')->count();
+
+                            $provName = $kab->provinsi->nama_provinsi ?? 'SUMATERA UTARA';
+
+                            $summaryRows[] = [
+                                'id' => $idCounter++,
+                                'tingkat_wilayah' => 'Kabupaten/Kota',
+                                'provinsi_id' => $kab->provinsi_id,
+                                'kabupaten_id' => $kab->kab_id,
+                                'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                                'daerah_pembanding' => 'PDRB ' . strtoupper($provName),
+                                'provinsi' => strtoupper($provName),
+                                'kabupaten' => strtoupper($kab->nama_kabupaten),
+                                'tahun_awal' => $tahunAwal,
+                                'tahun_akhir' => (int)$tahun,
+                                'tahun' => "{$tahunAwal} - {$tahun}",
+                                'sektor_cepat_count' => $cepatCount,
+                                'sektor_lambat_count' => $lambatCount,
+                                'daya_saing_tinggi_count' => $dayaSaingTinggiCount,
+                                'status_dominan' => $cepatCount >= $lambatCount ? 'Dominan Pertumbuhan Cepat' : 'Dominan Pertumbuhan Lambat',
+                                'is_provinsi' => false,
+                            ];
+                        }
                     }
                 }
 
-                return collect($mappedRows);
+                return collect($summaryRows);
             });
         }
 
-        if ($request->has('search') && !empty($request->search)) {
+        // Apply Filters (Provinsi, Kabupaten, Tahun, Search)
+        if ($request->filled('provinsi_id')) {
+            $provId = (int)$request->provinsi_id;
+            $mappedData = $mappedData->filter(fn($row) => ($row['provinsi_id'] ?? null) == $provId);
+        }
+
+        if ($request->filled('kabupaten_id')) {
+            $kabVal = $request->kabupaten_id;
+            if ($kabVal === 'prov_only') {
+                $mappedData = $mappedData->filter(fn($row) => !empty($row['is_provinsi']));
+            } elseif (str_starts_with($kabVal, 'prov_')) {
+                $pId = (int) str_replace('prov_', '', $kabVal);
+                $mappedData = $mappedData->filter(fn($row) => !empty($row['is_provinsi']) && ($row['provinsi_id'] ?? null) == $pId);
+            } else {
+                $kabId = (int)$kabVal;
+                $mappedData = $mappedData->filter(fn($row) => ($row['kabupaten_id'] ?? null) == $kabId);
+            }
+        }
+
+        if ($request->filled('tahun')) {
+            $thn = (int)$request->tahun;
+            $mappedData = $mappedData->filter(fn($row) => (int)($row['tahun_akhir'] ?? 0) === $thn);
+        }
+
+        if ($request->filled('search')) {
             $search = strtolower($request->search);
             $mappedData = $mappedData->filter(function ($row) use ($search) {
                 return str_contains(strtolower($row['daerah_analisis']), $search) ||
-                       str_contains(strtolower($row['sektor']), $search) ||
-                       str_contains((string)$row['tahun_akhir'], $search);
+                       str_contains(strtolower($row['provinsi']), $search) ||
+                       str_contains((string)$row['tahun'], $search);
             });
         }
 
@@ -154,159 +198,246 @@ class SsController extends Controller
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
-        ))->onEachSide(1);
+        ));
+
+        $provinsis = Provinsi::orderBy('nama_provinsi')->get();
+        if ($request->filled('provinsi_id')) {
+            $provId = (int)$request->provinsi_id;
+            $kabupatens = Kabupaten::where('provinsi_id', $provId)->orderBy('nama_kabupaten')->get();
+        } else {
+            $kabupatens = $authorizedKabupatens;
+        }
 
         return view('operator.potensi_unggulan.ss.index', [
             'ssData' => $paginatedData,
             'editItem' => $editItem,
-            'editData' => $editItem,
+            'provinsis' => $provinsis,
+            'kabupatens' => $kabupatens,
+            'availableYears' => $allYears,
         ]);
     }
 
-    private function calculateSSData(Request $request)
+    public function show(Request $request)
     {
-        $request->validate([
-            'tingkat_wilayah' => 'required|string',
-            'provinsi' => 'required|string',
-            'kabupaten' => 'nullable|string',
-            'sektor' => 'required|string',
-            'tahun_awal' => 'required|numeric',
-            'tahun_akhir' => 'required|numeric',
-            'pdrb_sektor_analisis_awal' => 'required',
-            'pdrb_sektor_analisis_akhir' => 'required',
-            'pdrb_sektor_pembanding_awal' => 'required',
-            'pdrb_sektor_pembanding_akhir' => 'required',
-            'total_pdrb_pembanding_awal' => 'required',
-            'total_pdrb_pembanding_akhir' => 'required',
+        $tingkatWilayah = $request->get('tingkat_wilayah', 'Kabupaten/Kota');
+        $tahun = (int) $request->get('tahun', 2024);
+        $tahunAwal = $tahun - 1;
+        $search = $request->get('search');
+
+        if ($tingkatWilayah === 'Provinsi') {
+            $provinsiId = (int) $request->get('provinsi_id', 1);
+            $provinsi = Provinsi::find($provinsiId);
+            $namaDaerah = $provinsi ? strtoupper($provinsi->nama_provinsi) : 'PROVINSI';
+            $namaPembanding = 'PDB NASIONAL';
+
+            $sectorData = $this->ssaService->calculateSsaProvinsi($provinsiId, $tahun);
+        } else {
+            $kabId = (int) $request->get('kabupaten_id', 1);
+            $kabupaten = Kabupaten::with('provinsi')->find($kabId);
+            $namaDaerah = $kabupaten ? strtoupper($kabupaten->nama_kabupaten) : 'KABUPATEN';
+            $provName = $kabupaten && $kabupaten->provinsi ? strtoupper($kabupaten->provinsi->nama_provinsi) : 'SUMATERA UTARA';
+            $namaPembanding = 'PDRB ' . $provName;
+
+            $sectorData = $this->ssaService->calculateSsa($kabId, $tahun);
+        }
+
+        $mappedSectors = $sectorData->map(function ($item) use ($tingkatWilayah, $namaDaerah, $namaPembanding, $tahun, $tahunAwal) {
+            return [
+                'tingkat_wilayah' => $tingkatWilayah,
+                'daerah_analisis' => $namaDaerah,
+                'daerah_pembanding' => $namaPembanding,
+                'sektor' => $item['sektor']->nama_sektor ?? '-',
+                'tahun_awal' => $tahunAwal,
+                'tahun_akhir' => $tahun,
+                'rij' => $item['rij'],
+                'rin' => $item['rin'],
+                'rn' => $item['rn'],
+                'nij' => $item['nij'],
+                'mij' => $item['mij'],
+                'cij' => $item['cij'],
+                'dij' => $item['dij'],
+                'status_pertumbuhan' => $item['kategori_pertumbuhan'],
+                'status_daya_saing' => $item['kategori_daya_saing'],
+            ];
+        });
+
+        if ($search) {
+            $searchLower = strtolower($search);
+            $mappedSectors = $mappedSectors->filter(function ($row) use ($searchLower) {
+                return str_contains(strtolower($row['sektor']), $searchLower) ||
+                       str_contains(strtolower($row['status_pertumbuhan']), $searchLower) ||
+                       str_contains(strtolower($row['status_daya_saing']), $searchLower);
+            });
+        }
+
+        $perPage = 20;
+        $page = (int) $request->get('page', 1);
+        $paginatedSectors = (new LengthAwarePaginator(
+            $mappedSectors->forPage($page, $perPage)->values(),
+            $mappedSectors->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        ));
+
+        return view('operator.potensi_unggulan.ss.show', [
+            'namaDaerah' => $namaDaerah,
+            'namaPembanding' => $namaPembanding,
+            'tingkatWilayah' => $tingkatWilayah,
+            'tahunAwal' => $tahunAwal,
+            'tahunAkhir' => $tahun,
+            'sectorData' => $paginatedSectors,
         ]);
-
-        $daerah_analisis = $request->tingkat_wilayah === 'Provinsi' ? $request->provinsi : $request->kabupaten;
-        $daerah_pembanding = $request->tingkat_wilayah === 'Provinsi' ? 'Nasional' : $request->provinsi;
-
-        $yij_awal = $this->parseNumber($request->pdrb_sektor_analisis_awal);
-        $yij_akhir = $this->parseNumber($request->pdrb_sektor_analisis_akhir);
-        $yin_awal = $this->parseNumber($request->pdrb_sektor_pembanding_awal);
-        $yin_akhir = $this->parseNumber($request->pdrb_sektor_pembanding_akhir);
-        $yn_awal = $this->parseNumber($request->total_pdrb_pembanding_awal);
-        $yn_akhir = $this->parseNumber($request->total_pdrb_pembanding_akhir);
-
-        $rij = $yij_awal > 0 ? ($yij_akhir - $yij_awal) / $yij_awal : 0;
-        $rin = $yin_awal > 0 ? ($yin_akhir - $yin_awal) / $yin_awal : 0;
-        $rn = $yn_awal > 0 ? ($yn_akhir - $yn_awal) / $yn_awal : 0;
-
-        $nij = round($yij_awal * $rn, 2);
-        $mij = round($yij_awal * ($rin - $rn), 2);
-        $cij = round($yij_awal * ($rij - $rin), 2);
-        $dij = round($nij + $mij + $cij, 2);
-
-        $status_pertumbuhan = $mij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat';
-        $status_daya_saing = $cij >= 0 ? 'Daya Saing Tinggi (Kompetitif)' : 'Daya Saing Rendah';
-
-        return [
-            'tingkat_wilayah' => $request->tingkat_wilayah,
-            'provinsi' => $request->provinsi,
-            'kabupaten' => $request->tingkat_wilayah === 'Provinsi' ? '-' : ($request->kabupaten ?? '-'),
-            'daerah_analisis' => $daerah_analisis,
-            'daerah_pembanding' => $daerah_pembanding,
-            'sektor' => $request->sektor,
-            'tahun_awal' => $request->tahun_awal,
-            'tahun_akhir' => $request->tahun_akhir,
-            'pdrb_sektor_analisis_awal' => $yij_awal,
-            'pdrb_sektor_analisis_akhir' => $yij_akhir,
-            'pdrb_sektor_pembanding_awal' => $yin_awal,
-            'pdrb_sektor_pembanding_akhir' => $yin_akhir,
-            'total_pdrb_pembanding_awal' => $yn_awal,
-            'total_pdrb_pembanding_akhir' => $yn_akhir,
-            'rij' => $rij,
-            'rin' => $rin,
-            'rn' => $rn,
-            'nij' => $nij,
-            'mij' => $mij,
-            'cij' => $cij,
-            'dij' => $dij,
-            'status_pertumbuhan' => $status_pertumbuhan,
-            'status_daya_saing' => $status_daya_saing,
-        ];
     }
 
     public function store(Request $request)
     {
-        $newData = $this->calculateSSData($request);
-
-        if (!$newData) {
-            return back()->with('error', 'Semua form PDRB wajib diisi dengan angka valid!');
-        }
-
-        AnalysisResult::create([
-            'type' => 'shift_share',
-            'title' => "Simulasi Shift-Share - {$newData['daerah_analisis']} ({$newData['tahun_awal']}-{$newData['tahun_akhir']})",
-            'description' => "Perhitungan Shift Share Sektor {$newData['sektor']} untuk {$newData['daerah_analisis']}",
-            'results' => $newData,
+        $validated = $request->validate([
+            'tingkat_wilayah' => 'required|string',
+            'sektor' => 'required|string',
+            'tahun_awal' => 'required|numeric',
+            'tahun_akhir' => 'required|numeric',
+            'provinsi' => 'required|string',
+            'kabupaten' => 'nullable|string',
+            'pdrb_sektor_analisis_awal' => 'required|numeric',
+            'pdrb_sektor_analisis_akhir' => 'required|numeric',
+            'pdrb_sektor_pembanding_awal' => 'required|numeric',
+            'total_pdrb_pembanding_akhir' => 'required|numeric',
+            'total_pdrb_pembanding_awal' => 'required|numeric',
         ]);
 
-        OperatorController::logActivity('Analisis SS', 'ditambah', "Menambah data Shift Share {$newData['daerah_analisis']}");
-        \Illuminate\Support\Facades\Cache::flush();
+        $yijAwal = $validated['pdrb_sektor_analisis_awal'];
+        $yijAkhir = $validated['pdrb_sektor_analisis_akhir'];
+        $yinAwal = $validated['pdrb_sektor_pembanding_awal'];
+        $yinAkhir = $validated['total_pdrb_pembanding_akhir'];
+        $ynAwal = $validated['total_pdrb_pembanding_awal'];
+        $ynAkhir = $validated['total_pdrb_pembanding_akhir'];
 
-        return redirect()->route('operator.ss.index')->with('success', 'Data perhitungan Shift-Share berhasil disimpan secara permanen!');
+        $rij = $yijAwal > 0 ? ($yijAkhir - $yijAwal) / $yijAwal : 0;
+        $rin = yinAwal > 0 ? ($yinAkhir - $yinAwal) / $yinAwal : 0;
+        $rn = ynAwal > 0 ? ($ynAkhir - $ynAwal) / $ynAwal : 0;
+
+        $nij = $yijAwal * $rn;
+        $mij = $yijAwal * ($rin - $rn);
+        $cij = $yijAwal * ($rij - $rin);
+        $dij = $nij + $mij + $cij;
+
+        $statusPertumbuhan = $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat';
+        $statusDayaSaing = $cij >= 0 ? 'Daya Saing Tinggi (Kompetitif)' : 'Daya Saing Rendah';
+
+        $daerahAnalisis = ($validated['tingkat_wilayah'] === 'Provinsi') 
+            ? strtoupper($validated['provinsi']) 
+            : strtoupper($validated['kabupaten'] ?? $validated['provinsi']);
+
+        $daerahPembanding = ($validated['tingkat_wilayah'] === 'Provinsi') 
+            ? 'PDB NASIONAL' 
+            : 'PDRB ' . strtoupper($validated['provinsi']);
+
+        AnalysisResult::create([
+            'user_id' => Auth::id(),
+            'type' => 'shift_share',
+            'results' => array_merge($validated, [
+                'daerah_analisis' => $daerahAnalisis,
+                'daerah_pembanding' => $daerahPembanding,
+                'rn' => round($rn, 4),
+                'rin' => round($rin, 4),
+                'rij' => round($rij, 4),
+                'nij' => round($nij, 2),
+                'mij' => round($mij, 2),
+                'cij' => round($cij, 2),
+                'dij' => round($dij, 2),
+                'status_pertumbuhan' => $statusPertumbuhan,
+                'status_daya_saing' => $statusDayaSaing,
+            ]),
+        ]);
+
+        Cache::flush();
+
+        return redirect()->route('operator.ss.index')->with('success', 'Data simulasi Shift-Share berhasil disimpan.');
     }
 
     public function update(Request $request, $id)
     {
-        $res = AnalysisResult::where('type', 'shift_share')->find($id);
-        if (!$res) {
-            return redirect()->route('operator.ss.index')->with('error', 'Data tidak ditemukan!');
-        }
+        $item = AnalysisResult::where('type', 'shift_share')->findOrFail($id);
 
-        $updatedData = $this->calculateSSData($request);
-
-        if (!$updatedData) {
-            return back()->with('error', 'Semua form PDRB wajib diisi dengan angka valid!');
-        }
-
-        $res->update([
-            'title' => "Simulasi Shift-Share - {$updatedData['daerah_analisis']} ({$updatedData['tahun_awal']}-{$updatedData['tahun_akhir']})",
-            'description' => "Perhitungan Shift Share Sektor {$updatedData['sektor']} untuk {$updatedData['daerah_analisis']}",
-            'results' => $updatedData,
+        $validated = $request->validate([
+            'tingkat_wilayah' => 'required|string',
+            'sektor' => 'required|string',
+            'tahun_awal' => 'required|numeric',
+            'tahun_akhir' => 'required|numeric',
+            'provinsi' => 'required|string',
+            'kabupaten' => 'nullable|string',
+            'pdrb_sektor_analisis_awal' => 'required|numeric',
+            'pdrb_sektor_analisis_akhir' => 'required|numeric',
+            'pdrb_sektor_pembanding_awal' => 'required|numeric',
+            'total_pdrb_pembanding_akhir' => 'required|numeric',
+            'total_pdrb_pembanding_awal' => 'required|numeric',
         ]);
 
-        OperatorController::logActivity('Analisis SS', 'diubah', "Mengubah data Shift Share {$updatedData['daerah_analisis']}");
-        \Illuminate\Support\Facades\Cache::flush();
+        $yijAwal = $validated['pdrb_sektor_analisis_awal'];
+        $yijAkhir = $validated['pdrb_sektor_analisis_akhir'];
+        $yinAwal = $validated['pdrb_sektor_pembanding_awal'];
+        $yinAkhir = $validated['total_pdrb_pembanding_akhir'];
+        $ynAwal = $validated['total_pdrb_pembanding_awal'];
+        $ynAkhir = $validated['total_pdrb_pembanding_akhir'];
 
-        return redirect()->route('operator.ss.index')->with('success', 'Data perhitungan Shift-Share berhasil diperbarui secara permanen!');
+        $rij = $yijAwal > 0 ? ($yijAkhir - $yijAwal) / $yijAwal : 0;
+        $rin = yinAwal > 0 ? ($yinAkhir - $yinAwal) / $yinAwal : 0;
+        $rn = ynAwal > 0 ? ($ynAkhir - $ynAwal) / $ynAwal : 0;
+
+        $nij = $yijAwal * $rn;
+        $mij = $yijAwal * ($rin - $rn);
+        $cij = $yijAwal * ($rij - $rin);
+        $dij = $nij + $mij + $cij;
+
+        $statusPertumbuhan = $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat';
+        $statusDayaSaing = $cij >= 0 ? 'Daya Saing Tinggi (Kompetitif)' : 'Daya Saing Rendah';
+
+        $daerahAnalisis = ($validated['tingkat_wilayah'] === 'Provinsi') 
+            ? strtoupper($validated['provinsi']) 
+            : strtoupper($validated['kabupaten'] ?? $validated['provinsi']);
+
+        $daerahPembanding = ($validated['tingkat_wilayah'] === 'Provinsi') 
+            ? 'PDB NASIONAL' 
+            : 'PDRB ' . strtoupper($validated['provinsi']);
+
+        $item->update([
+            'results' => array_merge($validated, [
+                'daerah_analisis' => $daerahAnalisis,
+                'daerah_pembanding' => $daerahPembanding,
+                'rn' => round($rn, 4),
+                'rin' => round($rin, 4),
+                'rij' => round($rij, 4),
+                'nij' => round($nij, 2),
+                'mij' => round($mij, 2),
+                'cij' => round($cij, 2),
+                'dij' => round($dij, 2),
+                'status_pertumbuhan' => $statusPertumbuhan,
+                'status_daya_saing' => $statusDayaSaing,
+            ]),
+        ]);
+
+        Cache::flush();
+
+        return redirect()->route('operator.ss.index')->with('success', 'Data simulasi Shift-Share berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $res = AnalysisResult::where('type', 'shift_share')->find($id);
+        $item = AnalysisResult::where('type', 'shift_share')->findOrFail($id);
+        $item->delete();
 
-        if ($res) {
-            $daerah = $res->results['daerah_analisis'] ?? 'Daerah';
-            $res->delete();
-            OperatorController::logActivity('Analisis SS', 'dihapus', "Menghapus data Shift Share {$daerah}");
-            \Illuminate\Support\Facades\Cache::flush();
-        }
+        Cache::flush();
 
-        return back()->with('success', 'Data perhitungan Shift-Share berhasil dihapus secara permanen!');
+        return redirect()->route('operator.ss.index')->with('success', 'Data simulasi Shift-Share berhasil dihapus.');
     }
 
     public function empty()
     {
         AnalysisResult::where('type', 'shift_share')->delete();
-        OperatorController::logActivity('Analisis SS', 'dihapus', "Menghapus semua data Shift Share");
-        \Illuminate\Support\Facades\Cache::flush();
-        return back()->with('success', 'Semua data perhitungan Shift-Share berhasil dihapus secara permanen!');
-    }
 
-    public function bulkDestroy(Request $request)
-    {
-        $ids = $request->input('ids');
-        if (!empty($ids)) {
-            $count = count($ids);
-            AnalysisResult::where('type', 'shift_share')->whereIn('id', $ids)->delete();
-            OperatorController::logActivity('Analisis SS', 'dihapus', "Menghapus {$count} data Shift Share secara massal");
-            \Illuminate\Support\Facades\Cache::flush();
-            return back()->with('success', "{$count} data Shift Share berhasil dihapus secara massal!");
-        }
-        return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
+        Cache::flush();
+
+        return redirect()->route('operator.ss.index')->with('success', 'Seluruh data simulasi Shift-Share berhasil dihapus.');
     }
 }
