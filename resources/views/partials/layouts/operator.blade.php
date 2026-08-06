@@ -166,7 +166,7 @@
                                     <a href="{{ route('operator.pdrb.index', ['tab' => 'own']) }}"
                                         class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.pdrb.*') && (request('tab', 'own') === 'own') ? 'active' : '' }}">
                                         <i class="fa-solid fa-file-pen text-[12px] w-4 text-center"></i>
-                                        <span>Kelola Kab/Kota (Scope)</span>
+                                        <span>Kelola Kab/Kota</span>
                                     </a>
                                 </li>
                                 @if(Auth::user()?->hasProvinsiScope())
@@ -174,7 +174,7 @@
                                     <a href="{{ route('operator.pdrb-provinsi.index', ['tab' => 'own']) }}"
                                         class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.pdrb-provinsi.*') && (request('tab', 'own') === 'own') ? 'active' : '' }}">
                                         <i class="fa-solid fa-building-columns text-[12px] w-4 text-center"></i>
-                                        <span>Kelola Scope Provinsi</span>
+                                        <span>Kelola Provinsi</span>
                                     </a>
                                 </li>
                                 @endif

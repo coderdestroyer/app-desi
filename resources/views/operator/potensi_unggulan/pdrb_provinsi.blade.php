@@ -3,7 +3,19 @@
 @section('title', 'Data PDRB Provinsi')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6" x-data="{ isPdrbModalOpen: false }">
+<div class="max-w-7xl mx-auto space-y-6" x-data="{ 
+    isPdrbModalOpen: false,
+    isDeleteModalOpen: false,
+    deleteActionUrl: '',
+    deleteTargetName: '',
+    deleteTargetYear: '',
+    openDeleteModal(url, name, year) {
+        this.deleteActionUrl = url;
+        this.deleteTargetName = name;
+        this.deleteTargetYear = year;
+        this.isDeleteModalOpen = true;
+    }
+}">
 
     {{-- Flash Notifications --}}
     @if(session('success'))
@@ -254,13 +266,12 @@
                                         </a>
 
                                         {{-- Delete Group Button --}}
-                                        <form action="{{ route('operator.pdrb-provinsi.destroy-group', ['provinsi_id' => $group->provinsi_id, 'tahun' => $group->tahun]) }}" method="POST" onsubmit="return confirm('Hapus seluruh data PDRB {{ $group->provinsi->nama_provinsi ?? '' }} Tahun {{ $group->tahun }}?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors" title="Hapus Data Provinsi & Tahun Ini">
-                                                <i class="fa-solid fa-trash-can text-xs"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                            @click="openDeleteModal('{{ route('operator.pdrb-provinsi.destroy-group', ['provinsi_id' => $group->provinsi_id, 'tahun' => $group->tahun]) }}', '{{ $group->provinsi->nama_provinsi ?? 'Provinsi' }}', '{{ $group->tahun }}')"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors shadow-2xs"
+                                            title="Hapus Data PDRB {{ $group->provinsi->nama_provinsi ?? '' }} {{ $group->tahun }}">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </button>
                                     </div>
                                 @else
                                     <a href="{{ route('operator.pdrb-provinsi.entry', ['provinsi_id' => $group->provinsi_id, 'tahun' => $group->tahun]) }}"
@@ -411,6 +422,9 @@
             </div>
         </div>
     </template>
+
+    <!-- MODAL KONFIRMASI HAPUS DATA PDRB PROVINSI -->
+    <x-confirm-delete-modal title="Konfirmasi Hapus Data PDRB Provinsi" />
 
 </div>
 @endsection

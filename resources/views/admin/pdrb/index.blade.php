@@ -1,7 +1,19 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{ isPdrbModalOpen: false }">
+<div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{ 
+    isPdrbModalOpen: false,
+    isDeleteModalOpen: false,
+    deleteActionUrl: '',
+    deleteTargetName: '',
+    deleteTargetYear: '',
+    openDeleteModal(url, name, year) {
+        this.deleteActionUrl = url;
+        this.deleteTargetName = name;
+        this.deleteTargetYear = year;
+        this.isDeleteModalOpen = true;
+    }
+}">
 
     {{-- Flash Notifications --}}
     @if(session('success'))
@@ -242,14 +254,13 @@
                                         <i class="fa-regular fa-pen-to-square text-xs"></i>
                                     </a>
 
-                                    {{-- Delete Group Button (Icon Only) --}}
-                                    <form action="{{ route('admin.pdrb.destroy-group', ['kabupaten_id' => $group->kabupaten_id, 'tahun' => $group->tahun]) }}" method="POST" onsubmit="return confirm('Hapus seluruh data PDRB {{ $group->kabupaten->nama_kabupaten ?? '' }} Tahun {{ $group->tahun }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors" title="Hapus Data Daerah & Tahun Ini">
-                                            <i class="fa-solid fa-trash-can text-xs"></i>
-                                        </button>
-                                    </form>
+                                    {{-- Delete Group Button --}}
+                                    <button type="button"
+                                        @click="openDeleteModal('{{ route('admin.pdrb.destroy-group', ['kabupaten_id' => $group->kabupaten_id, 'tahun' => $group->tahun]) }}', '{{ $group->kabupaten->nama_kabupaten ?? 'Kabupaten/Kota' }}', '{{ $group->tahun }}')"
+                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors shadow-2xs"
+                                        title="Hapus Data PDRB {{ $group->kabupaten->nama_kabupaten ?? '' }} {{ $group->tahun }}">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -436,6 +447,8 @@
         </div>
     </template>
 
+    <!-- MODAL KONFIRMASI HAPUS DATA PDRB (ADMIN) -->
+    <x-confirm-delete-modal title="Konfirmasi Hapus Data PDRB" />
 </div>
 
 <script>
