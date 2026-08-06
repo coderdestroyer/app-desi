@@ -39,52 +39,40 @@
 
 
     <div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8">
-        <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 shadow-lg md:p-8">
-            <div class="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-400 opacity-20 blur-3xl mix-blend-overlay"></div>
-
-            <div class="absolute bottom-0 right-32 h-40 w-40 rounded-full bg-yellow-400 opacity-20 blur-3xl mix-blend-overlay"></div>
-
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-
-            <div class="relative z-10 flex flex-col items-start justify-between gap-5 md:flex-row md:items-center">
-                <div>
-                    <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-700/50 bg-emerald-800/50 px-3 py-1 text-xs font-bold text-emerald-100 backdrop-blur-sm">
-                        <i class="fa-solid fa-map-location-dot text-[#FFD54F]"></i>
-                        Menu Admin
-                    </div>
-
-                    <h1 class="text-2xl font-extrabold tracking-tight text-white md:text-3xl">
-                        Manajemen
-                        <span class="text-[#FFD54F]">
-                            Data Wilayah
-                        </span>
-                    </h1>
-
-                    <p class="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-emerald-100/90">
-                        Kelola data provinsi, kabupaten atau kota, kecamatan, serta desa atau kelurahan di Sumatera Utara.
-                    </p>
+        <section
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="relative z-10 space-y-2">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+                    <i class="fa-solid fa-shield-halved text-[#FFD54F]"></i>
+                    <span>Menu Admin</span>
                 </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                    Manajemen Data Wilayah
+                </h1>
+                <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
+                    Kelola data provinsi, kabupaten atau kota, kecamatan, serta desa atau kelurahan di Sumatera Utara.
+                </p>
+            </div>
 
-                @if ($tableExists)
-                    <a
-                        href="{{ route(
-                            'admin.data-wilayah.index',
-                            array_merge(
-                                request()->except(['edit']),
-                                ['mode' => 'create']
-                            )
-                        ) }}"
-                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FFD54F] px-5 py-3 text-sm font-bold text-emerald-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-300"
-                    >
-                        <i class="fa-solid fa-plus"></i>
-                        Tambah Wilayah
-                    </a>
-                @endif
+            <div class="relative z-10">
+                <button type="button" onclick="window.location.href='{{ route(
+                    'admin.data-wilayah.index',
+                    array_merge(
+                        request()->except(['edit']),
+                        ['mode' => 'create']
+                    )
+                ) }}'"
+                    class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                    <span>Tambah Wilayah</span>
+                </button>
             </div>
         </section>
 
-        @if (! $tableExists)
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        @if (!$tableExists)
+            <div
+                class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
 
                 <span>
@@ -96,7 +84,8 @@
         @endif
 
         @if (session('success'))
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            <div
+                class="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
                 <i class="fa-solid fa-circle-check mt-0.5"></i>
 
                 <span>
@@ -106,7 +95,8 @@
         @endif
 
         @if (session('error'))
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            <div
+                class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
 
                 <span>
@@ -117,165 +107,136 @@
 
         <section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             @foreach ($stats as $stat)
-                @php
-                    $style = $statStyles[$stat['color']]
-                        ?? $statStyles['green'];
-                @endphp
+                    @php
+                        $style = $statStyles[$stat['color']]
+                            ?? $statStyles['green'];
+                    @endphp
 
-                <article class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-                    <div class="absolute -mr-8 -mt-8 right-0 top-0 h-20 w-20 rounded-bl-full transition-transform duration-500 group-hover:scale-150 {{ $style['corner'] }}"></div>
-
-                    <div class="relative z-10 flex items-center justify-between gap-4">
-                        <div>
-                            <p class="m-0 text-xs font-semibold text-slate-500">
-                                {{ $stat['label'] }}
-                            </p>
-
-                            <p class="mb-0 mt-2 text-3xl font-black tracking-tight text-slate-800">
-                                {{ number_format(
-                                    $stat['value'],
-                                    0,
-                                    ',',
-                                    '.'
-                                ) }}
-                            </p>
+                    <article
+                        class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                        <div
+                            class="absolute -mr-8 -mt-8 right-0 top-0 h-20 w-20 rounded-bl-full transition-transform duration-500 group-hover:scale-150 {{ $style['corner'] }}">
                         </div>
 
-                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg text-white shadow-sm {{ $style['icon'] }}">
-                            <i class="fa-solid {{ $stat['icon'] }}"></i>
+                        <div class="relative z-10 flex items-center justify-between gap-4">
+                            <div>
+                                <p class="m-0 text-xs font-semibold text-slate-500">
+                                    {{ $stat['label'] }}
+                                </p>
+
+                                <p class="mb-0 mt-2 text-3xl font-black tracking-tight text-slate-800">
+                                    {{ number_format(
+                    $stat['value'],
+                    0,
+                    ',',
+                    '.'
+                ) }}
+                                </p>
+                            </div>
+
+                            <div
+                                class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg text-white shadow-sm {{ $style['icon'] }}">
+                                <i class="fa-solid {{ $stat['icon'] }}"></i>
+                            </div>
                         </div>
-                    </div>
-                </article>
+                    </article>
             @endforeach
         </section>
 
         <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <form
-                action="{{ route('admin.data-wilayah.index') }}"
-                method="GET"
-                class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12"
-            >
-                
+            <form action="{{ route('admin.data-wilayah.index') }}" method="GET"
+                class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+
                 <div class="relative min-w-0 xl:col-span-2">
-                    <select
-                        name="kode_kabupaten"
-                        id="filterKabupaten"
-                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    >
+                    <select name="kode_kabupaten" id="filterKabupaten"
+                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                         <option value="">Semua Kab/Kota</option>
 
                         @foreach ($kabupatenOptions as $option)
-                            <option
-                                value="{{ $option->kode_kabupaten }}"
-                                @selected(
-                                    request('kode_kabupaten')
-                                    === $option->kode_kabupaten
-                                )
-                            >
+                            <option value="{{ $option->kode_kabupaten }}" @selected(
+                                request('kode_kabupaten')
+                                === $option->kode_kabupaten
+                            )>
                                 {{ $option->nama_kabupaten }}
                             </option>
                         @endforeach
                     </select>
 
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                    <i
+                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                
+
                 <div class="relative min-w-0 xl:col-span-2">
-                    <select
-                        name="kode_kecamatan"
-                        id="filterKecamatan"
-                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    >
+                    <select name="kode_kecamatan" id="filterKecamatan"
+                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                         <option value="">Semua Kecamatan</option>
 
                         @foreach ($kecamatanOptions as $option)
-                            <option
-                                value="{{ $option->kode_kecamatan }}"
-                                @selected(
-                                    request('kode_kecamatan')
-                                    === $option->kode_kecamatan
-                                )
-                            >
+                            <option value="{{ $option->kode_kecamatan }}" @selected(
+                                request('kode_kecamatan')
+                                === $option->kode_kecamatan
+                            )>
                                 {{ $option->nama_kecamatan }}
                             </option>
                         @endforeach
                     </select>
 
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                    <i
+                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                
+
                 <div class="relative min-w-0 xl:col-span-2">
-                    <select
-                        name="status"
-                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    >
+                    <select name="status"
+                        class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                         <option value="">Semua Status</option>
 
-                        <option
-                            value="Aktif"
-                            @selected(strtolower(request('status', '')) === 'aktif')
-                        >
+                        <option value="Aktif" @selected(strtolower(request('status', '')) === 'aktif')>
                             Aktif
                         </option>
 
-                        <option
-                            value="Nonaktif"
-                            @selected(strtolower(request('status', '')) === 'nonaktif')
-                        >
+                        <option value="Nonaktif" @selected(strtolower(request('status', '')) === 'nonaktif')>
                             Nonaktif
                         </option>
                     </select>
 
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                    <i
+                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                
-                <div class="relative min-w-0 xl:col-span-3">
-                    <input
-                        type="text"
-                        name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Cari nama atau kode wilayah..."
-                        class="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    >
 
-                    <button
-                        type="submit"
-                        aria-label="Cari wilayah"
-                        class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 transition hover:bg-emerald-100"
-                    >
+                <div class="relative min-w-0 xl:col-span-3">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Cari nama atau kode wilayah..."
+                        class="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                    <button type="submit" aria-label="Cari wilayah"
+                        class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 transition hover:bg-emerald-100">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </div>
 
-                
+
                 <div class="flex min-w-0 gap-2 md:col-span-2 xl:col-span-3">
-                    <button
-                        type="submit"
-                        class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                    >
+                    <button type="submit"
+                        class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700">
                         <i class="fa-solid fa-filter"></i>
                         <span class="truncate">Terapkan</span>
                     </button>
 
-                    <a
-                        href="{{ route('admin.data-wilayah.index') }}"
-                        title="Reset filter"
-                        class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600"
-                    >
+                    <a href="{{ route('admin.data-wilayah.index') }}" title="Reset filter"
+                        class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
                 </div>
             </form>
         </section>
 
-        <section
-            id="adminWilayahTableCard"
-            class="!block !visible !opacity-100 !relative !w-full !min-h-[100px] !h-auto !overflow-hidden !transform-none mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
-        >
-            <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+        <section id="adminWilayahTableCard"
+            class="!block !visible !opacity-100 !relative !w-full !min-h-[100px] !h-auto !overflow-hidden !transform-none mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <header
+                class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">
                         Daftar Wilayah
@@ -286,26 +247,27 @@
                     </p>
                 </div>
 
-                <div class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                <div
+                    class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
                     <i class="fa-solid fa-database"></i>
 
                     {{ number_format(
-                        $dataWilayah->total(),
-                        0,
-                        ',',
-                        '.'
-                    ) }}
+        $dataWilayah->total(),
+        0,
+        ',',
+        '.'
+    ) }}
                     Data
                 </div>
             </header>
 
-            <div id="adminWilayahTableWrapper" class="!block !visible !opacity-100 !w-full !overflow-x-auto !overflow-y-visible">
-                <table
-                    id="adminWilayahTable"
-                    class="!table !visible !opacity-100 !w-full !min-w-[1150px] !border-collapse !table-auto text-left [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_th]:!visible [&_th]:!opacity-100 [&_th]:!whitespace-nowrap [&_td]:!table-cell [&_td]:!visible [&_td]:!opacity-100"
-                >
+            <div id="adminWilayahTableWrapper"
+                class="!block !visible !opacity-100 !w-full !overflow-x-auto !overflow-y-visible">
+                <table id="adminWilayahTable"
+                    class="!table !visible !opacity-100 !w-full !min-w-[1150px] !border-collapse !table-auto text-left [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_th]:!visible [&_th]:!opacity-100 [&_th]:!whitespace-nowrap [&_td]:!table-cell [&_td]:!visible [&_td]:!opacity-100">
                     <thead>
-                        <tr class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <tr
+                            class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                             <th class="px-5 py-3">
                                 No.
                             </th>
@@ -338,120 +300,111 @@
 
                     <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($dataWilayah as $item)
-                            @php
-                                $nomor =
-                                    ($dataWilayah->currentPage() - 1)
-                                    * $dataWilayah->perPage()
-                                    + $loop->iteration;
+                                            @php
+                                                $nomor =
+                                                    ($dataWilayah->currentPage() - 1)
+                                                    * $dataWilayah->perPage()
+                                                    + $loop->iteration;
 
-                                $status = trim(
-                                    $item->status ?? 'Aktif'
-                                );
+                                                $status = trim(
+                                                    $item->status ?? 'Aktif'
+                                                );
 
-                                $statusLower = strtolower($status);
-                            @endphp
+                                                $statusLower = strtolower($status);
+                                            @endphp
 
-                            <tr class="transition-colors hover:bg-slate-50/60">
-                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">
-                                    {{ str_pad(
-                                        $nomor,
-                                        3,
-                                        '0',
-                                        STR_PAD_LEFT
-                                    ) }}
-                                </td>
+                                            <tr class="transition-colors hover:bg-slate-50/60">
+                                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">
+                                                    {{ str_pad(
+                                $nomor,
+                                3,
+                                '0',
+                                STR_PAD_LEFT
+                            ) }}
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <div class="font-semibold text-slate-700">
-                                        {{ $item->nama_provinsi ?: '-' }}
-                                    </div>
+                                                <td class="px-5 py-4">
+                                                    <div class="font-semibold text-slate-700">
+                                                        {{ $item->nama_provinsi ?: '-' }}
+                                                    </div>
 
-                                    <div class="mt-1 text-xs text-slate-400">
-                                        {{ $item->kode_provinsi ?: '-' }}
-                                    </div>
-                                </td>
+                                                    <div class="mt-1 text-xs text-slate-400">
+                                                        {{ $item->kode_provinsi ?: '-' }}
+                                                    </div>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <div class="font-semibold text-slate-700">
-                                        {{ $item->nama_kabupaten ?: '-' }}
-                                    </div>
+                                                <td class="px-5 py-4">
+                                                    <div class="font-semibold text-slate-700">
+                                                        {{ $item->nama_kabupaten ?: '-' }}
+                                                    </div>
 
-                                    <div class="mt-1 text-xs text-slate-400">
-                                        {{ $item->kode_kabupaten ?: '-' }}
-                                    </div>
-                                </td>
+                                                    <div class="mt-1 text-xs text-slate-400">
+                                                        {{ $item->kode_kabupaten ?: '-' }}
+                                                    </div>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <div class="font-semibold text-slate-700">
-                                        {{ $item->nama_kecamatan ?: '-' }}
-                                    </div>
+                                                <td class="px-5 py-4">
+                                                    <div class="font-semibold text-slate-700">
+                                                        {{ $item->nama_kecamatan ?: '-' }}
+                                                    </div>
 
-                                    <div class="mt-1 text-xs text-slate-400">
-                                        {{ $item->kode_kecamatan ?: '-' }}
-                                    </div>
-                                </td>
+                                                    <div class="mt-1 text-xs text-slate-400">
+                                                        {{ $item->kode_kecamatan ?: '-' }}
+                                                    </div>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <div class="font-semibold text-slate-700">
-                                        {{ $item->nama_desa ?: '-' }}
-                                    </div>
+                                                <td class="px-5 py-4">
+                                                    <div class="font-semibold text-slate-700">
+                                                        {{ $item->nama_desa ?: '-' }}
+                                                    </div>
 
-                                    <div class="mt-1 text-xs text-slate-400">
-                                        {{ $item->kode_desa ?: '-' }}
-                                    </div>
-                                </td>
+                                                    <div class="mt-1 text-xs text-slate-400">
+                                                        {{ $item->kode_desa ?: '-' }}
+                                                    </div>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusLower === 'nonaktif' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $statusLower === 'nonaktif' ? 'bg-red-500' : 'bg-emerald-500' }}"></span>
+                                                <td class="px-5 py-4">
+                                                    <span
+                                                        class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusLower === 'nonaktif' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
+                                                        <span
+                                                            class="h-1.5 w-1.5 rounded-full {{ $statusLower === 'nonaktif' ? 'bg-red-500' : 'bg-emerald-500' }}"></span>
 
-                                        {{ $status }}
-                                    </span>
-                                </td>
+                                                        {{ $status }}
+                                                    </span>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <a
-                                            href="{{ route(
-                                                'admin.data-wilayah.index',
-                                                array_merge(
-                                                    request()->query(),
-                                                    [
-                                                        'edit' => $item->id,
-                                                        'mode' => 'edit',
-                                                    ]
-                                                )
-                                            ) }}"
-                                            title="Edit wilayah"
-                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
-                                        >
-                                            <i class="fa-regular fa-pen-to-square"></i>
-                                        </a>
+                                                <td class="px-5 py-4">
+                                                    <div class="flex items-center justify-center gap-2">
+                                                        <a href="{{ route(
+                                'admin.data-wilayah.index',
+                                array_merge(
+                                    request()->query(),
+                                    [
+                                        'edit' => $item->id,
+                                        'mode' => 'edit',
+                                    ]
+                                )
+                            ) }}" title="Edit wilayah"
+                                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600">
+                                                            <i class="fa-regular fa-pen-to-square"></i>
+                                                        </a>
 
-                                        <button
-                                            type="button"
-                                            title="Hapus wilayah"
-                                            data-delete-wilayah
-                                            data-delete-url="{{ route(
-                                                'admin.data-wilayah.destroy',
-                                                $item->id
-                                            ) }}"
-                                            data-delete-name="{{ $item->nama_desa }}"
-                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                                        >
-                                            <i class="fa-regular fa-trash-can"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                                        <button type="button" title="Hapus wilayah" data-delete-wilayah data-delete-url="{{ route(
+                                'admin.data-wilayah.destroy',
+                                $item->id
+                            ) }}" data-delete-name="{{ $item->nama_desa }}"
+                                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600">
+                                                            <i class="fa-regular fa-trash-can"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
                         @empty
                             <tr>
-                                <td
-                                    colspan="7"
-                                    class="px-5 py-14 text-center"
-                                >
+                                <td colspan="7" class="px-5 py-14 text-center">
                                     <div class="mx-auto flex max-w-sm flex-col items-center">
-                                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400">
+                                        <div
+                                            class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400">
                                             <i class="fa-solid fa-map-location-dot"></i>
                                         </div>
 
@@ -472,19 +425,24 @@
         </section>
 
         @if ($dataWilayah->total() > 0)
-            <footer class="mt-5 flex flex-col gap-4 border-t border-slate-200 bg-white rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between shadow-xs">
+            <footer
+                class="mt-5 flex flex-col gap-4 border-t border-slate-200 bg-white rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between shadow-xs">
                 <p class="m-0 text-xs text-slate-500">
-                    Menampilkan <strong class="text-slate-700">{{ $dataWilayah->firstItem() }}</strong>–<strong class="text-slate-700">{{ $dataWilayah->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($dataWilayah->total(), 0, ',', '.') }}</strong> wilayah
+                    Menampilkan <strong class="text-slate-700">{{ $dataWilayah->firstItem() }}</strong>–<strong
+                        class="text-slate-700">{{ $dataWilayah->lastItem() }}</strong> dari <strong
+                        class="text-slate-700">{{ number_format($dataWilayah->total(), 0, ',', '.') }}</strong> wilayah
                 </p>
 
                 @if ($dataWilayah->hasPages())
                     <div class="flex flex-wrap items-center gap-2">
                         @if ($dataWilayah->onFirstPage())
-                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
+                            <span
+                                class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
                                 <i class="fa-solid fa-chevron-left text-xs"></i>
                             </span>
                         @else
-                            <a href="{{ $dataWilayah->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
+                            <a href="{{ $dataWilayah->previousPageUrl() }}"
+                                class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
                                 <i class="fa-solid fa-chevron-left text-xs"></i>
                             </a>
                         @endif
@@ -493,7 +451,7 @@
                             $currentPage = $dataWilayah->currentPage();
                             $lastPage = $dataWilayah->lastPage();
                             $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
-                                ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
+                                ->filter(fn($page) => $page >= 1 && $page <= $lastPage)
                                 ->unique()
                                 ->sort()
                                 ->values();
@@ -506,11 +464,13 @@
                             @endif
 
                             @if ($page === $currentPage)
-                                <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-emerald-600 bg-emerald-600 px-3 text-xs font-bold text-white">
+                                <span
+                                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-emerald-600 bg-emerald-600 px-3 text-xs font-bold text-white">
                                     {{ $page }}
                                 </span>
                             @else
-                                <a href="{{ $dataWilayah->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
+                                <a href="{{ $dataWilayah->url($page) }}"
+                                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
                                     {{ $page }}
                                 </a>
                             @endif
@@ -521,11 +481,13 @@
                         @endforeach
 
                         @if ($dataWilayah->hasMorePages())
-                            <a href="{{ $dataWilayah->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
+                            <a href="{{ $dataWilayah->nextPageUrl() }}"
+                                class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </a>
                         @else
-                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
+                            <span
+                                class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </span>
                         @endif
@@ -586,494 +548,335 @@
 
         <div class="fixed inset-0 z-[999] overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
             <div class="flex min-h-full items-start justify-center">
-                <div class="my-2 flex max-h-[calc(100vh-1rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl">
-                    <header class="sticky top-0 z-20 flex flex-shrink-0 items-start justify-between gap-5 border-b border-slate-100 bg-white p-6">
-                    <div>
-                        <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                            <i class="fa-solid {{ $isEdit ? 'fa-map-pen' : 'fa-map-location-dot' }}"></i>
-                        </div>
-
-                        <h2 class="m-0 text-xl font-bold text-slate-800">
-                            {{ $isEdit ? 'Edit Data Wilayah' : 'Tambah Data Wilayah' }}
-                        </h2>
-
-                        <p class="mb-0 mt-1 text-sm text-slate-500">
-                            Pilih nama wilayah dari dropdown atau gunakan pilihan Isi sendiri, kemudian masukkan kode wilayah secara manual.
-                        </p>
-                    </div>
-
-                    <a
-                        href="{{ $closeModalUrl }}"
-                        class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100"
-                    >
-                        <i class="fa-solid fa-xmark"></i>
-                    </a>
-                </header>
-
-                    <form
-                        action="{{ $formAction }}"
-                        method="POST"
-                        id="wilayahForm"
-                        class="overflow-y-auto p-6"
-                    >
-                    @csrf
-
-                    @if ($isEdit)
-                        @method('PUT')
-                    @endif
-
-                    <input
-                        type="hidden"
-                        name="nama_provinsi"
-                        id="nama_provinsi"
-                        value="{{ $formValues['nama_provinsi'] }}"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="nama_kabupaten"
-                        id="nama_kabupaten"
-                        value="{{ $formValues['nama_kabupaten'] }}"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="nama_kecamatan"
-                        id="nama_kecamatan"
-                        value="{{ $formValues['nama_kecamatan'] }}"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="nama_desa"
-                        id="nama_desa"
-                        value="{{ $formValues['nama_desa'] }}"
-                    >
-
-                    <div class="grid grid-cols-1 gap-x-8 gap-y-5 md:grid-cols-2">
+                <div
+                    class="my-2 flex max-h-[calc(100vh-1rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl">
+                    <header
+                        class="sticky top-0 z-20 flex flex-shrink-0 items-start justify-between gap-5 border-b border-slate-100 bg-white p-6">
                         <div>
-                            <label
-                                for="provinsiSelect"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Provinsi
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <div class="relative">
-                                <select
-                                    id="provinsiSelect"
-                                    required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-                                    <option value="">Memuat data provinsi...</option>
-                                </select>
-
-                                <input
-                                    type="text"
-                                    id="provinsiInlineInput"
-                                    value="{{ $formValues['nama_provinsi'] }}"
-                                    placeholder="Ketik nama provinsi"
-                                    autocomplete="off"
-                                    class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-
-                                <button
-                                    type="button"
-                                    id="provinsiBackButton"
-                                    title="Kembali ke daftar provinsi"
-                                    class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600"
-                                >
-                                    <i class="fa-solid fa-arrow-left"></i>
-                                </button>
-
-                                <i
-                                    id="provinsiChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"
-                                ></i>
+                            <div
+                                class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                                <i class="fa-solid {{ $isEdit ? 'fa-map-pen' : 'fa-map-location-dot' }}"></i>
                             </div>
 
-                            @error('nama_provinsi')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
+                            <h2 class="m-0 text-xl font-bold text-slate-800">
+                                {{ $isEdit ? 'Edit Data Wilayah' : 'Tambah Data Wilayah' }}
+                            </h2>
 
-                        <div>
-                            <label
-                                for="kode_provinsi"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Kode Provinsi
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <input
-                                id="kode_provinsi"
-                                type="text"
-                                name="kode_provinsi"
-                                value="{{ $formValues['kode_provinsi'] }}"
-                                maxlength="2"
-                                inputmode="numeric"
-                                pattern="[0-9]{2}"
-                                placeholder="Contoh: 13"
-                                required
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
-
-                            <p class="mb-0 mt-1.5 text-xs text-slate-400">
-                                Contoh: 13
+                            <p class="mb-0 mt-1 text-sm text-slate-500">
+                                Pilih nama wilayah dari dropdown atau gunakan pilihan Isi sendiri, kemudian masukkan kode
+                                wilayah secara manual.
                             </p>
-
-                            @error('kode_provinsi')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
                         </div>
 
-                        <div>
-                            <label
-                                for="kabupatenSelect"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Kabupaten/Kota
-                                <span class="text-red-500">*</span>
-                            </label>
+                        <a href="{{ $closeModalUrl }}"
+                            class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    </header>
 
-                            <div class="relative">
-                                <select
-                                    id="kabupatenSelect"
-                                    disabled
-                                    required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-                                    <option value="">Pilih provinsi terlebih dahulu</option>
-                                </select>
+                    <form action="{{ $formAction }}" method="POST" id="wilayahForm" class="overflow-y-auto p-6">
+                        @csrf
 
-                                <input
-                                    type="text"
-                                    id="kabupatenInlineInput"
-                                    value="{{ $formValues['nama_kabupaten'] }}"
-                                    placeholder="Ketik nama kabupaten/kota"
-                                    autocomplete="off"
-                                    class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
+                        @if ($isEdit)
+                            @method('PUT')
+                        @endif
 
-                                <button
-                                    type="button"
-                                    id="kabupatenBackButton"
-                                    title="Kembali ke daftar kabupaten/kota"
-                                    class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600"
-                                >
-                                    <i class="fa-solid fa-arrow-left"></i>
-                                </button>
+                        <input type="hidden" name="nama_provinsi" id="nama_provinsi" value="{{ $formValues['nama_provinsi'] }}">
 
-                                <i
-                                    id="kabupatenChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"
-                                ></i>
-                            </div>
+                        <input type="hidden" name="nama_kabupaten" id="nama_kabupaten"
+                            value="{{ $formValues['nama_kabupaten'] }}">
 
-                            @error('nama_kabupaten')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
+                        <input type="hidden" name="nama_kecamatan" id="nama_kecamatan"
+                            value="{{ $formValues['nama_kecamatan'] }}">
 
-                        <div>
-                            <label
-                                for="kode_kabupaten"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Kode Kabupaten/Kota
-                                <span class="text-red-500">*</span>
-                            </label>
+                        <input type="hidden" name="nama_desa" id="nama_desa" value="{{ $formValues['nama_desa'] }}">
 
-                            <input
-                                id="kode_kabupaten"
-                                type="text"
-                                name="kode_kabupaten"
-                                value="{{ $formValues['kode_kabupaten'] }}"
-                                maxlength="5"
-                                inputmode="numeric"
-                                placeholder="Contoh: 13.01"
-                                required
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
-
-                            <p class="mb-0 mt-1.5 text-xs text-slate-400">
-                                Contoh: 13.01
-                            </p>
-
-                            @error('kode_kabupaten')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label
-                                for="kecamatanSelect"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Kecamatan
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <div class="relative">
-                                <select
-                                    id="kecamatanSelect"
-                                    disabled
-                                    required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-                                    <option value="">Pilih kabupaten/kota terlebih dahulu</option>
-                                </select>
-
-                                <input
-                                    type="text"
-                                    id="kecamatanInlineInput"
-                                    value="{{ $formValues['nama_kecamatan'] }}"
-                                    placeholder="Ketik nama kecamatan"
-                                    autocomplete="off"
-                                    class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-
-                                <button
-                                    type="button"
-                                    id="kecamatanBackButton"
-                                    title="Kembali ke daftar kecamatan"
-                                    class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600"
-                                >
-                                    <i class="fa-solid fa-arrow-left"></i>
-                                </button>
-
-                                <i
-                                    id="kecamatanChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"
-                                ></i>
-                            </div>
-
-                            @error('nama_kecamatan')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label
-                                for="kode_kecamatan"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Kode Kecamatan
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <input
-                                id="kode_kecamatan"
-                                type="text"
-                                name="kode_kecamatan"
-                                value="{{ $formValues['kode_kecamatan'] }}"
-                                maxlength="8"
-                                inputmode="numeric"
-                                placeholder="Contoh: 13.01.01"
-                                required
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
-
-                            <p class="mb-0 mt-1.5 text-xs text-slate-400">
-                                Contoh: 13.01.01
-                            </p>
-
-                            @error('kode_kecamatan')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label
-                                for="desaSelect"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Desa/Kelurahan
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <div class="relative">
-                                <select
-                                    id="desaSelect"
-                                    disabled
-                                    required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-                                    <option value="">Pilih kecamatan terlebih dahulu</option>
-                                </select>
-
-                                <input
-                                    type="text"
-                                    id="desaInlineInput"
-                                    value="{{ $formValues['nama_desa'] }}"
-                                    placeholder="Ketik nama desa/kelurahan"
-                                    autocomplete="off"
-                                    class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-
-                                <button
-                                    type="button"
-                                    id="desaBackButton"
-                                    title="Kembali ke daftar desa/kelurahan"
-                                    class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600"
-                                >
-                                    <i class="fa-solid fa-arrow-left"></i>
-                                </button>
-
-                                <i
-                                    id="desaChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"
-                                ></i>
-                            </div>
-
-                            @error('nama_desa')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label
-                                for="kode_desa"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Kode Desa/Kelurahan
-                                <span class="text-red-500">*</span>
-                            </label>
-
-                            <input
-                                id="kode_desa"
-                                type="text"
-                                name="kode_desa"
-                                value="{{ $formValues['kode_desa'] }}"
-                                maxlength="13"
-                                inputmode="numeric"
-                                placeholder="Contoh: 13.01.01.2001"
-                                required
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
-
-                            <p class="mb-0 mt-1.5 text-xs text-slate-400">
-                                Contoh: 13.01.01.2001
-                            </p>
-
-                            @error('kode_desa')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        @if (Schema::hasColumn('kelurahan_desa', 'status'))
+                        <div class="grid grid-cols-1 gap-x-8 gap-y-5 md:grid-cols-2">
                             <div>
-                                <label
-                                    for="status"
-                                    class="mb-2 block text-sm font-semibold text-slate-700"
-                                >
-                                    Status
+                                <label for="provinsiSelect" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Provinsi
                                     <span class="text-red-500">*</span>
                                 </label>
 
-                                <select
-                                    id="status"
-                                    name="status"
-                                    required
-                                    class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-                                    <option
-                                        value="Aktif"
-                                        @selected(strtolower($selectedStatus) === 'aktif')
-                                    >
-                                        Aktif
-                                    </option>
+                                <div class="relative">
+                                    <select id="provinsiSelect" required
+                                        class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                        <option value="">Memuat data provinsi...</option>
+                                    </select>
 
-                                    <option
-                                        value="Nonaktif"
-                                        @selected(strtolower($selectedStatus) === 'nonaktif')
-                                    >
-                                        Nonaktif
-                                    </option>
-                                </select>
+                                    <input type="text" id="provinsiInlineInput" value="{{ $formValues['nama_provinsi'] }}"
+                                        placeholder="Ketik nama provinsi" autocomplete="off"
+                                        class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
 
-                                @error('status')
+                                    <button type="button" id="provinsiBackButton" title="Kembali ke daftar provinsi"
+                                        class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600">
+                                        <i class="fa-solid fa-arrow-left"></i>
+                                    </button>
+
+                                    <i id="provinsiChevron"
+                                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                </div>
+
+                                @error('nama_provinsi')
                                     <p class="mb-0 mt-1.5 text-xs text-red-600">
                                         {{ $message }}
                                     </p>
                                 @enderror
                             </div>
-                        @endif
 
-                        @if (Schema::hasColumn('kelurahan_desa', 'keterangan'))
-                            <div class="{{ Schema::hasColumn('kelurahan_desa', 'status') ? 'md:col-span-2' : 'md:col-span-2' }}">
-                                <label
-                                    for="keterangan"
-                                    class="mb-2 block text-sm font-semibold text-slate-700"
-                                >
-                                    Keterangan
+                            <div>
+                                <label for="kode_provinsi" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Kode Provinsi
+                                    <span class="text-red-500">*</span>
                                 </label>
 
-                                <textarea
-                                    id="keterangan"
-                                    name="keterangan"
-                                    rows="3"
-                                    placeholder="Masukkan keterangan tambahan bila diperlukan"
-                                    class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >{{ old(
+                                <input id="kode_provinsi" type="text" name="kode_provinsi"
+                                    value="{{ $formValues['kode_provinsi'] }}" maxlength="2" inputmode="numeric"
+                                    pattern="[0-9]{2}" placeholder="Contoh: 13" required
+                                    class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                                <p class="mb-0 mt-1.5 text-xs text-slate-400">
+                                    Contoh: 13
+                                </p>
+
+                                @error('kode_provinsi')
+                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="kabupatenSelect" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Kabupaten/Kota
+                                    <span class="text-red-500">*</span>
+                                </label>
+
+                                <div class="relative">
+                                    <select id="kabupatenSelect" disabled required
+                                        class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                        <option value="">Pilih provinsi terlebih dahulu</option>
+                                    </select>
+
+                                    <input type="text" id="kabupatenInlineInput" value="{{ $formValues['nama_kabupaten'] }}"
+                                        placeholder="Ketik nama kabupaten/kota" autocomplete="off"
+                                        class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                                    <button type="button" id="kabupatenBackButton" title="Kembali ke daftar kabupaten/kota"
+                                        class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600">
+                                        <i class="fa-solid fa-arrow-left"></i>
+                                    </button>
+
+                                    <i id="kabupatenChevron"
+                                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                </div>
+
+                                @error('nama_kabupaten')
+                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="kode_kabupaten" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Kode Kabupaten/Kota
+                                    <span class="text-red-500">*</span>
+                                </label>
+
+                                <input id="kode_kabupaten" type="text" name="kode_kabupaten"
+                                    value="{{ $formValues['kode_kabupaten'] }}" maxlength="5" inputmode="numeric"
+                                    placeholder="Contoh: 13.01" required
+                                    class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                                <p class="mb-0 mt-1.5 text-xs text-slate-400">
+                                    Contoh: 13.01
+                                </p>
+
+                                @error('kode_kabupaten')
+                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="kecamatanSelect" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Kecamatan
+                                    <span class="text-red-500">*</span>
+                                </label>
+
+                                <div class="relative">
+                                    <select id="kecamatanSelect" disabled required
+                                        class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                        <option value="">Pilih kabupaten/kota terlebih dahulu</option>
+                                    </select>
+
+                                    <input type="text" id="kecamatanInlineInput" value="{{ $formValues['nama_kecamatan'] }}"
+                                        placeholder="Ketik nama kecamatan" autocomplete="off"
+                                        class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                                    <button type="button" id="kecamatanBackButton" title="Kembali ke daftar kecamatan"
+                                        class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600">
+                                        <i class="fa-solid fa-arrow-left"></i>
+                                    </button>
+
+                                    <i id="kecamatanChevron"
+                                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                </div>
+
+                                @error('nama_kecamatan')
+                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="kode_kecamatan" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Kode Kecamatan
+                                    <span class="text-red-500">*</span>
+                                </label>
+
+                                <input id="kode_kecamatan" type="text" name="kode_kecamatan"
+                                    value="{{ $formValues['kode_kecamatan'] }}" maxlength="8" inputmode="numeric"
+                                    placeholder="Contoh: 13.01.01" required
+                                    class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                                <p class="mb-0 mt-1.5 text-xs text-slate-400">
+                                    Contoh: 13.01.01
+                                </p>
+
+                                @error('kode_kecamatan')
+                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="desaSelect" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Desa/Kelurahan
+                                    <span class="text-red-500">*</span>
+                                </label>
+
+                                <div class="relative">
+                                    <select id="desaSelect" disabled required
+                                        class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                        <option value="">Pilih kecamatan terlebih dahulu</option>
+                                    </select>
+
+                                    <input type="text" id="desaInlineInput" value="{{ $formValues['nama_desa'] }}"
+                                        placeholder="Ketik nama desa/kelurahan" autocomplete="off"
+                                        class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                                    <button type="button" id="desaBackButton" title="Kembali ke daftar desa/kelurahan"
+                                        class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600">
+                                        <i class="fa-solid fa-arrow-left"></i>
+                                    </button>
+
+                                    <i id="desaChevron"
+                                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                </div>
+
+                                @error('nama_desa')
+                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="kode_desa" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Kode Desa/Kelurahan
+                                    <span class="text-red-500">*</span>
+                                </label>
+
+                                <input id="kode_desa" type="text" name="kode_desa" value="{{ $formValues['kode_desa'] }}"
+                                    maxlength="13" inputmode="numeric" placeholder="Contoh: 13.01.01.2001" required
+                                    class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                                <p class="mb-0 mt-1.5 text-xs text-slate-400">
+                                    Contoh: 13.01.01.2001
+                                </p>
+
+                                @error('kode_desa')
+                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            @if (Schema::hasColumn('kelurahan_desa', 'status'))
+                                <div>
+                                    <label for="status" class="mb-2 block text-sm font-semibold text-slate-700">
+                                        Status
+                                        <span class="text-red-500">*</span>
+                                    </label>
+
+                                    <select id="status" name="status" required
+                                        class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                        <option value="Aktif" @selected(strtolower($selectedStatus) === 'aktif')>
+                                            Aktif
+                                        </option>
+
+                                        <option value="Nonaktif" @selected(strtolower($selectedStatus) === 'nonaktif')>
+                                            Nonaktif
+                                        </option>
+                                    </select>
+
+                                    @error('status')
+                                        <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
+                            @endif
+
+                            @if (Schema::hasColumn('kelurahan_desa', 'keterangan'))
+                                            <div
+                                                class="{{ Schema::hasColumn('kelurahan_desa', 'status') ? 'md:col-span-2' : 'md:col-span-2' }}">
+                                                <label for="keterangan" class="mb-2 block text-sm font-semibold text-slate-700">
+                                                    Keterangan
+                                                </label>
+
+                                                <textarea id="keterangan" name="keterangan" rows="3"
+                                                    placeholder="Masukkan keterangan tambahan bila diperlukan"
+                                                    class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">{{ old(
                                     'keterangan',
                                     $isEdit ? ($editData->keterangan ?? '') : ''
                                 ) }}</textarea>
 
-                                @error('keterangan')
-                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
-                        @endif
-                    </div>
+                                                @error('keterangan')
+                                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
+                                                        {{ $message }}
+                                                    </p>
+                                                @enderror
+                                            </div>
+                            @endif
+                        </div>
 
-                    <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row">
-                        <a
-                            href="{{ $closeModalUrl }}"
-                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                        >
-                            Batal
-                        </a>
+                        <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row">
+                            <a href="{{ $closeModalUrl }}"
+                                class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                                Batal
+                            </a>
 
-                        <button
-                            type="submit"
-                            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-                        >
-                            <i class="fa-solid fa-floppy-disk"></i>
+                            <button type="submit"
+                                class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
+                                <i class="fa-solid fa-floppy-disk"></i>
 
-                            {{ $isEdit ? 'Simpan Perubahan' : 'Simpan Wilayah' }}
-                        </button>
-                    </div>
+                                {{ $isEdit ? 'Simpan Perubahan' : 'Simpan Wilayah' }}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     @endif
 
-    <div
-        id="deleteWilayahModal"
-        class="fixed inset-0 z-[1000] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
-    >
+    <div id="deleteWilayahModal"
+        class="fixed inset-0 z-[1000] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
         <div class="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-2xl">
             <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-2xl text-red-600">
                 <i class="fa-regular fa-trash-can"></i>
@@ -1086,35 +889,23 @@
             <p class="mb-0 mt-2 text-sm leading-relaxed text-slate-500">
                 Data wilayah
 
-                <strong
-                    id="deleteWilayahName"
-                    class="text-slate-700"
-                ></strong>
+                <strong id="deleteWilayahName" class="text-slate-700"></strong>
 
                 akan dihapus. Tindakan ini tidak dapat dibatalkan.
             </p>
 
-            <form
-                id="deleteWilayahForm"
-                action=""
-                method="POST"
-                class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center"
-            >
+            <form id="deleteWilayahForm" action="" method="POST"
+                class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
                 @csrf
                 @method('DELETE')
 
-                <button
-                    type="button"
-                    id="cancelDeleteWilayah"
-                    class="inline-flex h-11 min-w-32 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                >
+                <button type="button" id="cancelDeleteWilayah"
+                    class="inline-flex h-11 min-w-32 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
                     Batal
                 </button>
 
-                <button
-                    type="submit"
-                    class="inline-flex h-11 min-w-32 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700"
-                >
+                <button type="submit"
+                    class="inline-flex h-11 min-w-32 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700">
                     <i class="fa-regular fa-trash-can"></i>
                     Hapus
                 </button>
@@ -1162,7 +953,7 @@
                 );
 
                 function openDeleteModal(url, name) {
-                    if (! deleteModal || ! deleteForm || ! deleteName) {
+                    if (!deleteModal || !deleteForm || !deleteName) {
                         return;
                     }
 
@@ -1174,7 +965,7 @@
                 }
 
                 function closeDeleteModal() {
-                    if (! deleteModal) {
+                    if (!deleteModal) {
                         return;
                     }
 
@@ -1218,7 +1009,7 @@
                     'wilayahForm'
                 );
 
-                if (! wilayahForm) {
+                if (!wilayahForm) {
                     return;
                 }
 
@@ -1369,7 +1160,7 @@
                         },
                     });
 
-                    if (! response.ok) {
+                    if (!response.ok) {
                         throw new Error(
                             'Data wilayah gagal dimuat.'
                         );
@@ -1411,7 +1202,7 @@
                         if (
                             selectedCode
                             && String(item.code)
-                                === String(selectedCode)
+                            === String(selectedCode)
                         ) {
                             option.selected = true;
                         }
@@ -1431,16 +1222,16 @@
                     const found = items.some(function (item) {
                         return selectedCode
                             && String(item.code)
-                                === String(selectedCode);
+                            === String(selectedCode);
                     });
 
-                    if (selectedName && ! found) {
+                    if (selectedName && !found) {
                         field.select.value = manualValue;
                         showInlineInput(level, selectedName);
                     } else if (found) {
                         const selected =
                             field.select.options[
-                                field.select.selectedIndex
+                            field.select.selectedIndex
                             ];
 
                         field.hidden.value =
@@ -1508,13 +1299,13 @@
                 function selectedName(level) {
                     const field = levels[level];
 
-                    if (! field.input.classList.contains('hidden')) {
+                    if (!field.input.classList.contains('hidden')) {
                         return field.input.value.trim();
                     }
 
                     const selected =
                         field.select.options[
-                            field.select.selectedIndex
+                        field.select.selectedIndex
                         ];
 
                     return selected?.dataset.name || '';
@@ -1523,7 +1314,7 @@
                 function selectedCode(level) {
                     const field = levels[level];
 
-                    if (! field.input.classList.contains('hidden')) {
+                    if (!field.input.classList.contains('hidden')) {
                         return null;
                     }
 
@@ -1596,7 +1387,7 @@
 
                         const code = selectedCode('province');
 
-                        if (! code) {
+                        if (!code) {
                             return;
                         }
 
@@ -1631,7 +1422,7 @@
 
                         const code = selectedCode('regency');
 
-                        if (! code) {
+                        if (!code) {
                             return;
                         }
 
@@ -1664,7 +1455,7 @@
 
                         const code = selectedCode('district');
 
-                        if (! code) {
+                        if (!code) {
                             return;
                         }
 
@@ -1703,7 +1494,7 @@
 
                         const missing = Object.values(levels)
                             .some(function (field) {
-                                return ! field.hidden.value.trim();
+                                return !field.hidden.value.trim();
                             });
 
                         if (missing) {
@@ -1732,7 +1523,7 @@
                     if (
                         levels.province.select.value
                         && levels.province.select.value
-                            !== manualValue
+                        !== manualValue
                     ) {
                         const regencies = await fetchItems(
                             endpoints.regencies,
@@ -1749,7 +1540,7 @@
                             initial.regencyName
                         );
                     } else if (
-                        ! levels.province.input.classList
+                        !levels.province.input.classList
                             .contains('hidden')
                     ) {
                         renderOptions(
@@ -1763,7 +1554,7 @@
                     if (
                         levels.regency.select.value
                         && levels.regency.select.value
-                            !== manualValue
+                        !== manualValue
                     ) {
                         const districts = await fetchItems(
                             endpoints.districts,
@@ -1780,7 +1571,7 @@
                             initial.districtName
                         );
                     } else if (
-                        ! levels.regency.input.classList
+                        !levels.regency.input.classList
                             .contains('hidden')
                     ) {
                         renderOptions(
@@ -1794,7 +1585,7 @@
                     if (
                         levels.district.select.value
                         && levels.district.select.value
-                            !== manualValue
+                        !== manualValue
                     ) {
                         const villages = await fetchItems(
                             endpoints.villages,
@@ -1811,7 +1602,7 @@
                             initial.villageName
                         );
                     } else if (
-                        ! levels.district.input.classList
+                        !levels.district.input.classList
                             .contains('hidden')
                     ) {
                         renderOptions(
