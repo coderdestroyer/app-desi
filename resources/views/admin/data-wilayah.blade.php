@@ -471,68 +471,8 @@
             </div>
         </section>
 
-        @if ($dataWilayah->total() > 0)
-            <footer class="mt-5 flex flex-col gap-4 border-t border-slate-200 bg-white rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between shadow-xs">
-                <p class="m-0 text-xs text-slate-500">
-                    Menampilkan <strong class="text-slate-700">{{ $dataWilayah->firstItem() }}</strong>–<strong class="text-slate-700">{{ $dataWilayah->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($dataWilayah->total(), 0, ',', '.') }}</strong> wilayah
-                </p>
-
-                @if ($dataWilayah->hasPages())
-                    <div class="flex flex-wrap items-center gap-2">
-                        @if ($dataWilayah->onFirstPage())
-                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                <i class="fa-solid fa-chevron-left text-xs"></i>
-                            </span>
-                        @else
-                            <a href="{{ $dataWilayah->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                <i class="fa-solid fa-chevron-left text-xs"></i>
-                            </a>
-                        @endif
-
-                        @php
-                            $currentPage = $dataWilayah->currentPage();
-                            $lastPage = $dataWilayah->lastPage();
-                            $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
-                                ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
-                                ->unique()
-                                ->sort()
-                                ->values();
-                            $previousPageNumber = null;
-                        @endphp
-
-                        @foreach ($pages as $page)
-                            @if ($previousPageNumber && $page - $previousPageNumber > 1)
-                                <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">…</span>
-                            @endif
-
-                            @if ($page === $currentPage)
-                                <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-emerald-600 bg-emerald-600 px-3 text-xs font-bold text-white">
-                                    {{ $page }}
-                                </span>
-                            @else
-                                <a href="{{ $dataWilayah->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
-                                    {{ $page }}
-                                </a>
-                            @endif
-
-                            @php
-                                $previousPageNumber = $page;
-                            @endphp
-                        @endforeach
-
-                        @if ($dataWilayah->hasMorePages())
-                            <a href="{{ $dataWilayah->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                <i class="fa-solid fa-chevron-right text-xs"></i>
-                            </a>
-                        @else
-                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                <i class="fa-solid fa-chevron-right text-xs"></i>
-                            </span>
-                        @endif
-                    </div>
-                @endif
-            </footer>
-        @endif
+        <!-- Pagination Component -->
+        <x-pagination :paginator="$dataWilayah" />
 
         <footer class="pb-1 pt-8 text-center text-xs text-slate-400">
             Copyright &copy;

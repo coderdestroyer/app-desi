@@ -34,123 +34,95 @@ class SsController extends Controller
         $authorizedKabupatens = $this->getAuthorizedKabupatens($user);
         $authorizedIds = $authorizedKabupatens->pluck('kab_id')->toArray();
 
-        $savedResults = AnalysisResult::where('type', 'shift_share')->orderBy('id', 'desc')->get();
+        $cacheKey = 'calc_ss_summary_multi_year_all_regions_v3';
 
-        if ($savedResults->isNotEmpty()) {
-            $mappedData = $savedResults->map(function ($item) {
-                $res = $item->results ?? [];
-                $isProv = ($res['tingkat_wilayah'] ?? '') === 'Provinsi';
-                $provName = strtoupper($res['provinsi'] ?? 'SUMATERA UTARA');
-                $pembanding = $isProv ? 'PDB NASIONAL' : 'PDRB ' . $provName;
-
-                return [
-                    'id' => $item->id,
-                    'tingkat_wilayah' => $res['tingkat_wilayah'] ?? 'Kabupaten/Kota',
-                    'daerah_analisis' => $res['daerah_analisis'] ?? '-',
-                    'daerah_pembanding' => $pembanding,
-                    'provinsi' => $res['provinsi'] ?? '-',
-                    'kabupaten' => $res['kabupaten'] ?? '-',
-                    'tahun' => ($res['tahun_awal'] ?? '') . ' - ' . ($res['tahun_akhir'] ?? ''),
-                    'tahun_akhir' => (int)($res['tahun_akhir'] ?? 2024),
-                    'sektor_cepat_count' => isset($res['status_pertumbuhan']) && str_contains($res['status_pertumbuhan'], 'Cepat') ? 1 : 0,
-                    'sektor_lambat_count' => isset($res['status_pertumbuhan']) && str_contains($res['status_pertumbuhan'], 'Lambat') ? 1 : 0,
-                    'status_daya_saing' => $res['status_daya_saing'] ?? '-',
-                    'is_provinsi' => $isProv,
-                    'provinsi_id' => $res['provinsi_id'] ?? null,
-                    'kabupaten_id' => $res['kabupaten_id'] ?? null,
-                ];
-            });
-
-            $allYears = $mappedData->pluck('tahun_akhir')->filter()->unique()->values()->toArray();
-        } else {
-            $cacheKey = 'calc_ss_summary_multi_year_all_regions_v2';
-
-            $allYears = DB::table('pdrb_sumatera_kabupaten')
+        $allYears = Cache::remember('ss_available_years', 3600, function () {
+            $years = DB::table('pdrb_sumatera_kabupaten')
                 ->select('tahun')
                 ->distinct()
                 ->orderBy('tahun', 'desc')
                 ->pluck('tahun');
 
-            if ($allYears->isEmpty()) {
-                $allYears = collect([2024, 2023, 2022, 2021, 2020]);
+            return $years->isEmpty() ? collect([2024, 2023, 2022, 2021, 2020]) : $years;
+        });
+
+        $mappedData = Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $allYears) {
+            $this->ssaService->preloadPdrbData($allYears->toArray());
+
+            $provinsiList = Provinsi::whereNotNull('latitude')->orderBy('nama_provinsi')->get();
+            if ($provinsiList->isEmpty()) {
+                $provinsiList = Provinsi::orderBy('nama_provinsi')->get();
             }
 
-            $mappedData = Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $allYears) {
-                $provinsiList = Provinsi::whereNotNull('latitude')->orderBy('nama_provinsi')->get();
-                if ($provinsiList->isEmpty()) {
-                    $provinsiList = Provinsi::orderBy('nama_provinsi')->get();
-                }
+            $summaryRows = [];
+            $idCounter = 1;
 
-                $summaryRows = [];
-                $idCounter = 1;
+            foreach ($allYears as $tahun) {
+                $tahunAwal = $tahun - 1;
 
-                foreach ($allYears as $tahun) {
-                    $tahunAwal = $tahun - 1;
+                // 1. Data Provinsi Terlebih Dahulu (Prioritas Utama di Atas)
+                foreach ($provinsiList as $prov) {
+                    $dynamicProv = $this->ssaService->calculateSsaProvinsi($prov->provinsi_id, (int)$tahun);
+                    if ($dynamicProv->isNotEmpty()) {
+                        $cepatCount = $dynamicProv->where('kategori_pertumbuhan', 'Pertumbuhan Cepat')->count();
+                        $lambatCount = $dynamicProv->where('kategori_pertumbuhan', 'Pertumbuhan Lambat')->count();
+                        $dayaSaingTinggiCount = $dynamicProv->where('kategori_daya_saing', 'Daya Saing Baik')->count();
 
-                    // 1. Data Provinsi Terlebih Dahulu (Prioritas Utama di Atas)
-                    foreach ($provinsiList as $prov) {
-                        $dynamicProv = $this->ssaService->calculateSsaProvinsi($prov->provinsi_id, $tahun);
-                        if ($dynamicProv->isNotEmpty()) {
-                            $cepatCount = $dynamicProv->where('kategori_pertumbuhan', 'Pertumbuhan Cepat')->count();
-                            $lambatCount = $dynamicProv->where('kategori_pertumbuhan', 'Pertumbuhan Lambat')->count();
-                            $dayaSaingTinggiCount = $dynamicProv->where('kategori_daya_saing', 'Daya Saing Baik')->count();
-
-                            $summaryRows[] = [
-                                'id' => $idCounter++,
-                                'tingkat_wilayah' => 'Provinsi',
-                                'provinsi_id' => $prov->provinsi_id,
-                                'kabupaten_id' => null,
-                                'daerah_analisis' => strtoupper($prov->nama_provinsi),
-                                'daerah_pembanding' => 'PDB NASIONAL',
-                                'provinsi' => strtoupper($prov->nama_provinsi),
-                                'kabupaten' => '-',
-                                'tahun_awal' => $tahunAwal,
-                                'tahun_akhir' => (int)$tahun,
-                                'tahun' => "{$tahunAwal} - {$tahun}",
-                                'sektor_cepat_count' => $cepatCount,
-                                'sektor_lambat_count' => $lambatCount,
-                                'daya_saing_tinggi_count' => $dayaSaingTinggiCount,
-                                'status_dominan' => $cepatCount >= $lambatCount ? 'Dominan Pertumbuhan Cepat' : 'Dominan Pertumbuhan Lambat',
-                                'is_provinsi' => true,
-                            ];
-                        }
-                    }
-
-                    // 2. Data Kabupaten/Kota di Bawahnya
-                    foreach ($authorizedKabupatens as $kab) {
-                        $dynamicKab = $this->ssaService->calculateSsa($kab->kab_id, $tahun);
-                        if ($dynamicKab->isNotEmpty()) {
-                            $cepatCount = $dynamicKab->where('kategori_pertumbuhan', 'Pertumbuhan Cepat')->count();
-                            $lambatCount = $dynamicKab->where('kategori_pertumbuhan', 'Pertumbuhan Lambat')->count();
-                            $dayaSaingTinggiCount = $dynamicKab->where('kategori_daya_saing', 'Daya Saing Baik')->count();
-
-                            $provName = $kab->provinsi->nama_provinsi ?? 'SUMATERA UTARA';
-
-                            $summaryRows[] = [
-                                'id' => $idCounter++,
-                                'tingkat_wilayah' => 'Kabupaten/Kota',
-                                'provinsi_id' => $kab->provinsi_id,
-                                'kabupaten_id' => $kab->kab_id,
-                                'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                                'daerah_pembanding' => 'PDRB ' . strtoupper($provName),
-                                'provinsi' => strtoupper($provName),
-                                'kabupaten' => strtoupper($kab->nama_kabupaten),
-                                'tahun_awal' => $tahunAwal,
-                                'tahun_akhir' => (int)$tahun,
-                                'tahun' => "{$tahunAwal} - {$tahun}",
-                                'sektor_cepat_count' => $cepatCount,
-                                'sektor_lambat_count' => $lambatCount,
-                                'daya_saing_tinggi_count' => $dayaSaingTinggiCount,
-                                'status_dominan' => $cepatCount >= $lambatCount ? 'Dominan Pertumbuhan Cepat' : 'Dominan Pertumbuhan Lambat',
-                                'is_provinsi' => false,
-                            ];
-                        }
+                        $summaryRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Provinsi',
+                            'provinsi_id' => $prov->provinsi_id,
+                            'kabupaten_id' => null,
+                            'daerah_analisis' => strtoupper($prov->nama_provinsi),
+                            'daerah_pembanding' => 'PDB NASIONAL',
+                            'provinsi' => strtoupper($prov->nama_provinsi),
+                            'kabupaten' => '-',
+                            'tahun_awal' => $tahunAwal,
+                            'tahun_akhir' => (int)$tahun,
+                            'tahun' => "{$tahunAwal} - {$tahun}",
+                            'sektor_cepat_count' => $cepatCount,
+                            'sektor_lambat_count' => $lambatCount,
+                            'daya_saing_tinggi_count' => $dayaSaingTinggiCount,
+                            'status_dominan' => $cepatCount >= $lambatCount ? 'Dominan Pertumbuhan Cepat' : 'Dominan Pertumbuhan Lambat',
+                            'is_provinsi' => true,
+                        ];
                     }
                 }
 
-                return collect($summaryRows);
-            });
-        }
+                // 2. Data Kabupaten/Kota di Bawahnya
+                foreach ($authorizedKabupatens as $kab) {
+                    $dynamicKab = $this->ssaService->calculateSsa($kab->kab_id, (int)$tahun);
+                    if ($dynamicKab->isNotEmpty()) {
+                        $cepatCount = $dynamicKab->where('kategori_pertumbuhan', 'Pertumbuhan Cepat')->count();
+                        $lambatCount = $dynamicKab->where('kategori_pertumbuhan', 'Pertumbuhan Lambat')->count();
+                        $dayaSaingTinggiCount = $dynamicKab->where('kategori_daya_saing', 'Daya Saing Baik')->count();
+
+                        $provName = $kab->provinsi->nama_provinsi ?? 'SUMATERA UTARA';
+
+                        $summaryRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Kabupaten/Kota',
+                            'provinsi_id' => $kab->provinsi_id,
+                            'kabupaten_id' => $kab->kab_id,
+                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                            'daerah_pembanding' => 'PDRB ' . strtoupper($provName),
+                            'provinsi' => strtoupper($provName),
+                            'kabupaten' => strtoupper($kab->nama_kabupaten),
+                            'tahun_awal' => $tahunAwal,
+                            'tahun_akhir' => (int)$tahun,
+                            'tahun' => "{$tahunAwal} - {$tahun}",
+                            'sektor_cepat_count' => $cepatCount,
+                            'sektor_lambat_count' => $lambatCount,
+                            'daya_saing_tinggi_count' => $dayaSaingTinggiCount,
+                            'status_dominan' => $cepatCount >= $lambatCount ? 'Dominan Pertumbuhan Cepat' : 'Dominan Pertumbuhan Lambat',
+                            'is_provinsi' => false,
+                        ];
+                    }
+                }
+            }
+
+            return collect($summaryRows);
+        });
 
         // Apply Filters (Provinsi, Kabupaten, Tahun, Search)
         if ($request->filled('provinsi_id')) {
