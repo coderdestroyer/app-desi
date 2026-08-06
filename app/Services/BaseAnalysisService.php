@@ -13,9 +13,65 @@ class BaseAnalysisService
     use DeterminesQuadrants;
 
     protected static array $provinsiIdCache = [];
+    protected static array $totalKabupatenCache = [];
     protected static array $totalProvinsiCache = [];
     protected static array $totalNasionalCache = [];
+    protected static array $pdrbKabupatenCache = [];
+    protected static array $pdrbKabupatenBySektorCache = [];
+    protected static array $pdrbProvinsiCache = [];
     protected static array $pdrbProvinsiByTahunCache = [];
+    protected static array $pdbNasionalByTahunCache = [];
+    protected static bool $isPreloaded = false;
+
+    /**
+     * Preload all PDRB & PDB data for bulk calculations in just 3 SQL queries.
+     */
+    public function preloadPdrbData(array $years = []): void
+    {
+        // 1. Preload PdrbKabupaten totals & rows
+        $kabQuery = PdrbKabupaten::with('sektor');
+        if (!empty($years)) {
+            $kabQuery->whereIn('tahun', $years);
+        }
+        $allKab = $kabQuery->get();
+
+        foreach ($allKab->groupBy(fn($item) => $item->kabupaten_id . '_' . $item->tahun) as $key => $items) {
+            self::$pdrbKabupatenCache[$key] = $items;
+            self::$totalKabupatenCache[$key] = (float) $items->sum('nilai_pdrb');
+            foreach ($items as $item) {
+                self::$pdrbKabupatenBySektorCache[$item->kabupaten_id . '_' . $item->sektor_id . '_' . $item->tahun] = $item;
+            }
+        }
+
+        // 2. Preload PdrbSumut (Provinsi) totals & rows
+        $provQuery = PdrbSumut::with('sektor');
+        if (!empty($years)) {
+            $provQuery->whereIn('tahun', $years);
+        }
+        $allProv = $provQuery->get();
+
+        foreach ($allProv->groupBy(fn($item) => $item->provinsi_id . '_' . $item->tahun) as $key => $items) {
+            self::$pdrbProvinsiByTahunCache[$key] = $items;
+            self::$totalProvinsiCache[$key] = (float) $items->sum('nilai_pdrb');
+            foreach ($items as $item) {
+                self::$pdrbProvinsiCache[$item->provinsi_id . '_' . $item->sektor_id . '_' . $item->tahun] = $item;
+            }
+        }
+
+        // 3. Preload PdbNasional totals & rows
+        $nasQuery = PdbNasional::with('sektor');
+        if (!empty($years)) {
+            $nasQuery->whereIn('tahun', $years);
+        }
+        $allNas = $nasQuery->get();
+
+        foreach ($allNas->groupBy('tahun') as $thn => $items) {
+            self::$pdbNasionalByTahunCache[$thn] = $items;
+            self::$totalNasionalCache[$thn] = (float) $items->sum('nilai');
+        }
+
+        self::$isPreloaded = true;
+    }
 
     /**
      * Ambil provinsi dari kabupaten
@@ -34,9 +90,14 @@ class BaseAnalysisService
      */
     protected function getTotalKabupaten(int $kabId, int $tahun): float
     {
-        return (float) PdrbKabupaten::where('kabupaten_id', $kabId)
-            ->where('tahun', $tahun)
-            ->sum('nilai_pdrb');
+        $key = $kabId . '_' . $tahun;
+        if (! isset(self::$totalKabupatenCache[$key])) {
+            self::$totalKabupatenCache[$key] = (float) PdrbKabupaten::where('kabupaten_id', $kabId)
+                ->where('tahun', $tahun)
+                ->sum('nilai_pdrb');
+        }
+
+        return self::$totalKabupatenCache[$key];
     }
 
     /**
@@ -71,10 +132,15 @@ class BaseAnalysisService
      */
     protected function getPdrbKabupaten(int $kabId, int $tahun)
     {
-        return PdrbKabupaten::with('sektor')
-            ->where('kabupaten_id', $kabId)
-            ->where('tahun', $tahun)
-            ->get();
+        $key = $kabId . '_' . $tahun;
+        if (! isset(self::$pdrbKabupatenCache[$key])) {
+            self::$pdrbKabupatenCache[$key] = PdrbKabupaten::with('sektor')
+                ->where('kabupaten_id', $kabId)
+                ->where('tahun', $tahun)
+                ->get();
+        }
+
+        return self::$pdrbKabupatenCache[$key];
     }
 
     /**
@@ -82,10 +148,15 @@ class BaseAnalysisService
      */
     protected function getPdrbProvinsi(int $provinsiId, int $sektorId, int $tahun)
     {
-        return PdrbSumut::where('provinsi_id', $provinsiId)
-            ->where('sektor_id', $sektorId)
-            ->where('tahun', $tahun)
-            ->first();
+        $key = $provinsiId . '_' . $sektorId . '_' . $tahun;
+        if (! isset(self::$pdrbProvinsiCache[$key])) {
+            self::$pdrbProvinsiCache[$key] = PdrbSumut::where('provinsi_id', $provinsiId)
+                ->where('sektor_id', $sektorId)
+                ->where('tahun', $tahun)
+                ->first();
+        }
+
+        return self::$pdrbProvinsiCache[$key];
     }
 
     /**
@@ -93,10 +164,15 @@ class BaseAnalysisService
      */
     protected function getPdrbKabupatenBySektor(int $kabId, int $sektorId, int $tahun)
     {
-        return PdrbKabupaten::where('kabupaten_id', $kabId)
-            ->where('sektor_id', $sektorId)
-            ->where('tahun', $tahun)
-            ->first();
+        $key = $kabId . '_' . $sektorId . '_' . $tahun;
+        if (! isset(self::$pdrbKabupatenBySektorCache[$key])) {
+            self::$pdrbKabupatenBySektorCache[$key] = PdrbKabupaten::where('kabupaten_id', $kabId)
+                ->where('sektor_id', $sektorId)
+                ->where('tahun', $tahun)
+                ->first();
+        }
+
+        return self::$pdrbKabupatenBySektorCache[$key];
     }
 
     /**
@@ -135,17 +211,18 @@ class BaseAnalysisService
 
     protected function getPdrbKabupatenByTahun(int $kabId, int $tahun)
     {
-        return PdrbKabupaten::with('sektor')
-            ->where('kabupaten_id', $kabId)
-            ->where('tahun', $tahun)
-            ->get();
+        return $this->getPdrbKabupaten($kabId, $tahun);
     }
 
     protected function getPdbNasionalByTahun(int $tahun)
     {
-        return PdbNasional::with('sektor')
-            ->where('tahun', $tahun)
-            ->get();
+        if (! isset(self::$pdbNasionalByTahunCache[$tahun])) {
+            self::$pdbNasionalByTahunCache[$tahun] = PdbNasional::with('sektor')
+                ->where('tahun', $tahun)
+                ->get();
+        }
+
+        return self::$pdbNasionalByTahunCache[$tahun];
     }
 
     protected function buildIndicatorRow(array &$rows, array $attributes, array $values): void

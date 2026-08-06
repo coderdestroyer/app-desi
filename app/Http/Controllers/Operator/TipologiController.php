@@ -34,132 +34,103 @@ class TipologiController extends Controller
         $authorizedKabupatens = $this->getAuthorizedKabupatens($user);
         $authorizedIds = $authorizedKabupatens->pluck('kab_id')->toArray();
 
-        $savedResults = AnalysisResult::where('type', 'tipologi_sektor')->orderBy('id', 'desc')->get();
+        $cacheKey = 'calc_tipologi_summary_multi_year_all_regions_v3';
 
-        if ($savedResults->isNotEmpty()) {
-            $mappedData = $savedResults->map(function ($item) {
-                $res = $item->results ?? [];
-                $isProv = ($res['tingkat_wilayah'] ?? '') === 'Provinsi';
-                $provName = strtoupper($res['provinsi'] ?? 'SUMATERA UTARA');
-                $pembanding = $isProv ? 'PDB NASIONAL' : 'PDRB ' . $provName;
-
-                return [
-                    'id' => $item->id,
-                    'tingkat_wilayah' => $res['tingkat_wilayah'] ?? 'Kabupaten/Kota',
-                    'daerah_analisis' => $res['daerah_analisis'] ?? '-',
-                    'daerah_pembanding' => $pembanding,
-                    'provinsi' => $res['provinsi'] ?? '-',
-                    'kabupaten' => $res['kabupaten'] ?? '-',
-                    'tahun' => (int)($res['tahun'] ?? 2024),
-                    'c1_count' => isset($res['tipologi']) && str_contains($res['tipologi'], 'Kuadran I') ? 1 : 0,
-                    'c2_count' => isset($res['tipologi']) && str_contains($res['tipologi'], 'Kuadran II') ? 1 : 0,
-                    'c3_count' => isset($res['tipologi']) && str_contains($res['tipologi'], 'Kuadran III') ? 1 : 0,
-                    'c4_count' => isset($res['tipologi']) && str_contains($res['tipologi'], 'Kuadran IV') ? 1 : 0,
-                    'status_dominan' => $res['tipologi'] ?? '-',
-                    'is_provinsi' => $isProv,
-                    'provinsi_id' => $res['provinsi_id'] ?? null,
-                    'kabupaten_id' => $res['kabupaten_id'] ?? null,
-                ];
-            });
-
-            $allYears = $mappedData->pluck('tahun')->filter()->unique()->values()->toArray();
-        } else {
-            $cacheKey = 'calc_tipologi_summary_multi_year_all_regions_v2';
-
-            $allYears = DB::table('pdrb_sumatera_kabupaten')
+        $allYears = Cache::remember('tipologi_available_years', 3600, function () {
+            $years = DB::table('pdrb_sumatera_kabupaten')
                 ->select('tahun')
                 ->distinct()
                 ->orderBy('tahun', 'desc')
                 ->pluck('tahun');
 
-            if ($allYears->isEmpty()) {
-                $allYears = collect([2024, 2023, 2022, 2021, 2020]);
+            return $years->isEmpty() ? collect([2024, 2023, 2022, 2021, 2020]) : $years;
+        });
+
+        $mappedData = Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $allYears) {
+            $this->tipologiSektorService->preloadPdrbData($allYears->toArray());
+
+            $provinsiList = Provinsi::whereNotNull('latitude')->orderBy('nama_provinsi')->get();
+            if ($provinsiList->isEmpty()) {
+                $provinsiList = Provinsi::orderBy('nama_provinsi')->get();
             }
 
-            $mappedData = Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $allYears) {
-                $provinsiList = Provinsi::whereNotNull('latitude')->orderBy('nama_provinsi')->get();
-                if ($provinsiList->isEmpty()) {
-                    $provinsiList = Provinsi::orderBy('nama_provinsi')->get();
-                }
+            $summaryRows = [];
+            $idCounter = 1;
 
-                $summaryRows = [];
-                $idCounter = 1;
+            foreach ($allYears as $tahun) {
+                // 1. Data Provinsi Terlebih Dahulu (Prioritas Utama di Atas)
+                foreach ($provinsiList as $prov) {
+                    $dynamicProv = $this->tipologiSektorService->calculateTipologiProvinsi($prov->provinsi_id, (int)$tahun);
+                    if ($dynamicProv->isNotEmpty()) {
+                        $c1 = $dynamicProv->where('kuadran', 'Kuadran I')->count();
+                        $c2 = $dynamicProv->where('kuadran', 'Kuadran II')->count();
+                        $c3 = $dynamicProv->where('kuadran', 'Kuadran III')->count();
+                        $c4 = $dynamicProv->where('kuadran', 'Kuadran IV')->count();
 
-                foreach ($allYears as $tahun) {
-                    // 1. Data Provinsi Terlebih Dahulu (Prioritas Utama di Atas)
-                    foreach ($provinsiList as $prov) {
-                        $dynamicProv = $this->tipologiSektorService->calculateTipologiProvinsi($prov->provinsi_id, $tahun);
-                        if ($dynamicProv->isNotEmpty()) {
-                            $c1 = $dynamicProv->where('kuadran', 'Kuadran I')->count();
-                            $c2 = $dynamicProv->where('kuadran', 'Kuadran II')->count();
-                            $c3 = $dynamicProv->where('kuadran', 'Kuadran III')->count();
-                            $c4 = $dynamicProv->where('kuadran', 'Kuadran IV')->count();
+                        $maxCount = max($c1, $c2, $c3, $c4);
+                        $dominantKuadran = $maxCount === $c1 ? 'Kuadran I (Maju & Tumbuh Cepat)'
+                            : ($maxCount === $c2 ? 'Kuadran II (Potensial / Berkembang)'
+                            : ($maxCount === $c3 ? 'Kuadran III (Maju Tapi Tertekan)' : 'Kuadran IV (Relatif Tertinggal)'));
 
-                            $maxCount = max($c1, $c2, $c3, $c4);
-                            $dominantKuadran = $maxCount === $c1 ? 'Kuadran I (Maju & Tumbuh Cepat)'
-                                : ($maxCount === $c2 ? 'Kuadran II (Potensial / Berkembang)'
-                                : ($maxCount === $c3 ? 'Kuadran III (Maju Tapi Tertekan)' : 'Kuadran IV (Relatif Tertinggal)'));
-
-                            $summaryRows[] = [
-                                'id' => $idCounter++,
-                                'tingkat_wilayah' => 'Provinsi',
-                                'provinsi_id' => $prov->provinsi_id,
-                                'kabupaten_id' => null,
-                                'daerah_analisis' => strtoupper($prov->nama_provinsi),
-                                'daerah_pembanding' => 'PDB NASIONAL',
-                                'provinsi' => strtoupper($prov->nama_provinsi),
-                                'kabupaten' => '-',
-                                'tahun' => (int)$tahun,
-                                'c1_count' => $c1,
-                                'c2_count' => $c2,
-                                'c3_count' => $c3,
-                                'c4_count' => $c4,
-                                'status_dominan' => $dominantKuadran,
-                                'is_provinsi' => true,
-                            ];
-                        }
-                    }
-
-                    // 2. Data Kabupaten/Kota di Bawahnya
-                    foreach ($authorizedKabupatens as $kab) {
-                        $dynamicKab = $this->tipologiSektorService->calculateTipologi($kab->kab_id, $tahun);
-                        if ($dynamicKab->isNotEmpty()) {
-                            $c1 = $dynamicKab->where('kuadran', 'Kuadran I')->count();
-                            $c2 = $dynamicKab->where('kuadran', 'Kuadran II')->count();
-                            $c3 = $dynamicKab->where('kuadran', 'Kuadran III')->count();
-                            $c4 = $dynamicKab->where('kuadran', 'Kuadran IV')->count();
-
-                            $maxCount = max($c1, $c2, $c3, $c4);
-                            $dominantKuadran = $maxCount === $c1 ? 'Kuadran I (Maju & Tumbuh Cepat)'
-                                : ($maxCount === $c2 ? 'Kuadran II (Potensial / Berkembang)'
-                                : ($maxCount === $c3 ? 'Kuadran III (Maju Tapi Tertekan)' : 'Kuadran IV (Relatif Tertinggal)'));
-
-                            $provName = $kab->provinsi->nama_provinsi ?? 'SUMATERA UTARA';
-
-                            $summaryRows[] = [
-                                'id' => $idCounter++,
-                                'tingkat_wilayah' => 'Kabupaten/Kota',
-                                'provinsi_id' => $kab->provinsi_id,
-                                'kabupaten_id' => $kab->kab_id,
-                                'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                                'daerah_pembanding' => 'PDRB ' . strtoupper($provName),
-                                'provinsi' => strtoupper($provName),
-                                'kabupaten' => strtoupper($kab->nama_kabupaten),
-                                'tahun' => (int)$tahun,
-                                'c1_count' => $c1,
-                                'c2_count' => $c2,
-                                'c3_count' => $c3,
-                                'c4_count' => $c4,
-                                'status_dominan' => $dominantKuadran,
-                                'is_provinsi' => false,
-                            ];
-                        }
+                        $summaryRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Provinsi',
+                            'provinsi_id' => $prov->provinsi_id,
+                            'kabupaten_id' => null,
+                            'daerah_analisis' => strtoupper($prov->nama_provinsi),
+                            'daerah_pembanding' => 'PDB NASIONAL',
+                            'provinsi' => strtoupper($prov->nama_provinsi),
+                            'kabupaten' => '-',
+                            'tahun' => (int)$tahun,
+                            'c1_count' => $c1,
+                            'c2_count' => $c2,
+                            'c3_count' => $c3,
+                            'c4_count' => $c4,
+                            'status_dominan' => $dominantKuadran,
+                            'is_provinsi' => true,
+                        ];
                     }
                 }
 
-                return collect($summaryRows);
-            });
-        }
+                // 2. Data Kabupaten/Kota di Bawahnya
+                foreach ($authorizedKabupatens as $kab) {
+                    $dynamicKab = $this->tipologiSektorService->calculateTipologi($kab->kab_id, (int)$tahun);
+                    if ($dynamicKab->isNotEmpty()) {
+                        $c1 = $dynamicKab->where('kuadran', 'Kuadran I')->count();
+                        $c2 = $dynamicKab->where('kuadran', 'Kuadran II')->count();
+                        $c3 = $dynamicKab->where('kuadran', 'Kuadran III')->count();
+                        $c4 = $dynamicKab->where('kuadran', 'Kuadran IV')->count();
+
+                        $maxCount = max($c1, $c2, $c3, $c4);
+                        $dominantKuadran = $maxCount === $c1 ? 'Kuadran I (Maju & Tumbuh Cepat)'
+                            : ($maxCount === $c2 ? 'Kuadran II (Potensial / Berkembang)'
+                            : ($maxCount === $c3 ? 'Kuadran III (Maju Tapi Tertekan)' : 'Kuadran IV (Relatif Tertinggal)'));
+
+                        $provName = $kab->provinsi->nama_provinsi ?? 'SUMATERA UTARA';
+
+                        $summaryRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Kabupaten/Kota',
+                            'provinsi_id' => $kab->provinsi_id,
+                            'kabupaten_id' => $kab->kab_id,
+                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                            'daerah_pembanding' => 'PDRB ' . strtoupper($provName),
+                            'provinsi' => strtoupper($provName),
+                            'kabupaten' => strtoupper($kab->nama_kabupaten),
+                            'tahun' => (int)$tahun,
+                            'c1_count' => $c1,
+                            'c2_count' => $c2,
+                            'c3_count' => $c3,
+                            'c4_count' => $c4,
+                            'status_dominan' => $dominantKuadran,
+                            'is_provinsi' => false,
+                        ];
+                    }
+                }
+            }
+
+            return collect($summaryRows);
+        });
 
         // Apply Filters (Provinsi, Kabupaten, Tahun, Search)
         if ($request->filled('provinsi_id')) {

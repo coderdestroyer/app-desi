@@ -34,118 +34,91 @@ class LqController extends Controller
         $authorizedKabupatens = $this->getAuthorizedKabupatens($user);
         $authorizedIds = $authorizedKabupatens->pluck('kab_id')->toArray();
 
-        $savedResults = AnalysisResult::where('type', 'lq')->orderBy('id', 'desc')->get();
+        $cacheKey = 'calc_lq_summary_multi_year_all_regions_v3';
 
-        if ($savedResults->isNotEmpty()) {
-            $mappedData = $savedResults->map(function ($item) {
-                $res = $item->results ?? [];
-                $isProv = ($res['tingkat_wilayah'] ?? '') === 'Provinsi';
-                $provName = strtoupper($res['provinsi'] ?? 'SUMATERA UTARA');
-                $pembanding = $isProv ? 'PDB NASIONAL' : 'PDRB ' . $provName;
-
-                return [
-                    'id' => $item->id,
-                    'tingkat_wilayah' => $res['tingkat_wilayah'] ?? 'Kabupaten/Kota',
-                    'daerah_analisis' => $res['daerah_analisis'] ?? '-',
-                    'daerah_pembanding' => $pembanding,
-                    'provinsi' => $res['provinsi'] ?? '-',
-                    'kabupaten' => $res['kabupaten'] ?? '-',
-                    'tahun' => $res['tahun'] ?? '-',
-                    'sektor_basis_count' => isset($res['kategori']) && $res['kategori'] === 'BASIS' ? 1 : 0,
-                    'sektor_non_basis_count' => isset($res['kategori']) && $res['kategori'] === 'NON-BASIS' ? 1 : 0,
-                    'status_dominan' => $res['kategori'] ?? '-',
-                    'is_provinsi' => $isProv,
-                    'provinsi_id' => $res['provinsi_id'] ?? null,
-                    'kabupaten_id' => $res['kabupaten_id'] ?? null,
-                ];
-            });
-
-            $allYears = $mappedData->pluck('tahun')->filter()->unique()->values()->toArray();
-        } else {
-            $cacheKey = 'calc_lq_summary_multi_year_all_regions_v2';
-
-            $allYears = DB::table('pdrb_sumatera_kabupaten')
+        $allYears = Cache::remember('lq_available_years', 3600, function () {
+            $years = DB::table('pdrb_sumatera_kabupaten')
                 ->select('tahun')
                 ->distinct()
                 ->orderBy('tahun', 'desc')
                 ->pluck('tahun');
 
-            if ($allYears->isEmpty()) {
-                $allYears = collect([2024, 2023, 2022, 2021, 2020]);
+            return $years->isEmpty() ? collect([2024, 2023, 2022, 2021, 2020]) : $years;
+        });
+
+        $mappedData = Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $allYears) {
+            $this->lqService->preloadPdrbData($allYears->toArray());
+
+            $provinsiList = Provinsi::whereNotNull('latitude')->orderBy('nama_provinsi')->get();
+            if ($provinsiList->isEmpty()) {
+                $provinsiList = Provinsi::orderBy('nama_provinsi')->get();
             }
 
-            $mappedData = Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $allYears) {
-                $provinsiList = Provinsi::whereNotNull('latitude')->orderBy('nama_provinsi')->get();
-                if ($provinsiList->isEmpty()) {
-                    $provinsiList = Provinsi::orderBy('nama_provinsi')->get();
-                }
+            $summaryRows = [];
+            $idCounter = 1;
 
-                $summaryRows = [];
-                $idCounter = 1;
+            foreach ($allYears as $tahun) {
+                // 1. Data Provinsi Terlebih Dahulu (Prioritas Utama di Atas)
+                foreach ($provinsiList as $prov) {
+                    $dynamicProv = $this->lqService->calculateLqProvinsi($prov->provinsi_id, (int)$tahun);
+                    if ($dynamicProv->isNotEmpty()) {
+                        $basisCount = $dynamicProv->where('kategori', 'Basis')->count();
+                        $nonBasisCount = $dynamicProv->where('kategori', 'Non Basis')->count();
+                        $statusDominan = $basisCount >= $nonBasisCount 
+                            ? "Dominan Sektor Basis ({$basisCount} Sektor)" 
+                            : "Dominan Sektor Non-Basis ({$nonBasisCount} Sektor)";
 
-                foreach ($allYears as $tahun) {
-                    // 1. Data Provinsi Terlebih Dahulu (Prioritas Utama di Atas)
-                    foreach ($provinsiList as $prov) {
-                        $dynamicProv = $this->lqService->calculateLqProvinsi($prov->provinsi_id, $tahun);
-                        if ($dynamicProv->isNotEmpty()) {
-                            $basisCount = $dynamicProv->where('kategori', 'Basis')->count();
-                            $nonBasisCount = $dynamicProv->where('kategori', 'Non Basis')->count();
-                            $statusDominan = $basisCount >= $nonBasisCount 
-                                ? "Dominan Sektor Basis ({$basisCount} Sektor)" 
-                                : "Dominan Sektor Non-Basis ({$nonBasisCount} Sektor)";
-
-                            $summaryRows[] = [
-                                'id' => $idCounter++,
-                                'tingkat_wilayah' => 'Provinsi',
-                                'provinsi_id' => $prov->provinsi_id,
-                                'kabupaten_id' => null,
-                                'daerah_analisis' => strtoupper($prov->nama_provinsi),
-                                'daerah_pembanding' => 'PDB NASIONAL',
-                                'provinsi' => strtoupper($prov->nama_provinsi),
-                                'kabupaten' => '-',
-                                'tahun' => (int)$tahun,
-                                'sektor_basis_count' => $basisCount,
-                                'sektor_non_basis_count' => $nonBasisCount,
-                                'status_dominan' => $statusDominan,
-                                'is_provinsi' => true,
-                            ];
-                        }
-                    }
-
-                    // 2. Data Kabupaten/Kota di Bawahnya
-                    foreach ($authorizedKabupatens as $kab) {
-                        $dynamicKab = $this->lqService->calculateLq($kab->kab_id, $tahun);
-                        if ($dynamicKab->isNotEmpty()) {
-                            $basisCount = $dynamicKab->where('kategori', 'Basis')->count();
-                            $nonBasisCount = $dynamicKab->where('kategori', 'Non Basis')->count();
-                            $statusDominan = $basisCount >= $nonBasisCount 
-                                ? "Dominan Sektor Basis ({$basisCount} Sektor)" 
-                                : "Dominan Sektor Non-Basis ({$nonBasisCount} Sektor)";
-
-                            $provName = $kab->provinsi->nama_provinsi ?? 'SUMATERA UTARA';
-
-                            $summaryRows[] = [
-                                'id' => $idCounter++,
-                                'tingkat_wilayah' => 'Kabupaten/Kota',
-                                'provinsi_id' => $kab->provinsi_id,
-                                'kabupaten_id' => $kab->kab_id,
-                                'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                                'daerah_pembanding' => 'PDRB ' . strtoupper($provName),
-                                'provinsi' => strtoupper($provName),
-                                'kabupaten' => strtoupper($kab->nama_kabupaten),
-                                'tahun' => (int)$tahun,
-                                'sektor_basis_count' => $basisCount,
-                                'sektor_non_basis_count' => $nonBasisCount,
-                                'status_dominan' => $statusDominan,
-                                'is_provinsi' => false,
-                            ];
-                        }
+                        $summaryRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Provinsi',
+                            'provinsi_id' => $prov->provinsi_id,
+                            'kabupaten_id' => null,
+                            'daerah_analisis' => strtoupper($prov->nama_provinsi),
+                            'daerah_pembanding' => 'PDB NASIONAL',
+                            'provinsi' => strtoupper($prov->nama_provinsi),
+                            'kabupaten' => '-',
+                            'tahun' => (int)$tahun,
+                            'sektor_basis_count' => $basisCount,
+                            'sektor_non_basis_count' => $nonBasisCount,
+                            'status_dominan' => $statusDominan,
+                            'is_provinsi' => true,
+                        ];
                     }
                 }
 
-                return collect($summaryRows);
-            });
-        }
+                // 2. Data Kabupaten/Kota di Bawahnya
+                foreach ($authorizedKabupatens as $kab) {
+                    $dynamicKab = $this->lqService->calculateLq($kab->kab_id, (int)$tahun);
+                    if ($dynamicKab->isNotEmpty()) {
+                        $basisCount = $dynamicKab->where('kategori', 'Basis')->count();
+                        $nonBasisCount = $dynamicKab->where('kategori', 'Non Basis')->count();
+                        $statusDominan = $basisCount >= $nonBasisCount 
+                            ? "Dominan Sektor Basis ({$basisCount} Sektor)" 
+                            : "Dominan Sektor Non-Basis ({$nonBasisCount} Sektor)";
+
+                        $provName = $kab->provinsi->nama_provinsi ?? 'SUMATERA UTARA';
+
+                        $summaryRows[] = [
+                            'id' => $idCounter++,
+                            'tingkat_wilayah' => 'Kabupaten/Kota',
+                            'provinsi_id' => $kab->provinsi_id,
+                            'kabupaten_id' => $kab->kab_id,
+                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                            'daerah_pembanding' => 'PDRB ' . strtoupper($provName),
+                            'provinsi' => strtoupper($provName),
+                            'kabupaten' => strtoupper($kab->nama_kabupaten),
+                            'tahun' => (int)$tahun,
+                            'sektor_basis_count' => $basisCount,
+                            'sektor_non_basis_count' => $nonBasisCount,
+                            'status_dominan' => $statusDominan,
+                            'is_provinsi' => false,
+                        ];
+                    }
+                }
+            }
+
+            return collect($summaryRows);
+        });
 
         // Apply Filters (Provinsi, Kabupaten, Tahun, Search)
         if ($request->filled('provinsi_id')) {
