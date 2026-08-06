@@ -162,68 +162,8 @@
             </table>
         </div>
 
-        @if ($pdbGroups->total() > 0)
-            <footer class="flex flex-col gap-4 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <p class="m-0 text-xs text-slate-500">
-                    Menampilkan <strong class="text-slate-700">{{ $pdbGroups->firstItem() }}</strong>–<strong class="text-slate-700">{{ $pdbGroups->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($pdbGroups->total(), 0, ',', '.') }}</strong> data
-                </p>
-
-                @if ($pdbGroups->hasPages())
-                    <div class="flex flex-wrap items-center gap-2">
-                        @if ($pdbGroups->onFirstPage())
-                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                <i class="fa-solid fa-chevron-left text-xs"></i>
-                            </span>
-                        @else
-                            <a href="{{ $pdbGroups->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                <i class="fa-solid fa-chevron-left text-xs"></i>
-                            </a>
-                        @endif
-
-                        @php
-                            $currentPage = $pdbGroups->currentPage();
-                            $lastPage = $pdbGroups->lastPage();
-                            $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
-                                ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
-                                ->unique()
-                                ->sort()
-                                ->values();
-                            $previousPageNumber = null;
-                        @endphp
-
-                        @foreach ($pages as $page)
-                            @if ($previousPageNumber && $page - $previousPageNumber > 1)
-                                <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">…</span>
-                            @endif
-
-                            @if ($page === $currentPage)
-                                <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-emerald-600 bg-emerald-600 px-3 text-xs font-bold text-white">
-                                    {{ $page }}
-                                </span>
-                            @else
-                                <a href="{{ $pdbGroups->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
-                                    {{ $page }}
-                                </a>
-                            @endif
-
-                            @php
-                                $previousPageNumber = $page;
-                            @endphp
-                        @endforeach
-
-                        @if ($pdbGroups->hasMorePages())
-                            <a href="{{ $pdbGroups->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                <i class="fa-solid fa-chevron-right text-xs"></i>
-                            </a>
-                        @else
-                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                <i class="fa-solid fa-chevron-right text-xs"></i>
-                            </span>
-                        @endif
-                    </div>
-                @endif
-            </footer>
-        @endif
+        <!-- Pagination Component -->
+        <x-pagination :paginator="$pdbGroups" />
     </div>
 
     <!-- MODAL INISIASI PDB BARU -->
@@ -254,7 +194,7 @@
                         <label class="block font-semibold text-slate-700 mb-1">
                             Tahun PDB Nasional <span class="text-rose-500">*</span>
                         </label>
-                        <input type="number" name="tahun" required value="{{ date('Y') - 1 }}" min="2000" max="2100" class="w-full h-[42px] rounded-xl border border-slate-200 focus:border-emerald-600 focus:ring-emerald-600 text-sm font-mono px-3.5">
+                        <input type="number" name="tahun" required value="{{ date('Y') - 1 }}" min="2000" max="2100" class="w-full h-[42px] rounded-xl border border-slate-200 focus:border-emerald-600 focus:ring-emerald-600 text-sm font-medium text-slate-700 px-3.5">
                         <p class="text-[11px] text-slate-400 mt-1">
                             Sistem akan mengecek apakah PDB Nasional Tahun ini sudah pernah didaftarkan.
                         </p>

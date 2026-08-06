@@ -20,7 +20,7 @@
     @endif
 
     <!-- Header & Mode Pill Switcher Card (Exact 55:45 Ratio & Multi-Line Flexible Buttons) -->
-    <div class="bg-white rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+    <div class="bg-[#FFFFFF] rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <!-- Title & Subtitle Section (55% Width) -->
         <div class="w-full lg:w-[55%]">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold mb-2 border border-[#CFE3D5]">
@@ -53,88 +53,101 @@
         </div>
     </div>
 
-    <!-- TAB 1: DATA REAL PDRB (Kalkulasi Otomatis) -->
+    <!-- TAB 1: DATA REAL PDRB (Ringkasan Multi-Tahun Per Daerah) -->
     <div x-show="activeTab === 'real'" x-transition class="space-y-6">
-        <!-- Info Banner -->
-        <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex items-start gap-3.5 text-slate-700 text-xs md:text-sm">
-            <div class="w-8 h-8 rounded-xl bg-[#145239] text-white flex items-center justify-center shrink-0 font-bold mt-0.5">
-                <i class="fa-solid fa-database text-[#FFD54F]"></i>
-            </div>
-            <div>
-                <span class="font-bold text-[#145239] block text-sm">Mode Data Real PDRB (Kalkulasi Otomatis)</span>
-                Menampilkan hasil kalkulasi Tipologi Klassen secara otomatis yang ditarik langsung dari basis data PDRB resmi wilayah otorisasi Anda.
-            </div>
-        </div>
+
+        <!-- Component Filter Bar (Provinsi, Kabupaten, Tahun, Search) -->
+        <x-analisa-filter-bar 
+            :action="route('operator.klassen.index')"
+            :provinsis="$provinsis ?? []"
+            :kabupatens="$kabupatens ?? []"
+            :availableYears="$availableYears ?? []"
+            searchPlaceholder="Cari Wilayah atau Tahun..."
+        />
 
         <!-- Table Container -->
         <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
             <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800">Hasil Analisis Klassen Data Real</h2>
-                    <p class="text-slate-500 text-xs mt-0.5">Klasifikasi Pertumbuhan & Kontribusi 17 Sektor PDRB Wilayah</p>
+                    <h2 class="text-xl font-bold text-slate-800">Ringkasan Tipologi Klassen Per Wilayah & Periode</h2>
+                    <p class="text-slate-500 text-xs mt-0.5">Prioritas Wilayah Provinsi Ditampilkan Teratas untuk Setiap Tahun</p>
                 </div>
-                <form action="{{ route('operator.klassen.index') }}" method="GET" class="relative w-full md:w-80">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Daerah, Sektor, atau Tahun..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-[#145239] focus:ring-1 focus:ring-[#145239] outline-none transition-all">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </div>
-                </form>
             </div>
 
             <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
-                <table id="klassenTable" class="w-full text-left border-collapse min-w-[1100px]">
+                <table id="klassenTable" class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
                         <tr>
                             <th class="px-4 py-3.5 w-12 text-center">No</th>
-                            <th class="px-4 py-3.5 min-w-[200px]">SEKTOR</th>
-                            <th class="px-4 py-3.5 whitespace-nowrap">KAB/KOTA</th>
-                            <th class="px-4 py-3.5 whitespace-nowrap">PROVINSI</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">LAJU PERTUMBUHAN SEKTOR (%)</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">LAJU PERTUMBUHAN ACUAN (%)</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KONTRIBUSI SEKTOR (%)</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KONTRIBUSI ACUAN (%)</th>
-                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KUADRAN</th>
-                            <th class="px-4 py-3.5 min-w-[200px]">KLASIFIKASI</th>
-                            <th class="px-4 py-3.5 whitespace-nowrap">RIWAYAT</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">Tingkat Wilayah</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">DAERAH ANALISIS</th>
+                            <th class="px-4 py-3.5 whitespace-nowrap">PEMBANDING</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">PERIODE TAHUN</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KUADRAN I</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KUADRAN II</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KUADRAN III</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KUADRAN IV</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">KLASIFIKASI DOMINAN</th>
+                            <th class="px-4 py-3.5 text-center whitespace-nowrap">AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
                         @forelse($klassenData as $index => $data)
-                            <tr class="hover:bg-emerald-50/30 transition-colors">
+                            <tr class="hover:bg-emerald-50/30 transition-colors {{ !empty($data['is_provinsi']) ? 'bg-emerald-50/40 font-semibold' : '' }}">
                                 <td class="px-4 py-3.5 text-center font-mono font-semibold text-slate-500">{{ ($klassenData->currentPage() - 1) * $klassenData->perPage() + $loop->iteration }}</td>
-                                <td class="px-4 py-3.5 font-bold text-slate-800">{{ $data['sektor'] }}</td>
-                                <td class="px-4 py-3.5 font-bold text-slate-800">{{ $data['kabupaten'] ?? $data['daerah_analisis'] ?? '-' }}</td>
-                                <td class="px-4 py-3.5 text-slate-600">{{ $data['provinsi'] ?? $data['daerah_pembanding'] ?? '-' }}</td>
-                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ number_format($data['ri'] ?? 0, 2, ',', '.') }}%</td>
-                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ number_format($data['r'] ?? 0, 2, ',', '.') }}%</td>
-                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ number_format($data['yi'] ?? 0, 2, ',', '.') }}%</td>
-                                <td class="px-4 py-3.5 text-center font-mono text-xs">{{ number_format($data['y'] ?? 0, 2, ',', '.') }}%</td>
-                                <td class="px-4 py-3.5 text-center whitespace-nowrap font-bold">
-                                    @if($data['kuadran'] === 'Kuadran I')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                            Kuadran I
-                                        </span>
-                                    @elseif($data['kuadran'] === 'Kuadran II')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                            Kuadran II
-                                        </span>
-                                    @elseif($data['kuadran'] === 'Kuadran III')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-200">
-                                            Kuadran III
+                                <td class="px-4 py-3.5">
+                                    @if(!empty($data['is_provinsi']) || $data['tingkat_wilayah'] === 'Provinsi')
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-[#145239] text-white border border-[#145239]">
+                                            <i class="fa-solid fa-building-columns text-[10px] text-[#FFD54F]"></i> Provinsi
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                                            Kuadran IV
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                            Kabupaten/Kota
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3.5 text-slate-700 font-medium">{{ $data['klasifikasi'] }}</td>
-                                <td class="px-4 py-3.5 text-xs text-slate-500 whitespace-nowrap">{{ $data['riwayat'] ?? '-' }}</td>
+                                <td class="px-4 py-3.5 font-bold text-slate-800">{{ $data['daerah_analisis'] }}</td>
+                                <td class="px-4 py-3.5 text-slate-600 font-medium">{{ $data['daerah_pembanding'] }}</td>
+                                <td class="px-4 py-3.5 text-center font-mono font-bold">{{ $data['tahun'] }}</td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        {{ $data['c1_count'] ?? 0 }} Sektor
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                        {{ $data['c2_count'] ?? 0 }} Sektor
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-200">
+                                        {{ $data['c3_count'] ?? 0 }} Sektor
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                        {{ $data['c4_count'] ?? 0 }} Sektor
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center font-bold text-xs text-slate-700">
+                                    {{ $data['status_dominan'] }}
+                                </td>
+                                <td class="px-4 py-3.5 text-center">
+                                    <a href="{{ route('operator.klassen.show', [
+                                        'tingkat_wilayah' => $data['tingkat_wilayah'],
+                                        'tahun' => $data['tahun_akhir'] ?? 2024,
+                                        'kabupaten_id' => $data['kabupaten_id'] ?? null,
+                                        'provinsi_id' => $data['provinsi_id'] ?? null
+                                    ]) }}" class="inline-flex items-center gap-1.5 bg-[#145239] hover:bg-[#0F8A5F] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs">
+                                        <i class="fa-solid fa-list-check text-[#FFD54F]"></i>
+                                        <span>Lihat Detail</span>
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="11" class="px-4 py-8 text-center text-slate-500 font-medium">
-                                    Belum ada data kalkulasi Tipologi Klassen.
+                                    Belum ada data ringkasan Tipologi Klassen yang sesuai dengan filter.
                                 </td>
                             </tr>
                         @endforelse
@@ -142,69 +155,8 @@
                 </table>
             </div>
 
-            <!-- Pagination Section -->
-            @if ($klassenData->total() > 0)
-                <footer class="mt-5 flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="m-0 text-xs text-slate-500">
-                        Menampilkan <strong class="text-slate-700">{{ $klassenData->firstItem() }}</strong>–<strong class="text-slate-700">{{ $klassenData->lastItem() }}</strong> dari <strong class="text-slate-700">{{ number_format($klassenData->total(), 0, ',', '.') }}</strong> data
-                    </p>
-
-                    @if ($klassenData->hasPages())
-                        <div class="flex flex-wrap items-center gap-2">
-                            @if ($klassenData->onFirstPage())
-                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                                </span>
-                            @else
-                                <a href="{{ $klassenData->previousPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                                </a>
-                            @endif
-
-                            @php
-                                $currentPage = $klassenData->currentPage();
-                                $lastPage = $klassenData->lastPage();
-                                $pages = collect([1, 2, $currentPage - 1, $currentPage, $currentPage + 1, $lastPage - 1, $lastPage])
-                                    ->filter(fn ($page) => $page >= 1 && $page <= $lastPage)
-                                    ->unique()
-                                    ->sort()
-                                    ->values();
-                                $previousPageNumber = null;
-                            @endphp
-
-                            @foreach ($pages as $page)
-                                @if ($previousPageNumber && $page - $previousPageNumber > 1)
-                                    <span class="inline-flex h-9 min-w-9 items-center justify-center text-xs text-slate-400">…</span>
-                                @endif
-
-                                @if ($page === $currentPage)
-                                    <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-[#145239] bg-[#145239] px-3 text-xs font-bold text-white">
-                                        {{ $page }}
-                                    </span>
-                                @else
-                                    <a href="{{ $klassenData->url($page) }}" class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50">
-                                        {{ $page }}
-                                    </a>
-                                @endif
-
-                                @php
-                                    $previousPageNumber = $page;
-                                @endphp
-                            @endforeach
-
-                            @if ($klassenData->hasMorePages())
-                                <a href="{{ $klassenData->nextPageUrl() }}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50">
-                                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                                </a>
-                            @else
-                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-400">
-                                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                                </span>
-                            @endif
-                        </div>
-                    @endif
-                </footer>
-            @endif
+            <!-- Pagination Component -->
+            <x-pagination :paginator="$klassenData" />
         </div>
     </div>
 
@@ -446,8 +398,8 @@
             }
         }
         
-        var wb = XLSX.utils.table_to_book(clone, {sheet: "Analisis Klassen"});
-        XLSX.writeFile(wb, "Hasil_Analisis_Klassen.xlsx");
+        var wb = XLSX.utils.table_to_book(clone, {sheet: "Ringkasan Klassen"});
+        XLSX.writeFile(wb, "Hasil_Ringkasan_Analisis_Klassen.xlsx");
     }
 </script>
 @endsection

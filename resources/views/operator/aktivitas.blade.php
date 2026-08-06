@@ -115,10 +115,7 @@
         @endforelse
     </div>
     
-    @if($paginatedLogs->hasPages())
-        <div class="p-6 border-t border-slate-100 bg-slate-50/30">
-            {{ $paginatedLogs->links() }}
-        </div>
-    @endif
+    <!-- Pagination Component -->
+    <x-pagination :paginator="$paginatedLogs" />
 </div>
 @endsection
