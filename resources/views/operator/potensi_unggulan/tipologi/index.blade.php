@@ -57,7 +57,7 @@
     <div x-show="activeTab === 'real'" x-transition class="space-y-6">
 
         <!-- Component Filter Bar (Provinsi, Kabupaten, Tahun, Search) -->
-        <x-pdrb-filter-bar 
+        <x-analisa-filter-bar 
             :action="route('operator.tipologi.index')"
             :provinsis="$provinsis ?? []"
             :kabupatens="$kabupatens ?? []"
@@ -140,7 +140,7 @@
                                         'provinsi_id' => $data['provinsi_id'] ?? null
                                     ]) }}" class="inline-flex items-center gap-1.5 bg-[#145239] hover:bg-[#0F8A5F] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs">
                                         <i class="fa-solid fa-list-check text-[#FFD54F]"></i>
-                                        <span>Lihat Detail Sektor</span>
+                                        <span>Lihat Detail</span>
                                     </a>
                                 </td>
                             </tr>
