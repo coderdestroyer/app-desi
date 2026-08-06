@@ -3,7 +3,19 @@
 @section('title', 'Data PDRB Daerah')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6" x-data="{ isPdrbModalOpen: false }">
+<div class="max-w-7xl mx-auto space-y-6" x-data="{ 
+    isPdrbModalOpen: false,
+    isDeleteModalOpen: false,
+    deleteActionUrl: '',
+    deleteTargetName: '',
+    deleteTargetYear: '',
+    openDeleteModal(url, name, year) {
+        this.deleteActionUrl = url;
+        this.deleteTargetName = name;
+        this.deleteTargetYear = year;
+        this.isDeleteModalOpen = true;
+    }
+}">
 
     {{-- Flash Notifications --}}
     @if(session('success'))
@@ -50,10 +62,10 @@
                 <span>{{ ($tab ?? 'own') === 'own' ? 'Pengelolaan PDRB Scope Otorisasi' : 'Mode Lihat Data Makroekonomi' }}</span>
             </div>
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
-                {{ ($tab ?? 'own') === 'own' ? 'Kelola Data PDRB Kab/Kota (Scope)' : 'Lihat Data PDRB Daerah (Seluruh Sumatera)' }}
+                {{ ($tab ?? 'own') === 'own' ? 'Kelola Data PDRB Kab/Kota' : 'Lihat Data PDRB Seluruh Provinsi di Sumatera' }}
             </h1>
             <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
-                {{ ($tab ?? 'own') === 'own' ? 'Kelola data PDRB daerah otorisasi Anda. Setiap tahun & daerah dapat diisi dan diedit.' : 'Melihat rincian nilai 17 sektor PDRB Kabupaten/Kota dan Provinsi di Sumatera (Read-Only Mode).' }}
+                {{ ($tab ?? 'own') === 'own' ? 'Kelola data PDRB daerah otorisasi Anda. Setiap tahun & daerah dapat diisi dan diedit.' : 'Melihat rincian nilai 17 sektor PDRB Kabupaten/Kota dan Provinsi di Sumatera.' }}
             </p>
         </div>
 
@@ -283,13 +295,12 @@
                                         </a>
 
                                         {{-- Delete Group Button (Icon Only) --}}
-                                        <form action="{{ route('operator.pdrb.destroy-group', ['kabupaten_id' => $group->kabupaten_id, 'tahun' => $group->tahun]) }}" method="POST" onsubmit="return confirm('Hapus seluruh data PDRB {{ $group->kabupaten->nama_kabupaten ?? '' }} Tahun {{ $group->tahun }}?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors" title="Hapus Data Daerah & Tahun Ini">
-                                                <i class="fa-solid fa-trash-can text-xs"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                            @click="openDeleteModal('{{ route('operator.pdrb.destroy-group', ['kabupaten_id' => $group->kabupaten_id, 'tahun' => $group->tahun]) }}', '{{ $group->kabupaten->nama_kabupaten ?? 'Kabupaten/Kota' }}', '{{ $group->tahun }}')"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors shadow-2xs"
+                                            title="Hapus Data PDRB {{ $group->kabupaten->nama_kabupaten ?? '' }} {{ $group->tahun }}">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </button>
                                     </div>
                                 @else
                                     <a href="{{ route('operator.pdrb.entry', ['kabupaten_id' => $group->kabupaten_id, 'tahun' => $group->tahun]) }}"
@@ -492,6 +503,9 @@
             </div>
         </div>
     </template>
+
+    <!-- MODAL KONFIRMASI HAPUS DATA PDRB KAB/KOTA -->
+    <x-confirm-delete-modal title="Konfirmasi Hapus Data PDRB Kab/Kota" />
 </div>
 
 <script>

@@ -3,7 +3,17 @@
 @section('title', 'Data PDB Nasional')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{ isPdbModalOpen: false }">
+<div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{ 
+    isPdbModalOpen: false,
+    isDeleteModalOpen: false,
+    deleteActionUrl: '',
+    deleteTargetYear: '',
+    openDeleteModal(url, year) {
+        this.deleteActionUrl = url;
+        this.deleteTargetYear = year;
+        this.isDeleteModalOpen = true;
+    }
+}">
 
     {{-- Flash Notifications --}}
     @if(session('success'))
@@ -173,14 +183,13 @@
                                         <i class="fa-regular fa-pen-to-square text-xs"></i>
                                     </a>
 
-                                    {{-- Delete Button (Icon Only) --}}
-                                    <form action="{{ route('admin.pdb-nasional.destroy-group', ['tahun' => $group->tahun]) }}" method="POST" onsubmit="return confirm('Hapus seluruh data PDB Nasional Tahun {{ $group->tahun }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors" title="Hapus Data Tahun Ini">
-                                            <i class="fa-solid fa-trash-can text-xs"></i>
-                                        </button>
-                                    </form>
+                                    {{-- Delete Button --}}
+                                    <button type="button"
+                                        @click="openDeleteModal('{{ route('admin.pdb-nasional.destroy-group', ['tahun' => $group->tahun]) }}', '{{ $group->tahun }}')"
+                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors shadow-2xs"
+                                        title="Hapus Data PDB Nasional Tahun {{ $group->tahun }}">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -308,5 +317,8 @@
             </div>
         </div>
     </template>
+
+    <!-- MODAL KONFIRMASI HAPUS DATA PDB NASIONAL (ADMIN) -->
+    <x-confirm-delete-modal title="Konfirmasi Hapus Data PDB Nasional" />
 </div>
 @endsection
