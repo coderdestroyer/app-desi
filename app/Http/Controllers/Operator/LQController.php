@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Operator;
 use App\Http\Controllers\Controller;
 use App\Models\AnalysisResult;
 use App\Models\Kabupaten;
-use App\Models\Sektor;
+use App\Models\Provinsi;
 use App\Services\LqService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class LqController extends Controller
@@ -23,27 +24,7 @@ class LqController extends Controller
 
     private function getAuthorizedKabupatens($user)
     {
-        if ($user->isAdmin()) {
-            return Kabupaten::orderBy('nama_kabupaten')->get();
-        }
-
-        if (!\Illuminate\Support\Facades\Schema::hasTable('user_wilayah_scopes')) {
-            return Kabupaten::orderBy('nama_kabupaten')->get();
-        }
-
-        $scope = \App\Models\UserWilayahScope::where('user_id', $user->id)->first();
-        if (!$scope) {
-            return Kabupaten::orderBy('nama_kabupaten')->get();
-        }
-
-        if ($scope->kabupaten_id) {
-            return Kabupaten::where('kab_id', $scope->kabupaten_id)->get();
-        }
-
-        if ($scope->provinsi_id) {
-            return Kabupaten::where('provinsi_id', $scope->provinsi_id)->orderBy('nama_kabupaten')->get();
-        }
-
+        // Read-only analysis mode: Always return all Kabupatens across Sumatera
         return Kabupaten::orderBy('nama_kabupaten')->get();
     }
 
@@ -58,69 +39,143 @@ class LqController extends Controller
         if ($savedResults->isNotEmpty()) {
             $mappedData = $savedResults->map(function ($item) {
                 $res = $item->results ?? [];
+                $isProv = ($res['tingkat_wilayah'] ?? '') === 'Provinsi';
+                $provName = strtoupper($res['provinsi'] ?? 'SUMATERA UTARA');
+                $pembanding = $isProv ? 'PDB NASIONAL' : 'PDRB ' . $provName;
+
                 return [
                     'id' => $item->id,
                     'tingkat_wilayah' => $res['tingkat_wilayah'] ?? 'Kabupaten/Kota',
                     'daerah_analisis' => $res['daerah_analisis'] ?? '-',
-                    'daerah_pembanding' => $res['daerah_pembanding'] ?? '-',
+                    'daerah_pembanding' => $pembanding,
                     'provinsi' => $res['provinsi'] ?? '-',
                     'kabupaten' => $res['kabupaten'] ?? '-',
-                    'sektor' => $res['sektor'] ?? '-',
                     'tahun' => $res['tahun'] ?? '-',
-                    'pdrb_sektor_analisis' => $res['pdrb_sektor_analisis'] ?? 0,
-                    'total_pdrb_analisis' => $res['total_pdrb_analisis'] ?? 0,
-                    'pdrb_sektor_pembanding' => $res['pdrb_sektor_pembanding'] ?? 0,
-                    'total_pdrb_pembanding' => $res['total_pdrb_pembanding'] ?? 0,
-                    'nilai_lq' => $res['nilai_lq'] ?? 0,
-                    'keterangan' => $res['keterangan'] ?? '-',
-                    'kategori' => $res['kategori'] ?? '-',
-                    'riwayat' => 'Diperbarui ' . $item->updated_at->format('d-m-Y'),
+                    'sektor_basis_count' => isset($res['kategori']) && $res['kategori'] === 'BASIS' ? 1 : 0,
+                    'sektor_non_basis_count' => isset($res['kategori']) && $res['kategori'] === 'NON-BASIS' ? 1 : 0,
+                    'status_dominan' => $res['kategori'] ?? '-',
+                    'is_provinsi' => $isProv,
+                    'provinsi_id' => $res['provinsi_id'] ?? null,
+                    'kabupaten_id' => $res['kabupaten_id'] ?? null,
                 ];
             });
-        } else {
-            $maxTahun = DB::table('pdrb_sumatera_kabupaten')->whereIn('kabupaten_id', $authorizedIds)->max('tahun') ?? 2024;
-            $selectedTahun = $request->has('tahun') && !empty($request->tahun) ? (int)$request->tahun : (int)$maxTahun;
-            $cacheKey = 'calc_lq_' . md5(implode('_', $authorizedIds) . '_' . $selectedTahun);
 
-            $mappedData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $selectedTahun) {
-                $mappedRows = [];
+            $allYears = $mappedData->pluck('tahun')->filter()->unique()->values()->toArray();
+        } else {
+            $cacheKey = 'calc_lq_summary_multi_year_all_regions_v2';
+
+            $allYears = DB::table('pdrb_sumatera_kabupaten')
+                ->select('tahun')
+                ->distinct()
+                ->orderBy('tahun', 'desc')
+                ->pluck('tahun');
+
+            if ($allYears->isEmpty()) {
+                $allYears = collect([2024, 2023, 2022, 2021, 2020]);
+            }
+
+            $mappedData = Cache::remember($cacheKey, 86400, function () use ($authorizedKabupatens, $allYears) {
+                $provinsiList = Provinsi::whereNotNull('latitude')->orderBy('nama_provinsi')->get();
+                if ($provinsiList->isEmpty()) {
+                    $provinsiList = Provinsi::orderBy('nama_provinsi')->get();
+                }
+
+                $summaryRows = [];
                 $idCounter = 1;
 
-                foreach ($authorizedKabupatens as $kab) {
-                    $dynamicLq = $this->lqService->calculateLq($kab->kab_id, $selectedTahun);
-                    foreach ($dynamicLq as $item) {
-                        $mappedRows[] = [
-                            'id' => $idCounter++,
-                            'tingkat_wilayah' => 'Kabupaten/Kota',
-                            'daerah_analisis' => strtoupper($kab->nama_kabupaten),
-                            'daerah_pembanding' => 'SUMATERA UTARA',
-                            'provinsi' => 'SUMATERA UTARA',
-                            'kabupaten' => strtoupper($kab->nama_kabupaten),
-                            'sektor' => $item['sektor']->nama_sektor ?? '-',
-                            'tahun' => $item['tahun'],
-                            'pdrb_sektor_analisis' => $item['persen_kabupaten'],
-                            'total_pdrb_analisis' => 100,
-                            'pdrb_sektor_pembanding' => $item['persen_provinsi'],
-                            'total_pdrb_pembanding' => 100,
-                            'nilai_lq' => $item['nilai_lq'],
-                            'keterangan' => $item['kategori'] === 'Basis'
-                                ? 'Sektor Unggulan (LQ >= 1). Peranannya di daerah lebih dominan dibanding rata-rata acuan.'
-                                : 'Sektor Non-Unggulan (LQ < 1). Peranannya lebih rendah dibanding rata-rata acuan.',
-                            'kategori' => strtoupper($item['kategori']),
-                            'riwayat' => 'Kalkulasi Otomatis',
-                        ];
+                foreach ($allYears as $tahun) {
+                    // 1. Data Provinsi Terlebih Dahulu (Prioritas Utama di Atas)
+                    foreach ($provinsiList as $prov) {
+                        $dynamicProv = $this->lqService->calculateLqProvinsi($prov->provinsi_id, $tahun);
+                        if ($dynamicProv->isNotEmpty()) {
+                            $basisCount = $dynamicProv->where('kategori', 'Basis')->count();
+                            $nonBasisCount = $dynamicProv->where('kategori', 'Non Basis')->count();
+                            $statusDominan = $basisCount >= $nonBasisCount 
+                                ? "Dominan Sektor Basis ({$basisCount} Sektor)" 
+                                : "Dominan Sektor Non-Basis ({$nonBasisCount} Sektor)";
+
+                            $summaryRows[] = [
+                                'id' => $idCounter++,
+                                'tingkat_wilayah' => 'Provinsi',
+                                'provinsi_id' => $prov->provinsi_id,
+                                'kabupaten_id' => null,
+                                'daerah_analisis' => strtoupper($prov->nama_provinsi),
+                                'daerah_pembanding' => 'PDB NASIONAL',
+                                'provinsi' => strtoupper($prov->nama_provinsi),
+                                'kabupaten' => '-',
+                                'tahun' => (int)$tahun,
+                                'sektor_basis_count' => $basisCount,
+                                'sektor_non_basis_count' => $nonBasisCount,
+                                'status_dominan' => $statusDominan,
+                                'is_provinsi' => true,
+                            ];
+                        }
+                    }
+
+                    // 2. Data Kabupaten/Kota di Bawahnya
+                    foreach ($authorizedKabupatens as $kab) {
+                        $dynamicKab = $this->lqService->calculateLq($kab->kab_id, $tahun);
+                        if ($dynamicKab->isNotEmpty()) {
+                            $basisCount = $dynamicKab->where('kategori', 'Basis')->count();
+                            $nonBasisCount = $dynamicKab->where('kategori', 'Non Basis')->count();
+                            $statusDominan = $basisCount >= $nonBasisCount 
+                                ? "Dominan Sektor Basis ({$basisCount} Sektor)" 
+                                : "Dominan Sektor Non-Basis ({$nonBasisCount} Sektor)";
+
+                            $provName = $kab->provinsi->nama_provinsi ?? 'SUMATERA UTARA';
+
+                            $summaryRows[] = [
+                                'id' => $idCounter++,
+                                'tingkat_wilayah' => 'Kabupaten/Kota',
+                                'provinsi_id' => $kab->provinsi_id,
+                                'kabupaten_id' => $kab->kab_id,
+                                'daerah_analisis' => strtoupper($kab->nama_kabupaten),
+                                'daerah_pembanding' => 'PDRB ' . strtoupper($provName),
+                                'provinsi' => strtoupper($provName),
+                                'kabupaten' => strtoupper($kab->nama_kabupaten),
+                                'tahun' => (int)$tahun,
+                                'sektor_basis_count' => $basisCount,
+                                'sektor_non_basis_count' => $nonBasisCount,
+                                'status_dominan' => $statusDominan,
+                                'is_provinsi' => false,
+                            ];
+                        }
                     }
                 }
 
-                return collect($mappedRows);
+                return collect($summaryRows);
             });
         }
 
-        if ($request->has('search') && !empty($request->search)) {
+        // Apply Filters (Provinsi, Kabupaten, Tahun, Search)
+        if ($request->filled('provinsi_id')) {
+            $provId = (int)$request->provinsi_id;
+            $mappedData = $mappedData->filter(fn($row) => ($row['provinsi_id'] ?? null) == $provId);
+        }
+
+        if ($request->filled('kabupaten_id')) {
+            $kabVal = $request->kabupaten_id;
+            if ($kabVal === 'prov_only') {
+                $mappedData = $mappedData->filter(fn($row) => !empty($row['is_provinsi']));
+            } elseif (str_starts_with($kabVal, 'prov_')) {
+                $pId = (int) str_replace('prov_', '', $kabVal);
+                $mappedData = $mappedData->filter(fn($row) => !empty($row['is_provinsi']) && ($row['provinsi_id'] ?? null) == $pId);
+            } else {
+                $kabId = (int)$kabVal;
+                $mappedData = $mappedData->filter(fn($row) => ($row['kabupaten_id'] ?? null) == $kabId);
+            }
+        }
+
+        if ($request->filled('tahun')) {
+            $thn = (int)$request->tahun;
+            $mappedData = $mappedData->filter(fn($row) => (int)$row['tahun'] === $thn);
+        }
+
+        if ($request->filled('search')) {
             $search = strtolower($request->search);
             $mappedData = $mappedData->filter(function ($row) use ($search) {
                 return str_contains(strtolower($row['daerah_analisis']), $search) ||
-                       str_contains(strtolower($row['sektor']), $search) ||
+                       str_contains(strtolower($row['provinsi']), $search) ||
                        str_contains((string)$row['tahun'], $search);
             });
         }
@@ -138,156 +193,204 @@ class LqController extends Controller
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
-        ))->onEachSide(1);
+        ));
+
+        $provinsis = Provinsi::orderBy('nama_provinsi')->get();
+        if ($request->filled('provinsi_id')) {
+            $provId = (int)$request->provinsi_id;
+            $kabupatens = Kabupaten::where('provinsi_id', $provId)->orderBy('nama_kabupaten')->get();
+        } else {
+            $kabupatens = $authorizedKabupatens;
+        }
 
         return view('operator.potensi_unggulan.lq.index', [
             'lqData' => $paginatedData,
             'editItem' => $editItem,
-            'editData' => $editItem,
+            'provinsis' => $provinsis,
+            'kabupatens' => $kabupatens,
+            'availableYears' => $allYears,
         ]);
     }
 
-    private function calculateLQData(Request $request)
+    public function show(Request $request)
     {
-        $request->validate([
-            'tingkat_wilayah' => 'required|string',
-            'provinsi' => 'required|string',
-            'kabupaten' => 'nullable|string',
-            'sektor' => 'required|string',
-            'tahun' => 'required|numeric',
-            'pdrb_sektor_analisis' => 'required',
-            'total_pdrb_analisis' => 'required',
-            'pdrb_sektor_pembanding' => 'required',
-            'total_pdrb_pembanding' => 'required',
+        $tingkatWilayah = $request->get('tingkat_wilayah', 'Kabupaten/Kota');
+        $tahun = (int) $request->get('tahun', 2024);
+        $search = $request->get('search');
+
+        if ($tingkatWilayah === 'Provinsi') {
+            $provinsiId = (int) $request->get('provinsi_id', 1);
+            $provinsi = Provinsi::find($provinsiId);
+            $namaDaerah = $provinsi ? strtoupper($provinsi->nama_provinsi) : 'PROVINSI';
+            $namaPembanding = 'PDB NASIONAL';
+
+            $sectorData = $this->lqService->calculateLqProvinsi($provinsiId, $tahun);
+        } else {
+            $kabId = (int) $request->get('kabupaten_id', 1);
+            $kabupaten = Kabupaten::with('provinsi')->find($kabId);
+            $namaDaerah = $kabupaten ? strtoupper($kabupaten->nama_kabupaten) : 'KABUPATEN';
+            $provName = $kabupaten && $kabupaten->provinsi ? strtoupper($kabupaten->provinsi->nama_provinsi) : 'SUMATERA UTARA';
+            $namaPembanding = 'PDRB ' . $provName;
+
+            $sectorData = $this->lqService->calculateLq($kabId, $tahun);
+        }
+
+        $mappedSectors = $sectorData->map(function ($item) use ($tingkatWilayah, $namaDaerah, $namaPembanding, $tahun) {
+            return [
+                'tingkat_wilayah' => $tingkatWilayah,
+                'daerah_analisis' => $namaDaerah,
+                'daerah_pembanding' => $namaPembanding,
+                'sektor' => $item['sektor']->nama_sektor ?? '-',
+                'tahun' => $tahun,
+                'nilai_lq' => $item['nilai_lq'],
+                'persen_analisis' => $item['persen_kabupaten'] ?? $item['persen_provinsi'] ?? 0,
+                'persen_pembanding' => $item['persen_provinsi'] ?? $item['persen_nasional'] ?? 0,
+                'kategori' => strtoupper($item['kategori']),
+                'keterangan' => $item['kategori'] === 'Basis'
+                    ? 'Sektor Unggulan (LQ >= 1). Peranannya di daerah lebih dominan dibanding rata-rata acuan.'
+                    : 'Sektor Non-Unggulan (LQ < 1). Peranannya lebih rendah dibanding rata-rata acuan.',
+            ];
+        });
+
+        if ($search) {
+            $searchLower = strtolower($search);
+            $mappedSectors = $mappedSectors->filter(function ($row) use ($searchLower) {
+                return str_contains(strtolower($row['sektor']), $searchLower) ||
+                       str_contains(strtolower($row['kategori']), $searchLower);
+            });
+        }
+
+        $perPage = 20;
+        $page = (int) $request->get('page', 1);
+        $paginatedSectors = (new LengthAwarePaginator(
+            $mappedSectors->forPage($page, $perPage)->values(),
+            $mappedSectors->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        ));
+
+        return view('operator.potensi_unggulan.lq.show', [
+            'namaDaerah' => $namaDaerah,
+            'namaPembanding' => $namaPembanding,
+            'tingkatWilayah' => $tingkatWilayah,
+            'tahun' => $tahun,
+            'sectorData' => $paginatedSectors,
         ]);
-
-        $daerah_analisis = $request->tingkat_wilayah === 'Provinsi' ? $request->provinsi : $request->kabupaten;
-        $daerah_pembanding = $request->tingkat_wilayah === 'Provinsi' ? 'Nasional' : $request->provinsi;
-
-        $xij = $this->parseNumber($request->pdrb_sektor_analisis);
-        $rvj = $this->parseNumber($request->total_pdrb_analisis);
-        $xi = $this->parseNumber($request->pdrb_sektor_pembanding);
-        $rvi = $this->parseNumber($request->total_pdrb_pembanding);
-
-        if ($rvj <= 0 || $rvi <= 0) {
-            return null;
-        }
-
-        $pembagi = $xi / $rvi;
-        
-        if ($pembagi > 0) {
-            $lq = round(($xij / $rvj) / $pembagi, 2);
-        } else {
-            $lq = $xij > 0 ? 99.99 : 0; 
-        }
-
-        if ($lq > 1) {
-            $kategori = 'BASIS';
-            $keterangan = 'Menunjukkan bahwa indikator dengan LQ > 1, yaitu sektor unggulan (surplus). Peranannya di daerah lebih dominan dibanding rata-rata referensi, sehingga berpotensi besar untuk diekspor.';
-        } elseif ($lq < 1) {
-            $kategori = 'NON-BASIS';
-            $keterangan = 'Menunjukkan bahwa indikator dengan LQ < 1, yaitu sektor non-unggulan (defisit). Belum mampu memenuhi kebutuhan daerah karena peranannya lebih rendah dari referensi, sehingga memerlukan impor.';
-        } else {
-            $kategori = 'SEIMBANG';
-            $keterangan = 'Menunjukkan bahwa indikator dengan LQ = 1, yaitu sektor berimbang. Produktivitas setara dengan referensi. Mampu memenuhi kebutuhan daerah sendiri namun belum layak diekspor.';
-        }
-
-        return [
-            'tingkat_wilayah' => $request->tingkat_wilayah,
-            'provinsi' => $request->provinsi,
-            'kabupaten' => $request->tingkat_wilayah === 'Provinsi' ? '-' : ($request->kabupaten ?? '-'),
-            'daerah_analisis' => $daerah_analisis,
-            'daerah_pembanding' => $daerah_pembanding,
-            'sektor' => $request->sektor,
-            'tahun' => $request->tahun,
-            'pdrb_sektor_analisis' => $xij,
-            'total_pdrb_analisis' => $rvj,
-            'pdrb_sektor_pembanding' => $xi,
-            'total_pdrb_pembanding' => $rvi,
-            'nilai_lq' => $lq,
-            'keterangan' => $keterangan,
-            'kategori' => $kategori,
-        ];
     }
 
     public function store(Request $request)
     {
-        $newData = $this->calculateLQData($request);
-
-        if (!$newData) {
-            return back()->with('error', 'Semua form PDRB wajib diisi dengan angka valid!');
-        }
-
-        AnalysisResult::create([
-            'type' => 'lq',
-            'title' => "Simulasi LQ - {$newData['daerah_analisis']} ({$newData['tahun']})",
-            'description' => "Perhitungan LQ Sektor {$newData['sektor']} untuk {$newData['daerah_analisis']}",
-            'results' => $newData,
+        $validated = $request->validate([
+            'tingkat_wilayah' => 'required|string',
+            'sektor' => 'required|string',
+            'tahun' => 'required|numeric',
+            'provinsi' => 'required|string',
+            'kabupaten' => 'nullable|string',
+            'pdrb_sektor_analisis' => 'required|numeric',
+            'total_pdrb_analisis' => 'required|numeric',
+            'pdrb_sektor_pembanding' => 'required|numeric',
+            'total_pdrb_pembanding' => 'required|numeric',
         ]);
 
-        OperatorController::logActivity('Analisis LQ', 'ditambah', "Menambah data perhitungan LQ untuk daerah {$newData['daerah_analisis']} tahun {$newData['tahun']}");
-        \Illuminate\Support\Facades\Cache::flush();
+        $persenAnalisis = ($validated['total_pdrb_analisis'] > 0) ? ($validated['pdrb_sektor_analisis'] / $validated['total_pdrb_analisis']) : 0;
+        $persenPembanding = ($validated['total_pdrb_pembanding'] > 0) ? ($validated['pdrb_sektor_pembanding'] / $validated['total_pdrb_pembanding']) : 0;
+        $lq = ($persenPembanding > 0) ? round($persenAnalisis / $persenPembanding, 4) : 0;
 
-        return redirect()->route('operator.lq.index')->with('success', 'Data perhitungan LQ berhasil disimpan secara permanen!');
+        $kategori = ($lq >= 1.0) ? 'BASIS' : 'NON-BASIS';
+        $keterangan = ($lq >= 1.0) 
+            ? 'Sektor Unggulan (LQ >= 1). Peranannya di daerah lebih dominan dibanding rata-rata acuan.'
+            : 'Sektor Non-Unggulan (LQ < 1). Peranannya lebih rendah dibanding rata-rata acuan.';
+
+        $daerahAnalisis = ($validated['tingkat_wilayah'] === 'Provinsi') 
+            ? strtoupper($validated['provinsi']) 
+            : strtoupper($validated['kabupaten'] ?? $validated['provinsi']);
+            
+        $daerahPembanding = ($validated['tingkat_wilayah'] === 'Provinsi') 
+            ? 'PDB NASIONAL' 
+            : 'PDRB ' . strtoupper($validated['provinsi']);
+
+        AnalysisResult::create([
+            'user_id' => Auth::id(),
+            'type' => 'lq',
+            'results' => array_merge($validated, [
+                'daerah_analisis' => $daerahAnalisis,
+                'daerah_pembanding' => $daerahPembanding,
+                'nilai_lq' => $lq,
+                'kategori' => $kategori,
+                'keterangan' => $keterangan,
+            ]),
+        ]);
+
+        Cache::flush();
+
+        return redirect()->route('operator.lq.index')->with('success', 'Data simulasi LQ berhasil disimpan.');
     }
 
     public function update(Request $request, $id)
     {
-        $res = AnalysisResult::where('type', 'lq')->find($id);
-        if (!$res) {
-            return redirect()->route('operator.lq.index')->with('error', 'Data tidak ditemukan!');
-        }
+        $item = AnalysisResult::where('type', 'lq')->findOrFail($id);
 
-        $updatedData = $this->calculateLQData($request);
-
-        if (!$updatedData) {
-            return back()->with('error', 'Semua form PDRB wajib diisi dengan angka valid!');
-        }
-
-        $res->update([
-            'title' => "Simulasi LQ - {$updatedData['daerah_analisis']} ({$updatedData['tahun']})",
-            'description' => "Perhitungan LQ Sektor {$updatedData['sektor']} untuk {$updatedData['daerah_analisis']}",
-            'results' => $updatedData,
+        $validated = $request->validate([
+            'tingkat_wilayah' => 'required|string',
+            'sektor' => 'required|string',
+            'tahun' => 'required|numeric',
+            'provinsi' => 'required|string',
+            'kabupaten' => 'nullable|string',
+            'pdrb_sektor_analisis' => 'required|numeric',
+            'total_pdrb_analisis' => 'required|numeric',
+            'pdrb_sektor_pembanding' => 'required|numeric',
+            'total_pdrb_pembanding' => 'required|numeric',
         ]);
 
-        OperatorController::logActivity('Analisis LQ', 'diubah', "Mengubah data perhitungan LQ daerah {$updatedData['daerah_analisis']}");
-        \Illuminate\Support\Facades\Cache::flush();
+        $persenAnalisis = ($validated['total_pdrb_analisis'] > 0) ? ($validated['pdrb_sektor_analisis'] / $validated['total_pdrb_analisis']) : 0;
+        $persenPembanding = ($validated['total_pdrb_pembanding'] > 0) ? ($validated['pdrb_sektor_pembanding'] / $validated['total_pdrb_pembanding']) : 0;
+        $lq = ($persenPembanding > 0) ? round($persenAnalisis / $persenPembanding, 4) : 0;
 
-        return redirect()->route('operator.lq.index')->with('success', 'Data perhitungan LQ berhasil diperbarui secara permanen!');
+        $kategori = ($lq >= 1.0) ? 'BASIS' : 'NON-BASIS';
+        $keterangan = ($lq >= 1.0) 
+            ? 'Sektor Unggulan (LQ >= 1). Peranannya di daerah lebih dominan dibanding rata-rata acuan.'
+            : 'Sektor Non-Unggulan (LQ < 1). Peranannya lebih rendah dibanding rata-rata acuan.';
+
+        $daerahAnalisis = ($validated['tingkat_wilayah'] === 'Provinsi') 
+            ? strtoupper($validated['provinsi']) 
+            : strtoupper($validated['kabupaten'] ?? $validated['provinsi']);
+
+        $daerahPembanding = ($validated['tingkat_wilayah'] === 'Provinsi') 
+            ? 'PDB NASIONAL' 
+            : 'PDRB ' . strtoupper($validated['provinsi']);
+
+        $item->update([
+            'results' => array_merge($validated, [
+                'daerah_analisis' => $daerahAnalisis,
+                'daerah_pembanding' => $daerahPembanding,
+                'nilai_lq' => $lq,
+                'kategori' => $kategori,
+                'keterangan' => $keterangan,
+            ]),
+        ]);
+
+        Cache::flush();
+
+        return redirect()->route('operator.lq.index')->with('success', 'Data simulasi LQ berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $res = AnalysisResult::where('type', 'lq')->find($id);
-        
-        if ($res) {
-            $daerah = $res->results['daerah_analisis'] ?? 'Daerah';
-            $res->delete();
-            OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus data perhitungan LQ daerah {$daerah}");
-            \Illuminate\Support\Facades\Cache::flush();
-        }
+        $item = AnalysisResult::where('type', 'lq')->findOrFail($id);
+        $item->delete();
 
-        return back()->with('success', 'Data perhitungan LQ berhasil dihapus secara permanen!');
+        Cache::flush();
+
+        return redirect()->route('operator.lq.index')->with('success', 'Data simulasi LQ berhasil dihapus.');
     }
 
     public function empty()
     {
         AnalysisResult::where('type', 'lq')->delete();
-        OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus semua data perhitungan LQ");
-        \Illuminate\Support\Facades\Cache::flush();
-        return back()->with('success', 'Semua data perhitungan LQ berhasil dihapus secara permanen!');
-    }
 
-    public function bulkDestroy(Request $request)
-    {
-        $ids = $request->input('ids');
-        if (!empty($ids)) {
-            $count = count($ids);
-            AnalysisResult::where('type', 'lq')->whereIn('id', $ids)->delete();
-            OperatorController::logActivity('Analisis LQ', 'dihapus', "Menghapus {$count} data perhitungan LQ secara massal");
-            \Illuminate\Support\Facades\Cache::flush();
-            return back()->with('success', "{$count} data perhitungan LQ berhasil dihapus secara massal!");
-        }
-        return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
+        Cache::flush();
+
+        return redirect()->route('operator.lq.index')->with('success', 'Seluruh data simulasi LQ berhasil dihapus.');
     }
 }
