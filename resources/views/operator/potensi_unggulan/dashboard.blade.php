@@ -1,6 +1,6 @@
 @extends('partials.layouts.operator')
 
-@section('title', 'Potensi Unggulan Daerah')
+@section('title', 'Dashboard Potensi Unggulan Daerah')
 
 @section('content')
 <div x-data="{ isPdrbModalOpen: false, inputMode: 'batch' }">
@@ -49,7 +49,7 @@
                 <svg class="w-4 h-4 text-[#FFD54F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Dashboard Utama Potensi Unggulan
+                Dashboard Potensi Unggulan
             </div>
             <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">Selamat Datang, <span
                     class="text-[#FFD54F]">{{ Auth::user()->name }}</span></h1>
@@ -61,9 +61,8 @@
         <!-- Right Side Action & Date Info -->
         <div class="relative z-10 flex flex-col md:flex-row items-end md:items-center gap-4 mt-4 md:mt-0">
             <div class="flex flex-col items-end justify-center hidden sm:flex">
-                <span
-                    class="text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
-                <span class="text-xs font-semibold text-[#FFD54F] uppercase tracking-wider mt-0.5">Tanggal Hari Ini</span>
+                <span class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</span>
+                <span class="text-xs font-semibold text-[#FFD54F] uppercase tracking-wider mt-0.5">Tanggal Sistem</span>
             </div>
         </div>
     </div>

@@ -210,14 +210,14 @@
                                     <a href="{{ route('operator.lq.index') }}"
                                         class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.lq.*') ? 'active' : '' }}">
                                         <i class="fa-solid fa-chart-simple text-[12px] w-4 text-center"></i>
-                                        <span>Analisis LQ</span>
+                                        <span>Analisis Location Quotient</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ route('operator.ss.index') }}"
                                         class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.ss.*') ? 'active' : '' }}">
                                         <i class="fa-solid fa-chart-pie text-[12px] w-4 text-center"></i>
-                                        <span>Analisis Shift-Share (SS)</span>
+                                        <span>Analisis Shift-Share</span>
                                     </a>
                                 </li>
                                 <li>

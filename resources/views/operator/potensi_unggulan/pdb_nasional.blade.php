@@ -31,23 +31,23 @@
     @endif
 
     <!-- Header Banner (Read-Only Mode) -->
-    <div class="bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="relative z-10 text-white flex-1 space-y-2">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/50 border border-emerald-700/50 text-emerald-100 text-xs font-bold backdrop-blur-sm">
-                <i class="fa-solid fa-globe text-[#FFD54F]"></i>
+    <div class="bg-white rounded-2xl p-6 md:p-8 border border-[#CFE3D5] shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex-1 space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold border border-[#CFE3D5]">
+                <i class="fa-solid fa-globe text-[#D8A62A]"></i>
                 <span>Referensi Makroekonomi Nasional (Read Only)</span>
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">
                 Data PDB Nasional
             </h1>
-            <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
+            <p class="text-slate-500 text-xs md:text-sm max-w-2xl leading-relaxed">
                 Informasi Produk Domestik Bruto (PDB) Nasional per 17 Sektor Lapangan Usaha. Data ini digunakan sebagai acuan pembanding dalam perhitungan Analisis Makroekonomi (LQ, Shift-Share, Tipologi Sektor, & Klassen).
             </p>
         </div>
 
-        <div class="relative z-10">
-            <div class="px-4 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-emerald-100 text-xs font-semibold flex items-center gap-2">
-                <i class="fa-solid fa-lock text-[#FFD54F]"></i>
+        <div class="shrink-0">
+            <div class="px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-2 shadow-xs">
+                <i class="fa-solid fa-lock text-[#D8A62A]"></i>
                 <span>Akses Mode: Read Only</span>
             </div>
         </div>

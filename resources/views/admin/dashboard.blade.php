@@ -232,7 +232,7 @@
                             text-[#FFD54F]
                         "
                     >
-                        Tanggal Hari Ini
+                        Tanggal Sistem
                     </span>
                 </div>
             </div>

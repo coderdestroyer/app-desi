@@ -14,7 +14,7 @@
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
 
         <div class="relative z-10 text-white flex-1">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-900/60 border border-emerald-500/30 text-amber-300 text-xs font-bold mb-4 backdrop-blur-sm">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/50 border border-emerald-700/50 text-emerald-100 text-xs font-bold mb-4 backdrop-blur-sm">
                 <i class="fa-solid fa-chart-line text-xs text-[#FFD54F]"></i>
                 Dashboard Peluang Investasi
             </div>
@@ -22,7 +22,7 @@
                 Selamat Datang, <span class="text-[#FFD54F]">{{ Auth::user()->name }}</span>
             </h1>
             <p class="text-emerald-100/90 font-medium max-w-2xl text-sm leading-relaxed">
-                Kelola dan susun studi kelayakan finansial proyek investasi *Ready to Offer* daerah meliputi Komputasi CAPEX, Proyeksi Laba Rugi (P&L), dan Arus Kas (*Dynamic Real-Time Cash Flow*).
+                Kelola dan susun studi kelayakan finansial proyek investasi *Ready to Offer* daerah meliputi Komputasi CAPEX, Proyeksi Laba Rugi (P&L), dan Arus Kas (Dynamic Real-Time Cash Flow).
             </p>
         </div>
 

@@ -28,7 +28,7 @@
 
             {{ now()->locale('id')->translatedFormat('d F Y') }}
 
-            <small>TANGGAL HARI INI</small>
+            <small>Tanggal Sistem</small>
 
         </div>
 
