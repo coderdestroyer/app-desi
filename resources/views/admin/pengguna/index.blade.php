@@ -510,8 +510,8 @@
         {{-- ============================================================= --}}
         {{-- MODAL HAPUS (AlpineJS-controlled) --}}
         {{-- ============================================================= --}}
-        <template x-if="isDeleteModalOpen">
-            <div class="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" @click.self="isDeleteModalOpen = false" @keydown.escape.window="isDeleteModalOpen = false">
+        <template x-teleport="body">
+            <div x-show="isDeleteModalOpen" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" @click.self="isDeleteModalOpen = false" @keydown.escape.window="isDeleteModalOpen = false">
                 <div class="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-2xl">
                     <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-2xl text-red-600">
                         <i class="fa-regular fa-trash-can"></i>

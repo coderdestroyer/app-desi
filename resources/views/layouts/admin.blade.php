@@ -41,6 +41,10 @@
 
 
 
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
     @stack('styles')
 </head>
 
