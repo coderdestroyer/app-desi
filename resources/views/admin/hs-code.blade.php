@@ -47,52 +47,42 @@
 
 
     <div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8">
-        <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 shadow-lg md:p-8">
-            <div class="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-400 opacity-20 blur-3xl mix-blend-overlay"></div>
-
-            <div class="absolute bottom-0 right-32 h-40 w-40 rounded-full bg-yellow-400 opacity-20 blur-3xl mix-blend-overlay"></div>
-
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-
-            <div class="relative z-10 flex flex-col items-start justify-between gap-5 md:flex-row md:items-center">
-                <div>
-                    <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-700/50 bg-emerald-800/50 px-3 py-1 text-xs font-bold text-emerald-100 backdrop-blur-sm">
-                        <i class="fa-solid fa-tags text-[#FFD54F]"></i>
-                        Menu Admin
-                    </div>
-
-                    <h1 class="text-2xl font-extrabold tracking-tight text-white md:text-3xl">
-                        Manajemen
-                        <span class="text-[#FFD54F]">
-                            Data HS Code
-                        </span>
-                    </h1>
-
-                    <p class="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-emerald-100/90">
-                        Kelola kategori, kelompok, subkelompok, kode HS, dan uraian barang perdagangan.
-                    </p>
+        <section
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="relative z-10 space-y-2">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+                    <i class="fa-solid fa-tags text-[#FFD54F]"></i>
+                    <span>Menu Admin</span>
                 </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                    Manajemen Data HS Code
+                </h1>
+                <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
+                    Kelola kategori, kelompok, subkelompok, kode HS, dan uraian barang perdagangan.
+                </p>
+            </div>
 
+            <div class="relative z-10">
                 @if ($columnsReady)
-                    <a
-                        href="{{ route(
-                            'admin.hs-code.index',
-                            array_merge(
-                                request()->except(['edit']),
-                                ['mode' => 'create']
-                            )
-                        ) }}"
-                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FFD54F] px-5 py-3 text-sm font-bold text-emerald-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-300"
-                    >
-                        <i class="fa-solid fa-plus"></i>
-                        Tambah HS Code
-                    </a>
+                            <button type="button" onclick="window.location.href='{{ route(
+                                'admin.hs-code.index',
+                                array_merge(
+                                    request()->except(['edit']),
+                                    ['mode' => 'create']
+                                )
+                            ) }}'"
+                                class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                                <i class="fa-solid fa-plus text-sm"></i>
+                                <span>Tambah HS Code</span>
+                            </button>
                 @endif
             </div>
         </section>
 
-        @if (! $tableExists)
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        @if (!$tableExists)
+            <div
+                class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
 
                 <span>
@@ -101,8 +91,9 @@
                     belum tersedia di Supabase.
                 </span>
             </div>
-        @elseif (! $columnsReady)
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        @elseif (!$columnsReady)
+            <div
+                class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
 
                 <span>
@@ -117,7 +108,8 @@
         @endif
 
         @if (session('success'))
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            <div
+                class="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
                 <i class="fa-solid fa-circle-check mt-0.5"></i>
 
                 <span>
@@ -127,7 +119,8 @@
         @endif
 
         @if (session('error'))
-            <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            <div
+                class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
 
                 <span>
@@ -138,211 +131,158 @@
 
         <section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             @foreach ($stats as $stat)
-                @php
-                    $style = $statStyles[$stat['color']]
-                        ?? $statStyles['green'];
-                @endphp
+                    @php
+                        $style = $statStyles[$stat['color']]
+                            ?? $statStyles['green'];
+                    @endphp
 
-                <article class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-                    <div class="absolute -mr-8 -mt-8 right-0 top-0 h-20 w-20 rounded-bl-full transition-transform duration-500 group-hover:scale-150 {{ $style['corner'] }}"></div>
-
-                    <div class="relative z-10 flex items-center justify-between gap-4">
-                        <div>
-                            <p class="m-0 text-xs font-semibold text-slate-500">
-                                {{ $stat['label'] }}
-                            </p>
-
-                            <p class="mb-0 mt-2 text-3xl font-black tracking-tight text-slate-800">
-                                {{ number_format(
-                                    $stat['value'],
-                                    0,
-                                    ',',
-                                    '.'
-                                ) }}
-                            </p>
+                    <article
+                        class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                        <div
+                            class="absolute -mr-8 -mt-8 right-0 top-0 h-20 w-20 rounded-bl-full transition-transform duration-500 group-hover:scale-150 {{ $style['corner'] }}">
                         </div>
 
-                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg text-white shadow-sm {{ $style['icon'] }}">
-                            <i class="fa-solid {{ $stat['icon'] }}"></i>
+                        <div class="relative z-10 flex items-center justify-between gap-4">
+                            <div>
+                                <p class="m-0 text-xs font-semibold text-slate-500">
+                                    {{ $stat['label'] }}
+                                </p>
+
+                                <p class="mb-0 mt-2 text-3xl font-black tracking-tight text-slate-800">
+                                    {{ number_format(
+                    $stat['value'],
+                    0,
+                    ',',
+                    '.'
+                ) }}
+                                </p>
+                            </div>
+
+                            <div
+                                class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg text-white shadow-sm {{ $style['icon'] }}">
+                                <i class="fa-solid {{ $stat['icon'] }}"></i>
+                            </div>
                         </div>
-                    </div>
-                </article>
+                    </article>
             @endforeach
         </section>
 
         <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-    <form
-        action="{{ route('admin.hs-code.index') }}"
-        method="GET"
-        class="flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-center 2xl:flex-nowrap"
-    >
-        {{-- Filter Kategori --}}
-        <div class="relative w-full xl:w-[210px] xl:flex-none">
-            <select
-                name="kategori"
-                class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
-                    px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
-                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            >
-                <option value="">Semua Kategori</option>
-
-                @foreach ($kategoriOptions ?? [] as $option)
-                    <option
-                        value="{{ $option }}"
-                        @selected(request('kategori') == $option)
-                    >
-                        {{ $option }}
-                    </option>
-                @endforeach
-            </select>
-
-            <i
-                class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
-                    -translate-y-1/2 text-xs text-emerald-600"
-            ></i>
-        </div>
-
-        {{-- Filter Kelompok --}}
-        <div class="relative w-full xl:w-[230px] xl:flex-none">
-            <select
-                name="kelompok"
-                class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
-                    px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
-                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            >
-                <option value="">Semua Kelompok</option>
-
-                @foreach ($kelompokOptions ?? [] as $option)
-                    <option
-                        value="{{ $option }}"
-                        @selected(request('kelompok') == $option)
-                    >
-                        {{ $option }}
-                    </option>
-                @endforeach
-            </select>
-
-            <i
-                class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
-                    -translate-y-1/2 text-xs text-emerald-600"
-            ></i>
-        </div>
-
-        {{-- Filter Subkelompok --}}
-        <div class="relative w-full xl:w-[250px] xl:flex-none">
-            <select
-                name="subkelompok"
-                class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
-                    px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
-                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            >
-                <option value="">Semua Subkelompok</option>
-
-                @foreach ($subkelompokOptions ?? [] as $option)
-                    <option
-                        value="{{ $option }}"
-                        @selected(request('subkelompok') == $option)
-                    >
-                        {{ $option }}
-                    </option>
-                @endforeach
-            </select>
-
-            <i
-                class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
-                    -translate-y-1/2 text-xs text-emerald-600"
-            ></i>
-        </div>
-
-        {{-- Filter Status --}}
-        @if ($hasStatusColumn)
-            <div class="relative w-full xl:w-[180px] xl:flex-none">
-                <select
-                    name="status"
-                    class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white
+            <form action="{{ route('admin.hs-code.index') }}" method="GET"
+                class="flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-center 2xl:flex-nowrap">
+                {{-- Filter Kategori --}}
+                <div class="relative w-full xl:w-[210px] xl:flex-none">
+                    <select name="kategori" class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
                         px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
-                        focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                >
-                    <option value="">Semua Status</option>
+                        focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                        <option value="">Semua Kategori</option>
 
-                    <option
-                        value="Aktif"
-                        @selected(strtolower(request('status', '')) === 'aktif')
-                    >
-                        Aktif
-                    </option>
+                        @foreach ($kategoriOptions ?? [] as $option)
+                            <option value="{{ $option }}" @selected(request('kategori') == $option)>
+                                {{ $option }}
+                            </option>
+                        @endforeach
+                    </select>
 
-                    <option
-                        value="Nonaktif"
-                        @selected(strtolower(request('status', '')) === 'nonaktif')
-                    >
-                        Nonaktif
-                    </option>
-                </select>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
+                        -translate-y-1/2 text-xs text-emerald-600"></i>
+                </div>
 
-                <i
-                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
-                        -translate-y-1/2 text-xs text-emerald-600"
-                ></i>
-            </div>
-        @endif
+                {{-- Filter Kelompok --}}
+                <div class="relative w-full xl:w-[230px] xl:flex-none">
+                    <select name="kelompok" class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
+                        px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
+                        focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                        <option value="">Semua Kelompok</option>
 
-        {{-- Pencarian --}}
-        <div class="relative min-w-0 flex-1 xl:min-w-[280px]">
-            <input
-                type="text"
-                name="search"
-                value="{{ request('search') }}"
-                placeholder="Cari kode, kelompok, atau uraian..."
-                class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12
-                    text-sm text-slate-700 outline-none transition placeholder:text-slate-400
-                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            >
+                        @foreach ($kelompokOptions ?? [] as $option)
+                            <option value="{{ $option }}" @selected(request('kelompok') == $option)>
+                                {{ $option }}
+                            </option>
+                        @endforeach
+                    </select>
 
-            <button
-                type="submit"
-                aria-label="Cari HS Code"
-                title="Cari"
-                class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2
-                    items-center justify-center rounded-lg bg-emerald-50 text-sm
-                    text-emerald-600 transition hover:bg-emerald-100"
-            >
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-        </div>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
+                        -translate-y-1/2 text-xs text-emerald-600"></i>
+                </div>
 
-        {{-- Tombol Aksi --}}
-        <div class="flex w-full flex-none gap-2 xl:w-auto">
-            <button
-                type="submit"
-                class="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap
-                    rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm
-                    transition hover:bg-emerald-700 focus:outline-none focus:ring-2
-                    focus:ring-emerald-200 xl:flex-none"
-            >
-                <i class="fa-solid fa-filter"></i>
-                <span>Terapkan</span>
-            </button>
+                {{-- Filter Subkelompok --}}
+                <div class="relative w-full xl:w-[250px] xl:flex-none">
+                    <select name="subkelompok" class="h-11 w-full appearance-none truncate rounded-xl border border-slate-200 bg-white
+                        px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
+                        focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                        <option value="">Semua Subkelompok</option>
 
-            <a
-                href="{{ route('admin.hs-code.index') }}"
-                title="Reset filter"
-                aria-label="Reset filter"
-                class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl
-                    border border-slate-200 bg-white text-slate-500 transition
-                    hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
-            >
-                <i class="fa-solid fa-rotate-left"></i>
-            </a>
-        </div>
-    </form>
-</section>
+                        @foreach ($subkelompokOptions ?? [] as $option)
+                            <option value="{{ $option }}" @selected(request('subkelompok') == $option)>
+                                {{ $option }}
+                            </option>
+                        @endforeach
+                    </select>
 
-        <section
-            id="adminHsTableCard"
-            class="!block !visible !opacity-100 !relative !w-full !min-h-[100px] !h-auto !overflow-hidden !transform-none mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
-        >
-            <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
+                        -translate-y-1/2 text-xs text-emerald-600"></i>
+                </div>
+
+                {{-- Filter Status --}}
+                @if ($hasStatusColumn)
+                    <div class="relative w-full xl:w-[180px] xl:flex-none">
+                        <select name="status" class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white
+                                px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition
+                                focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                            <option value="">Semua Status</option>
+
+                            <option value="Aktif" @selected(strtolower(request('status', '')) === 'aktif')>
+                                Aktif
+                            </option>
+
+                            <option value="Nonaktif" @selected(strtolower(request('status', '')) === 'nonaktif')>
+                                Nonaktif
+                            </option>
+                        </select>
+
+                        <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2
+                                -translate-y-1/2 text-xs text-emerald-600"></i>
+                    </div>
+                @endif
+
+                {{-- Pencarian --}}
+                <div class="relative min-w-0 flex-1 xl:min-w-[280px]">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Cari kode, kelompok, atau uraian..." class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12
+                        text-sm text-slate-700 outline-none transition placeholder:text-slate-400
+                        focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+
+                    <button type="submit" aria-label="Cari HS Code" title="Cari" class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2
+                        items-center justify-center rounded-lg bg-emerald-50 text-sm
+                        text-emerald-600 transition hover:bg-emerald-100">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                {{-- Tombol Aksi --}}
+                <div class="flex w-full flex-none gap-2 xl:w-auto">
+                    <button type="submit" class="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap
+                        rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm
+                        transition hover:bg-emerald-700 focus:outline-none focus:ring-2
+                        focus:ring-emerald-200 xl:flex-none">
+                        <i class="fa-solid fa-filter"></i>
+                        <span>Terapkan</span>
+                    </button>
+
+                    <a href="{{ route('admin.hs-code.index') }}" title="Reset filter" aria-label="Reset filter" class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl
+                        border border-slate-200 bg-white text-slate-500 transition
+                        hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <section id="adminHsTableCard"
+            class="!block !visible !opacity-100 !relative !w-full !min-h-[100px] !h-auto !overflow-hidden !transform-none mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <header
+                class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">
                         Daftar HS Code
@@ -353,27 +293,28 @@
                     </p>
                 </div>
 
-                <div class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                <div
+                    class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
                     <i class="fa-solid fa-database"></i>
 
                     {{ number_format(
-                        $dataHsCode->total(),
-                        0,
-                        ',',
-                        '.'
-                    ) }}
+        $dataHsCode->total(),
+        0,
+        ',',
+        '.'
+    ) }}
 
                     Data
                 </div>
             </header>
 
-            <div id="adminHsTableWrapper" class="!block !visible !opacity-100 !relative !w-full !overflow-x-auto !overflow-y-visible !transform-none">
-                <table
-                    id="adminHsTable"
-                    class="!table !visible !opacity-100 !w-full !min-w-[1480px] !border-collapse !table-auto !transform-none text-left [&_thead]:!table-header-group [&_thead]:!visible [&_thead]:!opacity-100 [&_tbody]:!table-row-group [&_tbody]:!visible [&_tbody]:!opacity-100 [&_tr]:!table-row [&_tr]:!visible [&_tr]:!opacity-100 [&_tr]:!transform-none [&_th]:!table-cell [&_th]:!visible [&_th]:!opacity-100 [&_th]:!whitespace-nowrap [&_td]:!table-cell [&_td]:!visible [&_td]:!opacity-100"
-                >
+            <div id="adminHsTableWrapper"
+                class="!block !visible !opacity-100 !relative !w-full !overflow-x-auto !overflow-y-visible !transform-none">
+                <table id="adminHsTable"
+                    class="!table !visible !opacity-100 !w-full !min-w-[1480px] !border-collapse !table-auto !transform-none text-left [&_thead]:!table-header-group [&_thead]:!visible [&_thead]:!opacity-100 [&_tbody]:!table-row-group [&_tbody]:!visible [&_tbody]:!opacity-100 [&_tr]:!table-row [&_tr]:!visible [&_tr]:!opacity-100 [&_tr]:!transform-none [&_th]:!table-cell [&_th]:!visible [&_th]:!opacity-100 [&_th]:!whitespace-nowrap [&_td]:!table-cell [&_td]:!visible [&_td]:!opacity-100">
                     <thead>
-                        <tr class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <tr
+                            class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                             <th class="px-5 py-3">
                                 No.
                             </th>
@@ -410,147 +351,134 @@
 
                     <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($dataHsCode as $item)
-                            @php
-                                $nomor =
-                                    ($dataHsCode->currentPage() - 1)
-                                    * $dataHsCode->perPage()
-                                    + $loop->iteration;
+                                            @php
+                                                $nomor =
+                                                    ($dataHsCode->currentPage() - 1)
+                                                    * $dataHsCode->perPage()
+                                                    + $loop->iteration;
 
-                                $status = trim(
-                                    $item->status ?? 'Aktif'
-                                );
+                                                $status = trim(
+                                                    $item->status ?? 'Aktif'
+                                                );
 
-                                $statusLower = strtolower(
-                                    $status
-                                );
-                            @endphp
+                                                $statusLower = strtolower(
+                                                    $status
+                                                );
+                                            @endphp
 
-                            <tr class="transition-colors hover:bg-slate-50/60">
-                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">
-                                    {{ str_pad(
-                                        $nomor,
-                                        3,
-                                        '0',
-                                        STR_PAD_LEFT
-                                    ) }}
-                                </td>
+                                            <tr class="transition-colors hover:bg-slate-50/60">
+                                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">
+                                                    {{ str_pad(
+                                $nomor,
+                                3,
+                                '0',
+                                STR_PAD_LEFT
+                            ) }}
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex items-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 font-mono text-xs font-bold text-amber-700">
-                                        {{ $item->kode_kategori ?: '-' }}
-                                    </span>
-                                </td>
+                                                <td class="px-5 py-4">
+                                                    <span
+                                                        class="inline-flex items-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 font-mono text-xs font-bold text-amber-700">
+                                                        {{ $item->kode_kategori ?: '-' }}
+                                                    </span>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <div
-                                        class="max-w-[260px] font-semibold leading-relaxed text-slate-700"
-                                        title="{{ $item->uraian_kelompok }}"
-                                    >
-                                        {{ \Illuminate\Support\Str::limit(
-                                            $item->uraian_kelompok ?: '-',
-                                            75
-                                        ) }}
-                                    </div>
+                                                <td class="px-5 py-4">
+                                                    <div class="max-w-[260px] font-semibold leading-relaxed text-slate-700"
+                                                        title="{{ $item->uraian_kelompok }}">
+                                                        {{ \Illuminate\Support\Str::limit(
+                                $item->uraian_kelompok ?: '-',
+                                75
+                            ) }}
+                                                    </div>
 
-                                    <div class="mt-1 font-mono text-xs text-slate-400">
-                                        {{ $item->kode_kelompok ?: '-' }}
-                                    </div>
-                                </td>
+                                                    <div class="mt-1 font-mono text-xs text-slate-400">
+                                                        {{ $item->kode_kelompok ?: '-' }}
+                                                    </div>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <div
-                                        class="max-w-[260px] font-semibold leading-relaxed text-slate-700"
-                                        title="{{ $item->uraian_subkelompok }}"
-                                    >
-                                        {{ \Illuminate\Support\Str::limit(
-                                            $item->uraian_subkelompok ?: '-',
-                                            75
-                                        ) }}
-                                    </div>
+                                                <td class="px-5 py-4">
+                                                    <div class="max-w-[260px] font-semibold leading-relaxed text-slate-700"
+                                                        title="{{ $item->uraian_subkelompok }}">
+                                                        {{ \Illuminate\Support\Str::limit(
+                                $item->uraian_subkelompok ?: '-',
+                                75
+                            ) }}
+                                                    </div>
 
-                                    <div class="mt-1 font-mono text-xs text-slate-400">
-                                        {{ $item->kode_subkelompok ?: '-' }}
-                                    </div>
-                                </td>
+                                                    <div class="mt-1 font-mono text-xs text-slate-400">
+                                                        {{ $item->kode_subkelompok ?: '-' }}
+                                                    </div>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex items-center rounded-lg border border-sky-200 bg-sky-50 px-3 py-1.5 font-mono text-xs font-bold tracking-wide text-sky-700">
-                                        {{ $item->hs_code ?: '-' }}
-                                    </span>
-                                </td>
+                                                <td class="px-5 py-4">
+                                                    <span
+                                                        class="inline-flex items-center rounded-lg border border-sky-200 bg-sky-50 px-3 py-1.5 font-mono text-xs font-bold tracking-wide text-sky-700">
+                                                        {{ $item->hs_code ?: '-' }}
+                                                    </span>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <div
-                                        class="max-w-[340px] text-xs leading-relaxed text-slate-500"
-                                        title="{{ $item->uraian_barang }}"
-                                    >
-                                        {{ \Illuminate\Support\Str::limit(
-                                            $item->uraian_barang ?: '-',
-                                            135
-                                        ) }}
-                                    </div>
-                                </td>
+                                                <td class="px-5 py-4">
+                                                    <div class="max-w-[340px] text-xs leading-relaxed text-slate-500"
+                                                        title="{{ $item->uraian_barang }}">
+                                                        {{ \Illuminate\Support\Str::limit(
+                                $item->uraian_barang ?: '-',
+                                135
+                            ) }}
+                                                    </div>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusLower === 'nonaktif' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $statusLower === 'nonaktif' ? 'bg-red-500' : 'bg-emerald-500' }}"></span>
+                                                <td class="px-5 py-4">
+                                                    <span
+                                                        class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusLower === 'nonaktif' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
+                                                        <span
+                                                            class="h-1.5 w-1.5 rounded-full {{ $statusLower === 'nonaktif' ? 'bg-red-500' : 'bg-emerald-500' }}"></span>
 
-                                        {{ $status }}
-                                    </span>
-                                </td>
+                                                        {{ $status }}
+                                                    </span>
+                                                </td>
 
-                                <td class="px-5 py-4">
-                                    @if (
-                                        $hasIdColumn
-                                        && $item->id
-                                    )
-                                        <div class="flex items-center justify-center gap-2">
-                                            <a
-                                                href="{{ route(
-                                                    'admin.hs-code.index',
-                                                    array_merge(
-                                                        request()->query(),
-                                                        [
-                                                            'edit' => $item->id,
-                                                            'mode' => 'edit',
-                                                        ]
-                                                    )
-                                                ) }}"
-                                                title="Edit HS Code"
-                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600"
-                                            >
-                                                <i class="fa-regular fa-pen-to-square"></i>
-                                            </a>
+                                                <td class="px-5 py-4">
+                                                    @if (
+                                                                                $hasIdColumn
+                                                                                && $item->id
+                                                                            )
+                                                                            <div class="flex items-center justify-center gap-2">
+                                                                                <a href="{{ route(
+                                                            'admin.hs-code.index',
+                                                            array_merge(
+                                                                request()->query(),
+                                                                [
+                                                                    'edit' => $item->id,
+                                                                    'mode' => 'edit',
+                                                                ]
+                                                            )
+                                                        ) }}" title="Edit HS Code"
+                                                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600">
+                                                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                                                </a>
 
-                                            <button
-                                                type="button"
-                                                title="Hapus HS Code"
-                                                data-delete-hs
-                                                data-delete-url="{{ route(
-                                                    'admin.hs-code.destroy',
-                                                    $item->id
-                                                ) }}"
-                                                data-delete-name="{{ $item->hs_code }}"
-                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                                            >
-                                                <i class="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </div>
-                                    @else
-                                        <div class="text-center text-slate-400">
-                                            -
-                                        </div>
-                                    @endif
-                                </td>
-                            </tr>
+                                                                                <button type="button" title="Hapus HS Code" data-delete-hs data-delete-url="{{ route(
+                                                            'admin.hs-code.destroy',
+                                                            $item->id
+                                                        ) }}" data-delete-name="{{ $item->hs_code }}"
+                                                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600">
+                                                                                    <i class="fa-regular fa-trash-can"></i>
+                                                                                </button>
+                                                                            </div>
+                                                    @else
+                                                        <div class="text-center text-slate-400">
+                                                            -
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                            </tr>
                         @empty
                             <tr>
-                                <td
-                                    colspan="8"
-                                    class="px-5 py-14 text-center"
-                                >
+                                <td colspan="8" class="px-5 py-14 text-center">
                                     <div class="mx-auto flex max-w-sm flex-col items-center">
-                                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400">
+                                        <div
+                                            class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400">
                                             <i class="fa-solid fa-tags"></i>
                                         </div>
 
@@ -581,19 +509,21 @@
     </div>
 
     @if ($isModalOpen)
-        <div class="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
+        <div
+            class="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
             <div class="my-6 w-full max-w-5xl overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl">
                 <header class="flex items-start justify-between gap-5 border-b border-slate-100 bg-slate-50/50 p-6">
                     <div>
-                        <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                        <div
+                            class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                             <i class="fa-solid {{ $isEdit ? 'fa-pen-to-square' : 'fa-plus' }}"></i>
                         </div>
 
                         <h2 class="m-0 text-xl font-bold text-slate-800">
                             {{ $isEdit
-                                ? 'Edit Data HS Code'
-                                : 'Tambah Data HS Code'
-                            }}
+                ? 'Edit Data HS Code'
+                : 'Tambah Data HS Code'
+                                    }}
                         </h2>
 
                         <p class="mb-0 mt-1 text-sm text-slate-500">
@@ -601,19 +531,13 @@
                         </p>
                     </div>
 
-                    <a
-                        href="{{ $closeModalUrl }}"
-                        class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100"
-                    >
+                    <a href="{{ $closeModalUrl }}"
+                        class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100">
                         <i class="fa-solid fa-xmark"></i>
                     </a>
                 </header>
 
-                <form
-                    action="{{ $formAction }}"
-                    method="POST"
-                    class="p-6"
-                >
+                <form action="{{ $formAction }}" method="POST" class="p-6">
                     @csrf
 
                     @if ($isEdit)
@@ -622,26 +546,17 @@
 
                     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
-                            <label
-                                for="excel_id"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="excel_id" class="mb-2 block text-sm font-semibold text-slate-700">
                                 ID Excel
                             </label>
 
-                            <input
-                                id="excel_id"
-                                type="number"
-                                name="excel_id"
-                                value="{{ old(
-                                    'excel_id',
-                                    $isEdit
-                                        ? $editData->excel_id
-                                        : ''
-                                ) }}"
-                                placeholder="Opsional"
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
+                            <input id="excel_id" type="number" name="excel_id" value="{{ old(
+                'excel_id',
+                $isEdit
+                ? $editData->excel_id
+                : ''
+            ) }}" placeholder="Opsional"
+                                class="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
 
                             @error('excel_id')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -652,10 +567,7 @@
 
                         @if ($hasStatusColumn)
                             <div>
-                                <label
-                                    for="status"
-                                    class="mb-2 block text-sm font-semibold text-slate-700"
-                                >
+                                <label for="status" class="mb-2 block text-sm font-semibold text-slate-700">
                                     Status
                                     <span class="text-red-500">*</span>
                                 </label>
@@ -664,38 +576,29 @@
                                     $selectedStatus = old(
                                         'status',
                                         $isEdit
-                                            ? ($editData->status ?? 'Aktif')
-                                            : 'Aktif'
+                                        ? ($editData->status ?? 'Aktif')
+                                        : 'Aktif'
                                     );
                                 @endphp
 
-                                <select
-                                    id="status"
-                                    name="status"
-                                    required
-                                    class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                >
-                                    <option
-                                        value="Aktif"
-                                        @selected(
-                                            strtolower($selectedStatus)
-                                            === 'aktif'
-                                        )
-                                    >
+                                <select id="status" name="status" required
+                                    class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                    <option value="Aktif" @selected(
+                                        strtolower($selectedStatus)
+                                        === 'aktif'
+                                    )>
                                         Aktif
                                     </option>
 
-                                    <option
-                                        value="Nonaktif"
-                                        @selected(
-                                            strtolower($selectedStatus)
-                                            === 'nonaktif'
-                                        )
-                                    >
+                                    <option value="Nonaktif" @selected(
+                                        strtolower($selectedStatus)
+                                        === 'nonaktif'
+                                    )>
                                         Nonaktif
                                     </option>
                                 </select>
-                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                <i
+                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
 
                                 @error('status')
                                     <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -706,26 +609,17 @@
                         @endif
 
                         <div>
-                            <label
-                                for="kode_kategori"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="kode_kategori" class="mb-2 block text-sm font-semibold text-slate-700">
                                 Kode Kategori
                             </label>
 
-                            <input
-                                id="kode_kategori"
-                                type="text"
-                                name="kode_kategori"
-                                value="{{ old(
-                                    'kode_kategori',
-                                    $isEdit
-                                        ? $editData->kode_kategori
-                                        : ''
-                                ) }}"
-                                placeholder="Contoh: 01"
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
+                            <input id="kode_kategori" type="text" name="kode_kategori" value="{{ old(
+                'kode_kategori',
+                $isEdit
+                ? $editData->kode_kategori
+                : ''
+            ) }}" placeholder="Contoh: 01"
+                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
 
                             @error('kode_kategori')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -735,26 +629,17 @@
                         </div>
 
                         <div>
-                            <label
-                                for="kode_kelompok"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="kode_kelompok" class="mb-2 block text-sm font-semibold text-slate-700">
                                 Kode Kelompok
                             </label>
 
-                            <input
-                                id="kode_kelompok"
-                                type="text"
-                                name="kode_kelompok"
-                                value="{{ old(
-                                    'kode_kelompok',
-                                    $isEdit
-                                        ? $editData->kode_kelompok
-                                        : ''
-                                ) }}"
-                                placeholder="Contoh: 01.01"
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
+                            <input id="kode_kelompok" type="text" name="kode_kelompok" value="{{ old(
+                'kode_kelompok',
+                $isEdit
+                ? $editData->kode_kelompok
+                : ''
+            ) }}" placeholder="Contoh: 01.01"
+                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
 
                             @error('kode_kelompok')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -764,26 +649,17 @@
                         </div>
 
                         <div>
-                            <label
-                                for="kode_subkelompok"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="kode_subkelompok" class="mb-2 block text-sm font-semibold text-slate-700">
                                 Kode Subkelompok
                             </label>
 
-                            <input
-                                id="kode_subkelompok"
-                                type="text"
-                                name="kode_subkelompok"
-                                value="{{ old(
-                                    'kode_subkelompok',
-                                    $isEdit
-                                        ? $editData->kode_subkelompok
-                                        : ''
-                                ) }}"
-                                placeholder="Contoh: 0101.30"
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
+                            <input id="kode_subkelompok" type="text" name="kode_subkelompok" value="{{ old(
+                'kode_subkelompok',
+                $isEdit
+                ? $editData->kode_subkelompok
+                : ''
+            ) }}" placeholder="Contoh: 0101.30"
+                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
 
                             @error('kode_subkelompok')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -793,28 +669,18 @@
                         </div>
 
                         <div>
-                            <label
-                                for="hs_code"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="hs_code" class="mb-2 block text-sm font-semibold text-slate-700">
                                 HS Code
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <input
-                                id="hs_code"
-                                type="text"
-                                name="hs_code"
-                                value="{{ old(
-                                    'hs_code',
-                                    $isEdit
-                                        ? $editData->hs_code
-                                        : ''
-                                ) }}"
-                                placeholder="Contoh: 0101.21.00"
-                                required
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
+                            <input id="hs_code" type="text" name="hs_code" value="{{ old(
+                'hs_code',
+                $isEdit
+                ? $editData->hs_code
+                : ''
+            ) }}" placeholder="Contoh: 0101.21.00" required
+                                class="h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm text-slate-700 outline-none transition placeholder:font-sans placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
 
                             @error('hs_code')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -824,26 +690,17 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label
-                                for="uraian_kelompok"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="uraian_kelompok" class="mb-2 block text-sm font-semibold text-slate-700">
                                 Uraian Kelompok
                             </label>
 
-                            <input
-                                id="uraian_kelompok"
-                                type="text"
-                                name="uraian_kelompok"
-                                value="{{ old(
-                                    'uraian_kelompok',
-                                    $isEdit
-                                        ? $editData->uraian_kelompok
-                                        : ''
-                                ) }}"
-                                placeholder="Masukkan uraian kelompok"
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
+                            <input id="uraian_kelompok" type="text" name="uraian_kelompok" value="{{ old(
+                'uraian_kelompok',
+                $isEdit
+                ? $editData->uraian_kelompok
+                : ''
+            ) }}" placeholder="Masukkan uraian kelompok"
+                                class="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
 
                             @error('uraian_kelompok')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -853,26 +710,17 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label
-                                for="uraian_subkelompok"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="uraian_subkelompok" class="mb-2 block text-sm font-semibold text-slate-700">
                                 Uraian Subkelompok
                             </label>
 
-                            <input
-                                id="uraian_subkelompok"
-                                type="text"
-                                name="uraian_subkelompok"
-                                value="{{ old(
-                                    'uraian_subkelompok',
-                                    $isEdit
-                                        ? $editData->uraian_subkelompok
-                                        : ''
-                                ) }}"
-                                placeholder="Masukkan uraian subkelompok"
-                                class="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >
+                            <input id="uraian_subkelompok" type="text" name="uraian_subkelompok" value="{{ old(
+                'uraian_subkelompok',
+                $isEdit
+                ? $editData->uraian_subkelompok
+                : ''
+            ) }}" placeholder="Masukkan uraian subkelompok"
+                                class="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
 
                             @error('uraian_subkelompok')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -882,27 +730,19 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label
-                                for="uraian_barang"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="uraian_barang" class="mb-2 block text-sm font-semibold text-slate-700">
                                 Uraian Barang
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <textarea
-                                id="uraian_barang"
-                                name="uraian_barang"
-                                rows="5"
-                                placeholder="Masukkan uraian barang"
+                            <textarea id="uraian_barang" name="uraian_barang" rows="5" placeholder="Masukkan uraian barang"
                                 required
-                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >{{ old(
-                                'uraian_barang',
-                                $isEdit
-                                    ? $editData->uraian_barang
-                                    : ''
-                            ) }}</textarea>
+                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">{{ old(
+                'uraian_barang',
+                $isEdit
+                ? $editData->uraian_barang
+                : ''
+            ) }}</textarea>
 
                             @error('uraian_barang')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -912,25 +752,18 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label
-                                for="keterangan"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
+                            <label for="keterangan" class="mb-2 block text-sm font-semibold text-slate-700">
                                 Keterangan
                             </label>
 
-                            <textarea
-                                id="keterangan"
-                                name="keterangan"
-                                rows="4"
+                            <textarea id="keterangan" name="keterangan" rows="4"
                                 placeholder="Masukkan keterangan tambahan bila diperlukan"
-                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            >{{ old(
-                                'keterangan',
-                                $isEdit
-                                    ? $editData->keterangan
-                                    : ''
-                            ) }}</textarea>
+                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">{{ old(
+                'keterangan',
+                $isEdit
+                ? $editData->keterangan
+                : ''
+            ) }}</textarea>
 
                             @error('keterangan')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -941,23 +774,19 @@
                     </div>
 
                     <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row">
-                        <a
-                            href="{{ $closeModalUrl }}"
-                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                        >
+                        <a href="{{ $closeModalUrl }}"
+                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
                             Batal
                         </a>
 
-                        <button
-                            type="submit"
-                            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-                        >
+                        <button type="submit"
+                            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
                             <i class="fa-solid fa-floppy-disk"></i>
 
                             {{ $isEdit
-                                ? 'Simpan Perubahan'
-                                : 'Tambah HS Code'
-                            }}
+                ? 'Simpan Perubahan'
+                : 'Tambah HS Code'
+                                    }}
                         </button>
                     </div>
                 </form>
@@ -965,10 +794,8 @@
         </div>
     @endif
 
-    <div
-        id="deleteHsModal"
-        class="fixed inset-0 z-[1000] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
-    >
+    <div id="deleteHsModal"
+        class="fixed inset-0 z-[1000] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
         <div class="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-2xl">
             <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-2xl text-red-600">
                 <i class="fa-regular fa-trash-can"></i>
@@ -981,35 +808,23 @@
             <p class="mb-0 mt-2 text-sm leading-relaxed text-slate-500">
                 Data HS Code
 
-                <strong
-                    id="deleteHsName"
-                    class="text-slate-700"
-                ></strong>
+                <strong id="deleteHsName" class="text-slate-700"></strong>
 
                 akan dihapus. Tindakan ini tidak dapat dibatalkan.
             </p>
 
-            <form
-                id="deleteHsForm"
-                action=""
-                method="POST"
-                class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center"
-            >
+            <form id="deleteHsForm" action="" method="POST"
+                class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
                 @csrf
                 @method('DELETE')
 
-                <button
-                    type="button"
-                    id="cancelDeleteHs"
-                    class="inline-flex h-11 min-w-32 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                >
+                <button type="button" id="cancelDeleteHs"
+                    class="inline-flex h-11 min-w-32 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
                     Batal
                 </button>
 
-                <button
-                    type="submit"
-                    class="inline-flex h-11 min-w-32 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700"
-                >
+                <button type="submit"
+                    class="inline-flex h-11 min-w-32 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700">
                     <i class="fa-regular fa-trash-can"></i>
                     Hapus
                 </button>
@@ -1042,9 +857,9 @@
 
                 function openDeleteModal(url, name) {
                     if (
-                        ! deleteModal
-                        || ! deleteForm
-                        || ! deleteName
+                        !deleteModal
+                        || !deleteForm
+                        || !deleteName
                     ) {
                         return;
                     }
@@ -1059,7 +874,7 @@
                 }
 
                 function closeDeleteModal() {
-                    if (! deleteModal) {
+                    if (!deleteModal) {
                         return;
                     }
 

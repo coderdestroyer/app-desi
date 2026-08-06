@@ -21,7 +21,7 @@
     </div>
 
     {{-- Header Banner --}}
-    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-6 md:p-7 shadow-md text-white flex flex-col md:flex-row items-center justify-between gap-6">
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
         <div class="space-y-1 z-10">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                 <i class="fa-solid fa-pen-to-square text-[#FFD54F]"></i>

@@ -71,33 +71,34 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
 
 
 <div class="min-h-screen bg-[#f7f9fc] p-4 sm:p-6 lg:p-8">
-    <section class="rounded-2xl bg-gradient-to-r from-[#145239] via-[#0E8F62] to-[#1E5D41] p-6 shadow-lg sm:p-7 lg:p-8">
-        <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div class="min-w-0">
-                <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-900/25 px-3 py-1.5 text-xs font-bold text-white/90 backdrop-blur-sm">
+    <section
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="relative z-10 space-y-2">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                     <i class="fa-solid fa-boxes-stacked text-[#FFD54F]"></i>
-                    Menu Admin
+                    <span>Menu Admin</span>
                 </div>
-
-                <h1 class="m-0 text-2xl font-black tracking-tight text-white md:text-3xl">
-                    Manajemen <span class="text-[#FFD54F]">Data KBKI</span>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                    Manajemen Data KBKI
                 </h1>
-
-                <p class="mb-0 mt-2 max-w-3xl text-sm font-medium leading-6 text-emerald-50/90">
+                <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
                     Kelola struktur Seksi, Divisi, Kelompok, Kelas, Subkelas, Kelompok Komoditas, dan Komoditas KBKI 2015.
                 </p>
             </div>
 
-            @if ($columnsReady)
-            <a
-                href="{{ $createUrl }}"
-                class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#FFD54F] px-6 text-sm font-black text-emerald-900 shadow-lg shadow-emerald-950/15 transition hover:-translate-y-0.5 hover:bg-yellow-300 sm:w-auto md:flex-shrink-0">
-                <i class="fa-solid fa-plus"></i>
-                Tambah KBKI
-            </a>
-            @endif
-        </div>
-    </section>
+            <div class="relative z-10">
+                @if ($columnsReady)
+                <button
+                    type="button"
+                    onclick="window.location.href='{{ $createUrl }}'"
+                    class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                    <span>Tambah KBKI</span>
+                </button>
+                @endif
+            </div>
+        </section>
 
     @if (! $tableExists)
     <div class="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">

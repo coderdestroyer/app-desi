@@ -36,9 +36,7 @@
     </div>
 
     <!-- Project Overview Banner -->
-    <div class="bg-gradient-to-r from-[#145239] via-[#0B5D3D] to-[#1E5D41] rounded-2xl p-7 text-white shadow-xl mb-8 relative overflow-hidden">
-        <div class="absolute right-0 top-0 h-56 w-56 rounded-full bg-[#FFD54F] opacity-15 blur-3xl mix-blend-overlay"></div>
-
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 text-white shadow-lg mb-8">
         <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-2 mb-3">
                 <span class="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-semibold text-emerald-100">
@@ -76,7 +74,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Navigation Tabs -->
     <div class="flex items-center gap-2 border-b border-[#CFE3D5] mb-6 overflow-x-auto pb-1">

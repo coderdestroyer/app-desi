@@ -18,49 +18,7 @@
         {{-- CARD HIJAU INFORMASI KURS --}}
         {{-- ====================================================== --}}
 
-        <section
-            class="
-                relative
-                overflow-hidden
-                rounded-2xl
-                bg-gradient-to-r
-                from-[#145239]
-                via-[#0F8A5F]
-                to-[#1E5D41]
-                p-6
-                shadow-xl
-                md:p-8
-            "
-        >
-            {{-- Ornamen latar --}}
-            <div
-                class="
-                    pointer-events-none
-                    absolute
-                    -right-16
-                    -top-20
-                    h-64
-                    w-64
-                    rounded-full
-                    bg-emerald-300/20
-                    blur-3xl
-                "
-            ></div>
-
-            <div
-                class="
-                    pointer-events-none
-                    absolute
-                    -bottom-20
-                    left-1/3
-                    h-56
-                    w-56
-                    rounded-full
-                    bg-yellow-300/20
-                    blur-3xl
-                "
-            ></div>
-
+        <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white">
             <div
                 class="
                     relative

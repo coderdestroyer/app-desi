@@ -5,49 +5,26 @@
 @section('content')
 <div class="min-h-screen bg-[#F7FAF8] p-5 md:p-7 lg:p-8">
 
-    <!-- Top Header & Breadcrumb Bar -->
-    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
-                <a href="{{ route('admin.dashboard') }}" class="hover:text-[#145239] font-medium">Dashboard Admin</a>
-                <span>/</span>
-                <span class="text-slate-800 font-semibold">Dokumen IPRO</span>
-            </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-[#17201C] tracking-tight">Dokumen Kelayakan Proyek IPRO</h1>
-            <p class="text-xs md:text-sm text-[#667069] mt-0.5">Peninjauan dan evaluasi kelayakan finansial proyek investasi yang telah diinput oleh Operator.</p>
-        </div>
-
-        <div class="flex items-center gap-3 shrink-0">
-            <a href="{{ route('admin.dashboard') }}" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-[#CFE3D5] shadow-xs transition-colors flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Kembali ke Dashboard</span>
-            </a>
-        </div>
-    </div>
-
     <!-- Banner Header Stat -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0B5D3D] to-[#1E5D41] p-7 md:p-8 shadow-xl text-white mb-8">
-        <div class="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-400 opacity-20 blur-3xl mix-blend-overlay"></div>
-        <div class="absolute bottom-0 right-32 h-40 w-40 rounded-full bg-[#FFD54F] opacity-20 blur-3xl mix-blend-overlay"></div>
-        
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-900/60 border border-emerald-500/30 text-emerald-100 text-xs font-semibold mb-3 backdrop-blur-sm">
-                    <i class="fa-solid fa-file-invoice-dollar text-[#FFD54F]"></i>
-                    Peninjauan Finansial Proyek (Database Riil)
-                </div>
-                <h2 class="text-xl md:text-2xl font-bold text-white mb-1">Pusat Peninjauan Dokumen Proyek IPRO</h2>
-                <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
-                    Lihat struktur Estimasi CAPEX, Proyeksi Laba Rugi (P&L), dan Simulasi Arus Kas yang disajikan secara terintegrasi dari database.
-                </p>
+     <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="relative z-10 space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+                <i class="fa-solid fa-file-invoice-dollar text-[#FFD54F]"></i>
+                <span>Peninjauan Finansial Proyek (Database Riil)</span>
             </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                Pusat Peninjauan Dokumen Proyek IPRO
+            </h1>
+            <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
+                Lihat struktur Estimasi CAPEX, Proyeksi Laba Rugi (P&L), dan Simulasi Arus Kas yang disajikan secara terintegrasi dari database.
+            </p>
+        </div>
 
-            <div class="text-right hidden md:block">
+        <div class="text-right hidden md:block">
                 <span class="text-xs uppercase font-bold text-[#FFD54F] tracking-wider block mb-1">Total Proyek Terdaftar</span>
                 <span class="text-3xl font-black text-white">{{ $projects->total() }} Dokumen</span>
             </div>
-        </div>
-    </div>
+    </section>
 
     <!-- Filter & Search Bar -->
     <div class="bg-white rounded-2xl p-5 shadow-xs border border-[#CFE3D5] mb-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
