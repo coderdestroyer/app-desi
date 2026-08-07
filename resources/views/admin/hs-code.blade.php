@@ -46,7 +46,24 @@
 
 
 
-    <div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8">
+    <div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{
+        isModalOpen: {{ (session('errors') || old('hs_code') || $isModalOpen) ? 'true' : 'false' }},
+        isEdit: {{ (old('_method') === 'PUT' || $isEdit) ? 'true' : 'false' }},
+        formAction: '{{ old('_method') === 'PUT' || $isEdit ? route('admin.hs-code.update', old('hs_id', $isEdit ? $editData->id : 0)) : route('admin.hs-code.store') }}',
+
+        openCreateModal() {
+            this.isEdit = false;
+            this.formAction = '{{ route('admin.hs-code.store') }}';
+            this.isModalOpen = true;
+        },
+
+        closeModal() {
+            this.isModalOpen = false;
+            if (window.location.search) {
+                window.location.href = '{{ route('admin.hs-code.index') }}';
+            }
+        }
+    }">
         <section
             class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="relative z-10 space-y-2">
@@ -65,17 +82,11 @@
 
             <div class="relative z-10">
                 @if ($columnsReady)
-                            <button type="button" onclick="window.location.href='{{ route(
-                                'admin.hs-code.index',
-                                array_merge(
-                                    request()->except(['edit']),
-                                    ['mode' => 'create']
-                                )
-                            ) }}'"
-                                class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
-                                <i class="fa-solid fa-plus text-sm"></i>
-                                <span>Tambah HS Code</span>
-                            </button>
+                    <button type="button" @click="openCreateModal()"
+                        class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                        <span>Tambah HS Code</span>
+                    </button>
                 @endif
             </div>
         </section>
@@ -506,43 +517,34 @@
             {{ date('Y') }}
             DPMPTSP Provinsi Sumatera Utara
         </footer>
-    </div>
 
-    @if ($isModalOpen)
-        <div
-            class="fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
-            <div class="my-6 w-full max-w-5xl overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl">
-                <header class="flex items-start justify-between gap-5 border-b border-slate-100 bg-slate-50/50 p-6">
-                    <div>
-                        <div
-                            class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                            <i class="fa-solid {{ $isEdit ? 'fa-pen-to-square' : 'fa-plus' }}"></i>
+        <template x-teleport="body">
+            <div x-show="isModalOpen" x-cloak x-transition @keydown.escape.window="closeModal()"
+                class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm">
+
+                <div class="bg-white rounded-2xl max-w-5xl w-full p-6 shadow-2xl border border-emerald-100 relative my-6 max-h-[90vh] flex flex-col overflow-hidden" @click.outside="closeModal()">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                                <i class="fa-solid" :class="isEdit ? 'fa-pen-to-square' : 'fa-plus'"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base" x-text="isEdit ? 'Edit Data HS Code' : 'Tambah Data HS Code'"></h3>
+                                <p class="text-xs text-slate-500">Lengkapi kategori, kelompok, subkelompok, HS Code, serta uraian barang.</p>
+                            </div>
                         </div>
 
-                        <h2 class="m-0 text-xl font-bold text-slate-800">
-                            {{ $isEdit
-                ? 'Edit Data HS Code'
-                : 'Tambah Data HS Code'
-                                    }}
-                        </h2>
-
-                        <p class="mb-0 mt-1 text-sm text-slate-500">
-                            Lengkapi kategori, kelompok, subkelompok, HS Code, serta uraian barang.
-                        </p>
+                        <button type="button" @click="closeModal()"
+                            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
                     </div>
 
-                    <a href="{{ $closeModalUrl }}"
-                        class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100">
-                        <i class="fa-solid fa-xmark"></i>
-                    </a>
-                </header>
-
-                <form action="{{ $formAction }}" method="POST" class="p-6">
-                    @csrf
-
-                    @if ($isEdit)
-                        @method('PUT')
-                    @endif
+                    <form :action="formAction" method="POST" class="overflow-y-auto p-2 pt-4 flex-1">
+                        @csrf
+                        <template x-if="isEdit">
+                            <input type="hidden" name="_method" value="PUT">
+                        </template>
 
                     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
@@ -773,26 +775,23 @@
                         </div>
                     </div>
 
-                    <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row">
-                        <a href="{{ $closeModalUrl }}"
-                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
-                            Batal
-                        </a>
+                        <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row flex-shrink-0">
+                            <button type="button" @click="closeModal()"
+                                class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                                Batal
+                            </button>
 
-                        <button type="submit"
-                            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
-                            <i class="fa-solid fa-floppy-disk"></i>
-
-                            {{ $isEdit
-                ? 'Simpan Perubahan'
-                : 'Tambah HS Code'
-                                    }}
-                        </button>
-                    </div>
-                </form>
+                            <button type="submit"
+                                class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#145239] hover:bg-[#0E3B29] px-5 text-sm font-semibold text-white shadow-sm transition">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span x-text="isEdit ? 'Simpan Perubahan' : 'Tambah HS Code'"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-    @endif
+        </template>
+    </div>
 
     <div id="deleteHsModal"
         class="fixed inset-0 z-[1000] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
