@@ -103,7 +103,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3.5 text-slate-700 font-medium">{{ $data['klasifikasi'] }}</td>
+                            <td class="px-4 py-3.5 text-slate-700 font-medium">{{ $data['klasifikasi'] ?? ($data['klasifikasi_sektor'] ?? '-') }}</td>
                         </tr>
                     @empty
                         <tr>

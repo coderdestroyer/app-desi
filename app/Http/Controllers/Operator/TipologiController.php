@@ -189,7 +189,10 @@ class TipologiController extends Controller
                 'tahun' => $tahun,
                 'lq' => $lq,
                 'cij' => $cij,
+                'nilai_lq' => $lq,
+                'nilai_ss' => $cij,
                 'kuadran' => $kuadran,
+                'tipologi' => $item->klasifikasi_sektor,
                 'kategori_sektor' => $item->klasifikasi_sektor,
             ];
         });

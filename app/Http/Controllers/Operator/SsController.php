@@ -192,6 +192,8 @@ class SsController extends Controller
                 'komponen_p' => $mij,
                 'komponen_d' => $cij,
                 'total_shift' => $dij,
+                'status_pertumbuhan' => $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat',
+                'status_daya_saing' => $cij >= 0 ? 'Daya Saing Tinggi' : 'Daya Saing Rendah',
                 'kategori_pertumbuhan' => $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat',
                 'kategori_daya_saing' => $cij >= 0 ? 'Daya Saing Baik' : 'Tidak Dapat Bersaing',
             ];
@@ -203,6 +205,7 @@ class SsController extends Controller
             'tingkatWilayah' => $tingkatWilayah,
             'tahun' => $tahun,
             'tahunAwal' => $tahunAwal,
+            'tahunAkhir' => $tahun,
             'sectorData' => $paginatedSectors,
         ]);
     }

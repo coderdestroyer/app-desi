@@ -195,19 +195,6 @@ class DashboardAnalysisService
             ];
         });
     }
-                    'pertumbuhan_kabupaten' => $item['laju_pertumbuhan'],
-                    'pertumbuhan_provinsi' => $item['laju_pertumbuhan_acuan'],
-                    'kontribusi_pdrb' => $item['kontribusi_pdrb'],
-                    'kontribusi_kabupaten' => $item['kontribusi_pdrb'],
-                    'kontribusi_provinsi' => $item['kontribusi_acuan'],
-                    'kuadran' => $item['kuadran'],
-                    'klasifikasi_sektor' => $item['klasifikasi_sektor'],
-                ]);
-            }
-        }
-
-        return $results;
-    }
 
     /** ============ Dashboard LQ ============ */
 
