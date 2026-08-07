@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('filterSearch');
 
     let debounceTimer = null;
+    let currentFetchController = null;
 
     function showLoading() {
         tableContainer.style.opacity = '0.5';
@@ -38,6 +39,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function fetchFilteredData(targetUrl = null) {
+        // Abort previous pending fetch request if a new search/filter is triggered
+        if (currentFetchController) {
+            currentFetchController.abort();
+        }
+        currentFetchController = new AbortController();
+
         showLoading();
 
         const formData = new FormData(form);
@@ -51,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let requestUrl = targetUrl || (form.action + '?' + params.toString());
 
         fetch(requestUrl, {
+            signal: currentFetchController.signal,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -71,10 +79,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
         .catch(err => {
+            if (err.name === 'AbortError') {
+                // Silently ignore aborted requests
+                return;
+            }
             console.error('Live filter error:', err);
         })
         .finally(() => {
-            hideLoading();
+            if (!currentFetchController || !currentFetchController.signal.aborted) {
+                hideLoading();
+            }
         });
     }
 
@@ -98,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const btnSearch = document.getElementById('btnSearchSubmit');
 
-    // Input listener with 300ms Debounce & Enter Key Interceptor for Search Box
+    // Input listener with 450ms Debounce & Enter Key Interceptor for Search Box
     if (searchInput) {
         searchInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
@@ -113,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 fetchFilteredData();
-            }, 300);
+            }, 450);
         });
     }
 
