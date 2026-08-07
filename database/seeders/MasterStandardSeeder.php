@@ -25,7 +25,7 @@ class MasterStandardSeeder extends Seeder
         $header = fgetcsv($handle);
 
         while (($row = fgetcsv($handle)) !== false) {
-            if (empty($row[0])) continue;
+            if (count($row) < 2 || empty($row[0])) continue;
             DB::table('sektor')->updateOrInsert(
                 ['sektor_id' => (int) $row[0]],
                 [
@@ -47,7 +47,7 @@ class MasterStandardSeeder extends Seeder
         $header = fgetcsv($handle);
 
         while (($row = fgetcsv($handle)) !== false) {
-            if (empty($row[0])) continue;
+            if (count($row) < 4 || empty($row[0])) continue;
             DB::table('lokasi')->updateOrInsert(
                 ['id' => (int) $row[0]],
                 [
