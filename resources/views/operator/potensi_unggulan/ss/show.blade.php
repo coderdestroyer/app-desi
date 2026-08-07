@@ -85,7 +85,7 @@
                             <td class="px-4 py-3.5 text-right font-mono text-xs">{{ number_format($data['cij'] ?? 0, 2, ',', '.') }}</td>
                             <td class="px-4 py-3.5 text-right font-mono text-xs font-bold text-[#145239]">{{ number_format($data['dij'] ?? 0, 2, ',', '.') }}</td>
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                @if(str_contains($data['status_pertumbuhan'], 'Cepat'))
+                                @if(str_contains($data['status_pertumbuhan'] ?? ($data['kategori_pertumbuhan'] ?? ''), 'Cepat'))
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                         Cepat
                                     </span>
@@ -96,7 +96,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                @if(str_contains($data['status_daya_saing'], 'Tinggi') || str_contains($data['status_daya_saing'], 'Baik'))
+                                @if(str_contains($data['status_daya_saing'] ?? ($data['kategori_daya_saing'] ?? ''), 'Tinggi') || str_contains($data['status_daya_saing'] ?? ($data['kategori_daya_saing'] ?? ''), 'Baik'))
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                         Tinggi
                                     </span>

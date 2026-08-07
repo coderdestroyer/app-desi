@@ -175,17 +175,27 @@ class KlassenController extends Controller
         $paginatedSectors = $query->paginate(20)->withQueryString();
 
         $paginatedSectors->getCollection()->transform(function ($item) use ($tingkatWilayah, $namaDaerah, $namaPembanding, $tahun, $tahunAwal) {
+            $ri = (float)$item->growth_daerah;
+            $r = (float)$item->growth_pembanding;
+            $yi = (float)$item->share_daerah;
+            $y = (float)$item->share_pembanding;
+
             return [
                 'tingkat_wilayah' => $tingkatWilayah,
                 'daerah_analisis' => $namaDaerah,
                 'daerah_pembanding' => $namaPembanding,
                 'sektor' => $item->sektor->nama_sektor ?? '-',
                 'tahun' => "{$tahunAwal} - {$tahun}",
-                'laju_pertumbuhan' => (float)$item->growth_daerah,
-                'laju_pertumbuhan_acuan' => (float)$item->growth_pembanding,
-                'kontribusi_pdrb' => (float)$item->share_daerah,
-                'kontribusi_acuan' => (float)$item->share_pembanding,
+                'ri' => $ri,
+                'r' => $r,
+                'yi' => $yi,
+                'y' => $y,
+                'laju_pertumbuhan' => $ri,
+                'laju_pertumbuhan_acuan' => $r,
+                'kontribusi_pdrb' => $yi,
+                'kontribusi_acuan' => $y,
                 'kuadran' => $item->kuadran,
+                'klasifikasi' => $item->kategori_kuadran,
                 'klasifikasi_sektor' => $item->kategori_kuadran,
             ];
         });
@@ -196,6 +206,7 @@ class KlassenController extends Controller
             'tingkatWilayah' => $tingkatWilayah,
             'tahun' => $tahun,
             'tahunAwal' => $tahunAwal,
+            'tahunAkhir' => $tahun,
             'sectorData' => $paginatedSectors,
         ]);
     }
