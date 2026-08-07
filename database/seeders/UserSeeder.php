@@ -58,5 +58,36 @@ class UserSeeder extends Seeder
             'provinsi_id' => 12, // Sumatera Utara
             'kabupaten_id' => 1271, // Kota Medan
         ]);
+
+        // 4. Account Admin 2 (Tambahan Admin Baru)
+        User::firstOrCreate(
+            ['email' => 'sudjono.usu@gmail.com'],
+            [
+                'name' => 'Omar Arafat Sudjono',
+                'password' => Hash::make('123456789'),
+                'role' => 'admin',
+                'status' => 'approved',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // 5. Account Operator Provinsi SUMUT 2 (Tambahan Operator Prov. SUMUT Baru)
+        $opSumut2 = User::firstOrCreate(
+            ['email' => 'omar.arafatsudjono@gmail.com'],
+            [
+                'name' => 'Kiky',
+                'password' => Hash::make('123456789'),
+                'role' => 'operator',
+                'status' => 'approved',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        UserWilayahScope::firstOrCreate([
+            'user_id' => $opSumut2->id,
+            'provinsi_id' => 12, // Sumatera Utara
+            'kabupaten_id' => null,
+        ]);
     }
 }
+

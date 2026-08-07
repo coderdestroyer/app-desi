@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             MasterStandardSeeder::class,
             UserSeeder::class,
             PdrbIndikatorSeeder::class,
+            AnalysisSummarySeeder::class,
         ]);
     }
 }
