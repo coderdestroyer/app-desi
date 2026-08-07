@@ -7,10 +7,12 @@
     <form
         action="{{ $action }}"
         method="GET"
+        data-live-filter
+        data-no-loader
         class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12"
     >
-        {{-- Filter Tahun PDB (50%) --}}
-        <div class="relative min-w-0 md:col-span-1 xl:col-span-6">
+        {{-- Filter Tahun PDB --}}
+        <div class="relative min-w-0 md:col-span-1 xl:col-span-11">
             <select
                 name="tahun"
                 id="filterTahun"
@@ -30,22 +32,14 @@
             <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
         </div>
 
-        {{-- Action Buttons (50%) --}}
-        <div class="flex min-w-0 gap-2 md:col-span-1 xl:col-span-6">
-            <button
-                type="submit"
-                class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
-            >
-                <i class="fa-solid fa-filter"></i>
-                <span class="truncate">Terapkan</span>
-            </button>
-
+        {{-- Reset Filter Button --}}
+        <div class="flex min-w-0 items-center justify-end xl:col-span-1">
             <a
                 href="{{ $action }}"
                 title="Reset filter"
-                class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600 shadow-sm"
+                class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs"
             >
-                <i class="fa-solid fa-rotate-left"></i>
+                <i class="fa-solid fa-rotate-left text-sm"></i>
             </a>
         </div>
     </form>

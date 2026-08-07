@@ -458,152 +458,186 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                     </button>
                 </div>
 
-                <form :action="formAction" method="POST" class="overflow-y-auto p-2 pt-4 flex-1">
+                <form :action="formAction" method="POST" class="overflow-y-auto pt-4 flex-1"
+                    x-data="kbkiFormHandler()" @submit="validateSubmit($event)">
                     @csrf
                     <template x-if="isEdit">
                         <input type="hidden" name="_method" value="PUT">
                     </template>
 
             <div class="grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_310px]">
-                <div class="p-5 sm:p-7">
+                <div class="pr-5 lg:pr-8 py-2">
                     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
-                            <label for="struktur" class="mb-2 block text-sm font-bold text-slate-700">
+                            <label class="mb-1 block text-sm font-bold text-slate-700">
                                 Level Struktur <span class="text-red-500">*</span>
                             </label>
-                            <div class="relative">
-                                <select
-                                    id="struktur"
-                                    name="struktur"
-                                    required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                                    <option value="">Pilih level struktur</option>
-                                    @foreach ($structures as $structureOption)
-                                    <option value="{{ $structureOption }}" @selected($selectedStructure===$structureOption)>
-                                        {{ $structureOption }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                            
+                            <input type="hidden" name="struktur" :value="struktur" required>
+
+                            <!-- Dropdown Trigger -->
+                            <div x-data="{ open: false }" class="relative z-50">
+                                <div @click="open = !open"
+                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] bg-white text-sm flex items-center justify-between cursor-pointer hover:border-[#145239] transition-colors shadow-2xs">
+                                    <span x-text="struktur || 'Pilih level struktur...'" :class="struktur ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                </div>
+
+                                <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
+                                    class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-1 space-y-0.5 text-xs">
+                                    <template x-for="opt in strukturOptions" :key="opt">
+                                        <div @click="selectStruktur(opt); open = false"
+                                            :class="struktur === opt ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                            class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                            <span x-text="opt"></span>
+                                            <i x-show="struktur === opt" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
-                            <p id="structureHelp" class="mb-0 mt-2 text-xs leading-relaxed text-slate-400">Pilih posisi data pada hierarki KBKI.</p>
+
+                            <p class="mb-0 mt-2 text-xs leading-relaxed text-slate-400"
+                                x-text="structureConfig ? 'Level ' + structureConfig.level + ' dari 7 pada struktur KBKI.' : 'Pilih posisi data pada hierarki KBKI.'"></p>
+                            
                             @error('struktur')
-                            <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="kode_induk" class="mb-2 block text-sm font-bold text-slate-700">
-                                Induk / Parent <span id="parentRequired" class="text-red-500">*</span>
+                            <label class="mb-1 block text-sm font-bold text-slate-700">
+                                Induk / Parent <span x-show="structureConfig && structureConfig.parentLevel !== null" class="text-red-500">*</span>
                             </label>
-                            <div class="relative">
-                                <select
-                                    id="kode_induk"
-                                    name="kode_induk"
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400">
-                                    <option value="">Pilih level struktur terlebih dahulu</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                            
+                            <input type="hidden" name="kode_induk" :value="kode_induk">
+
+                            <!-- Dropdown Trigger -->
+                            <div class="relative z-40">
+                                <div @click="if(structureConfig && structureConfig.parentLevel !== null) { parentDropdownOpen = !parentDropdownOpen; if(parentDropdownOpen) $nextTick(() => $refs.parentSearchInput.focus()) }"
+                                    :class="(structureConfig && structureConfig.parentLevel !== null) ? 'bg-white cursor-pointer hover:border-[#145239]' : 'bg-slate-50 cursor-not-allowed text-slate-400'"
+                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] text-sm flex items-center justify-between transition-colors shadow-2xs">
+                                    <span x-text="selectedParentLabel" :class="kode_induk ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="parentDropdownOpen ? 'rotate-180' : ''"></i>
+                                </div>
+
+                                <div x-show="parentDropdownOpen" @click.outside="parentDropdownOpen = false" x-transition.origin.top.duration.150ms
+                                    class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2">
+                                    <div class="relative">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                                        <input type="text" x-model="parentSearch" x-ref="parentSearchInput" placeholder="Cari data induk..."
+                                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#CFE3D5] focus:border-[#145239] outline-none">
+                                    </div>
+                                    <div class="max-h-48 overflow-y-auto space-y-0.5 text-xs">
+                                        <template x-for="item in filteredParents" :key="item.kode">
+                                            <div @click="selectParent(item)"
+                                                :class="kode_induk == item.kode ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                                class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                                <span x-text="item.kode + ' — ' + item.judul"></span>
+                                                <i x-show="kode_induk == item.kode" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                            </div>
+                                        </template>
+                                        <template x-if="filteredParents.length === 0">
+                                            <div class="px-3 py-2 text-slate-400 text-center" x-text="parentLoading ? 'Memuat data induk...' : 'Data induk tidak ditemukan'"></div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
+
                             <p class="mb-0 mt-2 text-xs leading-relaxed text-slate-400">Pilihan induk disesuaikan otomatis dengan level struktur.</p>
+                            
                             @error('kode_induk')
-                            <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="kode" class="mb-2 block text-sm font-bold text-slate-700">
+                            <label for="kode" class="mb-1 block text-sm font-bold text-slate-700">
                                 Kode KBKI <span class="text-red-500">*</span>
                             </label>
-                            <input
-                                id="kode"
-                                type="text"
-                                name="kode"
-                                value="{{ $selectedCode }}"
-                                required
-                                autocomplete="off"
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm font-bold text-slate-700 outline-none transition placeholder:font-sans placeholder:font-normal placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                            <p id="codeHelp" class="mb-0 mt-2 text-xs leading-relaxed text-slate-400">Format kode menyesuaikan level struktur.</p>
+                            <input id="kode" type="text" name="kode" x-model="kode" @input="onCodeInput()"
+                                :maxlength="structureConfig ? structureConfig.length : ''"
+                                :placeholder="structureConfig ? structureConfig.placeholder : 'Pilih level struktur'"
+                                required autocomplete="off"
+                                class="h-[42px] w-full rounded-xl border border-[#CFE3D5] px-3.5 font-mono text-sm font-bold tracking-wide text-slate-700 outline-none transition placeholder:font-sans placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs">
+                            <p class="mb-0 mt-2 text-xs leading-relaxed text-slate-400"
+                                x-text="structureConfig ? structureConfig.help : 'Format kode menyesuaikan level struktur.'"></p>
                             @error('kode')
-                            <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="status" class="mb-2 block text-sm font-bold text-slate-700">
+                            <label class="mb-1 block text-sm font-bold text-slate-700">
                                 Status <span class="text-red-500">*</span>
                             </label>
-                            <div class="relative">
-                                <select
-                                    id="status"
-                                    name="status"
-                                    required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                                    <option value="Aktif" @selected($selectedStatus==='Aktif' )>Aktif</option>
-                                    <option value="Nonaktif" @selected($selectedStatus==='Nonaktif' )>Nonaktif</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                            
+                            <input type="hidden" name="status" :value="status" required>
+
+                            <!-- Dropdown Trigger -->
+                            <div x-data="{ open: false }" class="relative z-[30]">
+                                <div @click="open = !open"
+                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] bg-white text-sm flex items-center justify-between cursor-pointer hover:border-[#145239] transition-colors shadow-2xs">
+                                    <span x-text="status || 'Pilih Status...'" :class="status ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                </div>
+
+                                <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
+                                    class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-1 space-y-0.5 text-xs">
+                                    <template x-for="opt in ['Aktif', 'Nonaktif']" :key="opt">
+                                        <div @click="status = opt; open = false"
+                                            :class="status === opt ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                            class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                            <span x-text="opt"></span>
+                                            <i x-show="status === opt" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
+                            
                             @error('status')
-                            <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="judul" class="mb-2 block text-sm font-bold text-slate-700">
+                            <label for="judul" class="mb-1 block text-sm font-bold text-slate-700">
                                 Judul KBKI <span class="text-red-500">*</span>
                             </label>
-                            <textarea
-                                id="judul"
-                                name="judul"
-                                rows="3"
-                                required
+                            <textarea id="judul" name="judul" rows="3" x-model="judul" required
                                 placeholder="Masukkan judul KBKI"
-                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">{{ $selectedTitle }}</textarea>
+                                class="w-full resize-none rounded-xl border border-[#CFE3D5] px-3.5 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs"></textarea>
                             @error('judul')
-                            <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="halaman" class="mb-2 block text-sm font-bold text-slate-700">Halaman</label>
-                            <input
-                                id="halaman"
-                                type="number"
-                                min="1"
-                                name="halaman"
-                                value="{{ $selectedPage }}"
+                            <label for="halaman" class="mb-1 block text-sm font-bold text-slate-700">Halaman</label>
+                            <input id="halaman" type="number" min="1" name="halaman" x-model="halaman"
                                 placeholder="Contoh: 125"
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                class="h-[42px] w-full rounded-xl border border-[#CFE3D5] px-3.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs">
                             @error('halaman')
-                            <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="sumber_sheet" class="mb-2 block text-sm font-bold text-slate-700">Sumber Data</label>
-                            <input
-                                id="sumber_sheet"
-                                type="text"
-                                name="sumber_sheet"
-                                value="{{ $selectedSource }}"
+                            <label for="sumber_sheet" class="mb-1 block text-sm font-bold text-slate-700">Sumber Data</label>
+                            <input id="sumber_sheet" type="text" name="sumber_sheet" x-model="sumber_sheet"
                                 placeholder="Contoh: Input Web"
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                class="h-[42px] w-full rounded-xl border border-[#CFE3D5] px-3.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs">
                             @error('sumber_sheet')
-                            <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="catatan" class="mb-2 block text-sm font-bold text-slate-700">Catatan</label>
-                            <textarea
-                                id="catatan"
-                                name="catatan"
-                                rows="4"
+                            <label for="catatan" class="mb-1 block text-sm font-bold text-slate-700">Catatan</label>
+                            <textarea id="catatan" name="catatan" rows="4" x-model="catatan"
                                 placeholder="Tambahkan catatan bila diperlukan"
-                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">{{ $selectedNote }}</textarea>
+                                class="w-full resize-none rounded-xl border border-[#CFE3D5] px-3.5 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs"></textarea>
                             @error('catatan')
-                            <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                <p class="mb-0 mt-2 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -615,8 +649,24 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                             <i class="fa-solid fa-diagram-project"></i>
                             Preview Hierarki
                         </div>
-                        <div id="hierarchyPreview" class="mt-4 flex flex-wrap items-center gap-2">
-                            <span class="text-xs text-slate-400">Pilih level struktur untuk melihat hierarki.</span>
+                        <div class="mt-4 flex flex-wrap items-center gap-2">
+                            <template x-if="previewChips.length === 0">
+                                <span class="text-xs text-slate-400">Pilih level struktur untuk melihat hierarki.</span>
+                            </template>
+                            <template x-for="(chip, index) in previewChips" :key="index">
+                                <div class="flex items-center gap-2">
+                                    <i x-show="index > 0" class="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
+                                    <span class="inline-flex rounded-lg border px-2.5 py-1 font-mono text-xs font-black"
+                                        :class="chip.struktur === 'Seksi' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
+                                                 chip.struktur === 'Divisi' ? 'border-orange-200 bg-orange-50 text-orange-700' :
+                                                 chip.struktur === 'Kelompok' ? 'border-sky-200 bg-sky-50 text-sky-700' :
+                                                 chip.struktur === 'Kelas' ? 'border-red-200 bg-red-50 text-red-700' :
+                                                 chip.struktur === 'Subkelas' ? 'border-violet-200 bg-violet-50 text-violet-700' :
+                                                 chip.struktur === 'Kelompok Komoditas' ? 'border-pink-200 bg-pink-50 text-pink-700' :
+                                                 'border-cyan-200 bg-cyan-50 text-cyan-700'"
+                                        x-text="chip.code"></span>
+                                </div>
+                            </template>
                         </div>
                     </div>
 
@@ -640,12 +690,12 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
 
                     <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row flex-shrink-0">
                         <button type="button" @click="closeModal()"
-                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
                             Batal
                         </button>
                         <button type="submit"
-                            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#145239] hover:bg-[#0E3B29] px-5 text-sm font-semibold text-white shadow-sm transition">
-                            <i class="fa-solid fa-floppy-disk"></i>
+                            class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i>
                             <span x-text="isEdit ? 'Simpan Perubahan' : 'Simpan Data KBKI'"></span>
                         </button>
                     </div>
@@ -849,330 +899,6 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
             }
         });
 
-        const formModal = document.getElementById('kbkiFormModal');
-        const structureSelect = document.getElementById('struktur');
-        const parentSelect = document.getElementById('kode_induk');
-        const codeInput = document.getElementById('kode');
-        const parentRequired = document.getElementById('parentRequired');
-        const structureHelp = document.getElementById('structureHelp');
-        const codeHelp = document.getElementById('codeHelp');
-        const hierarchyPreview = document.getElementById('hierarchyPreview');
-        const parentOptionsUrl = @json(route('admin.data-kbki.parent-options'));
-        const initialParent = @json($selectedParent);
-        const currentCode = @json($isEdit ? $editData->kode : null);
-        let parentOptions = [];
-
-        const structureConfig = {
-            'Seksi': {
-                level: 1,
-                length: 1,
-                parentLevel: null,
-                placeholder: 'Contoh: 0',
-                help: 'Seksi menggunakan kode 1 digit.'
-            },
-            'Divisi': {
-                level: 2,
-                length: 2,
-                parentLevel: 1,
-                placeholder: 'Contoh: 01',
-                help: 'Divisi menggunakan kode 2 digit.'
-            },
-            'Kelompok': {
-                level: 3,
-                length: 3,
-                parentLevel: 2,
-                placeholder: 'Contoh: 011',
-                help: 'Kelompok menggunakan kode 3 digit.'
-            },
-            'Kelas': {
-                level: 4,
-                length: 4,
-                parentLevel: 3,
-                placeholder: 'Contoh: 0111',
-                help: 'Kelas menggunakan kode 4 digit.'
-            },
-            'Subkelas': {
-                level: 5,
-                length: 5,
-                parentLevel: 4,
-                placeholder: 'Contoh: 01111',
-                help: 'Subkelas menggunakan kode 5 digit.'
-            },
-            'Kelompok Komoditas': {
-                level: 6,
-                length: 7,
-                parentLevel: 5,
-                placeholder: 'Contoh: 0111100',
-                help: 'Kelompok Komoditas menggunakan kode 7 digit.'
-            },
-            'Komoditas': {
-                level: 7,
-                length: 10,
-                parentLevel: 6,
-                placeholder: 'Contoh: 0111100001',
-                help: 'Komoditas menggunakan kode 10 digit.'
-            }
-        };
-
-        const previewClasses = {
-            'Seksi': 'border-emerald-200 bg-emerald-50 text-emerald-700',
-            'Divisi': 'border-orange-200 bg-orange-50 text-orange-700',
-            'Kelompok': 'border-sky-200 bg-sky-50 text-sky-700',
-            'Kelas': 'border-red-200 bg-red-50 text-red-700',
-            'Subkelas': 'border-violet-200 bg-violet-50 text-violet-700',
-            'Kelompok Komoditas': 'border-pink-200 bg-pink-50 text-pink-700',
-            'Komoditas': 'border-cyan-200 bg-cyan-50 text-cyan-700'
-        };
-
-        async function setParentOptions(selectedValue) {
-            if (!parentSelect || !structureSelect) {
-                return;
-            }
-
-            const config = structureConfig[structureSelect.value];
-            parentSelect.innerHTML = '';
-            parentOptions = [];
-
-            if (!config || config.parentLevel === null) {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'Seksi tidak memiliki induk';
-                parentSelect.appendChild(option);
-                parentSelect.disabled = true;
-                parentRequired?.classList.add('hidden');
-                updatePreview();
-                return;
-            }
-
-            parentSelect.disabled = true;
-            parentRequired?.classList.remove('hidden');
-
-            const loadingOption = document.createElement('option');
-            loadingOption.value = '';
-            loadingOption.textContent = 'Memuat data induk...';
-            parentSelect.appendChild(loadingOption);
-
-            const query = new URLSearchParams({
-                level: String(config.parentLevel),
-            });
-
-            if (currentCode) {
-                query.set('exclude', currentCode);
-            }
-
-            try {
-                const response = await fetch(parentOptionsUrl + '?' + query.toString(), {
-                    headers: {
-                        Accept: 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Gagal memuat data induk.');
-                }
-
-                const result = await response.json();
-                parentOptions = Array.isArray(result.data) ? result.data : [];
-                parentSelect.innerHTML = '';
-
-                const placeholder = document.createElement('option');
-                placeholder.value = '';
-                placeholder.textContent = parentOptions.length > 0 ?
-                    'Pilih data induk' :
-                    'Data induk tidak tersedia';
-                parentSelect.appendChild(placeholder);
-
-                parentOptions.forEach(function(optionData) {
-                    const option = document.createElement('option');
-                    option.value = optionData.kode;
-                    option.textContent = optionData.kode + ' — ' + optionData.judul;
-                    option.selected = optionData.kode === selectedValue;
-                    parentSelect.appendChild(option);
-                });
-
-                parentSelect.disabled = parentOptions.length === 0;
-            } catch (error) {
-                parentSelect.innerHTML = '';
-
-                const errorOption = document.createElement('option');
-                errorOption.value = '';
-                errorOption.textContent = 'Data induk gagal dimuat';
-                parentSelect.appendChild(errorOption);
-                parentSelect.disabled = true;
-            }
-
-            updatePreview();
-        }
-
-        function configureCodeInput() {
-            if (!codeInput || !structureSelect) {
-                return;
-            }
-
-            const config = structureConfig[structureSelect.value];
-
-            if (!config) {
-                codeInput.removeAttribute('maxlength');
-                codeInput.removeAttribute('pattern');
-                codeInput.placeholder = 'Pilih level struktur';
-                codeInput.inputMode = 'numeric';
-
-                if (codeHelp) {
-                    codeHelp.textContent = 'Format kode akan menyesuaikan level.';
-                }
-
-                if (structureHelp) {
-                    structureHelp.textContent = 'Pilih posisi data pada hierarki KBKI.';
-                }
-
-                return;
-            }
-
-            codeInput.maxLength = config.length;
-            codeInput.placeholder = config.placeholder;
-            codeInput.inputMode = 'numeric';
-            codeInput.pattern = '[0-9]{' + config.length + '}';
-
-            if (codeHelp) {
-                codeHelp.textContent = config.help;
-            }
-
-            if (structureHelp) {
-                structureHelp.textContent = 'Level ' + config.level + ' dari 7 pada struktur KBKI.';
-            }
-        }
-
-        function createPreviewChip(code, structure) {
-            const chip = document.createElement('span');
-            chip.className = 'inline-flex rounded-lg border px-2.5 py-1 font-mono text-xs font-black ' + (previewClasses[structure] || previewClasses['Seksi']);
-            chip.textContent = code || '—';
-            return chip;
-        }
-
-        function createPreviewArrow() {
-            const arrow = document.createElement('i');
-            arrow.className = 'fa-solid fa-chevron-right text-[9px] text-slate-300';
-            return arrow;
-        }
-
-        function buildHierarchyChain(code) {
-            if (!code) {
-                return [];
-            }
-
-            const hierarchy = [{
-                    length: 1,
-                    structure: 'Seksi'
-                },
-                {
-                    length: 2,
-                    structure: 'Divisi'
-                },
-                {
-                    length: 3,
-                    structure: 'Kelompok'
-                },
-                {
-                    length: 4,
-                    structure: 'Kelas'
-                },
-                {
-                    length: 5,
-                    structure: 'Subkelas'
-                },
-                {
-                    length: 7,
-                    structure: 'Kelompok Komoditas'
-                },
-                {
-                    length: 10,
-                    structure: 'Komoditas'
-                },
-            ];
-
-            return hierarchy
-                .filter((item) => item.length <= code.length)
-                .map((item) => ({
-                    kode: code.slice(0, item.length),
-                    struktur: item.structure,
-                }));
-        }
-
-        function updatePreview() {
-            if (!hierarchyPreview || !structureSelect || !parentSelect || !codeInput) {
-                return;
-            }
-
-            hierarchyPreview.innerHTML = '';
-            const structure = structureSelect.value;
-            const config = structureConfig[structure];
-
-            if (!config) {
-                const empty = document.createElement('span');
-                empty.className = 'text-xs text-slate-400';
-                empty.textContent = 'Pilih level struktur untuk melihat hierarki.';
-                hierarchyPreview.appendChild(empty);
-                return;
-            }
-
-            const chain = buildHierarchyChain(parentSelect.value);
-
-            chain.forEach(function(item, index) {
-                if (index > 0) {
-                    hierarchyPreview.appendChild(createPreviewArrow());
-                }
-
-                hierarchyPreview.appendChild(
-                    createPreviewChip(item.kode, item.struktur)
-                );
-            });
-
-            if (chain.length > 0) {
-                hierarchyPreview.appendChild(createPreviewArrow());
-            }
-
-            hierarchyPreview.appendChild(
-                createPreviewChip(
-                    codeInput.value.trim() || '—',
-                    structure
-                )
-            );
-        }
-
-        structureSelect?.addEventListener('change', async function() {
-            configureCodeInput();
-            await setParentOptions('');
-            updatePreview();
-        });
-
-        parentSelect?.addEventListener('change', function() {
-            const config = structureConfig[structureSelect?.value];
-            const parentCode = parentSelect.value;
-
-            if (config && config.level >= 2 && codeInput && parentCode && !codeInput.value.startsWith(parentCode)) {
-                codeInput.value = parentCode;
-                codeInput.focus();
-                codeInput.setSelectionRange(codeInput.value.length, codeInput.value.length);
-            }
-
-            updatePreview();
-        });
-
-        codeInput?.addEventListener('input', function() {
-            const config = structureConfig[structureSelect?.value];
-
-            if (config) {
-                codeInput.value = codeInput.value.replace(/\D/g, '').slice(0, config.length);
-            }
-
-            updatePreview();
-        });
-
-        if (structureSelect) {
-            configureCodeInput();
-            setParentOptions(initialParent).then(updatePreview);
-        }
-
         document.addEventListener('keydown', function(event) {
             if (event.key !== 'Escape') {
                 return;
@@ -1180,14 +906,180 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
 
             if (deleteModal && !deleteModal.classList.contains('hidden')) {
                 closeDeleteModal();
-                return;
-            }
-
-            if (formModal) {
-                window.location.href = @json($closeModalUrl);
             }
         });
     });
+
+    function kbkiFormHandler() {
+        return {
+            parentOptionsUrl: @json(route('admin.data-kbki.parent-options')),
+            
+            // Selected / Input states (JSON-encoded to avoid quote syntax errors)
+            struktur: @json($selectedStructure ?? ''),
+            kode_induk: @json($selectedParent ?? ''),
+            kode: @json($selectedCode ?? ''),
+            status: @json($selectedStatus ?? 'Aktif'),
+            judul: @json($selectedTitle ?? ''),
+            halaman: @json($selectedPage ?? ''),
+            sumber_sheet: @json($selectedSource ?? ''),
+            catatan: @json($selectedNote ?? ''),
+
+            parentOptions: [],
+            parentLoading: false,
+            strukturDropdownOpen: false,
+            parentDropdownOpen: false,
+            parentSearch: '',
+            strukturOptions: @json($structures),
+
+            get structureConfig() {
+                const config = {
+                    'Seksi': { level: 1, length: 1, parentLevel: null, placeholder: 'Contoh: 0', help: 'Seksi menggunakan kode 1 digit.' },
+                    'Divisi': { level: 2, length: 2, parentLevel: 1, placeholder: 'Contoh: 01', help: 'Divisi menggunakan kode 2 digit.' },
+                    'Kelompok': { level: 3, length: 3, parentLevel: 2, placeholder: 'Contoh: 011', help: 'Kelompok menggunakan kode 3 digit.' },
+                    'Kelas': { level: 4, length: 4, parentLevel: 3, placeholder: 'Contoh: 0111', help: 'Kelas menggunakan kode 4 digit.' },
+                    'Subkelas': { level: 5, length: 5, parentLevel: 4, placeholder: 'Contoh: 01111', help: 'Subkelas menggunakan kode 5 digit.' },
+                    'Kelompok Komoditas': { level: 6, length: 7, parentLevel: 5, placeholder: 'Contoh: 0111100', help: 'Kelompok Komoditas menggunakan kode 7 digit.' },
+                    'Komoditas': { level: 7, length: 10, parentLevel: 6, placeholder: 'Contoh: 0111100001', help: 'Komoditas menggunakan kode 10 digit.' }
+                };
+                return config[this.struktur] || null;
+            },
+
+            get filteredParents() {
+                if (!this.parentOptions) return [];
+                if (this.parentSearch) {
+                    const q = this.parentSearch.toLowerCase();
+                    return this.parentOptions.filter(o => o.kode.toLowerCase().includes(q) || o.judul.toLowerCase().includes(q));
+                }
+                return this.parentOptions;
+            },
+
+            get selectedParentLabel() {
+                if (this.parentLoading) return 'Memuat data induk...';
+                if (!this.kode_induk) {
+                    const config = this.structureConfig;
+                    if (config && config.parentLevel === null) return 'Seksi tidak memiliki induk';
+                    return 'Pilih data induk...';
+                }
+                const found = this.parentOptions.find(o => o.kode === this.kode_induk);
+                return found ? `${found.kode} — ${found.judul}` : this.kode_induk;
+            },
+
+            async selectStruktur(val) {
+                this.struktur = val;
+                this.strukturDropdownOpen = false;
+                await this.fetchParents();
+            },
+
+            selectParent(item) {
+                this.kode_induk = item.kode;
+                this.parentDropdownOpen = false;
+                this.parentSearch = '';
+                const config = this.structureConfig;
+                if (config && config.level >= 2 && this.kode_induk && !this.kode.startsWith(this.kode_induk)) {
+                    this.kode = this.kode_induk;
+                }
+                this.updatePreview();
+            },
+
+            async fetchParents() {
+                const config = this.structureConfig;
+                this.parentOptions = [];
+                this.kode_induk = '';
+                this.parentSearch = '';
+
+                if (!config || config.parentLevel === null) {
+                    this.updatePreview();
+                    return;
+                }
+
+                this.parentLoading = true;
+                const query = new URLSearchParams({
+                    level: String(config.parentLevel),
+                });
+
+                const currentCode = @json($isEdit ? $editData->kode : null);
+                if (currentCode) {
+                    query.set('exclude', currentCode);
+                }
+
+                try {
+                    const response = await fetch(this.parentOptionsUrl + '?' + query.toString(), {
+                        headers: {
+                            Accept: 'application/json',
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Gagal memuat data induk.');
+                    }
+
+                    const result = await response.json();
+                    this.parentOptions = Array.isArray(result.data) ? result.data : [];
+                } catch (error) {
+                    console.error(error);
+                    alert('Gagal memuat data induk.');
+                } finally {
+                    this.parentLoading = false;
+                    this.updatePreview();
+                }
+            },
+
+            onCodeInput() {
+                const config = this.structureConfig;
+                if (config) {
+                    this.kode = this.kode.replace(/\D/g, '').slice(0, config.length);
+                }
+                this.updatePreview();
+            },
+
+            previewChips: [],
+            updatePreview() {
+                const config = this.structureConfig;
+                if (!config) {
+                    this.previewChips = [];
+                    return;
+                }
+
+                const hierarchy = [
+                    { length: 1, structure: 'Seksi' },
+                    { length: 2, structure: 'Divisi' },
+                    { length: 3, structure: 'Kelompok' },
+                    { length: 4, structure: 'Kelas' },
+                    { length: 5, structure: 'Subkelas' },
+                    { length: 7, structure: 'Kelompok Komoditas' },
+                    { length: 10, structure: 'Komoditas' }
+                ];
+
+                const parentCode = this.kode_induk || '';
+                const chips = hierarchy
+                    .filter(item => item.length <= parentCode.length)
+                    .map(item => ({
+                        code: parentCode.slice(0, item.length),
+                        struktur: item.structure
+                    }));
+
+                chips.push({ code: this.kode.trim() || '—', struktur: this.struktur });
+                this.previewChips = chips;
+            },
+
+            async init() {
+                const initialParent = @json($selectedParent);
+                await this.fetchParents();
+                if (initialParent) {
+                    this.kode_induk = initialParent;
+                    this.updatePreview();
+                }
+            },
+
+            validateSubmit(e) {
+                const config = this.structureConfig;
+                if (config && config.parentLevel !== null && !this.kode_induk) {
+                    e.preventDefault();
+                    alert('Data induk wajib dipilih.');
+                }
+            }
+        };
+    }
 </script>
 @endpush
 @endsection
