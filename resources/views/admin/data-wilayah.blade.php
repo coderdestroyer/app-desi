@@ -488,7 +488,7 @@ $statStyles = [
         <div x-show="isModalOpen" x-cloak x-transition @keydown.escape.window="closeModal()"
             class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm">
 
-            <div class="bg-white rounded-2xl max-w-5xl w-full p-6 shadow-2xl border border-emerald-100 relative my-6 max-h-[90vh] flex flex-col overflow-hidden" @click.outside="closeModal()">
+            <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-emerald-100 relative" @click.outside="closeModal()">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
@@ -508,46 +508,54 @@ $statStyles = [
                     </button>
                 </div>
 
-                <form :action="formAction" method="POST" id="wilayahForm" class="overflow-y-auto p-2 pt-4 flex-1">
+                <form :action="formAction" method="POST" id="wilayahForm" class="overflow-y-auto pt-4 flex-1"
+                    x-data="wilayahFormHandler()" @submit="validateSubmit($event)">
                     @csrf
                     <template x-if="isEdit">
                         <input type="hidden" name="_method" value="PUT">
                     </template>
 
-                    <input type="hidden" name="nama_provinsi" id="nama_provinsi" value="{{ $formValues['nama_provinsi'] }}">
+                    <input type="hidden" name="nama_provinsi" id="nama_provinsi" :value="nama_provinsi">
 
-                    <input type="hidden" name="nama_kabupaten" id="nama_kabupaten"
-                        value="{{ $formValues['nama_kabupaten'] }}">
+                    <input type="hidden" name="nama_kabupaten" id="nama_kabupaten" :value="nama_kabupaten">
 
-                    <input type="hidden" name="nama_kecamatan" id="nama_kecamatan"
-                        value="{{ $formValues['nama_kecamatan'] }}">
+                    <input type="hidden" name="nama_kecamatan" id="nama_kecamatan" :value="nama_kecamatan">
 
-                    <input type="hidden" name="nama_desa" id="nama_desa" value="{{ $formValues['nama_desa'] }}">
+                    <input type="hidden" name="nama_desa" id="nama_desa" :value="nama_desa">
 
-                    <div class="grid grid-cols-1 gap-x-8 gap-y-5 md:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
-                            <label for="provinsiSelect" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label class="mb-1 block text-sm font-semibold text-slate-700">
                                 Provinsi
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <div class="relative">
-                                <select id="provinsiSelect" required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                                    <option value="">Memuat data provinsi...</option>
-                                </select>
+                            <!-- Dropdown Select -->
+                            <div class="relative z-[60]">
+                                <div @click="provinceDropdownOpen = !provinceDropdownOpen; if(provinceDropdownOpen) $nextTick(() => $refs.provinceSearchInput.focus())"
+                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] bg-white text-sm flex items-center justify-between cursor-pointer hover:border-[#145239] transition-colors shadow-2xs">
+                                    <span x-text="nama_provinsi || 'Pilih Provinsi...'" :class="nama_provinsi ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="provinceDropdownOpen ? 'rotate-180' : ''"></i>
+                                </div>
 
-                                <input type="text" id="provinsiInlineInput" value="{{ $formValues['nama_provinsi'] }}"
-                                    placeholder="Ketik nama provinsi" autocomplete="off"
-                                    class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-
-                                <button type="button" id="provinsiBackButton" title="Kembali ke daftar provinsi"
-                                    class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600">
-                                    <i class="fa-solid fa-arrow-left"></i>
-                                </button>
-
-                                <i id="provinsiChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                <div x-show="provinceDropdownOpen" @click.outside="provinceDropdownOpen = false" x-transition.origin.top.duration.150ms
+                                    class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2">
+                                    <div class="relative">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                                        <input type="text" x-model="provinceSearch" x-ref="provinceSearchInput" placeholder="Cari provinsi..."
+                                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#CFE3D5] focus:border-[#145239] outline-none">
+                                    </div>
+                                    <div class="max-h-48 overflow-y-auto space-y-0.5 text-xs">
+                                        <template x-for="item in filteredProvinces" :key="item.code">
+                                            <div @click="selectProvince(item)"
+                                                :class="kode_provinsi == item.code ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                                class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                                <span x-text="item.name"></span>
+                                                <i x-show="kode_provinsi == item.code" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
 
                             @error('nama_provinsi')
@@ -558,15 +566,14 @@ $statStyles = [
                         </div>
 
                         <div>
-                            <label for="kode_provinsi" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label for="kode_provinsi" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kode Provinsi
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <input id="kode_provinsi" type="text" name="kode_provinsi"
-                                value="{{ $formValues['kode_provinsi'] }}" maxlength="2" inputmode="numeric"
-                                pattern="[0-9]{2}" placeholder="Contoh: 13" required
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                            <input id="kode_provinsi" type="text" name="kode_provinsi" x-model="kode_provinsi"
+                                maxlength="2" inputmode="numeric" pattern="[0-9]{2}" placeholder="Contoh: 13" required
+                                class="w-full h-[42px] rounded-xl border border-[#CFE3D5] px-3.5 text-sm font-medium text-slate-700 outline-none transition-colors hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs placeholder:text-slate-400">
 
                             <p class="mb-0 mt-1.5 text-xs text-slate-400">
                                 Contoh: 13
@@ -580,28 +587,38 @@ $statStyles = [
                         </div>
 
                         <div>
-                            <label for="kabupatenSelect" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kabupaten/Kota
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <div class="relative">
-                                <select id="kabupatenSelect" disabled required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                                    <option value="">Pilih provinsi terlebih dahulu</option>
-                                </select>
+                            <!-- Dropdown Select -->
+                            <div class="relative z-50">
+                                <div @click="if(kode_provinsi) { regencyDropdownOpen = !regencyDropdownOpen; if(regencyDropdownOpen) $nextTick(() => $refs.regencySearchInput.focus()) }"
+                                    :class="kode_provinsi ? 'bg-white cursor-pointer hover:border-[#145239]' : 'bg-slate-50 cursor-not-allowed text-slate-400'"
+                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] text-sm flex items-center justify-between transition-colors shadow-2xs">
+                                    <span x-text="nama_kabupaten || ( kode_provinsi ? 'Pilih Kabupaten/Kota...' : 'Pilih provinsi terlebih dahulu' )" :class="nama_kabupaten ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="regencyDropdownOpen ? 'rotate-180' : ''"></i>
+                                </div>
 
-                                <input type="text" id="kabupatenInlineInput" value="{{ $formValues['nama_kabupaten'] }}"
-                                    placeholder="Ketik nama kabupaten/kota" autocomplete="off"
-                                    class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-
-                                <button type="button" id="kabupatenBackButton" title="Kembali ke daftar kabupaten/kota"
-                                    class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600">
-                                    <i class="fa-solid fa-arrow-left"></i>
-                                </button>
-
-                                <i id="kabupatenChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                <div x-show="regencyDropdownOpen" @click.outside="regencyDropdownOpen = false" x-transition.origin.top.duration.150ms
+                                    class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2">
+                                    <div class="relative">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                                        <input type="text" x-model="regencySearch" x-ref="regencySearchInput" placeholder="Cari kabupaten/kota..."
+                                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#CFE3D5] focus:border-[#145239] outline-none">
+                                    </div>
+                                    <div class="max-h-48 overflow-y-auto space-y-0.5 text-xs">
+                                        <template x-for="item in filteredRegencies" :key="item.code">
+                                            <div @click="selectRegency(item)"
+                                                :class="kode_kabupaten == item.code ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                                class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                                <span x-text="item.name"></span>
+                                                <i x-show="kode_kabupaten == item.code" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
 
                             @error('nama_kabupaten')
@@ -612,15 +629,14 @@ $statStyles = [
                         </div>
 
                         <div>
-                            <label for="kode_kabupaten" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label for="kode_kabupaten" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kode Kabupaten/Kota
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <input id="kode_kabupaten" type="text" name="kode_kabupaten"
-                                value="{{ $formValues['kode_kabupaten'] }}" maxlength="5" inputmode="numeric"
-                                placeholder="Contoh: 13.01" required
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                            <input id="kode_kabupaten" type="text" name="kode_kabupaten" x-model="kode_kabupaten"
+                                maxlength="5" inputmode="numeric" placeholder="Contoh: 13.01" required
+                                class="w-full h-[42px] rounded-xl border border-[#CFE3D5] px-3.5 text-sm font-medium text-slate-700 outline-none transition-colors hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs placeholder:text-slate-400">
 
                             <p class="mb-0 mt-1.5 text-xs text-slate-400">
                                 Contoh: 13.01
@@ -634,28 +650,38 @@ $statStyles = [
                         </div>
 
                         <div>
-                            <label for="kecamatanSelect" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kecamatan
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <div class="relative">
-                                <select id="kecamatanSelect" disabled required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                                    <option value="">Pilih kabupaten/kota terlebih dahulu</option>
-                                </select>
+                            <!-- Dropdown Select -->
+                            <div class="relative z-40">
+                                <div @click="if(kode_kabupaten) { districtDropdownOpen = !districtDropdownOpen; if(districtDropdownOpen) $nextTick(() => $refs.districtSearchInput.focus()) }"
+                                    :class="kode_kabupaten ? 'bg-white cursor-pointer hover:border-[#145239]' : 'bg-slate-50 cursor-not-allowed text-slate-400'"
+                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] text-sm flex items-center justify-between transition-colors shadow-2xs">
+                                    <span x-text="nama_kecamatan || ( kode_kabupaten ? 'Pilih Kecamatan...' : 'Pilih kabupaten/kota terlebih dahulu' )" :class="nama_kecamatan ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="districtDropdownOpen ? 'rotate-180' : ''"></i>
+                                </div>
 
-                                <input type="text" id="kecamatanInlineInput" value="{{ $formValues['nama_kecamatan'] }}"
-                                    placeholder="Ketik nama kecamatan" autocomplete="off"
-                                    class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-
-                                <button type="button" id="kecamatanBackButton" title="Kembali ke daftar kecamatan"
-                                    class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600">
-                                    <i class="fa-solid fa-arrow-left"></i>
-                                </button>
-
-                                <i id="kecamatanChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                <div x-show="districtDropdownOpen" @click.outside="districtDropdownOpen = false" x-transition.origin.top.duration.150ms
+                                    class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2">
+                                    <div class="relative">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                                        <input type="text" x-model="districtSearch" x-ref="districtSearchInput" placeholder="Cari kecamatan..."
+                                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#CFE3D5] focus:border-[#145239] outline-none">
+                                    </div>
+                                    <div class="max-h-48 overflow-y-auto space-y-0.5 text-xs">
+                                        <template x-for="item in filteredDistricts" :key="item.code">
+                                            <div @click="selectDistrict(item)"
+                                                :class="kode_kecamatan == item.code ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                                class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                                <span x-text="item.name"></span>
+                                                <i x-show="kode_kecamatan == item.code" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
 
                             @error('nama_kecamatan')
@@ -666,15 +692,14 @@ $statStyles = [
                         </div>
 
                         <div>
-                            <label for="kode_kecamatan" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label for="kode_kecamatan" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kode Kecamatan
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <input id="kode_kecamatan" type="text" name="kode_kecamatan"
-                                value="{{ $formValues['kode_kecamatan'] }}" maxlength="8" inputmode="numeric"
-                                placeholder="Contoh: 13.01.01" required
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                            <input id="kode_kecamatan" type="text" name="kode_kecamatan" x-model="kode_kecamatan"
+                                maxlength="8" inputmode="numeric" placeholder="Contoh: 13.01.01" required
+                                class="w-full h-[42px] rounded-xl border border-[#CFE3D5] px-3.5 text-sm font-medium text-slate-700 outline-none transition-colors hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs placeholder:text-slate-400">
 
                             <p class="mb-0 mt-1.5 text-xs text-slate-400">
                                 Contoh: 13.01.01
@@ -688,28 +713,38 @@ $statStyles = [
                         </div>
 
                         <div>
-                            <label for="desaSelect" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label class="mb-1 block text-sm font-semibold text-slate-700">
                                 Desa/Kelurahan
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <div class="relative">
-                                <select id="desaSelect" disabled required
-                                    class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                                    <option value="">Pilih kecamatan terlebih dahulu</option>
-                                </select>
+                            <!-- Dropdown Select -->
+                            <div class="relative z-30">
+                                <div @click="if(kode_kecamatan) { villageDropdownOpen = !villageDropdownOpen; if(villageDropdownOpen) $nextTick(() => $refs.villageSearchInput.focus()) }"
+                                    :class="kode_kecamatan ? 'bg-white cursor-pointer hover:border-[#145239]' : 'bg-slate-50 cursor-not-allowed text-slate-400'"
+                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] text-sm flex items-center justify-between transition-colors shadow-2xs">
+                                    <span x-text="nama_desa || ( kode_kecamatan ? 'Pilih Desa/Kelurahan...' : 'Pilih kecamatan terlebih dahulu' )" :class="nama_desa ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="villageDropdownOpen ? 'rotate-180' : ''"></i>
+                                </div>
 
-                                <input type="text" id="desaInlineInput" value="{{ $formValues['nama_desa'] }}"
-                                    placeholder="Ketik nama desa/kelurahan" autocomplete="off"
-                                    class="hidden h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-
-                                <button type="button" id="desaBackButton" title="Kembali ke daftar desa/kelurahan"
-                                    class="absolute right-3 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-emerald-600">
-                                    <i class="fa-solid fa-arrow-left"></i>
-                                </button>
-
-                                <i id="desaChevron"
-                                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                                <div x-show="villageDropdownOpen" @click.outside="villageDropdownOpen = false" x-transition.origin.top.duration.150ms
+                                    class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2">
+                                    <div class="relative">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                                        <input type="text" x-model="villageSearch" x-ref="villageSearchInput" placeholder="Cari desa/kelurahan..."
+                                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#CFE3D5] focus:border-[#145239] outline-none">
+                                    </div>
+                                    <div class="max-h-48 overflow-y-auto space-y-0.5 text-xs">
+                                        <template x-for="item in filteredVillages" :key="item.code">
+                                            <div @click="selectVillage(item)"
+                                                :class="kode_desa == item.code ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                                class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                                <span x-text="item.name"></span>
+                                                <i x-show="kode_desa == item.code" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
 
                             @error('nama_desa')
@@ -720,14 +755,14 @@ $statStyles = [
                         </div>
 
                         <div>
-                            <label for="kode_desa" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label for="kode_desa" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kode Desa/Kelurahan
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <input id="kode_desa" type="text" name="kode_desa" value="{{ $formValues['kode_desa'] }}"
+                            <input id="kode_desa" type="text" name="kode_desa" x-model="kode_desa"
                                 maxlength="13" inputmode="numeric" placeholder="Contoh: 13.01.01.2001" required
-                                class="h-12 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                class="w-full h-[42px] rounded-xl border border-[#CFE3D5] px-3.5 text-sm font-medium text-slate-700 outline-none transition-colors hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs placeholder:text-slate-400">
 
                             <p class="mb-0 mt-1.5 text-xs text-slate-400">
                                 Contoh: 13.01.01.2001
@@ -742,21 +777,35 @@ $statStyles = [
 
                         @if (Schema::hasColumn('kelurahan_desa', 'status'))
                         <div>
-                            <label for="status" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label class="mb-1 block text-sm font-semibold text-slate-700">
                                 Status
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <select id="status" name="status" required
-                                class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                                <option value="Aktif" @selected(strtolower($selectedStatus)==='aktif' )>
-                                    Aktif
-                                </option>
+                            <input type="hidden" name="status" :value="status" required>
 
-                                <option value="Nonaktif" @selected(strtolower($selectedStatus)==='nonaktif' )>
-                                    Nonaktif
-                                </option>
-                            </select>
+                            <div x-data="{ open: false }" class="relative z-20">
+                                <div @click="open = !open"
+                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] bg-white text-sm flex items-center justify-between cursor-pointer hover:border-[#145239] transition-colors shadow-2xs">
+                                    <span x-text="status" class="text-slate-800 font-medium"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                </div>
+                                <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
+                                    class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-1 space-y-0.5 text-xs">
+                                    <div @click="status = 'Aktif'; open = false"
+                                        :class="status === 'Aktif' ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                        class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                        <span>Aktif</span>
+                                        <i x-show="status === 'Aktif'" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                    </div>
+                                    <div @click="status = 'Nonaktif'; open = false"
+                                        :class="status === 'Nonaktif' ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
+                                        class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
+                                        <span>Nonaktif</span>
+                                        <i x-show="status === 'Nonaktif'" class="fa-solid fa-check text-xs text-[#145239]"></i>
+                                    </div>
+                                </div>
+                            </div>
 
                             @error('status')
                             <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -769,16 +818,13 @@ $statStyles = [
                         @if (Schema::hasColumn('kelurahan_desa', 'keterangan'))
                         <div
                             class="{{ Schema::hasColumn('kelurahan_desa', 'status') ? 'md:col-span-2' : 'md:col-span-2' }}">
-                            <label for="keterangan" class="mb-2 block text-sm font-semibold text-slate-700">
+                            <label for="keterangan" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Keterangan
                             </label>
 
-                            <textarea id="keterangan" name="keterangan" rows="3"
+                            <textarea id="keterangan" name="keterangan" rows="3" x-model="keterangan"
                                 placeholder="Masukkan keterangan tambahan bila diperlukan"
-                                class="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">{{ old(
-                                    'keterangan',
-                                    $isEdit ? ($editData->keterangan ?? '') : ''
-                                ) }}</textarea>
+                                class="w-full resize-y rounded-xl border border-[#CFE3D5] bg-white px-3.5 py-3 text-sm font-medium text-slate-700 outline-none transition-colors hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs placeholder:text-slate-400"></textarea>
 
                             @error('keterangan')
                             <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -791,13 +837,13 @@ $statStyles = [
 
                     <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row flex-shrink-0">
                         <button type="button" @click="closeModal()"
-                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
                             Batal
                         </button>
 
                         <button type="submit"
-                            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#145239] hover:bg-[#0E3B29] px-5 text-sm font-semibold text-white shadow-sm transition">
-                            <i class="fa-solid fa-floppy-disk"></i>
+                            class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i>
                             <span x-text="isEdit ? 'Simpan Perubahan' : 'Simpan Wilayah'"></span>
                         </button>
                     </div>
@@ -937,635 +983,198 @@ $statStyles = [
             }
         });
 
-        const wilayahForm = document.getElementById(
-            'wilayahForm'
-        );
-
-        if (!wilayahForm) {
-            return;
-        }
-
-        const manualValue = '__manual__';
-
-        const endpoints = {
-            provinces: @json(
-                route(
-                    'admin.data-wilayah.options.provinsi'
-                )
-            ),
-            regencies: @json(
-                route(
-                    'admin.data-wilayah.options.kabupaten'
-                )
-            ),
-            districts: @json(
-                route(
-                    'admin.data-wilayah.options.kecamatan'
-                )
-            ),
-            villages: @json(
-                route(
-                    'admin.data-wilayah.options.desa'
-                )
-            ),
-        };
-
-        const initial = {
-            provinceCode: @json(
-                $formValues['kode_provinsi'] ?? ''
-            ),
-            provinceName: @json(
-                $formValues['nama_provinsi'] ?? ''
-            ),
-            regencyCode: @json(
-                $formValues['kode_kabupaten'] ?? ''
-            ),
-            regencyName: @json(
-                $formValues['nama_kabupaten'] ?? ''
-            ),
-            districtCode: @json(
-                $formValues['kode_kecamatan'] ?? ''
-            ),
-            districtName: @json(
-                $formValues['nama_kecamatan'] ?? ''
-            ),
-            villageCode: @json(
-                $formValues['kode_desa'] ?? ''
-            ),
-            villageName: @json(
-                $formValues['nama_desa'] ?? ''
-            ),
-        };
-
-        const levels = {
-            province: {
-                select: document.getElementById(
-                    'provinsiSelect'
-                ),
-                input: document.getElementById(
-                    'provinsiInlineInput'
-                ),
-                back: document.getElementById(
-                    'provinsiBackButton'
-                ),
-                chevron: document.getElementById(
-                    'provinsiChevron'
-                ),
-                hidden: document.getElementById(
-                    'nama_provinsi'
-                ),
-            },
-            regency: {
-                select: document.getElementById(
-                    'kabupatenSelect'
-                ),
-                input: document.getElementById(
-                    'kabupatenInlineInput'
-                ),
-                back: document.getElementById(
-                    'kabupatenBackButton'
-                ),
-                chevron: document.getElementById(
-                    'kabupatenChevron'
-                ),
-                hidden: document.getElementById(
-                    'nama_kabupaten'
-                ),
-            },
-            district: {
-                select: document.getElementById(
-                    'kecamatanSelect'
-                ),
-                input: document.getElementById(
-                    'kecamatanInlineInput'
-                ),
-                back: document.getElementById(
-                    'kecamatanBackButton'
-                ),
-                chevron: document.getElementById(
-                    'kecamatanChevron'
-                ),
-                hidden: document.getElementById(
-                    'nama_kecamatan'
-                ),
-            },
-            village: {
-                select: document.getElementById(
-                    'desaSelect'
-                ),
-                input: document.getElementById(
-                    'desaInlineInput'
-                ),
-                back: document.getElementById(
-                    'desaBackButton'
-                ),
-                chevron: document.getElementById(
-                    'desaChevron'
-                ),
-                hidden: document.getElementById(
-                    'nama_desa'
-                ),
-            },
-        };
-
-        function placeholder(level) {
-            const labels = {
-                province: 'Pilih Provinsi',
-                regency: 'Pilih Kabupaten/Kota',
-                district: 'Pilih Kecamatan',
-                village: 'Pilih Desa/Kelurahan',
-            };
-
-            return labels[level];
-        }
-
-        async function fetchItems(url, parameters = {}) {
-            const query = new URLSearchParams(parameters);
-            const target = query.toString() ?
-                url + '?' + query.toString() :
-                url;
-
-            const response = await fetch(target, {
-                headers: {
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    'Data wilayah gagal dimuat.'
-                );
-            }
-
-            const payload = await response.json();
-
-            return Array.isArray(payload.data) ?
-                payload.data : [];
-        }
-
-        function renderOptions(
-            level,
-            items,
-            selectedCode = '',
-            selectedName = ''
-        ) {
-            const field = levels[level];
-
-            field.select.innerHTML = '';
-
-            const emptyOption =
-                document.createElement('option');
-
-            emptyOption.value = '';
-            emptyOption.textContent = placeholder(level);
-
-            field.select.appendChild(emptyOption);
-
-            items.forEach(function(item) {
-                const option =
-                    document.createElement('option');
-
-                option.value = item.code;
-                option.textContent = item.name;
-                option.dataset.name = item.name;
-
-                if (
-                    selectedCode &&
-                    String(item.code) ===
-                    String(selectedCode)
-                ) {
-                    option.selected = true;
-                }
-
-                field.select.appendChild(option);
-            });
-
-            const manualOption =
-                document.createElement('option');
-
-            manualOption.value = manualValue;
-            manualOption.textContent = 'Lainnya...';
-
-            field.select.appendChild(manualOption);
-            field.select.disabled = false;
-
-            const found = items.some(function(item) {
-                return selectedCode &&
-                    String(item.code) ===
-                    String(selectedCode);
-            });
-
-            if (selectedName && !found) {
-                field.select.value = manualValue;
-                showInlineInput(level, selectedName);
-            } else if (found) {
-                const selected =
-                    field.select.options[
-                        field.select.selectedIndex
-                    ];
-
-                field.hidden.value =
-                    selected?.dataset.name || '';
-            }
-        }
-
-        function resetLevel(level, disabled = true) {
-            const field = levels[level];
-
-            field.select.innerHTML = '';
-
-            const option =
-                document.createElement('option');
-
-            option.value = '';
-            option.textContent = placeholder(level);
-
-            field.select.appendChild(option);
-            field.select.disabled = disabled;
-            field.select.classList.remove('hidden');
-            field.input.classList.add('hidden');
-            field.input.required = false;
-            field.back.classList.add('hidden');
-            field.back.classList.remove('flex');
-            field.chevron.classList.remove('hidden');
-            field.hidden.value = '';
-        }
-
-        function showInlineInput(level, value = '') {
-            const field = levels[level];
-
-            field.select.classList.add('hidden');
-            field.input.classList.remove('hidden');
-            field.input.value = value;
-            field.input.required = true;
-            field.back.classList.remove('hidden');
-            field.back.classList.add('flex');
-            field.chevron.classList.add('hidden');
-            field.hidden.value = value.trim();
-
-            window.setTimeout(function() {
-                field.input.focus();
-                field.input.setSelectionRange(
-                    field.input.value.length,
-                    field.input.value.length
-                );
-            }, 0);
-        }
-
-        function showSelect(level) {
-            const field = levels[level];
-
-            field.input.classList.add('hidden');
-            field.input.required = false;
-            field.select.classList.remove('hidden');
-            field.select.value = '';
-            field.back.classList.add('hidden');
-            field.back.classList.remove('flex');
-            field.chevron.classList.remove('hidden');
-            field.hidden.value = '';
-            field.select.focus();
-        }
-
-        function selectedName(level) {
-            const field = levels[level];
-
-            if (!field.input.classList.contains('hidden')) {
-                return field.input.value.trim();
-            }
-
-            const selected =
-                field.select.options[
-                    field.select.selectedIndex
-                ];
-
-            return selected?.dataset.name || '';
-        }
-
-        function selectedCode(level) {
-            const field = levels[level];
-
-            if (!field.input.classList.contains('hidden')) {
-                return null;
-            }
-
-            return field.select.value || null;
-        }
-
-        function syncHidden(level) {
-            levels[level].hidden.value =
-                selectedName(level);
-        }
-
-        Object.keys(levels).forEach(function(level) {
-            const field = levels[level];
-
-            field.input.addEventListener(
-                'input',
-                function() {
-                    syncHidden(level);
-                }
-            );
-
-            field.back.addEventListener(
-                'click',
-                function() {
-                    showSelect(level);
-
-                    if (level === 'province') {
-                        resetLevel('regency');
-                        resetLevel('district');
-                        resetLevel('village');
-                    }
-
-                    if (level === 'regency') {
-                        resetLevel('district');
-                        resetLevel('village');
-                    }
-
-                    if (level === 'district') {
-                        resetLevel('village');
-                    }
-                }
-            );
-        });
-
-        levels.province.select.addEventListener(
-            'change',
-            async function() {
-                resetLevel('regency');
-                resetLevel('district');
-                resetLevel('village');
-
-                if (
-                    levels.province.select.value ===
-                    manualValue
-                ) {
-                    showInlineInput('province');
-
-                    levels.regency.select.disabled = false;
-                    levels.district.select.disabled = false;
-                    levels.village.select.disabled = false;
-
-                    renderOptions('regency', []);
-                    renderOptions('district', []);
-                    renderOptions('village', []);
-
-                    return;
-                }
-
-                syncHidden('province');
-
-                const code = selectedCode('province');
-
-                if (!code) {
-                    return;
-                }
-
-                const items = await fetchItems(
-                    endpoints.regencies, {
-                        province_code: code,
-                    }
-                );
-
-                renderOptions('regency', items);
-            }
-        );
-
-        levels.regency.select.addEventListener(
-            'change',
-            async function() {
-                resetLevel('district');
-                resetLevel('village');
-
-                if (
-                    levels.regency.select.value ===
-                    manualValue
-                ) {
-                    showInlineInput('regency');
-                    renderOptions('district', []);
-                    renderOptions('village', []);
-                    return;
-                }
-
-                syncHidden('regency');
-
-                const code = selectedCode('regency');
-
-                if (!code) {
-                    return;
-                }
-
-                const items = await fetchItems(
-                    endpoints.districts, {
-                        regency_code: code,
-                    }
-                );
-
-                renderOptions('district', items);
-            }
-        );
-
-        levels.district.select.addEventListener(
-            'change',
-            async function() {
-                resetLevel('village');
-
-                if (
-                    levels.district.select.value ===
-                    manualValue
-                ) {
-                    showInlineInput('district');
-                    renderOptions('village', []);
-                    return;
-                }
-
-                syncHidden('district');
-
-                const code = selectedCode('district');
-
-                if (!code) {
-                    return;
-                }
-
-                const items = await fetchItems(
-                    endpoints.villages, {
-                        district_code: code,
-                    }
-                );
-
-                renderOptions('village', items);
-            }
-        );
-
-        levels.village.select.addEventListener(
-            'change',
-            function() {
-                if (
-                    levels.village.select.value ===
-                    manualValue
-                ) {
-                    showInlineInput('village');
-                    return;
-                }
-
-                syncHidden('village');
-            }
-        );
-
-        wilayahForm.addEventListener(
-            'submit',
-            function(event) {
-                Object.keys(levels).forEach(function(level) {
-                    syncHidden(level);
-                });
-
-                const missing = Object.values(levels)
-                    .some(function(field) {
-                        return !field.hidden.value.trim();
-                    });
-
-                if (missing) {
-                    event.preventDefault();
-                }
-            }
-        );
-
-        async function initializeForm() {
-            resetLevel('province', false);
-            resetLevel('regency');
-            resetLevel('district');
-            resetLevel('village');
-
-            const provinces = await fetchItems(
-                endpoints.provinces
-            );
-
-            renderOptions(
-                'province',
-                provinces,
-                initial.provinceCode,
-                initial.provinceName
-            );
-
-            if (
-                levels.province.select.value &&
-                levels.province.select.value !==
-                manualValue
-            ) {
-                const regencies = await fetchItems(
-                    endpoints.regencies, {
-                        province_code: levels.province.select.value,
-                    }
-                );
-
-                renderOptions(
-                    'regency',
-                    regencies,
-                    initial.regencyCode,
-                    initial.regencyName
-                );
-            } else if (
-                !levels.province.input.classList
-                .contains('hidden')
-            ) {
-                renderOptions(
-                    'regency',
-                    [],
-                    '',
-                    initial.regencyName
-                );
-            }
-
-            if (
-                levels.regency.select.value &&
-                levels.regency.select.value !==
-                manualValue
-            ) {
-                const districts = await fetchItems(
-                    endpoints.districts, {
-                        regency_code: levels.regency.select.value,
-                    }
-                );
-
-                renderOptions(
-                    'district',
-                    districts,
-                    initial.districtCode,
-                    initial.districtName
-                );
-            } else if (
-                !levels.regency.input.classList
-                .contains('hidden')
-            ) {
-                renderOptions(
-                    'district',
-                    [],
-                    '',
-                    initial.districtName
-                );
-            }
-
-            if (
-                levels.district.select.value &&
-                levels.district.select.value !==
-                manualValue
-            ) {
-                const villages = await fetchItems(
-                    endpoints.villages, {
-                        district_code: levels.district.select.value,
-                    }
-                );
-
-                renderOptions(
-                    'village',
-                    villages,
-                    initial.villageCode,
-                    initial.villageName
-                );
-            } else if (
-                !levels.district.input.classList
-                .contains('hidden')
-            ) {
-                renderOptions(
-                    'village',
-                    [],
-                    '',
-                    initial.villageName
-                );
-            }
-        }
-
-        initializeForm().catch(function() {
-            renderOptions(
-                'province',
-                [],
-                '',
-                initial.provinceName
-            );
-
-            renderOptions(
-                'regency',
-                [],
-                '',
-                initial.regencyName
-            );
-
-            renderOptions(
-                'district',
-                [],
-                '',
-                initial.districtName
-            );
-
-            renderOptions(
-                'village',
-                [],
-                '',
-                initial.villageName
-            );
-        });
     });
+
+    function wilayahFormHandler() {
+        return {
+            endpoints: {
+                provinces: @json(route('admin.data-wilayah.options.provinsi')),
+                regencies: @json(route('admin.data-wilayah.options.kabupaten')),
+                districts: @json(route('admin.data-wilayah.options.kecamatan')),
+                villages: @json(route('admin.data-wilayah.options.desa')),
+            },
+            
+            // Dropdown option lists
+            provinces: [],
+            regencies: [],
+            districts: [],
+            villages: [],
+
+            // Selected codes (to query parent-child relationships)
+            kode_provinsi: @json($formValues['kode_provinsi'] ?? ''),
+            kode_kabupaten: @json($formValues['kode_kabupaten'] ?? ''),
+            kode_kecamatan: @json($formValues['kode_kecamatan'] ?? ''),
+            kode_desa: @json($formValues['kode_desa'] ?? ''),
+
+            // Selected names (what gets submitted in hidden inputs / text fields)
+            nama_provinsi: @json($formValues['nama_provinsi'] ?? ''),
+            nama_kabupaten: @json($formValues['nama_kabupaten'] ?? ''),
+            nama_kecamatan: @json($formValues['nama_kecamatan'] ?? ''),
+            nama_desa: @json($formValues['nama_desa'] ?? ''),
+
+            // Open states for the custom dropdowns
+            provinceDropdownOpen: false,
+            regencyDropdownOpen: false,
+            districtDropdownOpen: false,
+            villageDropdownOpen: false,
+
+            // Search inputs for filtering lists
+            provinceSearch: '',
+            regencySearch: '',
+            districtSearch: '',
+            villageSearch: '',
+
+            // Status & Keterangan
+            status: @json($selectedStatus ?? 'Aktif'),
+            keterangan: @json(old('keterangan', $isEdit ? ($editData->keterangan ?? '') : '')),
+
+            // Helper to get filtered items for display
+            get filteredProvinces() {
+                if (!this.provinceSearch) return this.provinces;
+                const q = this.provinceSearch.toLowerCase();
+                return this.provinces.filter(p => p.name.toLowerCase().includes(q));
+            },
+            get filteredRegencies() {
+                if (!this.regencySearch) return this.regencies;
+                const q = this.regencySearch.toLowerCase();
+                return this.regencies.filter(r => r.name.toLowerCase().includes(q));
+            },
+            get filteredDistricts() {
+                if (!this.districtSearch) return this.districts;
+                const q = this.districtSearch.toLowerCase();
+                return this.districts.filter(d => d.name.toLowerCase().includes(q));
+            },
+            get filteredVillages() {
+                if (!this.villageSearch) return this.villages;
+                const q = this.villageSearch.toLowerCase();
+                return this.villages.filter(v => v.name.toLowerCase().includes(q));
+            },
+
+            async init() {
+                // Fetch provinces on initialization
+                try {
+                    this.provinces = await this.fetchItems(this.endpoints.provinces);
+                    
+                    // Pre-load regencies if province selected
+                    if (this.kode_provinsi) {
+                        this.regencies = await this.fetchItems(this.endpoints.regencies, { province_code: this.kode_provinsi });
+                    }
+
+                    // Pre-load districts
+                    if (this.kode_kabupaten) {
+                        this.districts = await this.fetchItems(this.endpoints.districts, { regency_code: this.kode_kabupaten });
+                    }
+
+                    // Pre-load villages
+                    if (this.kode_kecamatan) {
+                        this.villages = await this.fetchItems(this.endpoints.villages, { district_code: this.kode_kecamatan });
+                    }
+                } catch (e) {
+                    console.error('Initial load failed', e);
+                }
+            },
+
+            async fetchItems(url, params = {}) {
+                const query = new URLSearchParams(params);
+                const target = query.toString() ? url + '?' + query.toString() : url;
+                const response = await fetch(target, {
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                if (!response.ok) throw new Error('Failed to fetch items');
+                const payload = await response.json();
+                return Array.isArray(payload.data) ? payload.data : [];
+            },
+
+            async selectProvince(item) {
+                this.kode_provinsi = item.code;
+                this.nama_provinsi = item.name;
+                this.provinceDropdownOpen = false;
+                this.provinceSearch = '';
+
+                // Reset child levels
+                this.resetRegency();
+                this.resetDistrict();
+                this.resetVillage();
+
+                // Load child levels
+                try {
+                    this.regencies = await this.fetchItems(this.endpoints.regencies, { province_code: item.code });
+                } catch (e) {
+                    this.regencies = [];
+                }
+            },
+
+            async selectRegency(item) {
+                this.kode_kabupaten = item.code;
+                this.nama_kabupaten = item.name;
+                this.regencyDropdownOpen = false;
+                this.regencySearch = '';
+
+                // Reset child levels
+                this.resetDistrict();
+                this.resetVillage();
+
+                // Load child levels
+                try {
+                    this.districts = await this.fetchItems(this.endpoints.districts, { regency_code: item.code });
+                } catch (e) {
+                    this.districts = [];
+                }
+            },
+
+            async selectDistrict(item) {
+                this.kode_kecamatan = item.code;
+                this.nama_kecamatan = item.name;
+                this.districtDropdownOpen = false;
+                this.districtSearch = '';
+
+                // Reset child levels
+                this.resetVillage();
+
+                // Load child levels
+                try {
+                    this.villages = await this.fetchItems(this.endpoints.villages, { district_code: item.code });
+                } catch (e) {
+                    this.villages = [];
+                }
+            },
+
+            selectVillage(item) {
+                this.kode_desa = item.code;
+                this.nama_desa = item.name;
+                this.villageDropdownOpen = false;
+                this.villageSearch = '';
+            },
+
+            resetRegency() {
+                this.kode_kabupaten = '';
+                this.nama_kabupaten = '';
+                this.regencies = [];
+            },
+
+            resetDistrict() {
+                this.kode_kecamatan = '';
+                this.nama_kecamatan = '';
+                this.districts = [];
+            },
+
+            resetVillage() {
+                this.kode_desa = '';
+                this.nama_desa = '';
+                this.villages = [];
+            },
+
+            validateSubmit(e) {
+                if (!this.nama_provinsi.trim() || !this.nama_kabupaten.trim() || !this.nama_kecamatan.trim() || !this.nama_desa.trim()) {
+                    e.preventDefault();
+                    alert('Semua wilayah kerja harus terisi.');
+                }
+            }
+        };
+    }
 </script>
 @endpush
 @endsection

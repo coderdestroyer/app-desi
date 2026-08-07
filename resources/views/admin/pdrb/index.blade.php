@@ -164,7 +164,7 @@
                     @empty
                         <tr>
                             <td colspan="7" class="px-5 py-12 text-center text-slate-400">
-                                <i class="fa-solid fa-folder-open text-3xl mb-2 block text-slate-300"></i>
+                                <i class="fa-solid fa-folder-open text-3xl mb-1 block text-slate-300"></i>
                                 Belum ada data PDRB yang terdaftar. Klik <strong>"Inisiasi Data PDRB Baru"</strong> untuk menginputkan data daerah baru.
                             </td>
                         </tr>
