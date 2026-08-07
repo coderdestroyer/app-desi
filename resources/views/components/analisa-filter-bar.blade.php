@@ -9,14 +9,13 @@
 ])
 
 <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-    <form action="{{ $action }}" method="GET" class="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12 items-center">
+    <form action="{{ $action }}" method="GET" id="analisaFilterForm" class="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12 items-center">
         
         {{-- Filter Provinsi --}}
         <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-3' : 'xl:col-span-4' }}">
             <select
                 name="provinsi_id"
                 id="filterProvinsi"
-                onchange="this.form.submit()"
                 class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
             >
                 @if(count($provinsis) > 1)
@@ -41,7 +40,6 @@
                 <select
                     name="kabupaten_id"
                     id="filterKabupaten"
-                    onchange="this.form.submit()"
                     class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 >
                     <option value="">Semua Wilayah (Provinsi & Kab/Kota)</option>
@@ -99,7 +97,6 @@
             <select
                 name="tahun"
                 id="filterTahun"
-                onchange="this.form.submit()"
                 class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
             >
                 <option value="">Semua Tahun</option>
@@ -121,6 +118,7 @@
             <input
                 type="text"
                 name="search"
+                id="filterSearch"
                 value="{{ request('search') }}"
                 placeholder="{{ $searchPlaceholder }}"
                 class="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"

@@ -125,6 +125,15 @@ class TipologiController extends Controller
             $kabupatens = $authorizedKabupatens;
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('operator.potensi_unggulan.tipologi.partials.table', [
+                    'tipologiData' => $paginatedData,
+                ])->render(),
+                'kabupatens' => $kabupatens,
+            ]);
+        }
+
         return view('operator.potensi_unggulan.tipologi.index', [
             'tipologiData' => $paginatedData,
             'editItem' => $editItem,

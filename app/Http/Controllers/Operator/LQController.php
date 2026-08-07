@@ -114,6 +114,15 @@ class LQController extends Controller
             $kabupatens = $authorizedKabupatens;
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('operator.potensi_unggulan.lq.partials.table', [
+                    'lqData' => $paginatedData,
+                ])->render(),
+                'kabupatens' => $kabupatens,
+            ]);
+        }
+
         return view('operator.potensi_unggulan.lq.index', [
             'lqData' => $paginatedData,
             'editItem' => $editItem,
