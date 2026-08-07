@@ -1,7 +1,7 @@
 # Spesifikasi & Struktur Database Terintegrasi (PostgreSQL)
 ## Dashboard Executive Investment DPMPTSP + IPRO Project Calculation Engine
 
-**Versi Database:** 3.1 (Dynamic Real-Time & Regional Scoped Authorization Engine)  
+**Versi Database:** 3.2 (Pre-Calculated Materialized Analysis Engine & Regional Scoped Authorization)  
 **Database Engine:** PostgreSQL 15+  
 **Standar Presisi Uang:** `NUMERIC(20, 2)`  
 **Standar Waktu:** `TIMESTAMPTZ` (`TIMESTAMP WITH TIME ZONE`)  
@@ -10,8 +10,9 @@
 
 ## 1. Arsitektur Relasi Antar Domain Database
 
-Database dirancang dengan prinsip **Single Source of Truth** dan **Hierarchical Regional Authorization**:
-- Seluruh analisis makroekonomi dihitung secara **dinamis (on-the-fly)** dari data PDRB.
+Database dirancang dengan prinsip **Single Source of Truth**, **Pre-Calculated Materialized Analysis Summaries**, dan **Hierarchical Regional Authorization**:
+- Seluruh analisis makroekonomi (LQ, Klassen, Shift-Share, Tipologi Sektor) disimpan dalam **Tabel Rekapitulasi Hasil Analisis** (`summary_lq_results`, `summary_klassen_results`, `summary_shift_share_results`, `summary_tipologi_sektor_results`) untuk memastikan query ultra-cepat dan responsif.
+- Perubahan pada data PDRB Provinsi/Kabupaten atau PDB Nasional memicu **Event-Driven Auto Sync Engine** yang memperbarui tabel rekapitulasi secara terotomatisasi.
 - Pengelolaan data PDRB oleh Operator dibatasi oleh **Scope Wilayah Terdaftar** (`user_wilayah_scopes`).
 - Hak akses tingkat **Provinsi** secara **otomatis mencakup seluruh Kabupaten/Kota di bawahnya**.
 - **Admin** memiliki hak akses global penuh (Nasional, Seluruh Provinsi, dan Seluruh Kabupaten).
@@ -297,7 +298,7 @@ CREATE TABLE pdrb_sumatera_kabupaten (
 
 ---
 
-### DOMAIN 5: Hasil Simulasi & Penyimpanan Analisis Kustom Operator
+### DOMAIN 5: Rekapitulasi Hasil Analisis (Materialized Summaries) & Simulasi Operator
 
 #### 16. Tabel `analysis_results`
 ```sql
@@ -313,11 +314,131 @@ CREATE TABLE analysis_results (
 );
 ```
 
+#### 17. Tabel `summary_lq_results` (Pre-Calculated LQ Summary)
+Menyimpan hasil perhitungan Location Quotient (LQ) per wilayah, sektor, dan tahun.
+```sql
+CREATE TABLE summary_lq_results (
+    id BIGSERIAL PRIMARY KEY,
+    tingkat_wilayah VARCHAR(20) NOT NULL, -- 'provinsi', 'kabupaten'
+    provinsi_id BIGINT NOT NULL REFERENCES provinsi(provinsi_id) ON DELETE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
+    tahun INT NOT NULL,
+    nilai_lq NUMERIC(10, 4) NOT NULL DEFAULT 0.0000,
+    kategori VARCHAR(20) NOT NULL, -- 'Basis', 'Non Basis'
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_summary_lq UNIQUE (provinsi_id, kabupaten_id, sektor_id, tahun)
+);
+
+CREATE INDEX idx_summary_lq_wilayah ON summary_lq_results(provinsi_id, kabupaten_id);
+CREATE INDEX idx_summary_lq_tahun ON summary_lq_results(tahun);
+CREATE INDEX idx_summary_lq_kategori ON summary_lq_results(kategori);
+```
+
+#### 18. Tabel `summary_klassen_results` (Pre-Calculated Klassen Typology Summary)
+Menyimpan hasil perhitungan Tipologi Klassen per wilayah, sektor, dan periode (tahun_awal vs tahun_akhir).
+```sql
+CREATE TABLE summary_klassen_results (
+    id BIGSERIAL PRIMARY KEY,
+    tingkat_wilayah VARCHAR(20) NOT NULL, -- 'provinsi', 'kabupaten'
+    provinsi_id BIGINT NOT NULL REFERENCES provinsi(provinsi_id) ON DELETE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
+    tahun_awal INT NOT NULL,
+    tahun_akhir INT NOT NULL,
+    growth_daerah NUMERIC(10, 4) NOT NULL DEFAULT 0.0000,
+    growth_pembanding NUMERIC(10, 4) NOT NULL DEFAULT 0.0000,
+    share_daerah NUMERIC(10, 4) NOT NULL DEFAULT 0.0000,
+    share_pembanding NUMERIC(10, 4) NOT NULL DEFAULT 0.0000,
+    kuadran VARCHAR(20) NOT NULL, -- 'Kuadran I', 'Kuadran II', 'Kuadran III', 'Kuadran IV'
+    kategori_kuadran VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_summary_klassen UNIQUE (provinsi_id, kabupaten_id, sektor_id, tahun_awal, tahun_akhir)
+);
+
+CREATE INDEX idx_summary_klassen_wilayah ON summary_klassen_results(provinsi_id, kabupaten_id);
+CREATE INDEX idx_summary_klassen_periode ON summary_klassen_results(tahun_awal, tahun_akhir);
+CREATE INDEX idx_summary_klassen_kuadran ON summary_klassen_results(kuadran);
+```
+
+#### 19. Tabel `summary_shift_share_results` (Pre-Calculated Shift-Share Summary)
+Menyimpan hasil komponen Shift-Share (National Growth, Proportional Shift, Differential Shift) per wilayah, sektor, dan periode.
+```sql
+CREATE TABLE summary_shift_share_results (
+    id BIGSERIAL PRIMARY KEY,
+    tingkat_wilayah VARCHAR(20) NOT NULL, -- 'provinsi', 'kabupaten'
+    provinsi_id BIGINT NOT NULL REFERENCES provinsi(provinsi_id) ON DELETE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
+    tahun_awal INT NOT NULL,
+    tahun_akhir INT NOT NULL,
+    n_nij NUMERIC(20, 2) NOT NULL DEFAULT 0.00, -- Pertumbuhan Nasional/Provinsi
+    c_cij NUMERIC(20, 2) NOT NULL DEFAULT 0.00, -- Bauran Industri (Proportional Shift)
+    s_sij NUMERIC(20, 2) NOT NULL DEFAULT 0.00, -- Keunggulan Kompetitif (Differential Shift)
+    d_dij NUMERIC(20, 2) NOT NULL DEFAULT 0.00, -- Perubahan Bersih (Net Change)
+    keunggulan_kompetitif BOOLEAN NOT NULL DEFAULT FALSE,
+    spesialisasi BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_summary_shift_share UNIQUE (provinsi_id, kabupaten_id, sektor_id, tahun_awal, tahun_akhir)
+);
+
+CREATE INDEX idx_summary_ss_wilayah ON summary_shift_share_results(provinsi_id, kabupaten_id);
+CREATE INDEX idx_summary_ss_periode ON summary_shift_share_results(tahun_awal, tahun_akhir);
+```
+
+#### 20. Tabel `summary_tipologi_sektor_results` (Pre-Calculated Sector Typology Summary)
+Menyimpan hasil penggabungan LQ & Shift-Share menjadi Tipologi Sektor.
+```sql
+CREATE TABLE summary_tipologi_sektor_results (
+    id BIGSERIAL PRIMARY KEY,
+    tingkat_wilayah VARCHAR(20) NOT NULL, -- 'provinsi', 'kabupaten'
+    provinsi_id BIGINT NOT NULL REFERENCES provinsi(provinsi_id) ON DELETE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
+    tahun INT NOT NULL,
+    nilai_lq NUMERIC(10, 4) NOT NULL DEFAULT 0.0000,
+    kategori_lq VARCHAR(20) NOT NULL, -- 'Basis', 'Non Basis'
+    shift_share_net NUMERIC(20, 2) NOT NULL DEFAULT 0.00,
+    klasifikasi_sektor VARCHAR(100) NOT NULL, -- 'Sektor Unggulan', 'Sektor Prospektif', 'Sektor Potensial', 'Sektor Tertinggal'
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_summary_tipologi_sektor UNIQUE (provinsi_id, kabupaten_id, sektor_id, tahun)
+);
+
+CREATE INDEX idx_summary_tipologi_wilayah ON summary_tipologi_sektor_results(provinsi_id, kabupaten_id);
+CREATE INDEX idx_summary_tipologi_tahun ON summary_tipologi_sektor_results(tahun);
+CREATE INDEX idx_summary_tipologi_klasifikasi ON summary_tipologi_sektor_results(klasifikasi_sektor);
+```
+
+#### 21. Tabel `summary_indikator_results` (Pre-Calculated Economic Indicators Summary)
+Menyimpan hasil perhitungan Indikator Ekonomi (Laju Pertumbuhan % & Kontribusi PDRB %) per wilayah, sektor, dan tahun.
+```sql
+CREATE TABLE summary_indikator_results (
+    id BIGSERIAL PRIMARY KEY,
+    tingkat_wilayah VARCHAR(20) NOT NULL, -- 'provinsi', 'kabupaten'
+    provinsi_id BIGINT NOT NULL REFERENCES provinsi(provinsi_id) ON DELETE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE CASCADE,
+    sektor_id BIGINT NOT NULL REFERENCES sektor(sektor_id) ON DELETE CASCADE,
+    tahun INT NOT NULL,
+    pertumbuhan NUMERIC(10, 4) NOT NULL DEFAULT 0.0000, -- Laju Pertumbuhan % (YoY)
+    kontribusi NUMERIC(10, 4) NOT NULL DEFAULT 0.0000, -- Kontribusi % terhadap Total PDRB
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unq_summary_indikator UNIQUE (provinsi_id, kabupaten_id, sektor_id, tahun)
+);
+
+CREATE INDEX idx_summary_indikator_wilayah ON summary_indikator_results(provinsi_id, kabupaten_id);
+CREATE INDEX idx_summary_indikator_tahun ON summary_indikator_results(tahun);
+```
+
 ---
 
 ### DOMAIN 6: Engine Proyek Investasi (IPRO Engine)
 
-#### 17. Tabel `projects`
+#### 22. Tabel `projects`
 ```sql
 CREATE TABLE projects (
     id BIGSERIAL PRIMARY KEY,
@@ -345,7 +466,7 @@ CREATE TABLE projects (
 );
 ```
 
-#### 18. Tabel `capex_components`
+#### 23. Tabel `capex_components`
 ```sql
 CREATE TABLE capex_components (
     id BIGSERIAL PRIMARY KEY,
@@ -364,7 +485,7 @@ CREATE TABLE capex_components (
 );
 ```
 
-#### 19. Tabel `pl_components`
+#### 24. Tabel `pl_components`
 ```sql
 CREATE TABLE pl_components (
     id BIGSERIAL PRIMARY KEY,
@@ -379,7 +500,7 @@ CREATE TABLE pl_components (
 );
 ```
 
-#### 20. Tabel `pl_yearly_data`
+#### 25. Tabel `pl_yearly_data`
 ```sql
 CREATE TABLE pl_yearly_data (
     id BIGSERIAL PRIMARY KEY,
