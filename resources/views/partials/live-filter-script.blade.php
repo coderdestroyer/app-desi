@@ -103,6 +103,21 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (newContainer) {
                             htmlContent = newContainer.innerHTML;
                         }
+
+                        // Update filter select dropdowns if updated options were returned by server
+                        form.querySelectorAll('select').forEach(select => {
+                            if (select.name || select.id) {
+                                const selector = select.id ? `#${select.id}` : `select[name="${select.name}"]`;
+                                const newSelect = doc.querySelector(selector);
+                                if (newSelect && newSelect.innerHTML !== select.innerHTML) {
+                                    const val = select.value;
+                                    select.innerHTML = newSelect.innerHTML;
+                                    if (Array.from(select.options).some(opt => opt.value === val)) {
+                                        select.value = val;
+                                    }
+                                }
+                            }
+                        });
                     }
 
                     tableContainer.innerHTML = htmlContent;

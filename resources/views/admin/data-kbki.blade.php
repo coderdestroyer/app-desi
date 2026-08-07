@@ -170,6 +170,8 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
         <form
             action="{{ route('admin.data-kbki.index') }}"
             method="GET"
+            data-live-filter
+            data-no-loader
             class="grid w-full min-w-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12">
             <div class="relative min-w-0 md:col-span-2 xl:col-span-3">
                 <input
@@ -195,7 +197,7 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-            <div class="relative min-w-0 xl:col-span-2">
+            <div class="relative min-w-0 xl:col-span-3">
                 <select
                     name="seksi"
                     class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
@@ -233,24 +235,19 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-            <div class="flex min-w-0 gap-2 md:col-span-1 xl:col-span-2">
-                <button
-                    type="submit"
-                    class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white transition hover:bg-emerald-700">
-                    <i class="fa-solid fa-filter"></i>
-                    Terapkan
-                </button>
+            <div class="flex min-w-0 items-center justify-end xl:col-span-1">
                 <a
                     href="{{ route('admin.data-kbki.index') }}"
                     title="Reset filter"
-                    class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600">
+                    class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-2xs">
                     <i class="fa-solid fa-rotate-left"></i>
                 </a>
             </div>
         </form>
     </section>
 
-    <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div id="tableContainer" class="transition-opacity duration-200">
+        <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <header class="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
                 <h2 class="m-0 text-lg font-black text-slate-900">
@@ -431,6 +428,7 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
         <!-- Pagination Component -->
         <x-pagination :paginator="$paginator" />
     </section>
+</div>
 
     <footer class="pb-2 pt-8 text-center text-xs text-slate-400">
         Copyright &copy; {{ date('Y') }} DPMPTSP Provinsi Sumatera Utara
