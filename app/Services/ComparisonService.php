@@ -54,9 +54,26 @@ class ComparisonService
         $results = collect();
 
         for ($y = $tahunAwal; $y <= $tahunAkhir; $y++) {
-            $lqRows = $this->lqService->calculateLq($kabId, $y)->keyBy('sektor_id');
-            $ssaRows = $this->ssaService->calculateSsa($kabId, $y)->keyBy('sektor_id');
-            $klassenRows = $this->tipologiKlassenService->calculateKlassen($kabId, $y)->keyBy('sektor_id');
+            $lqRows = \App\Models\SummaryLqResult::with('sektor')
+                ->where('tingkat_wilayah', 'kabupaten')
+                ->where('kabupaten_id', $kabId)
+                ->where('tahun', $y)
+                ->get()
+                ->keyBy('sektor_id');
+
+            $ssaRows = \App\Models\SummaryShiftShareResult::with('sektor')
+                ->where('tingkat_wilayah', 'kabupaten')
+                ->where('kabupaten_id', $kabId)
+                ->where('tahun_akhir', $y)
+                ->get()
+                ->keyBy('sektor_id');
+
+            $klassenRows = \App\Models\SummaryKlassenResult::with('sektor')
+                ->where('tingkat_wilayah', 'kabupaten')
+                ->where('kabupaten_id', $kabId)
+                ->where('tahun_akhir', $y)
+                ->get()
+                ->keyBy('sektor_id');
 
             foreach ($klassenRows as $sId => $klassen) {
                 if ($sektorId && $sId !== $sektorId) {
@@ -69,19 +86,19 @@ class ComparisonService
                 $results->push((object) [
                     'kab_id' => $kabId,
                     'sektor_id' => $sId,
-                    'sektor' => (object) ['nama_sektor' => $klassen['sektor']->nama_sektor ?? 'Sektor ' . $sId],
+                    'sektor' => (object) ['nama_sektor' => $klassen->sektor->nama_sektor ?? 'Sektor ' . $sId],
                     'tahun' => $y,
-                    'pertumbuhan_kabupaten' => $klassen['laju_pertumbuhan'],
-                    'pertumbuhan_provinsi' => $klassen['laju_pertumbuhan_acuan'],
-                    'kontribusi_kabupaten' => $klassen['kontribusi_pdrb'],
-                    'kontribusi_provinsi' => $klassen['kontribusi_acuan'],
-                    'kuadran' => $klassen['kuadran'],
-                    'nilai_lq' => $lq['nilai_lq'] ?? 0,
-                    'kategori' => $lq['kategori'] ?? 'Non Basis',
-                    'dij' => $ssa['dij'] ?? 0,
-                    'cij' => $ssa['cij'] ?? 0,
-                    'kategori_pertumbuhan' => $ssa['kategori_pertumbuhan'] ?? '-',
-                    'kategori_daya_saing' => $ssa['kategori_daya_saing'] ?? '-',
+                    'pertumbuhan_kabupaten' => (float)$klassen->growth_daerah,
+                    'pertumbuhan_provinsi' => (float)$klassen->growth_pembanding,
+                    'kontribusi_kabupaten' => (float)$klassen->share_daerah,
+                    'kontribusi_provinsi' => (float)$klassen->share_pembanding,
+                    'kuadran' => $klassen->kuadran,
+                    'nilai_lq' => $lq ? (float)$lq->nilai_lq : 0,
+                    'kategori' => $lq ? $lq->kategori : 'Non Basis',
+                    'dij' => $ssa ? (float)$ssa->d_dij : 0,
+                    'cij' => $ssa ? (float)$ssa->s_sij : 0,
+                    'kategori_pertumbuhan' => $ssa ? ((float)$ssa->d_dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat') : '-',
+                    'kategori_daya_saing' => $ssa ? ((float)$ssa->s_sij >= 0 ? 'Daya Saing Baik' : 'Tidak Dapat Bersaing') : '-',
                 ]);
             }
         }

@@ -4,19 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Kabupaten;
 use App\Models\Provinsi;
-use App\Services\TipologiSektorService;
+use App\Models\SummaryTipologiSektorResult;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class InvestmentMapController extends Controller
 {
-    protected TipologiSektorService $tipologiSektorService;
-
-    public function __construct(TipologiSektorService $tipologiSektorService)
-    {
-        $this->tipologiSektorService = $tipologiSektorService;
-    }
-
     /**
      * Tampilkan halaman peta investasi
      */
@@ -52,7 +45,7 @@ class InvestmentMapController extends Controller
     }
 
     /**
-     * Ambil sektor unggulan & status dominan berdasarkan wilayah secara dinamis
+     * Ambil sektor unggulan & status dominan berdasarkan wilayah dari tabel summary
      */
     public function analysis($nama)
     {
@@ -63,39 +56,42 @@ class InvestmentMapController extends Controller
             $provinsi = Provinsi::whereRaw('UPPER(TRIM(nama_provinsi)) = ?', [strtoupper($nama)])->first();
 
             if ($provinsi) {
-                $tahunTerbaru = DB::table('pdrb_sumatera_provinsi')
+                $tahunTerbaru = SummaryTipologiSektorResult::where('tingkat_wilayah', 'provinsi')
                     ->where('provinsi_id', $provinsi->provinsi_id)
                     ->max('tahun');
 
                 if (!$tahunTerbaru) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Belum ada data PDRB untuk provinsi ini.',
+                        'message' => 'Belum ada data analisis untuk provinsi ini.',
                         'kabupaten' => $provinsi->nama_provinsi,
                     ]);
                 }
 
-                // Hitung secara dinamis Tipologi Sektor Provinsi vs PDB Nasional
-                $tipologiRows = $this->tipologiSektorService->calculateTipologiProvinsi($provinsi->provinsi_id, $tahunTerbaru);
+                // Ambil data tipologi sektor dari tabel summary
+                $tipologiRows = SummaryTipologiSektorResult::with('sektor')
+                    ->where('tingkat_wilayah', 'provinsi')
+                    ->where('provinsi_id', $provinsi->provinsi_id)
+                    ->where('tahun', $tahunTerbaru)
+                    ->get();
 
-                // Hitung jumlah sektor per Kuadran
-                $c1 = $tipologiRows->where('kuadran', 'Kuadran I')->count();
-                $c2 = $tipologiRows->where('kuadran', 'Kuadran II')->count();
-                $c3 = $tipologiRows->where('kuadran', 'Kuadran III')->count();
-                $c4 = $tipologiRows->where('kuadran', 'Kuadran IV')->count();
+                // Hitung jumlah sektor per Klasifikasi / Kuadran
+                $c1 = $tipologiRows->where('klasifikasi_sektor', 'Maju dan Tumbuh Cepat')->count();
+                $c2 = $tipologiRows->where('klasifikasi_sektor', 'Potensial / Cepat Berkembang')->count();
+                $c3 = $tipologiRows->where('klasifikasi_sektor', 'Maju tapi Tertekan')->count();
+                $c4 = $tipologiRows->where('klasifikasi_sektor', 'Relatif Tertinggal')->count();
 
-                // Sektor Unggulan yang ditampilkan (Hirarki: Kuadran I -> II -> III -> IV)
-                $kuadranI = $tipologiRows->where('kuadran', 'Kuadran I')->pluck('sektor.nama_sektor')->filter()->unique()->values();
-                $kuadranII = $tipologiRows->where('kuadran', 'Kuadran II')->pluck('sektor.nama_sektor')->filter()->unique()->values();
-                $kuadranIII = $tipologiRows->where('kuadran', 'Kuadran III')->pluck('sektor.nama_sektor')->filter()->unique()->values();
-                $kuadranIV = $tipologiRows->where('kuadran', 'Kuadran IV')->pluck('sektor.nama_sektor')->filter()->unique()->values();
+                // Sektor Unggulan yang ditampilkan (Hirarki: Maju/Tumbuh -> Potensial -> Tertekan -> Tertinggal)
+                $kuadranI = $tipologiRows->where('klasifikasi_sektor', 'Maju dan Tumbuh Cepat')->pluck('sektor.nama_sektor')->filter()->unique()->values();
+                $kuadranII = $tipologiRows->where('klasifikasi_sektor', 'Potensial / Cepat Berkembang')->pluck('sektor.nama_sektor')->filter()->unique()->values();
+                $kuadranIII = $tipologiRows->where('klasifikasi_sektor', 'Maju tapi Tertekan')->pluck('sektor.nama_sektor')->filter()->unique()->values();
+                $kuadranIV = $tipologiRows->where('klasifikasi_sektor', 'Relatif Tertinggal')->pluck('sektor.nama_sektor')->filter()->unique()->values();
 
                 $sektorTampil = $kuadranI->isNotEmpty() ? $kuadranI
                     : ($kuadranII->isNotEmpty() ? $kuadranII
                     : ($kuadranIII->isNotEmpty() ? $kuadranIII
                     : ($kuadranIV->isNotEmpty() ? $kuadranIV : collect(['Sektor PDRB dalam Proses Pengolahan']))));
 
-                // Algoritma Penentuan Kuadran Dominan + Tie-Breaking Rule (Provinsi vs PDB Nasional)
                 $scores = [
                     'Kuadran I' => ($c1 * 100) + ($c2 * 10) + ($c3 * 1),
                     'Kuadran II' => ($c2 * 100) + ($c1 * 10) + ($c4 * 1),
@@ -132,7 +128,7 @@ class InvestmentMapController extends Controller
                 ]);
             }
 
-            // 2. Cek apakah ini Kabupaten (Pencarian Fleksibel)
+            // 2. Cek apakah ini Kabupaten
             $cleanSearch = strtoupper(str_replace([' ', '.', 'KABUPATEN', 'KOTA', 'KAB'], '', $nama));
 
             $kabupaten = Kabupaten::all()->first(function ($item) use ($cleanSearch) {
@@ -148,8 +144,7 @@ class InvestmentMapController extends Controller
                 ], 404);
             }
 
-            // Ambil tahun terbaru PDRB kabupaten tersebut
-            $tahunTerbaru = DB::table('pdrb_sumatera_kabupaten')
+            $tahunTerbaru = SummaryTipologiSektorResult::where('tingkat_wilayah', 'kabupaten')
                 ->where('kabupaten_id', $kabupaten->kab_id)
                 ->max('tahun');
 
@@ -161,27 +156,28 @@ class InvestmentMapController extends Controller
                 ]);
             }
 
-            // Hitung secara dinamis menggunakan TipologiSektorService (Kabupaten vs Provinsi)
-            $tipologiRows = $this->tipologiSektorService->calculateTipologi($kabupaten->kab_id, $tahunTerbaru);
+            // Ambil data dari summary_tipologi_sektor_results
+            $tipologiRows = SummaryTipologiSektorResult::with('sektor')
+                ->where('tingkat_wilayah', 'kabupaten')
+                ->where('kabupaten_id', $kabupaten->kab_id)
+                ->where('tahun', $tahunTerbaru)
+                ->get();
 
-            // Hitung jumlah sektor per Kuadran
-            $c1 = $tipologiRows->where('kuadran', 'Kuadran I')->count();
-            $c2 = $tipologiRows->where('kuadran', 'Kuadran II')->count();
-            $c3 = $tipologiRows->where('kuadran', 'Kuadran III')->count();
-            $c4 = $tipologiRows->where('kuadran', 'Kuadran IV')->count();
+            $c1 = $tipologiRows->where('klasifikasi_sektor', 'Maju dan Tumbuh Cepat')->count();
+            $c2 = $tipologiRows->where('klasifikasi_sektor', 'Potensial / Cepat Berkembang')->count();
+            $c3 = $tipologiRows->where('klasifikasi_sektor', 'Maju tapi Tertekan')->count();
+            $c4 = $tipologiRows->where('klasifikasi_sektor', 'Relatif Tertinggal')->count();
 
-            // Sektor Unggulan yang ditampilkan (Hirarki: Kuadran I -> II -> III -> IV)
-            $kuadranI = $tipologiRows->where('kuadran', 'Kuadran I')->pluck('sektor.nama_sektor')->filter()->unique()->values();
-            $kuadranII = $tipologiRows->where('kuadran', 'Kuadran II')->pluck('sektor.nama_sektor')->filter()->unique()->values();
-            $kuadranIII = $tipologiRows->where('kuadran', 'Kuadran III')->pluck('sektor.nama_sektor')->filter()->unique()->values();
-            $kuadranIV = $tipologiRows->where('kuadran', 'Kuadran IV')->pluck('sektor.nama_sektor')->filter()->unique()->values();
+            $kuadranI = $tipologiRows->where('klasifikasi_sektor', 'Maju dan Tumbuh Cepat')->pluck('sektor.nama_sektor')->filter()->unique()->values();
+            $kuadranII = $tipologiRows->where('klasifikasi_sektor', 'Potensial / Cepat Berkembang')->pluck('sektor.nama_sektor')->filter()->unique()->values();
+            $kuadranIII = $tipologiRows->where('klasifikasi_sektor', 'Maju tapi Tertekan')->pluck('sektor.nama_sektor')->filter()->unique()->values();
+            $kuadranIV = $tipologiRows->where('klasifikasi_sektor', 'Relatif Tertinggal')->pluck('sektor.nama_sektor')->filter()->unique()->values();
 
             $sektorTampil = $kuadranI->isNotEmpty() ? $kuadranI
                 : ($kuadranII->isNotEmpty() ? $kuadranII
                 : ($kuadranIII->isNotEmpty() ? $kuadranIII
                 : ($kuadranIV->isNotEmpty() ? $kuadranIV : collect(['Sektor PDRB dalam Proses Pengolahan']))));
 
-            // Algoritma Penentuan Kuadran Dominan + Tie-Breaking Rule (Kabupaten vs Provinsi)
             $scores = [
                 'Kuadran I' => ($c1 * 100) + ($c2 * 10) + ($c3 * 1),
                 'Kuadran II' => ($c2 * 100) + ($c1 * 10) + ($c4 * 1),
