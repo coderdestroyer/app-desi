@@ -125,7 +125,8 @@
             >
 
             <button
-                type="submit"
+                type="button"
+                id="btnSearchSubmit"
                 aria-label="Cari Analisis"
                 class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 transition hover:bg-emerald-100"
             >
