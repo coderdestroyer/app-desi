@@ -16,7 +16,9 @@ class LQController extends Controller
 {
     private function getAuthorizedKabupatens($user)
     {
-        return Kabupaten::orderBy('nama_kabupaten')->get();
+        return Cache::remember('master_kabupatens', 3600, function () {
+            return Kabupaten::orderBy('nama_kabupaten')->get();
+        });
     }
 
     public function index(Request $request)
@@ -24,10 +26,10 @@ class LQController extends Controller
         $user = Auth::user();
         $authorizedKabupatens = $this->getAuthorizedKabupatens($user);
 
-        $allYears = SummaryLqResult::distinct()->orderBy('tahun', 'desc')->pluck('tahun');
-        if ($allYears->isEmpty()) {
-            $allYears = collect([2024, 2023, 2022, 2021, 2020]);
-        }
+        $allYears = Cache::remember('summary_lq_available_years', 3600, function () {
+            $years = SummaryLqResult::distinct()->orderBy('tahun', 'desc')->pluck('tahun');
+            return $years->isEmpty() ? collect([2024, 2023, 2022, 2021, 2020]) : $years;
+        });
 
         // Query Rekapitulasi LQ dari Tabel Summary
         $query = SummaryLqResult::with(['provinsi', 'kabupaten'])
@@ -102,7 +104,9 @@ class LQController extends Controller
             $editItem = AnalysisResult::where('type', 'lq')->find((int)$request->edit);
         }
 
-        $provinsis = Provinsi::orderBy('nama_provinsi')->get();
+        $provinsis = Cache::remember('master_provinsis', 3600, function () {
+            return Provinsi::orderBy('nama_provinsi')->get();
+        });
         if ($request->filled('provinsi_id')) {
             $provId = (int)$request->provinsi_id;
             $kabupatens = Kabupaten::where('provinsi_id', $provId)->orderBy('nama_kabupaten')->get();
