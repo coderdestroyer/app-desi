@@ -172,6 +172,8 @@ class AdminPdrbController extends Controller
             ->where('tahun', $tahun)
             ->delete();
 
+        app(\App\Services\AnalysisSyncService::class)->syncKabupaten($kabupaten_id, (int)$tahun);
+
         \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->back()->with('success', "Seluruh data PDRB {$namaKab} Tahun {$tahun} berhasil dihapus dari database.");

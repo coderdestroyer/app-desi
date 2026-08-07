@@ -120,6 +120,8 @@ class AdminPdbNasionalController extends Controller
     {
         PdbNasional::where('tahun', $tahun)->delete();
 
+        app(\App\Services\AnalysisSyncService::class)->syncAll();
+
         Cache::flush();
 
         return redirect()->back()->with('success', "Seluruh data PDB Nasional Tahun {$tahun} berhasil dihapus dari database.");

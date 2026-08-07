@@ -608,6 +608,8 @@ class OperatorController extends Controller
             ->where('tahun', $tahun)
             ->delete();
 
+        app(\App\Services\AnalysisSyncService::class)->syncProvinsi($provinsi_id, (int)$tahun);
+
         \Illuminate\Support\Facades\Cache::flush();
 
         self::logActivity(
@@ -636,6 +638,8 @@ class OperatorController extends Controller
         \App\Models\PdrbSumateraKabupaten::where('kabupaten_id', $kabupaten_id)
             ->where('tahun', $tahun)
             ->delete();
+
+        app(\App\Services\AnalysisSyncService::class)->syncKabupaten($kabupaten_id, (int)$tahun);
 
         \Illuminate\Support\Facades\Cache::flush();
 
