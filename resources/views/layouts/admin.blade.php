@@ -307,6 +307,7 @@
     </div>
 
     @stack('scripts')
+    @include('partials.live-filter-script')
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

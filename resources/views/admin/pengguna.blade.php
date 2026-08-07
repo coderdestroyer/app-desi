@@ -217,7 +217,7 @@
         {{-- ========================================================= --}}
 
         <section class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <form action="{{ route('admin.pengguna.index') }}" method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[190px_190px_minmax(260px,1fr)_auto]">
+            <form action="{{ route('admin.pengguna.index') }}" method="GET" data-live-filter data-no-loader class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[190px_190px_minmax(260px,1fr)_auto]">
                 @if ($hasRoleColumn)
                     <div class="relative">
                         <select name="role" class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
@@ -233,8 +233,10 @@
                     <div class="relative">
                         <select name="status" class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                             <option value="">Semua Status</option>
-                            <option value="Aktif" @selected(strtolower(request('status', '')) === 'aktif')>Aktif</option>
-                            <option value="Suspend" @selected(strtolower(request('status', '')) === 'suspend')>Suspend</option>
+                            <option value="approved" @selected(strtolower(request('status', '')) === 'approved')>Approved</option>
+                            <option value="pending" @selected(strtolower(request('status', '')) === 'pending')>Pending</option>
+                            <option value="rejected" @selected(strtolower(request('status', '')) === 'rejected')>Rejected</option>
+                            <option value="nonactive" @selected(strtolower(request('status', '')) === 'nonactive')>Nonactive</option>
                         </select>
                         <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                     </div>
@@ -248,13 +250,8 @@
                     </button>
                 </div>
 
-                <div class="flex gap-2">
-                    <button type="submit" class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700">
-                        <i class="fa-solid fa-filter"></i>
-                        Terapkan
-                    </button>
-
-                    <a href="{{ route('admin.pengguna.index') }}" title="Reset filter" class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600">
+                <div class="flex items-center justify-end">
+                    <a href="{{ route('admin.pengguna.index') }}" title="Reset filter" class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
                 </div>
@@ -265,7 +262,7 @@
         {{-- TABEL --}}
         {{-- ========================================================= --}}
 
-        <section class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm" style="opacity: 1 !important; transform: none !important;">
+        <section id="tableContainer" class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-opacity duration-200">
             <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">Daftar Pengguna</h2>

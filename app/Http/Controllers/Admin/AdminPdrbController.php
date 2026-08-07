@@ -53,12 +53,12 @@ class AdminPdrbController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = trim($request->search);
+            $search = strtolower(trim($request->search));
             $query->where(function ($q) use ($search) {
                 $q->whereHas('kabupaten', function ($kq) use ($search) {
-                    $kq->where('nama_kabupaten', 'LIKE', "%{$search}%")
+                    $kq->whereRaw('LOWER(nama_kabupaten) LIKE ?', ["%{$search}%"])
                        ->orWhereHas('provinsi', function ($pq) use ($search) {
-                           $pq->where('nama_provinsi', 'LIKE', "%{$search}%");
+                           $pq->whereRaw('LOWER(nama_provinsi) LIKE ?', ["%{$search}%"]);
                        });
                 });
                 if (is_numeric($search)) {
@@ -75,6 +75,14 @@ class AdminPdrbController extends Controller
         $availableYears = PdrbSumateraKabupaten::distinct()
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('admin.pdrb.index', compact(
+                    'pdrbGroups', 'provinsis', 'kabupatens', 'sektors', 'availableYears', 'selectedProvinsiId'
+                ))->render(),
+            ]);
+        }
 
         return view('admin.pdrb.index', compact(
             'pdrbGroups', 'provinsis', 'kabupatens', 'sektors', 'availableYears', 'selectedProvinsiId'

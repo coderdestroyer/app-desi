@@ -1,151 +1,221 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('analisaFilterForm');
-    const tableContainer = document.getElementById('tableContainer');
-    if (!form || !tableContainer) return;
+    const filterForms = document.querySelectorAll('#analisaFilterForm, form[data-live-filter]');
+    
+    filterForms.forEach(form => {
+        initLiveFilter(form);
+    });
 
-    const provinsiSelect = document.getElementById('filterProvinsi');
-    const kabupatenSelect = document.getElementById('filterKabupaten');
-    const tahunSelect = document.getElementById('filterTahun');
-    const searchInput = document.getElementById('filterSearch');
-
-    let debounceTimer = null;
-    let currentFetchController = null;
-
-    function showLoading() {
-        tableContainer.style.opacity = '0.5';
-        tableContainer.style.pointerEvents = 'none';
-    }
-
-    function hideLoading() {
-        tableContainer.style.opacity = '1';
-        tableContainer.style.pointerEvents = 'auto';
-    }
-
-    function updateKabupatenDropdown(kabupatens) {
-        if (!kabupatenSelect || !kabupatens) return;
-        const currentVal = kabupatenSelect.value;
-        kabupatenSelect.innerHTML = '<option value="">Semua Wilayah (Provinsi & Kab/Kota)</option>';
-        
-        kabupatens.forEach(kab => {
-            const opt = document.createElement('option');
-            opt.value = kab.kab_id;
-            opt.textContent = kab.nama_kabupaten;
-            if (String(kab.kab_id) === String(currentVal)) {
-                opt.selected = true;
+    if (filterForms.length === 0) {
+        document.querySelectorAll('form').forEach(form => {
+            const hasSearch = form.querySelector('input[name="search"]');
+            const hasFilterSelect = form.querySelector('select[name="role"], select[name="status"], select[name="struktur"], select[name="seksi"], select[name="kategori"], select[name="provinsi_id"], select[name="kabupaten_id"], select[name="tahun"], select[name="per_page"], select[name="kode_kabupaten"], select[name="kode_kecamatan"]');
+            if (hasSearch || hasFilterSelect) {
+                initLiveFilter(form);
             }
-            kabupatenSelect.appendChild(opt);
         });
     }
 
-    function fetchFilteredData(targetUrl = null) {
-        // Abort previous pending fetch request if a new search/filter is triggered
-        if (currentFetchController) {
-            currentFetchController.abort();
-        }
-        currentFetchController = new AbortController();
+    function initLiveFilter(form) {
+        if (!form || form.dataset.liveFilterInitialized) return;
+        form.dataset.liveFilterInitialized = 'true';
+        form.setAttribute('data-no-loader', 'true');
 
-        showLoading();
+        let tableContainer = document.getElementById('tableContainer') 
+            || form.closest('div, main, body')?.querySelector('#tableContainer, [data-table-container], section.overflow-hidden:has(table), div.overflow-hidden:has(table)');
 
-        const formData = new FormData(form);
-        const params = new URLSearchParams(formData);
-
-        // Clear empty keys
-        for (const [key, value] of Array.from(params.entries())) {
-            if (!value) params.delete(key);
-        }
-
-        let requestUrl = targetUrl || (form.action + '?' + params.toString());
-
-        fetch(requestUrl, {
-            signal: currentFetchController.signal,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Network error');
-            return response.json();
-        })
-        .then(data => {
-            if (data.html) {
-                tableContainer.innerHTML = data.html;
-                window.history.pushState(null, '', requestUrl);
-                if (data.kabupatens) {
-                    updateKabupatenDropdown(data.kabupatens);
+        if (!tableContainer) {
+            let nextEl = form.closest('section, div')?.nextElementSibling;
+            while (nextEl) {
+                if (nextEl.querySelector('table')) {
+                    tableContainer = nextEl;
+                    break;
                 }
-                bindPaginationLinks();
+                nextEl = nextEl.nextElementSibling;
             }
-        })
-        .catch(err => {
-            if (err.name === 'AbortError') {
-                // Silently ignore aborted requests
-                return;
-            }
-            console.error('Live filter error:', err);
-        })
-        .finally(() => {
-            if (!currentFetchController || !currentFetchController.signal.aborted) {
-                hideLoading();
-            }
-        });
-    }
+        }
 
-    function bindPaginationLinks() {
-        const links = tableContainer.querySelectorAll('a.page-link, nav a');
-        links.forEach(link => {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                const url = this.getAttribute('href');
-                if (url && url !== '#') {
-                    fetchFilteredData(url);
+        if (!tableContainer) return;
+        tableContainer.setAttribute('data-no-loader', 'true');
+
+        let debounceTimer = null;
+        let currentFetchController = null;
+
+        function showLoading() {
+            tableContainer.style.transition = 'all 0.2s ease-in-out';
+            tableContainer.style.opacity = '0.35';
+            tableContainer.style.filter = 'blur(3px)';
+            tableContainer.style.pointerEvents = 'none';
+        }
+
+        function hideLoading() {
+            tableContainer.style.opacity = '1';
+            tableContainer.style.filter = 'none';
+            tableContainer.style.pointerEvents = 'auto';
+        }
+
+        function fetchFilteredData(targetUrl = null) {
+            if (currentFetchController) {
+                currentFetchController.abort();
+            }
+            currentFetchController = new AbortController();
+
+            showLoading();
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+
+            for (const [key, value] of Array.from(params.entries())) {
+                if (!value) params.delete(key);
+            }
+
+            let requestUrl = targetUrl || (form.action + (form.action.includes('?') ? '&' : '?') + params.toString());
+
+            fetch(requestUrl, {
+                signal: currentFetchController.signal,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json, text/html'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network error');
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    return response.text().then(htmlText => ({ htmlText }));
+                }
+            })
+            .then(data => {
+                let htmlContent = null;
+                if (data.html) {
+                    htmlContent = data.html;
+                } else if (data.htmlText) {
+                    htmlContent = data.htmlText;
+                }
+
+                if (htmlContent) {
+                    if (htmlContent.includes('<!DOCTYPE html>') || htmlContent.includes('<html') || htmlContent.includes('<body') || htmlContent.includes('id="tableContainer"')) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(htmlContent, 'text/html');
+                        const newContainer = doc.getElementById('tableContainer') || doc.querySelector('[data-table-container]') || doc.querySelector('section.overflow-hidden:has(table), div.overflow-hidden:has(table)');
+                        if (newContainer) {
+                            htmlContent = newContainer.innerHTML;
+                        }
+                    }
+
+                    tableContainer.innerHTML = htmlContent;
+                    window.history.pushState(null, '', requestUrl);
+
+                    if (data.kabupatens) {
+                        const kabupatenSelect = form.querySelector('#filterKabupaten, select[name="kabupaten_id"], select[name="kode_kabupaten"]');
+                        if (kabupatenSelect) {
+                            const currentVal = kabupatenSelect.value;
+                            kabupatenSelect.innerHTML = '<option value="">Semua Wilayah (Provinsi & Kab/Kota)</option>';
+                            data.kabupatens.forEach(kab => {
+                                const opt = document.createElement('option');
+                                opt.value = kab.kab_id || kab.kode_kabupaten;
+                                opt.textContent = kab.nama_kabupaten;
+                                if (String(kab.kab_id || kab.kode_kabupaten) === String(currentVal)) {
+                                    opt.selected = true;
+                                }
+                                kabupatenSelect.appendChild(opt);
+                            });
+                        }
+                    }
+
+                    bindPaginationAndResets();
+                }
+            })
+            .catch(err => {
+                if (err.name === 'AbortError') return;
+                console.error('Live filter error:', err);
+            })
+            .finally(() => {
+                if (!currentFetchController || !currentFetchController.signal.aborted) {
+                    hideLoading();
                 }
             });
+        }
+
+        function bindPaginationAndResets() {
+            const links = tableContainer.querySelectorAll('a.page-link, nav a, .pagination a');
+            links.forEach(link => {
+                link.setAttribute('data-no-loader', 'true');
+                link.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                        e.preventDefault();
+                        fetchFilteredData(href);
+                    }
+                });
+            });
+
+            const resetLinks = form.querySelectorAll('a[title*="Reset"], a[title*="reset"], a.reset-filter') 
+                || document.querySelectorAll('a[title*="Reset"], a[title*="reset"]');
+            resetLinks.forEach(link => {
+                link.setAttribute('data-no-loader', 'true');
+                if (link.dataset.liveResetBound) return;
+                link.dataset.liveResetBound = 'true';
+                link.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href && !href.includes('#') && !href.startsWith('javascript:')) {
+                        e.preventDefault();
+                        form.reset();
+                        form.querySelectorAll('input[type="text"], input[type="search"]').forEach(input => input.value = '');
+                        form.querySelectorAll('select').forEach(select => select.value = '');
+                        fetchFilteredData(href);
+                    }
+                });
+            });
+        }
+
+        form.querySelectorAll('select').forEach(select => {
+            select.removeAttribute('onchange');
+            select.addEventListener('change', () => {
+                clearTimeout(debounceTimer);
+                fetchFilteredData();
+            });
         });
-    }
 
-    // Change Listeners for Dropdowns
-    if (provinsiSelect) provinsiSelect.addEventListener('change', () => fetchFilteredData());
-    if (kabupatenSelect) kabupatenSelect.addEventListener('change', () => fetchFilteredData());
-    if (tahunSelect) tahunSelect.addEventListener('change', () => fetchFilteredData());
+        form.querySelectorAll('input[type="text"], input[type="search"]').forEach(input => {
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearTimeout(debounceTimer);
+                    fetchFilteredData();
+                }
+            });
 
-    const btnSearch = document.getElementById('btnSearchSubmit');
+            input.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    fetchFilteredData();
+                }, 400);
+            });
+        });
 
-    // Input listener with 450ms Debounce & Enter Key Interceptor for Search Box
-    if (searchInput) {
-        searchInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            clearTimeout(debounceTimer);
+            fetchFilteredData();
+            return false;
+        }, true);
+
+        const btnSearch = form.querySelector('button[type="submit"], #btnSearchSubmit');
+        if (btnSearch) {
+            btnSearch.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 clearTimeout(debounceTimer);
                 fetchFilteredData();
-            }
-        });
+            }, true);
+        }
 
-        searchInput.addEventListener('input', () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                fetchFilteredData();
-            }, 450);
-        });
+        bindPaginationAndResets();
     }
-
-    if (btnSearch) {
-        btnSearch.addEventListener('click', function (e) {
-            e.preventDefault();
-            clearTimeout(debounceTimer);
-            fetchFilteredData();
-        });
-    }
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        clearTimeout(debounceTimer);
-        fetchFilteredData();
-    });
-
-    bindPaginationLinks();
 });
 </script>

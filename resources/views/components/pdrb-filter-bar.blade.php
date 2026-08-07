@@ -10,17 +10,16 @@
 ])
 
 <section class="{{ ($tab ?? 'own') === 'all' ? 'mt-4' : 'mt-6' }} rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-    <form action="{{ $action }}" method="GET" class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+    <form action="{{ $action }}" method="GET" data-live-filter data-no-loader class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
         @if($tab)
             <input type="hidden" name="tab" value="{{ $tab }}">
         @endif
 
         {{-- Filter Provinsi --}}
-        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-3' : 'xl:col-span-4' }}">
+        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-3' : 'xl:col-span-3' }}">
             <select
                 name="provinsi_id"
                 id="filterProvinsi"
-                onchange="this.form.submit()"
                 class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
             >
                 @if(count($provinsis) > 1)
@@ -66,7 +65,7 @@
         @endif
 
         {{-- Filter Tahun PDRB --}}
-        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-2' : 'xl:col-span-3' }}">
+        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-2' : 'xl:col-span-2' }}">
             <select
                 name="tahun"
                 id="filterTahun"
@@ -86,8 +85,8 @@
             <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
         </div>
 
-        {{-- Input Search --}}
-        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-2' : 'xl:col-span-3' }}">
+        {{-- Input Search (Panjang) --}}
+        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-3' : 'xl:col-span-6' }}">
             <input
                 type="text"
                 name="search"
@@ -105,22 +104,14 @@
             </button>
         </div>
 
-        {{-- Action Buttons --}}
-        <div class="flex min-w-0 gap-2 md:col-span-2 {{ $kabupatens !== null ? 'xl:col-span-2' : 'xl:col-span-2' }}">
-            <button
-                type="submit"
-                class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
-            >
-                <i class="fa-solid fa-filter"></i>
-                <span class="truncate">Terapkan</span>
-            </button>
-
+        {{-- Reset Filter Button --}}
+        <div class="flex min-w-0 items-center justify-end xl:col-span-1">
             <a
                 href="{{ $action . ($tab ? '?tab='.$tab : '') }}"
                 title="Reset filter"
-                class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600 shadow-sm"
+                class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs"
             >
-                <i class="fa-solid fa-rotate-left"></i>
+                <i class="fa-solid fa-rotate-left text-sm"></i>
             </a>
         </div>
     </form>

@@ -281,5 +281,6 @@
         });
     });
 </script>
+    @include('partials.live-filter-script')
 </body>
 </html>

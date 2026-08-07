@@ -110,6 +110,22 @@ class PenggunaController extends Controller
         $provinsis = Provinsi::orderBy('nama_provinsi')->get();
         $kabupatens = Kabupaten::orderBy('nama_kabupaten')->get();
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('admin.pengguna', compact(
+                    'pengguna',
+                    'stats',
+                    'mode',
+                    'editData',
+                    'hasRoleColumn',
+                    'hasStatusColumn',
+                    'hasScopesTable',
+                    'provinsis',
+                    'kabupatens'
+                ))->render(),
+            ]);
+        }
+
         return view('admin.pengguna', compact(
             'pengguna',
             'stats',
