@@ -96,8 +96,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (kabupatenSelect) kabupatenSelect.addEventListener('change', () => fetchFilteredData());
     if (tahunSelect) tahunSelect.addEventListener('change', () => fetchFilteredData());
 
-    // Input listener with 300ms Debounce for Search Box
+    const btnSearch = document.getElementById('btnSearchSubmit');
+
+    // Input listener with 300ms Debounce & Enter Key Interceptor for Search Box
     if (searchInput) {
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                clearTimeout(debounceTimer);
+                fetchFilteredData();
+            }
+        });
+
         searchInput.addEventListener('input', () => {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
@@ -106,8 +117,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    if (btnSearch) {
+        btnSearch.addEventListener('click', function (e) {
+            e.preventDefault();
+            clearTimeout(debounceTimer);
+            fetchFilteredData();
+        });
+    }
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
+        e.stopPropagation();
+        clearTimeout(debounceTimer);
         fetchFilteredData();
     });
 
