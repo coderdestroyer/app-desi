@@ -536,7 +536,6 @@
                         <input type="hidden" name="userId" :value="userId">
 
                         <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-
                             <div>
                                 <label for="name" class="mb-1 block text-sm font-semibold text-slate-700">
                                     Nama Pengguna

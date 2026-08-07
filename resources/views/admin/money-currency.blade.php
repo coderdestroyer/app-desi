@@ -438,7 +438,7 @@
                             for="amount"
                             id="amountLabel"
                             class="
-                                mb-2
+                                mb-1
                                 block
                                 text-sm
                                 font-semibold
@@ -587,7 +587,7 @@
                     <div>
                         <label
                             class="
-                                mb-2
+                                mb-1
                                 block
                                 text-sm
                                 font-semibold
@@ -712,7 +712,7 @@
                     <div>
                         <label
                             class="
-                                mb-2
+                                mb-1
                                 block
                                 text-sm
                                 font-semibold
