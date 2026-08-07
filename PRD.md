@@ -1,8 +1,8 @@
 # Product Requirement Document (PRD) - Integrated Final
 ## Executive Dashboard for Sumatera Investment & Investment Opportunity Calculation Engine (Web DPMPTSP)
 
-**Versi Dokumen:** 3.1 (Hierarchical Regional Scoped Authorization & PDRB Engine)  
-**Tanggal:** 1 Agustus 2026  
+**Versi Dokumen:** 3.2 (Pre-Calculated Materialized Analysis Engine & Regional Scoped Authorization)  
+**Tanggal:** 7 Agustus 2026  
 **Status:** Active Development / Scoped Multi-Tenant Architecture  
 **DBMS Target:** PostgreSQL 15+  
 **Target Pengguna:** Investor & Pengunjung Umum (Guest), Operator Data Wilayah/Provinsi/Kabupaten, Administrator Sistem.
@@ -20,8 +20,9 @@
      - **Scope Kabupaten**: Jika Operator ditugaskan pada Kabupaten/Kota tertentu (misal: Kota Medan), Operator hanya dapat mengelola data PDRB Kabupaten/Kota tersebut.
    - **Pencegahan Duplikasi & Out-of-Sync**: Sistem mencegah konflik antar-operator melalui middleware & policy otorisasi wilayah (`user_wilayah_scopes`).
 
-2. **Kalkulasi Makroekonomi Dinamis (Dynamic Real-Time Calculation)**:
-   - Seluruh 4 metode analisis makroekonomi (*Location Quotient*, *Shift-Share*, *Tipologi Sektor*, dan *Tipologi Klassen*) dihitung secara **on-the-fly di Service Layer** berbasis data PDRB terkini.
+2. **Mesin Rekapitulasi & Kalkulasi Analisis Makroekonomi (Pre-Calculated Materialized Analysis Engine)**:
+   - Seluruh 5 metode analisis/indikator makroekonomi (*Location Quotient*, *Shift-Share*, *Tipologi Sektor*, *Tipologi Klassen*, dan *Indikator Pertumbuhan & Kontribusi Ekonomi*) disimpan dalam **Tabel Rekapitulasi Hasil Analisis** (`summary_lq_results`, `summary_klassen_results`, `summary_shift_share_results`, `summary_tipologi_sektor_results`, `summary_indikator_results`) untuk memastikan responsivitas halaman ultra-cepat (sub-second query).
+   - **Event-Driven Automatic Sync**: Ketika terjadi perubahan/entry/edit data PDRB Provinsi, PDRB Kabupaten, atau PDB Nasional, sistem secara otomatis melakukan re-kalkulasi dan memperbarui (*sync*) data pada tabel rekapitulasi hasil analisis terkait.
 
 3. **Peluang Investasi Daerah (IPRO Project Calculation Engine)**:
    - Digitalisasi penyusunan dokumen kelayakan finansial proyek IPRO (CAPEX, P&L, & Auto Dynamic Cash Flow).
@@ -46,6 +47,9 @@ graph TD
     
     C -->|Kabupaten Scope| E[Operator Scope Kabupaten]
     E --> E1[CRUD PDRB Spesifik Kabupaten Ybs Only]
+    
+    D1 & D2 & E1 -->|Trigger Sync| F[Auto Event-Driven Re-calculation Engine]
+    F -->|Populate/Update| G[Materialized Analysis Summary Tables]
 ```
 
 ### 2.1 Aturan Otorisasi Hirarki Wilayah
@@ -58,9 +62,9 @@ graph TD
 
 ---
 
-## 3. Spesifikasi Database Terintegrasi (PostgreSQL Clean Engine v3.1)
+## 3. Spesifikasi Database Terintegrasi (PostgreSQL Clean Engine v3.2)
 
-Database menggunakan DBMS **PostgreSQL 15+** dengan 20 tabel terintegrasi yang terbagi ke dalam 6 Domain Utama:
+Database menggunakan DBMS **PostgreSQL 15+** dengan 25 tabel terintegrasi yang terbagi ke dalam 6 Domain Utama:
 
 ```
 📂 DATABASE SCHEMA (PostgreSQL)
@@ -68,7 +72,7 @@ Database menggunakan DBMS **PostgreSQL 15+** dengan 20 tabel terintegrasi yang t
 ├── 🗺️ Domain 2: Regional & GIS (provinsi, kabupaten, kecamatan, kelurahan_desa)
 ├── 📋 Domain 3: Master Standards (sektor, data_kbli, data_kbki, data_hs_code)
 ├── 📊 Domain 4: Macro Data PDRB (pdb_nasional, pdrb_sumatera_provinsi, pdrb_sumatera_kabupaten)
-├── 📈 Domain 5: Operator Custom Simulations (analysis_results)
+├── 📈 Domain 5: Materialized Analysis Summaries & Custom Simulations (analysis_results, summary_lq_results, summary_klassen_results, summary_shift_share_results, summary_tipologi_sektor_results, summary_indikator_results)
 └── 💼 Domain 6: Micro Financial Projects (projects, capex_components, pl_components, pl_yearly_data)
 ```
 
