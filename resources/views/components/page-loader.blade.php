@@ -32,20 +32,45 @@
         if (!loader) return;
 
         let isHiding = false;
+        let isNavigating = false;
+        let hideTimer = null;
+        let domContentTimer = null;
+        let safetyTimer = null;
+
+        function clearAllTimers() {
+            if (hideTimer) {
+                clearTimeout(hideTimer);
+                hideTimer = null;
+            }
+            if (domContentTimer) {
+                clearTimeout(domContentTimer);
+                domContentTimer = null;
+            }
+            if (safetyTimer) {
+                clearTimeout(safetyTimer);
+                safetyTimer = null;
+            }
+        }
 
         function hideLoader() {
+            if (isNavigating) return;
             if (isHiding) return;
+
             isHiding = true;
             loader.style.opacity = '0';
-            setTimeout(() => {
+            hideTimer = setTimeout(() => {
                 loader.style.display = 'none';
                 loader.style.pointerEvents = 'none';
                 isHiding = false;
+                hideTimer = null;
             }, 300);
         }
 
         function showLoader() {
+            isNavigating = true;
+            clearAllTimers();
             isHiding = false;
+
             loader.style.display = 'flex';
             loader.style.pointerEvents = 'auto';
             requestAnimationFrame(() => {
@@ -54,17 +79,16 @@
         }
 
         // Hide loader on initial load completion
+        safetyTimer = setTimeout(hideLoader, 3000);
+
         if (document.readyState === 'complete') {
             hideLoader();
         } else {
-            window.addEventListener('load', hideLoader);
+            window.addEventListener('load', hideLoader, { once: true });
             document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(hideLoader, 200);
-            });
+                domContentTimer = setTimeout(hideLoader, 200);
+            }, { once: true });
         }
-
-        // Safety timeout fallback (3 seconds max)
-        setTimeout(hideLoader, 3000);
 
         // Show loader on page navigation / unload
         window.addEventListener('beforeunload', function () {
@@ -74,6 +98,7 @@
         // Handle page restoration from back/forward cache
         window.addEventListener('pageshow', function (event) {
             if (event.persisted) {
+                isNavigating = false;
                 hideLoader();
             }
         });
@@ -94,7 +119,12 @@
                 target === '_blank' || 
                 e.ctrlKey || 
                 e.metaKey || 
-                link.hasAttribute('download')) {
+                link.hasAttribute('download') ||
+                link.hasAttribute('data-no-loader')) {
+                return;
+            }
+
+            if (link.href === window.location.href) {
                 return;
             }
 
