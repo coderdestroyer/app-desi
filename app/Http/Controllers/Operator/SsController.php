@@ -125,6 +125,15 @@ class SsController extends Controller
             $kabupatens = $authorizedKabupatens;
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('operator.potensi_unggulan.ss.partials.table', [
+                    'ssData' => $paginatedData,
+                ])->render(),
+                'kabupatens' => $kabupatens,
+            ]);
+        }
+
         return view('operator.potensi_unggulan.ss.index', [
             'ssData' => $paginatedData,
             'editItem' => $editItem,

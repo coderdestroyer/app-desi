@@ -127,6 +127,15 @@ class KlassenController extends Controller
             $kabupatens = $authorizedKabupatens;
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('operator.potensi_unggulan.klassen.partials.table', [
+                    'klassenData' => $paginatedData,
+                ])->render(),
+                'kabupatens' => $kabupatens,
+            ]);
+        }
+
         return view('operator.potensi_unggulan.klassen.index', [
             'klassenData' => $paginatedData,
             'editItem' => $editItem,
