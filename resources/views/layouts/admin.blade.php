@@ -49,6 +49,8 @@
 </head>
 
 <body class="font-['Poppins',sans-serif] text-[#202b3c] bg-[#f7f9fb] min-h-screen m-0">
+    <x-page-loader />
+
     <button
         type="button"
         id="mobileSidebarButton"

@@ -102,10 +102,6 @@
 
         {{-- Action Buttons Footer --}}
         <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
-            <a href="{{ route('operator.pdrb.index') }}" class="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition-colors">
-                <i class="fa-solid fa-arrow-left text-xs mr-1"></i>
-                Kembali ke Daftar PDRB
-            </a>
             @if(!($isReadOnly ?? false))
                 <button type="submit" class="px-8 py-3.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-sm font-extrabold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2.5 transform hover:-translate-y-0.5">
                     <i class="fa-solid fa-floppy-disk text-base"></i>
