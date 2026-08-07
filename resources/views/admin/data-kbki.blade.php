@@ -70,7 +70,24 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
 
 
 
-<div class="min-h-screen bg-[#f7f9fc] p-4 sm:p-6 lg:p-8">
+<div class="min-h-screen bg-[#f7f9fc] p-4 sm:p-6 lg:p-8 space-y-6" x-data="{
+        isModalOpen: {{ (session('errors') || old('kode') || $isModalOpen) ? 'true' : 'false' }},
+        isEdit: {{ (old('_method') === 'PUT' || $isEdit) ? 'true' : 'false' }},
+        formAction: '{{ old('_method') === 'PUT' || $isEdit ? route('admin.data-kbki.update', old('kbki_id', $isEdit ? $editData->id : 0)) : route('admin.data-kbki.store') }}',
+
+        openCreateModal() {
+            this.isEdit = false;
+            this.formAction = '{{ route('admin.data-kbki.store') }}';
+            this.isModalOpen = true;
+        },
+
+        closeModal() {
+            this.isModalOpen = false;
+            if (window.location.search) {
+                window.location.href = '{{ route('admin.data-kbki.index') }}';
+            }
+        }
+    }">
     <section
             class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="relative z-10 space-y-2">
@@ -91,7 +108,7 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 @if ($columnsReady)
                 <button
                     type="button"
-                    onclick="window.location.href='{{ $createUrl }}'"
+                    @click="openCreateModal()"
                     class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
                     <i class="fa-solid fa-plus text-sm"></i>
                     <span>Tambah KBKI</span>
@@ -418,32 +435,34 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
     <footer class="pb-2 pt-8 text-center text-xs text-slate-400">
         Copyright &copy; {{ date('Y') }} DPMPTSP Provinsi Sumatera Utara
     </footer>
-</div>
 
-@if ($isModalOpen)
-<div id="kbkiFormModal" class="fixed inset-0 z-[999] flex items-start justify-center overflow-y-auto bg-slate-950/55 p-3 backdrop-blur-sm sm:p-6">
-    <div class="my-auto w-full max-w-6xl overflow-hidden rounded-3xl border border-white/20 bg-white shadow-2xl">
-        <header class="flex items-start justify-between gap-5 border-b border-slate-200 px-5 py-5 sm:px-7">
-            <div>
-                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-700">
-                    <i class="fa-solid {{ $isEdit ? 'fa-pen-to-square' : 'fa-plus' }}"></i>
-                    {{ $isEdit ? 'Perbarui Data' : 'Data Baru' }}
+    <template x-teleport="body">
+        <div x-show="isModalOpen" x-cloak x-transition @keydown.escape.window="closeModal()"
+            class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm">
+
+            <div class="bg-white rounded-2xl max-w-6xl w-full p-6 shadow-2xl border border-emerald-100 relative my-6 max-h-[90vh] flex flex-col overflow-hidden" @click.outside="closeModal()">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                            <i class="fa-solid" :class="isEdit ? 'fa-pen-to-square' : 'fa-plus'"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base" x-text="isEdit ? 'Edit Data KBKI 2015' : 'Tambah Data KBKI 2015'"></h3>
+                            <p class="text-xs text-slate-500">Isi data sesuai level dan hubungan induk pada struktur KBKI.</p>
+                        </div>
+                    </div>
+
+                    <button type="button" @click="closeModal()"
+                        class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
                 </div>
-                <h2 class="m-0 text-xl font-black text-slate-900 sm:text-2xl">
-                    {{ $isEdit ? 'Edit Data KBKI 2015' : 'Tambah Data KBKI 2015' }}
-                </h2>
-                <p class="mb-0 mt-1 text-sm text-slate-500">Isi data sesuai level dan hubungan induk pada struktur KBKI.</p>
-            </div>
-            <a href="{{ $closeModalUrl }}" class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100">
-                <i class="fa-solid fa-xmark"></i>
-            </a>
-        </header>
 
-        <form action="{{ $formAction }}" method="POST">
-            @csrf
-            @if ($isEdit)
-            @method('PUT')
-            @endif
+                <form :action="formAction" method="POST" class="overflow-y-auto p-2 pt-4 flex-1">
+                    @csrf
+                    <template x-if="isEdit">
+                        <input type="hidden" name="_method" value="PUT">
+                    </template>
 
             <div class="grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_310px]">
                 <div class="p-5 sm:p-7">
@@ -619,19 +638,22 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 </aside>
             </div>
 
-            <footer class="flex flex-col-reverse gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7">
-                <a href="{{ $closeModalUrl }}" class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 transition hover:bg-slate-50">
-                    Batal
-                </a>
-                <button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    {{ $isEdit ? 'Simpan Perubahan' : 'Simpan Data KBKI' }}
-                </button>
-            </footer>
-        </form>
-    </div>
+                    <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row flex-shrink-0">
+                        <button type="button" @click="closeModal()"
+                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                            Batal
+                        </button>
+                        <button type="submit"
+                            class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#145239] hover:bg-[#0E3B29] px-5 text-sm font-semibold text-white shadow-sm transition">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span x-text="isEdit ? 'Simpan Perubahan' : 'Simpan Data KBKI'"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
 </div>
-@endif
 
 <div id="deleteKbkiModal" class="fixed inset-0 z-[1000] hidden items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm">
     <div class="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-2xl">
