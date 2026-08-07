@@ -110,7 +110,7 @@ class PenggunaController extends Controller
         $provinsis = Provinsi::orderBy('nama_provinsi')->get();
         $kabupatens = Kabupaten::orderBy('nama_kabupaten')->get();
 
-        return view('admin.pengguna.index', compact(
+        return view('admin.pengguna', compact(
             'pengguna',
             'stats',
             'mode',
