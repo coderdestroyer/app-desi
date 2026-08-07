@@ -39,6 +39,8 @@
 </head>
 
 <body class="font-['Poppins',sans-serif] bg-bg-main text-text-dark min-h-screen m-0 p-0">
+    <x-page-loader />
+
     <div class="flex flex-col lg:flex-row min-h-screen">
         <aside class="w-full lg:w-[290px] bg-white border-b lg:border-b-0 lg:border-r border-border-soft py-6 px-[22px] lg:fixed relative top-0 left-0 lg:bottom-0 lg:overflow-y-auto z-20">
             <div class="flex items-center mb-[26px]">

@@ -26,6 +26,8 @@
 </head>
 
 <body class="font-['Poppins',sans-serif] text-[#202b3c] bg-[#f7f9fb] min-h-screen m-0">
+    <x-page-loader />
+
     @php
     $isSelectionScreen = request()->routeIs('operator.dashboard');
     $isPeluangInvestasi = request()->routeIs('operator.peluang-investasi*') || request()->routeIs('operator.projects*');

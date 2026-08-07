@@ -62,6 +62,7 @@ src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 </script>
 
 <body>
+    <x-page-loader />
 
     @include('partials.landing.navbar')
 
