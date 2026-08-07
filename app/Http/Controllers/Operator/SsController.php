@@ -15,7 +15,9 @@ class SsController extends Controller
 {
     private function getAuthorizedKabupatens($user)
     {
-        return Kabupaten::orderBy('nama_kabupaten')->get();
+        return Cache::remember('master_kabupatens', 3600, function () {
+            return Kabupaten::orderBy('nama_kabupaten')->get();
+        });
     }
 
     public function index(Request $request)
@@ -23,10 +25,10 @@ class SsController extends Controller
         $user = Auth::user();
         $authorizedKabupatens = $this->getAuthorizedKabupatens($user);
 
-        $allYears = SummaryShiftShareResult::distinct()->orderBy('tahun_akhir', 'desc')->pluck('tahun_akhir');
-        if ($allYears->isEmpty()) {
-            $allYears = collect([2024, 2023, 2022, 2021, 2020]);
-        }
+        $allYears = Cache::remember('summary_ss_available_years', 3600, function () {
+            $years = SummaryShiftShareResult::distinct()->orderBy('tahun_akhir', 'desc')->pluck('tahun_akhir');
+            return $years->isEmpty() ? collect([2024, 2023, 2022, 2021, 2020]) : $years;
+        });
 
         // Query Rekapitulasi Shift Share dari Tabel Summary
         $query = SummaryShiftShareResult::with(['provinsi', 'kabupaten'])
@@ -98,6 +100,9 @@ class SsController extends Controller
             $item->tahun_awal = $item->tahun_awal;
             $item->tahun_akhir = $item->tahun_akhir;
             $item->tahun = "{$item->tahun_awal} - {$item->tahun_akhir}";
+            $item->sektor_cepat_count = (int)$item->cepat_count;
+            $item->sektor_lambat_count = (int)$item->lambat_count;
+            $item->daya_saing_tinggi_count = (int)$item->kompetitif_count;
             $item->total_shift = $dijTotal;
             $item->kategori_pertumbuhan = $kategoriPertumbuhan;
             $item->kategori_daya_saing = $kategoriDayaSaing;
@@ -110,7 +115,9 @@ class SsController extends Controller
             $editItem = AnalysisResult::where('type', 'shift_share')->find((int)$request->edit);
         }
 
-        $provinsis = Provinsi::orderBy('nama_provinsi')->get();
+        $provinsis = Cache::remember('master_provinsis', 3600, function () {
+            return Provinsi::orderBy('nama_provinsi')->get();
+        });
         if ($request->filled('provinsi_id')) {
             $provId = (int)$request->provinsi_id;
             $kabupatens = Kabupaten::where('provinsi_id', $provId)->orderBy('nama_kabupaten')->get();

@@ -15,7 +15,9 @@ class KlassenController extends Controller
 {
     private function getAuthorizedKabupatens($user)
     {
-        return Kabupaten::orderBy('nama_kabupaten')->get();
+        return Cache::remember('master_kabupatens', 3600, function () {
+            return Kabupaten::orderBy('nama_kabupaten')->get();
+        });
     }
 
     public function index(Request $request)
@@ -23,10 +25,10 @@ class KlassenController extends Controller
         $user = Auth::user();
         $authorizedKabupatens = $this->getAuthorizedKabupatens($user);
 
-        $allYears = SummaryKlassenResult::distinct()->orderBy('tahun_akhir', 'desc')->pluck('tahun_akhir');
-        if ($allYears->isEmpty()) {
-            $allYears = collect([2024, 2023, 2022, 2021, 2020]);
-        }
+        $allYears = Cache::remember('summary_klassen_available_years', 3600, function () {
+            $years = SummaryKlassenResult::distinct()->orderBy('tahun_akhir', 'desc')->pluck('tahun_akhir');
+            return $years->isEmpty() ? collect([2024, 2023, 2022, 2021, 2020]) : $years;
+        });
 
         // Query Rekapitulasi Tipologi Klassen dari Tabel Summary
         $query = SummaryKlassenResult::with(['provinsi', 'kabupaten'])
@@ -101,6 +103,10 @@ class KlassenController extends Controller
             $item->tahun_awal = $item->tahun_awal;
             $item->tahun_akhir = $item->tahun_akhir;
             $item->tahun = "{$item->tahun_awal} - {$item->tahun_akhir}";
+            $item->c1_count = $c1;
+            $item->c2_count = $c2;
+            $item->c3_count = $c3;
+            $item->c4_count = $c4;
             $item->status_dominan = $dominantKuadran;
             $item->is_provinsi = $isProv;
             return $item;
@@ -111,7 +117,9 @@ class KlassenController extends Controller
             $editItem = AnalysisResult::where('type', 'tipologi_klassen')->find((int)$request->edit);
         }
 
-        $provinsis = Provinsi::orderBy('nama_provinsi')->get();
+        $provinsis = Cache::remember('master_provinsis', 3600, function () {
+            return Provinsi::orderBy('nama_provinsi')->get();
+        });
         if ($request->filled('provinsi_id')) {
             $provId = (int)$request->provinsi_id;
             $kabupatens = Kabupaten::where('provinsi_id', $provId)->orderBy('nama_kabupaten')->get();

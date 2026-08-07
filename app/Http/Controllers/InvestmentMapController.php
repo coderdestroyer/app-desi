@@ -22,24 +22,26 @@ class InvestmentMapController extends Controller
             'KOTA PANGKAL PINANG', 'KOTA PANGKALPINANG', 'KOTA TANJUNG PINANG', 'KOTA TANJUNGPINANG'
         ];
 
-        // Ambil Kabupaten/Kota yang memiliki koordinat
-        $lokasi = Kabupaten::with('provinsi')
-            ->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->orderBy('nama_kabupaten')
-            ->get()
-            ->map(function ($item) use ($ibukotaNames) {
-                $cleanName = strtoupper(trim($item->nama_kabupaten));
-                return [
-                    'id' => $item->kab_id,
-                    'nama' => $item->nama_kabupaten,
-                    'latitude' => (float)$item->latitude,
-                    'longitude' => (float)$item->longitude,
-                    'type' => 'kabupaten',
-                    'provinsi' => $item->provinsi->nama_provinsi ?? 'Sumatera',
-                    'is_ibukota' => in_array($cleanName, $ibukotaNames),
-                ];
-            });
+        // Ambil Kabupaten/Kota yang memiliki koordinat dari Cache (0 ms)
+        $lokasi = \Illuminate\Support\Facades\Cache::remember('peta_lokasi_markers', 3600, function () use ($ibukotaNames) {
+            return Kabupaten::with('provinsi')
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->orderBy('nama_kabupaten')
+                ->get()
+                ->map(function ($item) use ($ibukotaNames) {
+                    $cleanName = strtoupper(trim($item->nama_kabupaten));
+                    return [
+                        'id' => $item->kab_id,
+                        'nama' => $item->nama_kabupaten,
+                        'latitude' => (float)$item->latitude,
+                        'longitude' => (float)$item->longitude,
+                        'type' => 'kabupaten',
+                        'provinsi' => $item->provinsi->nama_provinsi ?? 'Sumatera',
+                        'is_ibukota' => in_array($cleanName, $ibukotaNames),
+                    ];
+                });
+        });
 
         return view('landing.map', compact('lokasi'));
     }
