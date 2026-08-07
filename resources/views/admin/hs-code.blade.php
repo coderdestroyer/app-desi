@@ -179,7 +179,7 @@
         </section>
 
         <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <form action="{{ route('admin.hs-code.index') }}" method="GET"
+            <form action="{{ route('admin.hs-code.index') }}" method="GET" data-live-filter data-no-loader
                 class="flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-center 2xl:flex-nowrap">
                 {{-- Filter Kategori --}}
                 <div class="relative w-full xl:w-[210px] xl:flex-none">
@@ -271,27 +271,20 @@
                     </button>
                 </div>
 
-                {{-- Tombol Aksi --}}
-                <div class="flex w-full flex-none gap-2 xl:w-auto">
-                    <button type="submit" class="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap
-                        rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm
-                        transition hover:bg-emerald-700 focus:outline-none focus:ring-2
-                        focus:ring-emerald-200 xl:flex-none">
-                        <i class="fa-solid fa-filter"></i>
-                        <span>Terapkan</span>
-                    </button>
-
+                {{-- Reset Filter --}}
+                <div class="flex items-center justify-end">
                     <a href="{{ route('admin.hs-code.index') }}" title="Reset filter" aria-label="Reset filter" class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl
                         border border-slate-200 bg-white text-slate-500 transition
-                        hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600">
+                        hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 shadow-2xs">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
                 </div>
             </form>
         </section>
 
+    <div id="tableContainer" class="transition-opacity duration-200">
         <section id="adminHsTableCard"
-            class="!block !visible !opacity-100 !relative !w-full !min-h-[100px] !h-auto !overflow-hidden !transform-none mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+            class="mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <header
                 class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
                 <div>
@@ -319,10 +312,9 @@
                 </div>
             </header>
 
-            <div id="adminHsTableWrapper"
-                class="!block !visible !opacity-100 !relative !w-full !overflow-x-auto !overflow-y-visible !transform-none">
+            <div id="adminHsTableWrapper" class="w-full overflow-x-auto">
                 <table id="adminHsTable"
-                    class="!table !visible !opacity-100 !w-full !min-w-[1480px] !border-collapse !table-auto !transform-none text-left [&_thead]:!table-header-group [&_thead]:!visible [&_thead]:!opacity-100 [&_tbody]:!table-row-group [&_tbody]:!visible [&_tbody]:!opacity-100 [&_tr]:!table-row [&_tr]:!visible [&_tr]:!opacity-100 [&_tr]:!transform-none [&_th]:!table-cell [&_th]:!visible [&_th]:!opacity-100 [&_th]:!whitespace-nowrap [&_td]:!table-cell [&_td]:!visible [&_td]:!opacity-100">
+                    class="w-full min-w-[1480px] border-collapse text-left [&_tr[hidden]]:!hidden">
                     <thead>
                         <tr
                             class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -511,6 +503,7 @@
 
         <!-- Pagination Component -->
         <x-pagination :paginator="$dataHsCode" />
+    </div>
 
         <footer class="pb-1 pt-8 text-center text-xs text-slate-400">
             Copyright &copy;

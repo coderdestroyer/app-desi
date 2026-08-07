@@ -155,10 +155,10 @@ $statStyles = [
     </section>
 
     <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-        <form action="{{ route('admin.data-wilayah.index') }}" method="GET"
+        <form action="{{ route('admin.data-wilayah.index') }}" method="GET" data-live-filter data-no-loader
             class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
 
-            <div class="relative min-w-0 xl:col-span-2">
+            <div class="relative min-w-0 xl:col-span-3">
                 <select name="kode_kabupaten" id="filterKabupaten"
                     class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <option value="">Semua Kab/Kota</option>
@@ -177,7 +177,7 @@ $statStyles = [
             </div>
 
 
-            <div class="relative min-w-0 xl:col-span-2">
+            <div class="relative min-w-0 xl:col-span-3">
                 <select name="kode_kecamatan" id="filterKecamatan"
                     class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <option value="">Semua Kecamatan</option>
@@ -227,53 +227,47 @@ $statStyles = [
             </div>
 
 
-            <div class="flex min-w-0 gap-2 md:col-span-2 xl:col-span-3">
-                <button type="submit"
-                    class="inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700">
-                    <i class="fa-solid fa-filter"></i>
-                    <span class="truncate">Terapkan</span>
-                </button>
-
+            <div class="flex min-w-0 items-center justify-end xl:col-span-1">
                 <a href="{{ route('admin.data-wilayah.index') }}" title="Reset filter"
-                    class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-emerald-600">
+                    class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-2xs">
                     <i class="fa-solid fa-rotate-left"></i>
                 </a>
             </div>
         </form>
     </section>
 
-    <section id="adminWilayahTableCard"
-        class="!block !visible !opacity-100 !relative !w-full !min-h-[100px] !h-auto !overflow-hidden !transform-none mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-        <header
-            class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
-            <div>
-                <h2 class="text-lg font-bold text-slate-800">
-                    Daftar Wilayah
-                </h2>
+    <div id="tableContainer" class="transition-opacity duration-200">
+        <section id="adminWilayahTableCard"
+            class="mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <header
+                class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">
+                        Daftar Wilayah
+                    </h2>
 
-                <p class="mt-1 text-xs text-slate-500">
-                    Data administratif wilayah Provinsi Sumatera Utara.
-                </p>
-            </div>
+                    <p class="mt-1 text-xs text-slate-500">
+                        Data administratif wilayah Provinsi Sumatera Utara.
+                    </p>
+                </div>
 
-            <div
-                class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                <i class="fa-solid fa-database"></i>
+                <div
+                    class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                    <i class="fa-solid fa-database"></i>
 
-                {{ number_format(
-        $dataWilayah->total(),
-        0,
-        ',',
-        '.'
-    ) }}
-                Data
-            </div>
-        </header>
+                    {{ number_format(
+            $dataWilayah->total(),
+            0,
+            ',',
+            '.'
+        ) }}
+                    Data
+                </div>
+            </header>
 
-        <div id="adminWilayahTableWrapper"
-            class="!block !visible !opacity-100 !w-full !overflow-x-auto !overflow-y-visible">
-            <table id="adminWilayahTable"
-                class="!table !visible !opacity-100 !w-full !min-w-[1150px] !border-collapse !table-auto text-left [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_th]:!visible [&_th]:!opacity-100 [&_th]:!whitespace-nowrap [&_td]:!table-cell [&_td]:!visible [&_td]:!opacity-100">
+            <div id="adminWilayahTableWrapper" class="w-full overflow-x-auto">
+                <table id="adminWilayahTable"
+                    class="w-full min-w-[1150px] border-collapse text-left [&_tr[hidden]]:!hidden">
                 <thead>
                     <tr
                         class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -433,8 +427,9 @@ $statStyles = [
         </div>
     </section>
 
-    <!-- Pagination Component -->
-    <x-pagination :paginator="$dataWilayah" />
+        <!-- Pagination Component -->
+        <x-pagination :paginator="$dataWilayah" />
+    </div>
 
     <footer class="pb-1 pt-8 text-center text-xs text-slate-400">
         Copyright &copy;
@@ -906,12 +901,6 @@ $statStyles = [
             if (filterKecamatan) {
                 filterKecamatan.value = '';
             }
-
-            filterKabupaten.form.submit();
-        });
-
-        filterKecamatan?.addEventListener('change', function() {
-            filterKecamatan.form.submit();
         });
 
         const deleteModal = document.getElementById(
