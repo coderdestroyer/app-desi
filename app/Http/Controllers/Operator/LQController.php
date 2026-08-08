@@ -120,6 +120,8 @@ class LQController extends Controller
                     'lqData' => $paginatedData,
                 ])->render(),
                 'kabupatens' => $kabupatens,
+                'provinsis' => $provinsis,
+                'selectedProvinsiId' => $request->provinsi_id,
             ]);
         }
 

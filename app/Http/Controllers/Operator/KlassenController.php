@@ -133,6 +133,8 @@ class KlassenController extends Controller
                     'klassenData' => $paginatedData,
                 ])->render(),
                 'kabupatens' => $kabupatens,
+                'provinsis' => $provinsis,
+                'selectedProvinsiId' => $request->provinsi_id,
             ]);
         }
 

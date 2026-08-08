@@ -125,18 +125,72 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     if (data.kabupatens) {
                         const kabupatenSelect = form.querySelector('#filterKabupaten, select[name="kabupaten_id"], select[name="kode_kabupaten"]');
+                        const provinsiSelect = form.querySelector('#filterProvinsi, select[name="provinsi_id"]');
                         if (kabupatenSelect) {
                             const currentVal = kabupatenSelect.value;
-                            kabupatenSelect.innerHTML = '<option value="">Semua Wilayah (Provinsi & Kab/Kota)</option>';
-                            data.kabupatens.forEach(kab => {
-                                const opt = document.createElement('option');
-                                opt.value = kab.kab_id || kab.kode_kabupaten;
-                                opt.textContent = kab.nama_kabupaten;
-                                if (String(kab.kab_id || kab.kode_kabupaten) === String(currentVal)) {
-                                    opt.selected = true;
+                            const selProvId = data.selectedProvinsiId || (provinsiSelect ? provinsiSelect.value : '');
+                            const provs = data.provinsis || [];
+
+                            kabupatenSelect.innerHTML = '';
+
+                            const defaultOpt = document.createElement('option');
+                            defaultOpt.value = '';
+                            defaultOpt.textContent = 'Semua Wilayah (Provinsi & Kab/Kota)';
+                            if (!currentVal) defaultOpt.selected = true;
+                            kabupatenSelect.appendChild(defaultOpt);
+
+                            if (selProvId) {
+                                const currProv = provs.find(p => String(p.provinsi_id) === String(selProvId));
+                                const provName = currProv ? currProv.nama_provinsi.toUpperCase() : '';
+                                
+                                const provOnlyOpt = document.createElement('option');
+                                provOnlyOpt.value = 'prov_only';
+                                provOnlyOpt.className = 'font-extrabold text-slate-900 bg-emerald-50';
+                                provOnlyOpt.textContent = '🏛️ PROVINSI ' + (provName || 'TERPILIH');
+                                if (currentVal === 'prov_only') provOnlyOpt.selected = true;
+                                kabupatenSelect.appendChild(provOnlyOpt);
+
+                                data.kabupatens.forEach(kab => {
+                                    const opt = document.createElement('option');
+                                    opt.value = kab.kab_id || kab.kode_kabupaten;
+                                    opt.textContent = kab.nama_kabupaten;
+                                    if (String(kab.kab_id || kab.kode_kabupaten) === String(currentVal)) {
+                                        opt.selected = true;
+                                    }
+                                    kabupatenSelect.appendChild(opt);
+                                });
+                            } else {
+                                if (provs.length > 0) {
+                                    const provGroup = document.createElement('optgroup');
+                                    provGroup.label = '🏛️ Tingkat Provinsi';
+                                    provs.forEach(prov => {
+                                        const opt = document.createElement('option');
+                                        opt.value = 'prov_' + prov.provinsi_id;
+                                        opt.className = 'font-bold text-slate-800';
+                                        opt.textContent = '🏛️ PROVINSI ' + prov.nama_provinsi.toUpperCase();
+                                        if (currentVal === ('prov_' + prov.provinsi_id)) {
+                                            opt.selected = true;
+                                        }
+                                        provGroup.appendChild(opt);
+                                    });
+                                    kabupatenSelect.appendChild(provGroup);
                                 }
-                                kabupatenSelect.appendChild(opt);
-                            });
+
+                                if (data.kabupatens.length > 0) {
+                                    const kabGroup = document.createElement('optgroup');
+                                    kabGroup.label = '🏙️ Tingkat Kabupaten / Kota';
+                                    data.kabupatens.forEach(kab => {
+                                        const opt = document.createElement('option');
+                                        opt.value = kab.kab_id || kab.kode_kabupaten;
+                                        opt.textContent = kab.nama_kabupaten;
+                                        if (String(kab.kab_id || kab.kode_kabupaten) === String(currentVal)) {
+                                            opt.selected = true;
+                                        }
+                                        kabGroup.appendChild(opt);
+                                    });
+                                    kabupatenSelect.appendChild(kabGroup);
+                                }
+                            }
                         }
                     }
 
@@ -186,12 +240,27 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        form.querySelectorAll('select').forEach(select => {
-            select.removeAttribute('onchange');
-            select.addEventListener('change', () => {
+        const provinsiSelect = form.querySelector('#filterProvinsi, select[name="provinsi_id"]');
+        const kabupatenSelect = form.querySelector('#filterKabupaten, select[name="kabupaten_id"], select[name="kode_kabupaten"]');
+
+        if (provinsiSelect) {
+            provinsiSelect.addEventListener('change', () => {
+                if (kabupatenSelect) {
+                    kabupatenSelect.value = '';
+                }
                 clearTimeout(debounceTimer);
                 fetchFilteredData();
             });
+        }
+
+        form.querySelectorAll('select').forEach(select => {
+            select.removeAttribute('onchange');
+            if (select !== provinsiSelect) {
+                select.addEventListener('change', () => {
+                    clearTimeout(debounceTimer);
+                    fetchFilteredData();
+                });
+            }
         });
 
         form.querySelectorAll('input[type="text"], input[type="search"]').forEach(input => {

@@ -131,6 +131,8 @@ class TipologiController extends Controller
                     'tipologiData' => $paginatedData,
                 ])->render(),
                 'kabupatens' => $kabupatens,
+                'provinsis' => $provinsis,
+                'selectedProvinsiId' => $request->provinsi_id,
             ]);
         }
 

@@ -131,6 +131,8 @@ class SsController extends Controller
                     'ssData' => $paginatedData,
                 ])->render(),
                 'kabupatens' => $kabupatens,
+                'provinsis' => $provinsis,
+                'selectedProvinsiId' => $request->provinsi_id,
             ]);
         }
 
