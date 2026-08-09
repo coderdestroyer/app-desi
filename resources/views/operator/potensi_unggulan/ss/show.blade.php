@@ -187,10 +187,15 @@
 
 <script>
     function exportToExcel() {
+        if (typeof XLSX === 'undefined') {
+            alert('Library Excel export belum siap. Silakan coba beberapa saat lagi.');
+            return;
+        }
         var table = document.getElementById("ssDetailTable");
+        if (!table) return;
         var clone = table.cloneNode(true);
-        var wb = XLSX.utils.table_to_book(clone, {sheet: "Detail SS {{ $namaDaerah }}"});
-        XLSX.writeFile(wb, "Detail_Shift_Share_{{ $namaDaerah }}_{{ $tahunAwal }}_{{ $tahunAkhir }}.xlsx");
+        var wb = XLSX.utils.table_to_book(clone, {sheet: "Detail Shift Share"});
+        XLSX.writeFile(wb, "Detail_Shift_Share_{{ Str::slug($namaDaerah) }}_{{ $tahunAwal }}_{{ $tahunAkhir }}.xlsx");
     }
 </script>
 @endsection

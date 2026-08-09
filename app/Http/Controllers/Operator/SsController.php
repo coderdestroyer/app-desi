@@ -181,7 +181,7 @@ class SsController extends Controller
         }
 
         $query->orderBy('sektor_id', 'asc');
-        $paginatedSectors = $query->paginate(20)->withQueryString();
+        $paginatedSectors = $query->paginate(50)->withQueryString();
 
         $paginatedSectors->getCollection()->transform(function ($item) use ($tingkatWilayah, $namaDaerah, $namaPembanding, $tahun, $tahunAwal) {
             $nij = (float)$item->n_nij;

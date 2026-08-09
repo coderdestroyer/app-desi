@@ -185,10 +185,15 @@
 
 <script>
     function exportToExcel() {
+        if (typeof XLSX === 'undefined') {
+            alert('Library Excel export belum siap. Silakan coba beberapa saat lagi.');
+            return;
+        }
         var table = document.getElementById("klassenDetailTable");
+        if (!table) return;
         var clone = table.cloneNode(true);
-        var wb = XLSX.utils.table_to_book(clone, {sheet: "Detail Klassen {{ $namaDaerah }}"});
-        XLSX.writeFile(wb, "Detail_Klassen_{{ $namaDaerah }}_{{ $tahunAwal }}_{{ $tahunAkhir }}.xlsx");
+        var wb = XLSX.utils.table_to_book(clone, {sheet: "Detail Klassen"});
+        XLSX.writeFile(wb, "Detail_Klassen_{{ Str::slug($namaDaerah) }}_{{ $tahunAwal }}_{{ $tahunAkhir }}.xlsx");
     }
 </script>
 @endsection
