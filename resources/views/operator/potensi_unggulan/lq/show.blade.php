@@ -177,10 +177,15 @@
 
 <script>
     function exportToExcel() {
+        if (typeof XLSX === 'undefined') {
+            alert('Library Excel export belum siap. Silakan coba beberapa saat lagi.');
+            return;
+        }
         var table = document.getElementById("lqDetailTable");
+        if (!table) return;
         var clone = table.cloneNode(true);
-        var wb = XLSX.utils.table_to_book(clone, {sheet: "Detail LQ {{ $namaDaerah }}"});
-        XLSX.writeFile(wb, "Detail_LQ_{{ $namaDaerah }}_{{ $tahun }}.xlsx");
+        var wb = XLSX.utils.table_to_book(clone, {sheet: "Detail LQ"});
+        XLSX.writeFile(wb, "Detail_LQ_{{ Str::slug($namaDaerah) }}_{{ $tahun }}.xlsx");
     }
 </script>
 @endsection

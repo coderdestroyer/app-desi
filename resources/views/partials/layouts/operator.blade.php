@@ -293,6 +293,9 @@
         </div>
     </div>
 
+    <!-- SheetJS (Excel Export & Import Library) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
     @stack('scripts')
 
     <script>
