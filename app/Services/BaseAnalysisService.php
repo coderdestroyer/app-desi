@@ -24,12 +24,105 @@ class BaseAnalysisService
     protected static bool $isPreloaded = false;
 
     /**
+     * Clear all static memory caches.
+     */
+    public function clearCache(): void
+    {
+        self::$provinsiIdCache = [];
+        self::$totalKabupatenCache = [];
+        self::$totalProvinsiCache = [];
+        self::$totalNasionalCache = [];
+        self::$pdrbKabupatenCache = [];
+        self::$pdrbKabupatenBySektorCache = [];
+        self::$pdrbProvinsiCache = [];
+        self::$pdrbProvinsiByTahunCache = [];
+        self::$pdbNasionalByTahunCache = [];
+        self::$isPreloaded = false;
+    }
+
+    /**
+     * Preload targeted PDRB & PDB data for 1 Kabupaten in specific years (e.g. $tahun and $tahun-1).
+     */
+    public function warmUpKabupatenCache(int $kabId, int $provId, array $years): void
+    {
+        self::$provinsiIdCache[$kabId] = $provId;
+
+        // 1. Preload PdrbKabupaten for $kabId
+        $allKab = PdrbKabupaten::with('sektor')
+            ->where('kabupaten_id', $kabId)
+            ->whereIn('tahun', $years)
+            ->get();
+
+        foreach ($allKab->groupBy(fn($item) => $item->kabupaten_id . '_' . $item->tahun) as $key => $items) {
+            self::$pdrbKabupatenCache[$key] = $items;
+            self::$totalKabupatenCache[$key] = (float) $items->sum('nilai_pdrb');
+            foreach ($items as $item) {
+                self::$pdrbKabupatenBySektorCache[$item->kabupaten_id . '_' . $item->sektor_id . '_' . $item->tahun] = $item;
+            }
+        }
+
+        // 2. Preload PdrbSumut (Provinsi) for $provId
+        $allProv = PdrbSumut::with('sektor')
+            ->where('provinsi_id', $provId)
+            ->whereIn('tahun', $years)
+            ->get();
+
+        foreach ($allProv->groupBy(fn($item) => $item->provinsi_id . '_' . $item->tahun) as $key => $items) {
+            self::$pdrbProvinsiByTahunCache[$key] = $items;
+            self::$totalProvinsiCache[$key] = (float) $items->sum('nilai_pdrb');
+            foreach ($items as $item) {
+                self::$pdrbProvinsiCache[$item->provinsi_id . '_' . $item->sektor_id . '_' . $item->tahun] = $item;
+            }
+        }
+
+        // 3. Preload PdbNasional for $years
+        $allNas = PdbNasional::with('sektor')
+            ->whereIn('tahun', $years)
+            ->get();
+
+        foreach ($allNas->groupBy('tahun') as $thn => $items) {
+            self::$pdbNasionalByTahunCache[$thn] = $items;
+            self::$totalNasionalCache[$thn] = (float) $items->sum('nilai');
+        }
+    }
+
+    /**
+     * Preload targeted PDRB & PDB data for 1 Provinsi in specific years.
+     */
+    public function warmUpProvinsiCache(int $provId, array $years): void
+    {
+        // 1. Preload PdrbSumut (Provinsi) for $provId
+        $allProv = PdrbSumut::with('sektor')
+            ->where('provinsi_id', $provId)
+            ->whereIn('tahun', $years)
+            ->get();
+
+        foreach ($allProv->groupBy(fn($item) => $item->provinsi_id . '_' . $item->tahun) as $key => $items) {
+            self::$pdrbProvinsiByTahunCache[$key] = $items;
+            self::$totalProvinsiCache[$key] = (float) $items->sum('nilai_pdrb');
+            foreach ($items as $item) {
+                self::$pdrbProvinsiCache[$item->provinsi_id . '_' . $item->sektor_id . '_' . $item->tahun] = $item;
+            }
+        }
+
+        // 2. Preload PdbNasional for $years
+        $allNas = PdbNasional::with('sektor')
+            ->whereIn('tahun', $years)
+            ->get();
+
+        foreach ($allNas->groupBy('tahun') as $thn => $items) {
+            self::$pdbNasionalByTahunCache[$thn] = $items;
+            self::$totalNasionalCache[$thn] = (float) $items->sum('nilai');
+        }
+    }
+
+    /**
      * Preload all PDRB & PDB data for bulk calculations in just 3 SQL queries.
      */
     public function preloadPdrbData(array $years = []): void
     {
         // 1. Preload PdrbKabupaten totals & rows
-        $kabQuery = PdrbKabupaten::with('sektor');
+        $kabQuery = PdrbKabupaten::with(['sektor', 'kabupaten']);
         if (!empty($years)) {
             $kabQuery->whereIn('tahun', $years);
         }
@@ -39,6 +132,9 @@ class BaseAnalysisService
             self::$pdrbKabupatenCache[$key] = $items;
             self::$totalKabupatenCache[$key] = (float) $items->sum('nilai_pdrb');
             foreach ($items as $item) {
+                if ($item->kabupaten && $item->kabupaten->provinsi_id) {
+                    self::$provinsiIdCache[$item->kabupaten_id] = $item->kabupaten->provinsi_id;
+                }
                 self::$pdrbKabupatenBySektorCache[$item->kabupaten_id . '_' . $item->sektor_id . '_' . $item->tahun] = $item;
             }
         }
@@ -101,7 +197,7 @@ class BaseAnalysisService
     }
 
     /**
-     * Total PDRB Provinsi
+     * Total PDRB Provinsi (dari tabel pdrb_sumatera_provinsi)
      */
     protected function getTotalProvinsi(int $provinsiId, int $tahun): float
     {

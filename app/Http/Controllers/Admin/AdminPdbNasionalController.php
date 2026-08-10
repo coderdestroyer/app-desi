@@ -110,6 +110,16 @@ class AdminPdbNasionalController extends Controller
 
         Cache::flush();
 
+        if (function_exists('fastcgi_finish_request')) {
+            session()->flash('success', "Berhasil menyimpan data PDB Nasional Tahun {$request->tahun} ({$savedCount} sektor terisi)! Hasil analisis makro sedang diperbarui.");
+            redirect()->route('admin.pdb-nasional.index')->send();
+            fastcgi_finish_request();
+            app(\App\Services\AnalysisSyncService::class)->syncAllForYear((int)$request->tahun);
+            exit;
+        }
+
+        app(\App\Services\AnalysisSyncService::class)->syncAllForYear((int)$request->tahun);
+
         return redirect()->route('admin.pdb-nasional.index')->with('success', "Berhasil menyimpan data PDB Nasional Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
     }
 
@@ -119,10 +129,17 @@ class AdminPdbNasionalController extends Controller
     public function destroyGroup($tahun)
     {
         PdbNasional::where('tahun', $tahun)->delete();
-
-        app(\App\Services\AnalysisSyncService::class)->syncAll();
-
         Cache::flush();
+
+        if (function_exists('fastcgi_finish_request')) {
+            session()->flash('success', "Seluruh data PDB Nasional Tahun {$tahun} berhasil dihapus dari database.");
+            redirect()->back()->send();
+            fastcgi_finish_request();
+            app(\App\Services\AnalysisSyncService::class)->syncAllForYear((int)$tahun);
+            exit;
+        }
+
+        app(\App\Services\AnalysisSyncService::class)->syncAllForYear((int)$tahun);
 
         return redirect()->back()->with('success', "Seluruh data PDB Nasional Tahun {$tahun} berhasil dihapus dari database.");
     }

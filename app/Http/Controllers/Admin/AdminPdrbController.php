@@ -163,6 +163,8 @@ class AdminPdrbController extends Controller
             }
         }
 
+        app(\App\Services\AnalysisSyncService::class)->syncKabupaten((int)$request->kabupaten_id, (int)$request->tahun);
+
         \Illuminate\Support\Facades\Cache::flush();
 
         return redirect()->route('admin.pdrb.index')->with('success', "Berhasil menyimpan data PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
