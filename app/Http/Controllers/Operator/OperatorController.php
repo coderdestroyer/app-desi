@@ -25,25 +25,27 @@ class OperatorController extends Controller
         ]);
     }
 
-    private function getLatestStatusByType(string $type)
+    private function getLatestSummaryStatus(string $modelClass, array $allowedKabIds)
     {
-        $latest = \App\Models\AnalysisResult::where('type', $type)->latest('updated_at')->first();
-        if (!$latest) {
-            return ['date' => now()->format('d M Y'), 'action' => 'Real-Time', 'color' => 'bg-emerald-100 text-emerald-700 border-emerald-200'];
+        $query = $modelClass::query();
+        if (!empty($allowedKabIds)) {
+            $query->whereIn('kabupaten_id', $allowedKabIds);
         }
 
-        $action = ($latest->created_at == $latest->updated_at) ? 'ditambah' : 'diperbarui';
+        $latest = $query->latest('updated_at')->first();
 
-        $color = match ($action) {
-            'ditambah' => 'bg-green-100 text-green-700 border-green-200',
-            'diperbarui' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-            default => 'bg-slate-100 text-slate-700 border-slate-200'
-        };
+        if (!$latest || !$latest->updated_at) {
+            return [
+                'date' => now()->format('d M Y'),
+                'action' => 'Belum Ada Data',
+                'color' => 'bg-slate-100 text-slate-700 border-slate-200'
+            ];
+        }
 
         return [
-            'date' => $latest->updated_at ? $latest->updated_at->format('d M Y') : '-',
-            'action' => ucfirst($action),
-            'color' => $color,
+            'date' => $latest->updated_at->format('d M Y'),
+            'action' => 'Ter-Sync Otomatis',
+            'color' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
         ];
     }
 
@@ -61,25 +63,26 @@ class OperatorController extends Controller
         $user = Auth::user();
         $kabupatens = $this->getAuthorizedKabupatens($user);
         $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
+        $allowedKabIds = $kabupatens->pluck('kab_id')->toArray();
 
-        $savedLq = \App\Models\AnalysisResult::where('type', 'lq')->count();
-        $savedSs = \App\Models\AnalysisResult::where('type', 'shift_share')->count();
-        $savedTipologi = \App\Models\AnalysisResult::where('type', 'tipologi_sektor')->count();
-        $savedKlassen = \App\Models\AnalysisResult::where('type', 'tipologi_klassen')->count();
-
-        $totalSektorCount = $kabupatens->count() * 17;
-
-        $countLq = $savedLq > 0 ? $savedLq : $totalSektorCount;
-        $countSs = $savedSs > 0 ? $savedSs : $totalSektorCount;
-        $countTipologi = $savedTipologi > 0 ? $savedTipologi : $totalSektorCount;
-        $countKlassen = $savedKlassen > 0 ? $savedKlassen : $totalSektorCount;
+        if ($user->isAdmin() || empty($allowedKabIds)) {
+            $countLq = \App\Models\SummaryLqResult::count();
+            $countSs = \App\Models\SummaryShiftShareResult::count();
+            $countTipologi = \App\Models\SummaryTipologiSektorResult::count();
+            $countKlassen = \App\Models\SummaryKlassenResult::count();
+        } else {
+            $countLq = \App\Models\SummaryLqResult::whereIn('kabupaten_id', $allowedKabIds)->count();
+            $countSs = \App\Models\SummaryShiftShareResult::whereIn('kabupaten_id', $allowedKabIds)->count();
+            $countTipologi = \App\Models\SummaryTipologiSektorResult::whereIn('kabupaten_id', $allowedKabIds)->count();
+            $countKlassen = \App\Models\SummaryKlassenResult::whereIn('kabupaten_id', $allowedKabIds)->count();
+        }
 
         $totalAnalisa = $countLq + $countSs + $countTipologi + $countKlassen;
 
-        $statusLq = $this->getLatestStatusByType('lq');
-        $statusSs = $this->getLatestStatusByType('shift_share');
-        $statusTipologi = $this->getLatestStatusByType('tipologi_sektor');
-        $statusKlassen = $this->getLatestStatusByType('tipologi_klassen');
+        $statusLq = $this->getLatestSummaryStatus(\App\Models\SummaryLqResult::class, $allowedKabIds);
+        $statusSs = $this->getLatestSummaryStatus(\App\Models\SummaryShiftShareResult::class, $allowedKabIds);
+        $statusTipologi = $this->getLatestSummaryStatus(\App\Models\SummaryTipologiSektorResult::class, $allowedKabIds);
+        $statusKlassen = $this->getLatestSummaryStatus(\App\Models\SummaryKlassenResult::class, $allowedKabIds);
 
         $activityLogs = ActivityLog::whereNotIn('module', ['Autentikasi'])
             ->latest()
@@ -239,6 +242,8 @@ class OperatorController extends Controller
                 $savedCount++;
             }
         }
+
+        app(\App\Services\AnalysisSyncService::class)->syncKabupaten((int)$request->kabupaten_id, (int)$request->tahun);
 
         \Illuminate\Support\Facades\Cache::flush();
 
@@ -579,6 +584,8 @@ class OperatorController extends Controller
             }
         }
 
+        app(\App\Services\AnalysisSyncService::class)->syncProvinsiAndChildren((int)$request->provinsi_id, (int)$request->tahun);
+
         \Illuminate\Support\Facades\Cache::flush();
 
         self::logActivity(
@@ -608,7 +615,7 @@ class OperatorController extends Controller
             ->where('tahun', $tahun)
             ->delete();
 
-        app(\App\Services\AnalysisSyncService::class)->syncProvinsi($provinsi_id, (int)$tahun);
+        app(\App\Services\AnalysisSyncService::class)->syncProvinsiAndChildren((int)$provinsi_id, (int)$tahun);
 
         \Illuminate\Support\Facades\Cache::flush();
 
