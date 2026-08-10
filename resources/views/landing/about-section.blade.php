@@ -1,140 +1,163 @@
-<section id="tentang" class="about">
-    
-        <div class="about-image">
+    <!-- =========================
+            EXECUTIVE DASHBOARD SECTION
+    ========================== -->
 
-            <img src="{{ asset('images/gedung-dpmptsp.jpg') }}"
-                alt="Gedung DPMPTSP">
-
+    <section id="overview" class="dashboard-grid-section bg-[#f8faf9] pt-[60px] pb-10 px-[10%] flex flex-col items-center w-full border-t border-b border-[#eef2f0] transition-all duration-[1000ms]">
+        <div class="section-title w-full">
+            <h5>
+                Overview
+            </h5>
+            <h2>
+                Analisis & Visualisasi Potensi Investasi
+            </h2>
+            <p>
+                Monitoring komprehensif indikator makroekonomi, sebaran GIS, kontribusi sektor potensial, serta tren investasi regional.
+            </p>
         </div>
 
-        <div class="about-text">
+        <div class="w-full max-w-[1200px] flex flex-col gap-[30px]">
+            {{-- TOP BLOCK: CHARTS & MAP --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-[30px] w-full">
 
-            <h5>Tentang Kami</h5>
+                {{-- Left Column: Stacked Charts --}}
+                <div class="flex flex-col gap-[25px] w-full">
+                    {{-- Top 5 Potential Sectors --}}
+                    <div class="bg-white rounded-[20px] p-[25px] shadow-[0_10px_35px_rgba(0,0,0,0.05)] border border-[#145239]/5 flex flex-col w-full">
+                        <div class="flex justify-between items-center mb-[20px] flex-wrap gap-[10px]">
+                            <h3 class="text-base font-bold text-[#145239] m-0 flex items-center gap-[10px]">
+                                <i class="fa-solid fa-pie-chart"></i> Top 5 Sektor Potensial ({{ $latestYear }})
+                            </h3>
+                        </div>
+                        <div class="relative w-full" style="min-height: 230px;">
+                            <canvas id="topSectorsChart"></canvas>
+                        </div>
+                    </div>
 
-            <h2>
-
-                Dinas Penanaman Modal dan
-                Pelayanan Terpadu Satu Pintu
-                Provinsi Sumatera Utara
-
-            </h2>
-
-            <p>
-
-                DPMPTSP Provinsi Sumatera Utara
-                merupakan instansi pemerintah
-                yang bertugas memberikan pelayanan
-                perizinan, meningkatkan investasi,
-                serta mendukung pembangunan ekonomi
-                daerah melalui sistem pelayanan
-                yang efektif, transparan,
-                dan terintegrasi.
-
-            </p>
-
-            <div class="about-list">
-
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Pelayanan Perizinan
-
+                    {{-- Trend line chart --}}
+                    <div class="bg-white rounded-[20px] p-[25px] shadow-[0_10px_35px_rgba(0,0,0,0.05)] border border-[#145239]/5 flex flex-col w-full">
+                        <div class="flex justify-between items-center mb-[20px] flex-wrap gap-[10px]">
+                            <h3 class="text-base font-bold text-[#145239] m-0 flex items-center gap-[10px]">
+                                <i class="fa-solid fa-line-chart"></i> Tren Investasi & Ekspor-Impor
+                            </h3>
+                            <select id="provinceFilter" class="py-1.5 px-3 rounded-lg border border-[#145239]/15 bg-white text-[#145239] text-[13px] font-semibold outline-none cursor-pointer transition-colors duration-300 focus:border-[#1E5D41]"
+                                onchange="updateTrendChart(this.value)">
+                                @foreach(array_keys($provinsiInvestasi) as $provName)
+                                    <option value="{{ $provName }}" {{ $provName === 'SUMATERA UTARA' ? 'selected' : '' }}>
+                                        {{ $provName }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="relative w-full" style="min-height: 230px;">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Analisis Potensi Wilayah
-
-                </div>
-
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Dashboard GIS
-
-                </div>
-
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Analisis PDRB
-
+                {{-- Right Column: GIS Map --}}
+                <div class="w-full">
+                    <div class="bg-white rounded-[20px] p-[25px] shadow-[0_10px_35px_rgba(0,0,0,0.05)] border border-[#145239]/5 h-full flex flex-col">
+                        <div class="mb-[20px] flex-shrink-0">
+                            <h3 class="text-base font-bold text-[#145239] m-0 flex items-center gap-[10px]">
+                                <i class="fa-solid fa-map-location-dot"></i> Sebaran Potensi Ekonomi & GIS ({{ $latestYear }})
+                            </h3>
+                        </div>
+                        <div id="landing-map" class="w-full rounded-lg z-10 flex-grow min-h-[340px]"></div>
+                        <div class="mt-[15px] py-[10px] px-[15px] flex-shrink-0">
+                            <h4 class="text-[13px] font-bold text-[#145239] mb-2">Skala Potensi Ekonomi (PDRB)</h4>
+                            <div class="flex flex-wrap gap-2 text-xs text-[#555]">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-block w-4 h-4 rounded-[3px] bg-[#8ce0b7]"></span>
+                                    <span>Rendah</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-block w-4 h-4 rounded-[3px] bg-[#3db27c]"></span>
+                                    <span>Cukup</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-block w-4 h-4 rounded-[3px] bg-[#217d56]"></span>
+                                    <span>Sedang</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-block w-4 h-4 rounded-[3px] bg-[#145239]"></span>
+                                    <span>Tinggi</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-block w-4 h-4 rounded-[3px] bg-[#0d3826]"></span>
+                                    <span>Sangat Tinggi</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center mt-4 flex-shrink-0">
+                            <a href="{{ route('investment.map') }}" class="btn1 btn-explore inline-flex items-center gap-2.5 text-base py-[18px] px-10 bg-[#1E5D41] text-white rounded-full shadow-[0_8px_20px_rgba(20,82,57,0.15)] hover:bg-[#145239] transition-all duration-300 font-semibold">
+                                <i class="fa-solid fa-map-location-dot"></i> Eksplorasi Peta Investasi Detail
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
             </div>
 
-        </div>
+            {{-- BOTTOM BLOCK: METRICS ROW --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-[25px] w-full">
+                {{-- Card 1: Realisasi --}}
+                <div class="metric-card bg-white rounded-[18px] p-6 flex items-center gap-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] border border-[#145239]/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(20,82,57,0.08)] cursor-pointer">
+                    <div class="w-[54px] h-[54px] rounded-[14px] bg-[#EEF8F2] text-[#1E5D41] flex items-center justify-center text-[22px] shrink-0">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <h3 class="text-xl font-bold text-[#145239] mb-1.5">Rp {{ number_format($totalRealisasi / 1000000000000, 2, ',', '.') }} T</h3>
+                        <p class="text-[12px] text-[#666] font-semibold uppercase tracking-[0.5px]">Total Realisasi Investasi ({{ $latestYear }})</p>
+                    </div>
+                </div>
 
+                {{-- Card 2: PDRB Tertinggi --}}
+                <div class="metric-card bg-white rounded-[18px] p-6 flex items-center gap-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] border border-[#145239]/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(20,82,57,0.08)] cursor-pointer">
+                    <div class="w-[54px] h-[54px] rounded-[14px] bg-[#EEF8F2] text-[#1E5D41] flex items-center justify-center text-[22px] shrink-0">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <h3 class="text-xl font-bold text-[#145239] mb-1.5">{{ $pdrbTertinggiNama }}</h3>
+                        <p class="text-[12px] text-[#666] font-semibold uppercase tracking-[0.5px]">PDRB Tertinggi (Rp {{ number_format($pdrbTertinggiNilai / 1000000000000, 2, ',', '.') }} T)</p>
+                    </div>
+                </div>
+
+                {{-- Card 3: Proyek Aktif --}}
+                <div class="metric-card bg-white rounded-[18px] p-6 flex items-center gap-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] border border-[#145239]/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(20,82,57,0.08)] cursor-pointer">
+                    <div class="w-[54px] h-[54px] rounded-[14px] bg-[#EEF8F2] text-[#1E5D41] flex items-center justify-center text-[22px] shrink-0">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <h3 class="text-xl font-bold text-[#145239] mb-1.5">{{ $jumlahProyek }} Proyek</h3>
+                        <p class="text-[12px] text-[#666] font-semibold uppercase tracking-[0.5px]">Jumlah Proyek Aktif (IPRO)</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- STATS BLOCK --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[25px] mt-[30px] w-full stats">
+                <div class="card bg-white py-10 px-[25px] rounded-[20px] text-center transition-all duration-[400ms] shadow-[0_10px_25px_rgba(0,0,0,0.08)] cursor-pointer hover:-translate-y-2.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)]">
+                    <h1 class="counter text-[52px] text-[#0B5D3D] mb-2.5 font-bold" data-target="{{ \App\Models\Kabupaten::count() }}">0</h1>
+                    <p class="text-[#666] text-[17px]">Kabupaten / Kota</p>
+                </div>
+
+                <div class="card bg-white py-10 px-[25px] rounded-[20px] text-center transition-all duration-[400ms] shadow-[0_10px_25px_rgba(0,0,0,0.08)] cursor-pointer hover:-translate-y-2.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)]">
+                    <h1 class="counter text-[52px] text-[#0B5D3D] mb-2.5 font-bold" data-target="{{ \App\Models\Sektor::count() }}">0</h1>
+                    <p class="text-[#666] text-[17px]">Sektor Ekonomi</p>
+                </div>
+
+                <div class="card bg-white py-10 px-[25px] rounded-[20px] text-center transition-all duration-[400ms] shadow-[0_10px_25px_rgba(0,0,0,0.08)] cursor-pointer hover:-translate-y-2.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)]">
+                    <h1 class="counter text-[52px] text-[#0B5D3D] mb-2.5 font-bold" data-target="4">0</h1>
+                    <p class="text-[#666] text-[17px]">Metode Analisis</p>
+                </div>
+
+                <div class="card bg-white py-10 px-[25px] rounded-[20px] text-center transition-all duration-[400ms] shadow-[0_10px_25px_rgba(0,0,0,0.08)] cursor-pointer hover:-translate-y-2.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)]">
+                    <h1 class="counter text-[52px] text-[#0B5D3D] mb-2.5 font-bold" data-target="100">0</h1>
+                    <p class="text-[#666] text-[17px]">% Data Terintegrasi</p>
+                </div>
+            </div>
+        </div>
     </section>
-
-    <!-- =========================
-            STATISTIK
-    ========================== -->
-
-    <section class="stats">
-
-        <div class="card">
-
-            <h1 class="counter"
-                data-target="{{ \App\Models\Kabupaten::count() }}">
-
-                0
-
-            </h1>
-
-            <p>Kabupaten / Kota</p>
-
-        </div>
-
-        <div class="card">
-
-            <h1 class="counter"
-                data-target="{{ \App\Models\Sektor::count() }}">
-
-                0
-
-            </h1>
-
-            <p>Sektor Ekonomi</p>
-
-        </div>
-
-        <div class="card">
-
-            <h1 class="counter"
-                data-target="4">
-
-                0
-
-            </h1>
-
-            <p>Metode Analisis</p>
-
-        </div>
-
-        <div class="card">
-
-            <h1 class="counter"
-                data-target="100">
-
-                0
-
-            </h1>
-
-            <p>% Data Terintegrasi</p>
-
-        </div>
-
-    </section>
-
-
-
-
 
     <!-- =========================
             VISI MISI
@@ -186,7 +209,7 @@
                     <li>Mengembangkan dan Menata Infrastruktur yang Berkualitas, Estetik dan Ramah Lingkungan.</li>
 
                     <li>Menyediakan data ekonomi yang akurat.</li>
-                    
+
                     <li>Memperkuat ketahanan sosial, dan budaya untuk membangun masyarakat Sumut yang tangguh.</li>
                 </ul>
 
@@ -288,11 +311,11 @@
 
                 <i class="fa-solid fa-database"></i>
 
-                <h3>Tipology Sektor</h3>
+                <h3>Tipologi Sektor</h3>
 
                 <p>
 
-                    Mengelompokkan sektor ekonomi berdasarkan tingkat pertumbuhan dan kontribusinya untuk mengidentifikasi 
+                    Mengelompokkan sektor ekonomi berdasarkan tingkat pertumbuhan dan kontribusinya untuk mengidentifikasi
                     sektor unggulan
 
                 </p>
@@ -630,7 +653,7 @@
 
                 <button class="faq-question">
 
-                    Apa itu Tipology Sektor?
+                    Apa itu Tipologi Sektor?
 
                     <i class="fa-solid fa-plus"></i>
 
@@ -640,7 +663,7 @@
 
                     <p>
 
-                        Mengelompokkan sektor ekonomi berdasarkan tingkat pertumbuhan dan kontribusinya 
+                        Mengelompokkan sektor ekonomi berdasarkan tingkat pertumbuhan dan kontribusinya
                         untuk mengidentifikasi sektor unggulan serta sektor yang perlu dikembangkan
 
                     </p>
@@ -704,7 +727,7 @@
 
                 <p>
 
-                    Jl. K.H. Wahid Hasyim No.8A, Merdeka, 
+                    Jl. K.H. Wahid Hasyim No.8A, Merdeka,
                     Kec. Medan Baru, Kota Medan, Sumatera Utara 20154, Indonesia.
 
                 </p>
@@ -753,9 +776,9 @@
 
         <iframe
 
-           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3982.058729154579!2d98.65581707497314!3d3.5739699964002023!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30312fd63f5fe24d%3A0x84645c5d9a30054a!2sDinas%20Penanaman%20Modal%20dan%20PTSP%20Prov.%20Sumut!5e0!3m2!1sid!2sid!4v1783478328320!5m2!1sid!2sid" 
-           width="600" height="450" style="border:0;" 
-           allowfullscreen="" loading="lazy" 
+           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3982.058729154579!2d98.65581707497314!3d3.5739699964002023!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30312fd63f5fe24d%3A0x84645c5d9a30054a!2sDinas%20Penanaman%20Modal%20dan%20PTSP%20Prov.%20Sumut!5e0!3m2!1sid!2sid!4v1783478328320!5m2!1sid!2sid"
+           width="600" height="450" style="border:0;"
+           allowfullscreen="" loading="lazy"
            referrerpolicy="strict-origin-when-cross-origin">
 
         </iframe>

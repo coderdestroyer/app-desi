@@ -208,10 +208,10 @@ const observer = new IntersectionObserver((entries) => {
 });
 
 document.querySelectorAll(
-    ".about,.stats,.visi,.layanan,.flow,.unggulan,.faq,.contact,.maps,.cta"
+    ".about,.stats,.visi,.layanan,.flow,.unggulan,.faq,.contact,.maps,.cta,.dashboard-grid-section"
 ).forEach(el => {
 
-    el.classList.add("hidden");
+    el.classList.add("reveal-hidden");
 
     observer.observe(el);
 

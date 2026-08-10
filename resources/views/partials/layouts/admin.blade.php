@@ -80,11 +80,11 @@
 
                 <li class="mb-1.5">
                     <a
-                        href="{{ route('home') }}#tentang"
+                        href="{{ route('home') }}#overview"
                         class="flex items-center gap-3.5 no-underline p-3.5 rounded-2xl text-[15px] font-semibold transition-all duration-200 text-navy hover:bg-green-pale hover:text-green-dark"
                     >
                         <i class="fa-solid fa-circle-info w-[22px] text-center text-lg"></i>
-                        <span>Tentang</span>
+                        <span>Overview</span>
                     </a>
                 </li>
             </ul>

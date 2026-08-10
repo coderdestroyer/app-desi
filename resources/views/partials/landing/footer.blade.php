@@ -39,9 +39,9 @@
 
                 </a>
 
-                <a href="{{ route('home') }}#tentang">
-    Tentang
-</a>
+                <a href="{{ route('home') }}#overview">
+                    Overview
+                </a>
 
                 <a href="#">
 
