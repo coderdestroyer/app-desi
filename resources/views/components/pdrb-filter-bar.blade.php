@@ -9,8 +9,8 @@
     'searchPlaceholder' => 'Cari...'
 ])
 
-<section class="{{ ($tab ?? 'own') === 'all' ? 'mt-4' : 'mt-6' }} rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-    <form action="{{ $action }}" method="GET" data-live-filter data-no-loader class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+<section class="{{ ($tab ?? 'own') === 'all' ? 'mt-4' : 'mt-6' }} rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
+    <form action="{{ $action }}" method="GET" data-live-filter data-no-loader class="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-12 items-center">
         @if($tab)
             <input type="hidden" name="tab" value="{{ $tab }}">
         @endif
@@ -105,13 +105,14 @@
         </div>
 
         {{-- Reset Filter Button --}}
-        <div class="flex min-w-0 items-center justify-end xl:col-span-1">
+        <div class="flex min-w-0 items-center justify-end sm:col-span-2 xl:col-span-1">
             <a
                 href="{{ $action . ($tab ? '?tab='.$tab : '') }}"
                 title="Reset filter"
-                class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs"
+                class="inline-flex h-11 w-full sm:w-11 flex-shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs"
             >
                 <i class="fa-solid fa-rotate-left text-sm"></i>
+                <span class="sm:hidden text-xs font-semibold">Reset Filter</span>
             </a>
         </div>
     </form>
