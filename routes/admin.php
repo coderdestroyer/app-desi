@@ -182,14 +182,18 @@ Route::middleware(['auth', 'role:admin'])
 
         /*
         |--------------------------------------------------------------------------
-        | Kelola Data PDRB Daerah (Admin Full Access 33 Kab/Kota)
+        | Kelola Data PDRB Daerah & Provinsi (Admin Full Access)
         |--------------------------------------------------------------------------
         */
         Route::get('/pdrb', [AdminPdrbController::class, 'index'])->name('pdrb.index');
         Route::post('/pdrb/init', [AdminPdrbController::class, 'init'])->name('pdrb.init');
+        Route::post('/pdrb/init-provinsi', [AdminPdrbController::class, 'initProvinsi'])->name('pdrb.init-provinsi');
         Route::get('/pdrb/entry/{kabupaten_id}/{tahun}', [AdminPdrbController::class, 'entry'])->name('pdrb.entry');
+        Route::get('/pdrb/provinsi-entry/{provinsi_id}/{tahun}', [AdminPdrbController::class, 'entryProvinsi'])->name('pdrb.provinsi-entry');
         Route::post('/pdrb/save-entry', [AdminPdrbController::class, 'saveEntry'])->name('pdrb.save-entry');
+        Route::post('/pdrb/save-provinsi-entry', [AdminPdrbController::class, 'saveEntryProvinsi'])->name('pdrb.save-provinsi-entry');
         Route::delete('/pdrb/group/{kabupaten_id}/{tahun}', [AdminPdrbController::class, 'destroyGroup'])->name('pdrb.destroy-group');
+        Route::delete('/pdrb/provinsi-group/{provinsi_id}/{tahun}', [AdminPdrbController::class, 'destroyGroupProvinsi'])->name('pdrb.destroy-provinsi-group');
 
         /*
         |--------------------------------------------------------------------------
