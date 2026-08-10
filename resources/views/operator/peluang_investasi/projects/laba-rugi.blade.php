@@ -17,6 +17,32 @@
         </nav>
 
         <div class="flex items-center gap-2">
+            <!-- Indicator Autosave -->
+            <div x-show="autoSaveStatus" x-transition class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all" :class="{
+                'bg-slate-100 text-slate-600 border border-slate-200': autoSaveStatus === 'saving',
+                'bg-[#E7F2EB] text-[#145239] border border-[#CFE3D5]': autoSaveStatus === 'saved',
+                'bg-amber-50 text-amber-700 border border-amber-200': autoSaveStatus === 'draft'
+            }">
+                <template x-if="autoSaveStatus === 'saving'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-spinner animate-spin text-[#145239]"></i>
+                        <span>Menyimpan otomatis...</span>
+                    </span>
+                </template>
+                <template x-if="autoSaveStatus === 'saved'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up text-[#145239]"></i>
+                        <span x-text="'Tersimpan ' + lastSavedTime"></span>
+                    </span>
+                </template>
+                <template x-if="autoSaveStatus === 'draft'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk text-amber-600"></i>
+                        <span>Draft lokal tersimpan (Autosave DB per 5 mnt)</span>
+                    </span>
+                </template>
+            </div>
+
             <button @click="toggleMode()" class="px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold shadow-xs transition-colors flex items-center gap-2">
                 <i class="fa-solid" :class="isPreviewMode ? 'fa-pen-to-square' : 'fa-eye'"></i>
                 <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau (Preview)'"></span>
@@ -399,6 +425,9 @@
         </div>
 
     </div>
+
+    <!-- MODAL KONFIRMASI PERUBAHAN BELUM DISIMPAN -->
+    <x-confirm-unsaved-modal />
 </div>
 
 <script>
@@ -426,13 +455,199 @@
                 tenor_kredit_tahun: 5,
             },
 
-            rows: [], 
+            hasUnsavedChanges: false,
+            showLeaveModal: false,
+            pendingNavigationUrl: null,
+            isGuardPushed: false,
+            autoSaveStatus: '',
+            lastSavedTime: '',
+            autoSaveTimeout: null,
+            localDraftTimeout: null,
+            fiveMinIntervalTimer: null,
+            storageKey: 'labarugi_draft_' + {{ $project->id }},
 
             initData() {
                 for (let i = 1; i <= this.jangkaWaktuTahun; i++) {
                     this.years.push(i);
                 }
+                
+                const localDraft = localStorage.getItem(this.storageKey);
+                if (localDraft) {
+                    try {
+                        const parsed = JSON.parse(localDraft);
+                        if (parsed && Array.isArray(parsed.rows) && parsed.rows.length > 0) {
+                            this.rows = parsed.rows;
+                            if (parsed.settings) this.settings = Object.assign({}, this.settings, parsed.settings);
+                            this.hasUnsavedChanges = true;
+                            this.autoSaveStatus = 'draft';
+                            this.lastSavedTime = parsed.time || '';
+                        }
+                    } catch(e) {}
+                }
+
+                if (this.hasUnsavedChanges) {
+                    this.pushHistoryGuard();
+                }
+
                 this.loadData();
+
+                this.$watch('rows', () => { this.triggerAutoSave(); });
+                this.$watch('settings', () => { this.triggerAutoSave(); });
+
+                // Autosave to DB interval 5 minutes (300.000 ms)
+                this.fiveMinIntervalTimer = setInterval(() => {
+                    if (this.hasUnsavedChanges) {
+                        this.autoSaveToServer();
+                    }
+                }, 300000);
+
+                this.setupNavigationInterception();
+            },
+
+            pushHistoryGuard() {
+                if (!this.isGuardPushed) {
+                    try {
+                        history.pushState({ unsavedGuard: true }, '', window.location.href);
+                        this.isGuardPushed = true;
+                    } catch(e) {}
+                }
+            },
+
+            setupNavigationInterception() {
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.hasUnsavedChanges) {
+                        e.preventDefault();
+                        e.returnValue = '';
+                    }
+                });
+
+                window.addEventListener('popstate', (e) => {
+                    if (this.hasUnsavedChanges) {
+                        try {
+                            history.pushState({ unsavedGuard: true }, '', window.location.href);
+                        } catch(err) {}
+                        this.pendingNavigationUrl = 'BACK_NAVIGATION';
+                        this.showLeaveModal = true;
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!this.hasUnsavedChanges) return;
+
+                    const link = e.target.closest('a');
+                    if (!link) return;
+
+                    const href = link.getAttribute('href');
+                    const target = link.getAttribute('target');
+
+                    if (!href || 
+                        href.startsWith('#') || 
+                        href.startsWith('javascript:') || 
+                        href.startsWith('mailto:') || 
+                        href.startsWith('tel:') || 
+                        target === '_blank' || 
+                        e.ctrlKey || 
+                        e.metaKey || 
+                        link.hasAttribute('download')) {
+                        return;
+                    }
+
+                    if (link.href === window.location.href) {
+                        return;
+                    }
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.pendingNavigationUrl = link.href;
+                    this.showLeaveModal = true;
+                }, true);
+            },
+
+            triggerAutoSave() {
+                this.hasUnsavedChanges = true;
+                this.pushHistoryGuard();
+                clearTimeout(this.localDraftTimeout);
+                this.localDraftTimeout = setTimeout(() => {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    localStorage.setItem(this.storageKey, JSON.stringify({
+                        rows: this.rows,
+                        settings: this.settings,
+                        time: timeStr
+                    }));
+                    if (this.autoSaveStatus !== 'saving') {
+                        this.autoSaveStatus = 'draft';
+                    }
+                }, 400);
+            },
+
+            async autoSaveToServer(force = false) {
+                if (!force && !this.hasUnsavedChanges) return true;
+                this.autoSaveStatus = 'saving';
+                try {
+                    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                    const response = await fetch(`/operator/projects/${this.projectId}/laba-rugi/data`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfMeta ? csrfMeta.getAttribute('content') : '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ components: this.rows })
+                    });
+                    if (response.ok) {
+                        const now = new Date();
+                        this.lastSavedTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        this.autoSaveStatus = 'saved';
+                        this.hasUnsavedChanges = false;
+                        this.isGuardPushed = false;
+                        localStorage.removeItem(this.storageKey);
+                        return true;
+                    } else {
+                        this.autoSaveStatus = 'draft';
+                        return false;
+                    }
+                } catch (error) {
+                    this.autoSaveStatus = 'draft';
+                    return false;
+                }
+            },
+
+            async saveAndLeave() {
+                const isBackNav = (this.pendingNavigationUrl === 'BACK_NAVIGATION');
+                const targetUrl = this.pendingNavigationUrl;
+
+                const success = await this.autoSaveToServer(true);
+                if (success) {
+                    this.hasUnsavedChanges = false;
+                    this.isGuardPushed = false;
+                    localStorage.removeItem(this.storageKey);
+                    this.showLeaveModal = false;
+
+                    if (isBackNav) {
+                        window.history.go(-2);
+                    } else if (targetUrl) {
+                        window.location.href = targetUrl;
+                    }
+                } else {
+                    alert('Gagal menyimpan data ke database. Silakan coba lagi.');
+                }
+            },
+
+            discardAndLeave() {
+                const isBackNav = (this.pendingNavigationUrl === 'BACK_NAVIGATION');
+                const targetUrl = this.pendingNavigationUrl;
+
+                this.hasUnsavedChanges = false;
+                this.isGuardPushed = false;
+                localStorage.removeItem(this.storageKey);
+                this.showLeaveModal = false;
+
+                if (isBackNav) {
+                    window.history.go(-2);
+                } else if (targetUrl) {
+                    window.location.href = targetUrl;
+                }
             },
 
             async loadData() {
@@ -480,7 +695,10 @@
                             });
                         });
                         
-                        this.rows = newRows;
+                        const localDraft = localStorage.getItem(this.storageKey);
+                        if (!localDraft) {
+                            this.rows = newRows;
+                        }
                     }
                 } catch (error) {
                     console.error('Gagal memuat data', error);
@@ -649,29 +867,15 @@
 
             async saveData() {
                 this.isSaving = true;
-                try {
-                    const response = await fetch(`/operator/projects/${this.projectId}/laba-rugi/data`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ components: this.rows })
-                    });
-                    const result = await response.json();
-                    
-                    if (response.ok) {
-                        this.showToast(result.message, true);
-                        await this.loadData();
-                        this.isPreviewMode = true; 
-                    } else {
-                        this.showToast(result.message || 'Validasi gagal.', false);
-                    }
-                } catch (error) {
+                const success = await this.autoSaveToServer(true);
+                this.isSaving = false;
+                if (success) {
+                    this.showToast('Data Laba Rugi berhasil disimpan ke database.', true);
+                    await this.loadData();
+                    this.isPreviewMode = true; 
+                } else {
                     this.showToast('Gagal menyimpan data.', false);
                 }
-                this.isSaving = false;
             }
         }));
     }
