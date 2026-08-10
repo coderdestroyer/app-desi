@@ -17,6 +17,32 @@
         </nav>
 
         <div class="flex items-center gap-2">
+            <!-- Indicator Autosave -->
+            <div x-show="autoSaveStatus" x-transition class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all" :class="{
+                'bg-slate-100 text-slate-600 border border-slate-200': autoSaveStatus === 'saving',
+                'bg-[#E7F2EB] text-[#145239] border border-[#CFE3D5]': autoSaveStatus === 'saved',
+                'bg-amber-50 text-amber-700 border border-amber-200': autoSaveStatus === 'draft'
+            }">
+                <template x-if="autoSaveStatus === 'saving'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-spinner animate-spin text-[#145239]"></i>
+                        <span>Menyimpan otomatis...</span>
+                    </span>
+                </template>
+                <template x-if="autoSaveStatus === 'saved'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up text-[#145239]"></i>
+                        <span x-text="'Tersimpan ' + lastSavedTime"></span>
+                    </span>
+                </template>
+                <template x-if="autoSaveStatus === 'draft'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk text-amber-600"></i>
+                        <span>Draft lokal tersimpan (Autosave DB per 5 mnt)</span>
+                    </span>
+                </template>
+            </div>
+
             <button @click="toggleMode()" class="px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold shadow-xs transition-colors flex items-center gap-2">
                 <i class="fa-solid" :class="isPreviewMode ? 'fa-pen-to-square' : 'fa-eye'"></i>
                 <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau (Preview)'"></span>
@@ -166,6 +192,10 @@
             </div>
         </div>
 
+        </div>
+
+    <!-- MODAL KONFIRMASI PERUBAHAN BELUM DISIMPAN -->
+    <x-confirm-unsaved-modal />
     </div>
 </div>
 
@@ -177,23 +207,213 @@
             rows: [],
             errors: {},
             toast: { show: false, message: '', isSuccess: true },
+            hasUnsavedChanges: false,
+            showLeaveModal: false,
+            pendingNavigationUrl: null,
+            isGuardPushed: false,
+            autoSaveStatus: '',
+            lastSavedTime: '',
+            autoSaveTimeout: null,
+            localDraftTimeout: null,
+            fiveMinIntervalTimer: null,
+            storageKey: 'capex_draft_' + {{ $project->id }},
 
             initData() {
                 const dbComponents = @json($components);
+                let loadedFromDraft = false;
+
+                const localDraft = localStorage.getItem(this.storageKey);
+                if (localDraft) {
+                    try {
+                        const parsed = JSON.parse(localDraft);
+                        if (parsed && Array.isArray(parsed.rows) && parsed.rows.length > 0) {
+                            this.rows = parsed.rows;
+                            this.hasUnsavedChanges = true;
+                            this.autoSaveStatus = 'draft';
+                            this.lastSavedTime = parsed.time || '';
+                            loadedFromDraft = true;
+                        }
+                    } catch(e) {}
+                }
                 
-                if (dbComponents.length > 0) {
-                    this.rows = dbComponents.map(c => ({
-                        id: c.id,
-                        temp_id: 'db_' + c.id,
-                        parent_temp_id: c.parent_id ? 'db_' + c.parent_id : null,
-                        nama_komponen: c.nama_komponen,
-                        volume: c.volume !== null ? parseFloat(c.volume) : null,
-                        satuan: c.satuan || '',
-                        luas: c.luas !== null ? parseFloat(c.luas) : null,
-                        harga_m2: c.harga_m2 !== null ? parseFloat(c.harga_m2) : null
+                if (!loadedFromDraft) {
+                    if (dbComponents.length > 0) {
+                        this.rows = dbComponents.map(c => ({
+                            id: c.id,
+                            temp_id: 'db_' + c.id,
+                            parent_temp_id: c.parent_id ? 'db_' + c.parent_id : null,
+                            nama_komponen: c.nama_komponen,
+                            volume: c.volume !== null ? parseFloat(c.volume) : null,
+                            satuan: c.satuan || '',
+                            luas: c.luas !== null ? parseFloat(c.luas) : null,
+                            harga_m2: c.harga_m2 !== null ? parseFloat(c.harga_m2) : null
+                        }));
+                    } else {
+                        this.rows = [];
+                    }
+                }
+
+                if (this.hasUnsavedChanges) {
+                    this.pushHistoryGuard();
+                }
+
+                this.$watch('rows', () => {
+                    this.triggerAutoSave();
+                });
+
+                // Autosave to DB interval 5 minutes (300.000 ms)
+                this.fiveMinIntervalTimer = setInterval(() => {
+                    if (this.hasUnsavedChanges) {
+                        this.autoSaveToServer();
+                    }
+                }, 300000);
+
+                this.setupNavigationInterception();
+            },
+
+            pushHistoryGuard() {
+                if (!this.isGuardPushed) {
+                    try {
+                        history.pushState({ unsavedGuard: true }, '', window.location.href);
+                        this.isGuardPushed = true;
+                    } catch(e) {}
+                }
+            },
+
+            setupNavigationInterception() {
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.hasUnsavedChanges) {
+                        e.preventDefault();
+                        e.returnValue = '';
+                    }
+                });
+
+                window.addEventListener('popstate', (e) => {
+                    if (this.hasUnsavedChanges) {
+                        try {
+                            history.pushState({ unsavedGuard: true }, '', window.location.href);
+                        } catch(err) {}
+                        this.pendingNavigationUrl = 'BACK_NAVIGATION';
+                        this.showLeaveModal = true;
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!this.hasUnsavedChanges) return;
+
+                    const link = e.target.closest('a');
+                    if (!link) return;
+
+                    const href = link.getAttribute('href');
+                    const target = link.getAttribute('target');
+
+                    if (!href || 
+                        href.startsWith('#') || 
+                        href.startsWith('javascript:') || 
+                        href.startsWith('mailto:') || 
+                        href.startsWith('tel:') || 
+                        target === '_blank' || 
+                        e.ctrlKey || 
+                        e.metaKey || 
+                        link.hasAttribute('download')) {
+                        return;
+                    }
+
+                    if (link.href === window.location.href) {
+                        return;
+                    }
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.pendingNavigationUrl = link.href;
+                    this.showLeaveModal = true;
+                }, true);
+            },
+
+            triggerAutoSave() {
+                this.hasUnsavedChanges = true;
+                this.pushHistoryGuard();
+                clearTimeout(this.localDraftTimeout);
+                this.localDraftTimeout = setTimeout(() => {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    localStorage.setItem(this.storageKey, JSON.stringify({
+                        rows: this.rows,
+                        time: timeStr
                     }));
+                    if (this.autoSaveStatus !== 'saving') {
+                        this.autoSaveStatus = 'draft';
+                    }
+                }, 400);
+            },
+
+            async autoSaveToServer(force = false) {
+                if (!force && !this.hasUnsavedChanges) return true;
+                this.autoSaveStatus = 'saving';
+
+                try {
+                    const res = await fetch('{{ route('operator.projects.capex.store', $project->id) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ components: this.rows })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const now = new Date();
+                        this.lastSavedTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        this.autoSaveStatus = 'saved';
+                        this.hasUnsavedChanges = false;
+                        this.isGuardPushed = false;
+                        localStorage.removeItem(this.storageKey);
+                        return true;
+                    } else {
+                        this.autoSaveStatus = 'draft';
+                        return false;
+                    }
+                } catch(e) {
+                    this.autoSaveStatus = 'draft';
+                    return false;
+                }
+            },
+
+            async saveAndLeave() {
+                const isBackNav = (this.pendingNavigationUrl === 'BACK_NAVIGATION');
+                const targetUrl = this.pendingNavigationUrl;
+
+                const success = await this.autoSaveToServer(true);
+                if (success) {
+                    this.hasUnsavedChanges = false;
+                    this.isGuardPushed = false;
+                    localStorage.removeItem(this.storageKey);
+                    this.showLeaveModal = false;
+
+                    if (isBackNav) {
+                        window.history.go(-2);
+                    } else if (targetUrl) {
+                        window.location.href = targetUrl;
+                    }
                 } else {
-                    this.rows = [];
+                    alert('Gagal menyimpan data ke database. Silakan coba lagi.');
+                }
+            },
+
+            discardAndLeave() {
+                const isBackNav = (this.pendingNavigationUrl === 'BACK_NAVIGATION');
+                const targetUrl = this.pendingNavigationUrl;
+
+                this.hasUnsavedChanges = false;
+                this.isGuardPushed = false;
+                localStorage.removeItem(this.storageKey);
+                this.showLeaveModal = false;
+
+                if (isBackNav) {
+                    window.history.go(-2);
+                } else if (targetUrl) {
+                    window.location.href = targetUrl;
                 }
             },
 
@@ -273,34 +493,18 @@
                 return this.errors[row.temp_id] && this.errors[row.temp_id].includes(field);
             },
 
-            saveData() {
+            async saveData() {
                 this.isSaving = true;
                 this.errors = {};
-
-                fetch('{{ route('operator.projects.capex.store', $project->id) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ components: this.rows })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    this.isSaving = false;
-                    if(data.success) {
-                        this.toast.isSuccess = true;
-                        this.toast.message = data.message;
-                        this.toast.show = true;
-                    } else {
-                        alert(data.message || 'Gagal menyimpan data CAPEX.');
-                    }
-                })
-                .catch(() => {
-                    this.isSaving = false;
-                    alert('Terjadi kesalahan koneksi.');
-                });
+                const success = await this.autoSaveToServer(true);
+                this.isSaving = false;
+                if(success) {
+                    this.toast.isSuccess = true;
+                    this.toast.message = 'Data CAPEX berhasil disimpan ke database.';
+                    this.toast.show = true;
+                } else {
+                    alert('Gagal menyimpan data CAPEX.');
+                }
             }
         }));
     }

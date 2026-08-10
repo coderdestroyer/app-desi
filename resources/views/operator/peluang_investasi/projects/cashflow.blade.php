@@ -17,6 +17,32 @@
         </nav>
 
         <div class="flex items-center gap-2">
+            <!-- Indicator Autosave -->
+            <div x-show="autoSaveStatus" x-transition class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all" :class="{
+                'bg-slate-100 text-slate-600 border border-slate-200': autoSaveStatus === 'saving',
+                'bg-[#EEF8F2] text-[#145239] border border-[#CFE3D5]': autoSaveStatus === 'saved',
+                'bg-amber-50 text-amber-700 border border-amber-200': autoSaveStatus === 'draft'
+            }">
+                <template x-if="autoSaveStatus === 'saving'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-spinner animate-spin text-[#145239]"></i>
+                        <span>Menyimpan otomatis...</span>
+                    </span>
+                </template>
+                <template x-if="autoSaveStatus === 'saved'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up text-[#145239]"></i>
+                        <span x-text="'Tersimpan ' + lastSavedTime"></span>
+                    </span>
+                </template>
+                <template x-if="autoSaveStatus === 'draft'">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk text-amber-600"></i>
+                        <span>Draft lokal tersimpan (Autosave DB per 5 mnt)</span>
+                    </span>
+                </template>
+            </div>
+
             <a href="{{ route('operator.projects.show', $project->id) }}" class="px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left text-xs"></i>
                 <span>Kembali ke Detail</span>
@@ -237,6 +263,9 @@
         </div>
 
     </div>
+
+    <!-- MODAL KONFIRMASI PERUBAHAN BELUM DISIMPAN -->
+    <x-confirm-unsaved-modal />
 </div>
 
 <script>
@@ -247,15 +276,193 @@
             pendapatanPerTahun: @json($pendapatanPerTahun),
             opexPerTahun: @json($opexPerTahun),
             isSaving: false,
-            toast: { show: false, message: '', isSuccess: true },
-            settings: {
-                rasio_modal_sendiri: {{ $project->rasio_modal_sendiri }},
-                rasio_pinjaman_kredit: {{ $project->rasio_pinjaman_kredit }},
-                suku_bunga_kredit: {{ $project->suku_bunga_kredit }},
-                tenor_kredit_tahun: {{ $project->tenor_kredit_tahun }},
-            },
+            hasUnsavedChanges: false,
+            showLeaveModal: false,
+            pendingNavigationUrl: null,
+            isGuardPushed: false,
+            autoSaveStatus: '',
+            lastSavedTime: '',
+            autoSaveTimeout: null,
+            localDraftTimeout: null,
+            fiveMinIntervalTimer: null,
+            storageKey: 'cashflow_settings_draft_' + {{ $project->id }},
 
             initData() {
+                const localDraft = localStorage.getItem(this.storageKey);
+                if (localDraft) {
+                    try {
+                        const parsed = JSON.parse(localDraft);
+                        if (parsed && parsed.settings) {
+                            this.settings = Object.assign({}, this.settings, parsed.settings);
+                            this.hasUnsavedChanges = true;
+                            this.autoSaveStatus = 'draft';
+                            this.lastSavedTime = parsed.time || '';
+                        }
+                    } catch(e) {}
+                }
+
+                if (this.hasUnsavedChanges) {
+                    this.pushHistoryGuard();
+                }
+
+                this.$watch('settings', () => {
+                    this.triggerAutoSave();
+                });
+
+                // Autosave to DB interval 5 minutes (300.000 ms)
+                this.fiveMinIntervalTimer = setInterval(() => {
+                    if (this.hasUnsavedChanges) {
+                        this.autoSaveSettings();
+                    }
+                }, 300000);
+
+                this.setupNavigationInterception();
+            },
+
+            pushHistoryGuard() {
+                if (!this.isGuardPushed) {
+                    try {
+                        history.pushState({ unsavedGuard: true }, '', window.location.href);
+                        this.isGuardPushed = true;
+                    } catch(e) {}
+                }
+            },
+
+            setupNavigationInterception() {
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.hasUnsavedChanges) {
+                        e.preventDefault();
+                        e.returnValue = '';
+                    }
+                });
+
+                window.addEventListener('popstate', (e) => {
+                    if (this.hasUnsavedChanges) {
+                        try {
+                            history.pushState({ unsavedGuard: true }, '', window.location.href);
+                        } catch(err) {}
+                        this.pendingNavigationUrl = 'BACK_NAVIGATION';
+                        this.showLeaveModal = true;
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!this.hasUnsavedChanges) return;
+
+                    const link = e.target.closest('a');
+                    if (!link) return;
+
+                    const href = link.getAttribute('href');
+                    const target = link.getAttribute('target');
+
+                    if (!href || 
+                        href.startsWith('#') || 
+                        href.startsWith('javascript:') || 
+                        href.startsWith('mailto:') || 
+                        href.startsWith('tel:') || 
+                        target === '_blank' || 
+                        e.ctrlKey || 
+                        e.metaKey || 
+                        link.hasAttribute('download')) {
+                        return;
+                    }
+
+                    if (link.href === window.location.href) {
+                        return;
+                    }
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.pendingNavigationUrl = link.href;
+                    this.showLeaveModal = true;
+                }, true);
+            },
+
+            triggerAutoSave() {
+                this.hasUnsavedChanges = true;
+                this.pushHistoryGuard();
+                clearTimeout(this.localDraftTimeout);
+                this.localDraftTimeout = setTimeout(() => {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    localStorage.setItem(this.storageKey, JSON.stringify({
+                        settings: this.settings,
+                        time: timeStr
+                    }));
+                    if (this.autoSaveStatus !== 'saving') {
+                        this.autoSaveStatus = 'draft';
+                    }
+                }, 400);
+            },
+
+            async autoSaveSettings(force = false) {
+                if (!force && !this.hasUnsavedChanges) return true;
+                this.autoSaveStatus = 'saving';
+
+                try {
+                    const res = await fetch("{{ route('operator.projects.cashflow.settings', $project->id) }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(this.settings)
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const now = new Date();
+                        this.lastSavedTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        this.autoSaveStatus = 'saved';
+                        this.hasUnsavedChanges = false;
+                        this.isGuardPushed = false;
+                        localStorage.removeItem(this.storageKey);
+                        return true;
+                    } else {
+                        this.autoSaveStatus = 'draft';
+                        return false;
+                    }
+                } catch(e) {
+                    this.autoSaveStatus = 'draft';
+                    return false;
+                }
+            },
+
+            async saveAndLeave() {
+                const isBackNav = (this.pendingNavigationUrl === 'BACK_NAVIGATION');
+                const targetUrl = this.pendingNavigationUrl;
+
+                const success = await this.autoSaveSettings(true);
+                if (success) {
+                    this.hasUnsavedChanges = false;
+                    this.isGuardPushed = false;
+                    localStorage.removeItem(this.storageKey);
+                    this.showLeaveModal = false;
+
+                    if (isBackNav) {
+                        window.history.go(-2);
+                    } else if (targetUrl) {
+                        window.location.href = targetUrl;
+                    }
+                } else {
+                    alert('Gagal menyimpan pengaturan ke database. Silakan coba lagi.');
+                }
+            },
+
+            discardAndLeave() {
+                const isBackNav = (this.pendingNavigationUrl === 'BACK_NAVIGATION');
+                const targetUrl = this.pendingNavigationUrl;
+
+                this.hasUnsavedChanges = false;
+                this.isGuardPushed = false;
+                localStorage.removeItem(this.storageKey);
+                this.showLeaveModal = false;
+
+                if (isBackNav) {
+                    window.history.go(-2);
+                } else if (targetUrl) {
+                    window.location.href = targetUrl;
+                }
             },
 
             getEquityAmount() {
@@ -325,38 +532,20 @@
                 return isNeg ? `-${formatted}` : formatted;
             },
 
-            saveSettings() {
+            async saveSettings() {
                 this.isSaving = true;
                 this.toast.show = false;
-
-                fetch("{{ route('operator.projects.cashflow.settings', $project->id) }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(this.settings)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    this.isSaving = false;
-                    if (data.success) {
-                        this.toast.isSuccess = true;
-                        this.toast.message = data.message;
-                        this.toast.show = true;
-                    } else {
-                        this.toast.isSuccess = false;
-                        this.toast.message = data.message || 'Gagal menyimpan pengaturan.';
-                        this.toast.show = true;
-                    }
-                })
-                .catch(() => {
-                    this.isSaving = false;
-                    this.toast.isSuccess = false;
-                    this.toast.message = 'Koneksi server terputus.';
+                const success = await this.autoSaveSettings(true);
+                this.isSaving = false;
+                if (success) {
+                    this.toast.isSuccess = true;
+                    this.toast.message = 'Pengaturan pembiayaan berhasil disimpan ke database.';
                     this.toast.show = true;
-                });
+                } else {
+                    this.toast.isSuccess = false;
+                    this.toast.message = 'Gagal menyimpan pengaturan.';
+                    this.toast.show = true;
+                }
             }
         }));
     }
