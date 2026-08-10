@@ -1,3 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Restore default bold font weight for all heading elements */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+}
+
 /* ==========================================
             GOOGLE FONT
 ========================================== */
@@ -1165,14 +1174,6 @@ justify-content:center;
 
 }
 
-/* .hero{
-
-text-align:center;
-
-padding:0 20px;
-
-} */
-
 .overlay h1{
 
 font-size:40px;
@@ -1217,22 +1218,10 @@ grid-template-columns:1fr;
 
 }
 
-.section-title h2{
-
-font-size:32px;
-
-}
-
-.cta h2{
-
-font-size:34px;
-
-}
-
 }
 /* ========= SCROLL ANIMATION ========= */
 
-.hidden{
+.reveal-hidden{
 
     opacity:0;
 
@@ -1254,8 +1243,46 @@ html{
 }
 
 #hero,
-#tentang,
+#overview,
 #faq,
 #contact{
     scroll-margin-top:110px;
+}
+
+/* Leaflet Map Popup Custom Styles */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(20, 82, 57, 0.08);
+    padding: 6px;
+}
+
+.leaflet-popup-tip {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.map-popup-card {
+    padding: 5px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.map-popup-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #145239;
+    margin-bottom: 6px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+}
+
+.map-popup-value {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.map-popup-value strong {
+    color: #145239;
+    font-size: 14px;
+    font-weight: 700;
 }

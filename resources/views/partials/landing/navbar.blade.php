@@ -40,9 +40,9 @@
 
 <a
     id="nav-about"
-    href="{{ request()->routeIs('home') ? '#tentang' : route('home') . '#tentang' }}"
+    href="{{ request()->routeIs('home') ? '#overview' : route('home') . '#overview' }}"
     class="nav-link">
-    Tentang
+    Overview
 </a>
 
 <a

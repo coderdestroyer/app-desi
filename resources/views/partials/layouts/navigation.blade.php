@@ -54,12 +54,12 @@
 
 
             <a
-                href="{{ route('home') }}#tentang"
+                href="{{ route('home') }}#overview"
                 class="nav-link"
             >
                 <i class="fa-solid fa-puzzle-piece"></i>
 
-                Tentang Laman
+                Overview
             </a>
 
 

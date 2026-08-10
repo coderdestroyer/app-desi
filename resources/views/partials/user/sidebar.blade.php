@@ -28,9 +28,9 @@
     </a>
 
     {{-- Tentang --}}
-    <a href="{{ route('home') }}#tentang">
+    <a href="{{ route('home') }}#overview">
         <i class="fa-solid fa-circle-info"></i>
-        Tentang
+        Overview
     </a>
 
     {{-- Peta Investasi --}}

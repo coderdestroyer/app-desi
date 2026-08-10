@@ -16,183 +16,12 @@
     ])
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet">
+        rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        .map-section {
-            background: #ffffff;
-            padding: 90px 10%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border-top: 1px solid #eef2f0;
-            border-bottom: 1px solid #eef2f0;
-        }
-        
-        .map-section-header {
-            text-align: center;
-            max-width: 800px;
-            margin-bottom: 45px;
-        }
-        
-        .map-section-header h5 {
-            display: inline-block;
-            padding: 8px 18px;
-            background: #EEF8F2;
-            color: #1E5D41;
-            border-radius: 30px;
-            font-size: 14px;
-            margin-bottom: 15px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .map-section-header h2 {
-            font-size: 38px;
-            font-weight: 800;
-            color: #145239;
-            margin-bottom: 15px;
-            letter-spacing: -1px;
-        }
-        
-        .map-section-header p {
-            color: #666;
-            font-size: 16px;
-            line-height: 1.6;
-        }
-        
-        .map-section-card {
-            width: 100%;
-            max-width: 1100px;
-            background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(20, 82, 57, 0.08);
-            padding: 24px;
-            position: relative;
-            margin-bottom: 40px;
-            overflow: hidden;
-        }
-        
-        #landing-map {
-            width: 100%;
-            height: 500px;
-            border-radius: 16px;
-            z-index: 1;
-            background-color: #f7faf8;
-        }
-        
-        /* Map Legend */
-        .map-legend {
-            margin-top: 20px;
-            background: #f7faf8;
-            padding: 15px 25px;
-            border-radius: 12px;
-            border: 1px solid rgba(20, 82, 57, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .map-legend h4 {
-            font-size: 14px;
-            font-weight: 600;
-            color: #145239;
-            margin: 0;
-        }
-        
-        .legend-items {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        
-        .legend-color.color-1 { background-color: #8ce0b7; }
-        .legend-color.color-2 { background-color: #3db27c; }
-        .legend-color.color-3 { background-color: #217d56; }
-        .legend-color.color-4 { background-color: #145239; }
-        .legend-color.color-5 { background-color: #0d3826; }
-        
-        .map-section-action {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        
-        .btn-explore {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 16px;
-            padding: 18px 40px;
-            box-shadow: 0 8px 20px rgba(20, 82, 57, 0.15);
-        }
-        
-        .btn-explore i {
-            font-size: 18px;
-        }
-        
-        /* Custom styles for leaflet popup card */
-        .leaflet-popup-content-wrapper {
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-            border: 1px solid rgba(20, 82, 57, 0.08);
-            padding: 6px;
-        }
-        
-        .leaflet-popup-tip {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-        }
-        
-        .map-popup-card {
-            padding: 5px;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .map-popup-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #145239;
-            margin-bottom: 6px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 4px;
-        }
-        
-        .map-popup-value {
-            font-size: 13px;
-            color: #555;
-            line-height: 1.5;
-        }
-        
-        .map-popup-value strong {
-            color: #145239;
-            font-size: 14px;
-            font-weight: 700;
-        }
-    </style>
-
+    
 </head>
 
 <body>
@@ -231,42 +60,6 @@
 
             </div>
 
-            <div class="about-list">
-
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Pelayanan Perizinan
-
-                </div>
-
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Analisis Potensi Wilayah
-
-                </div>
-
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Dashboard GIS
-
-                </div>
-
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Analisis PDRB
-
-                </div>
-
-            </div>
-
         </div>
 
         <div class="hero-image">
@@ -276,44 +69,19 @@
         </div>
 
     </section>
-    
-    {{-- GIS MAP SECTION --}}
-    <section id="peta-ringkas" class="map-section">
-        <div class="map-section-header">
-            <h5>Peta GIS Sumatera</h5>
-            <h2>Visualisasi Potensi Wilayah</h2>
-            <p>Pemetaan intensitas potensi ekonomi dan investasi di 10 Provinsi Pulau Sumatera berdasarkan skala produk regional domestik bruto (PDRB) tahun {{ $latestYear }}.</p>
-        </div>
-        <div class="map-section-card">
-            <div id="landing-map"></div>
-            
-            {{-- LEGEND --}}
-            <div class="map-legend">
-                <h4>Skala Potensi Ekonomi & Investasi</h4>
-                <div class="legend-items">
-                    <div class="legend-item"><span class="legend-color color-1"></span><span>Rendah</span></div>
-                    <div class="legend-item"><span class="legend-color color-2"></span><span>Cukup</span></div>
-                    <div class="legend-item"><span class="legend-color color-3"></span><span>Sedang</span></div>
-                    <div class="legend-item"><span class="legend-color color-4"></span><span>Tinggi</span></div>
-                    <div class="legend-item"><span class="legend-color color-5"></span><span>Sangat Tinggi</span></div>
-                </div>
-            </div>
-        </div>
-        <div class="map-section-action">
-            <a href="{{ route('investment.map') }}" class="btn1 btn-explore">
-                <i class="fa-solid fa-map-location-dot"></i> Eksplorasi Peta Investasi Detail
-            </a>
-        </div>
-    </section>
+
     {{-- ABOUT --}}
-    <!-- @include('landing.about-section') -->
+    @include('landing.about-section')
     {{-- FOOTER --}}
     {{-- @include('partials.landing.footer') --}}
     {{-- Leaflet JS --}}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         window.provinsiInvestasi = @json($provinsiInvestasi);
-        
+        window.topSectorsData = @json($topSectors);
+        window.trendsData = @json($trendsData);
+
         document.addEventListener("DOMContentLoaded", () => {
             // Initialize map centered on Sumatra with zoom level 6
             const map = L.map("landing-map", {
@@ -353,7 +121,7 @@
                 let matchedKey = name;
                 if (name.includes("ACEH")) matchedKey = "ACEH";
                 const val = window.provinsiInvestasi[matchedKey] || 0;
-                
+
                 return {
                     fillColor: getColor(val),
                     weight: 1.5,
@@ -367,18 +135,18 @@
                 let matchedKey = name.toUpperCase().trim();
                 if (matchedKey.includes("ACEH")) matchedKey = "ACEH";
                 const val = window.provinsiInvestasi[matchedKey] || 0;
-                
+
                 const popupContent = `
                     <div class="map-popup-card">
                         <div class="map-popup-title">📍 Provinsi ${name}</div>
                         <div class="map-popup-value">Potensi Ekonomi (PDRB):<br><strong>${formatTriliun(val)}</strong></div>
                     </div>
                 `;
-                
+
                 layer.bindPopup(popupContent, { closeButton: false, offset: L.point(0, -10) });
-                
+
                 layer.on({
-                    mouseover: function(e) {
+                    mouseover: function (e) {
                         const layer = e.target;
                         layer.setStyle({
                             weight: 3,
@@ -387,10 +155,10 @@
                         });
                         layer.bringToFront();
                     },
-                    mouseout: function(e) {
+                    mouseout: function (e) {
                         geojsonLayer.resetStyle(e.target);
                     },
-                    click: function(e) {
+                    click: function (e) {
                         map.fitBounds(e.target.getBounds());
                         e.target.openPopup();
                     }
@@ -447,16 +215,149 @@
                             </div>
                         `;
                         circle.bindPopup(popupContent, { closeButton: false });
-                        circle.on('mouseover', function(e) {
+                        circle.on('mouseover', function (e) {
                             this.setStyle({ color: '#FFD54F', weight: 4 });
                             this.openPopup();
                         });
-                        circle.on('mouseout', function(e) {
+                        circle.on('mouseout', function (e) {
                             this.setStyle({ color: '#ffffff', weight: 2 });
                         });
                     });
                 });
+
+            // =====================================================
+            // CHART 1: TOP 5 POTENTIAL SECTORS
+            // =====================================================
+            const ctxSectors = document.getElementById("topSectorsChart").getContext("2d");
+            const sectorNames = window.topSectorsData.map(s => {
+                let name = s.nama_sektor;
+                name = name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+                if (name.length > 30) name = name.substring(0, 28) + "..";
+                return name;
+            });
+            const sectorValues = window.topSectorsData.map(s => s.total_pdrb / 1000000000000); // in Triliun
+
+            new Chart(ctxSectors, {
+                type: 'bar',
+                data: {
+                    labels: sectorNames,
+                    datasets: [{
+                        label: 'PDRB (Triliun Rp)',
+                        data: sectorValues,
+                        backgroundColor: '#1E5D41',
+                        borderRadius: 8,
+                        borderWidth: 0,
+                        barThickness: 16
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return 'Rp ' + context.raw.toFixed(2) + ' Triliun';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                callback: function (value) { return 'Rp ' + value + ' T'; }
+                            }
+                        },
+                        y: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // =====================================================
+            // CHART 2: TIME-SERIES LINE CHART (TRENDS)
+            // =====================================================
+            const ctxTrend = document.getElementById("trendChart").getContext("2d");
+            let trendChart;
+
+            window.updateTrendChart = function (provName) {
+                const dataPoints = window.trendsData[provName] || [];
+                const years = dataPoints.map(d => d.tahun);
+                const investasi = dataPoints.map(d => d.investasi / 1000000000000); // T
+                const ekspor = dataPoints.map(d => d.ekspor / 1000000000000); // T
+                const impor = dataPoints.map(d => d.impor / 1000000000000); // T
+
+                if (trendChart) {
+                    trendChart.data.labels = years;
+                    trendChart.data.datasets[0].data = investasi;
+                    trendChart.data.datasets[1].data = ekspor;
+                    trendChart.data.datasets[2].data = impor;
+                    trendChart.update();
+                } else {
+                    trendChart = new Chart(ctxTrend, {
+                        type: 'line',
+                        data: {
+                            labels: years,
+                            datasets: [
+                                {
+                                    label: 'Realisasi Investasi',
+                                    data: investasi,
+                                    borderColor: '#1E5D41',
+                                    backgroundColor: 'rgba(30, 93, 65, 0.08)',
+                                    tension: 0.3,
+                                    fill: true
+                                },
+                                {
+                                    label: 'Ekspor',
+                                    data: ekspor,
+                                    borderColor: '#E65100',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.3
+                                },
+                                {
+                                    label: 'Impor',
+                                    data: impor,
+                                    borderColor: '#0288D1',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.3
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return context.dataset.label + ': Rp ' + context.raw.toFixed(2) + ' Triliun';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { grid: { display: false } },
+                                y: {
+                                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                                    ticks: {
+                                        callback: function (value) { return 'Rp ' + value + ' T'; }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+
+            // Initialize trend chart with default selected province (SUMATERA UTARA)
+            updateTrendChart('SUMATERA UTARA');
         });
     </script>
 </body>
+
 </html>

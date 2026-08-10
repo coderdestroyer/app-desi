@@ -43,12 +43,12 @@ document.querySelectorAll(".btn1,.btn2").forEach(button => {
         CHANGE URL WHEN SCROLL
 ========================================== */
 
-const about = document.querySelector("#tentang");
+const about = document.querySelector("#overview");
 
 if (hero && about) {
 
-    // Kalau user buka langsung dengan hash #tentang
-    if (window.location.hash === "#tentang") {
+    // Kalau user buka langsung dengan hash #overview
+    if (window.location.hash === "#overview") {
 
         setTimeout(() => {
 
@@ -73,15 +73,15 @@ if (hero && about) {
 
         if (window.scrollY >= trigger) {
 
-            if (window.location.hash !== "#tentang") {
+            if (window.location.hash !== "#overview") {
 
-                history.replaceState(null, null, "#tentang");
+                history.replaceState(null, null, "#overview");
 
             }
 
         } else {
 
-            if (window.location.hash === "#tentang") {
+            if (window.location.hash === "#overview") {
 
                 history.replaceState(null, null, window.location.pathname + window.location.search);
 
