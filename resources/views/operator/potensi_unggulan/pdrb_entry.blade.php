@@ -7,7 +7,7 @@
 
     {{-- Breadcrumb & Action Bar --}}
     <div class="flex items-center justify-between">
-        <a href="{{ route('operator.pdrb.index') }}" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#CFE3D5] text-sm font-bold text-[#145239] hover:bg-[#EEF8F2] transition-colors shadow-sm">
+        <a href="{{ route('operator.pdrb.index') }}" class="ml-12 lg:ml-0 inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#CFE3D5] text-sm font-bold text-[#145239] hover:bg-[#EEF8F2] transition-colors shadow-sm">
             <i class="fa-solid fa-arrow-left text-xs"></i>
             <span>Kembali ke Daftar PDRB</span>
         </a>

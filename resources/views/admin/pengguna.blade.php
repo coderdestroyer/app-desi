@@ -46,7 +46,7 @@
         }
     @endphp
 
-    <div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{
+    <div class="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-7 lg:p-8 space-y-6" x-data="{
         isModalOpen: {{ (session('errors') || old('name') || $isModalOpen) ? 'true' : 'false' }},
         isEdit: {{ (old('_method') === 'PUT' || $isEdit) ? 'true' : 'false' }},
         userId: '{{ old('userId', $isEdit ? $editData->id : '') }}',
@@ -156,11 +156,9 @@
         {{-- HEADER HALAMAN --}}
         {{-- ========================================================= --}}
 
-        <section
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+        <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-6 sm:p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
             <div class="relative z-10 space-y-2">
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                     <i class="fa-solid fa-users text-[#FFD54F]"></i>
                     <span>Menu Admin</span>
                 </div>
@@ -168,13 +166,13 @@
                     Manajemen Pengguna
                 </h1>
                 <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
-                    Kelola akun yang terdaftar, role pengguna, status akun, dan akses pengguna dalam sistem.
+                    Kelola akun yang terdaftar, role pengguna, status akun, dan alokasi wilayah kerja pengguna dalam sistem.
                 </p>
             </div>
 
-            <div class="relative z-10">
+            <div class="relative z-10 w-full sm:w-auto shrink-0">
                 <button type="button" @click="openCreateModal()"
-                    class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                    class="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
                     <i class="fa-solid fa-plus text-sm"></i>
                     <span>Tambah Pengguna</span>
                 </button>
@@ -216,10 +214,10 @@
         {{-- FILTER --}}
         {{-- ========================================================= --}}
 
-        <section class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <form action="{{ route('admin.pengguna.index') }}" method="GET" data-live-filter data-no-loader class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[190px_190px_minmax(260px,1fr)_auto]">
+        <section class="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
+            <form action="{{ route('admin.pengguna.index') }}" method="GET" data-live-filter data-no-loader class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-12 items-center">
                 @if ($hasRoleColumn)
-                    <div class="relative">
+                    <div class="relative sm:col-span-1 lg:col-span-3">
                         <select name="role" class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                             <option value="">Semua Role</option>
                             <option value="admin" @selected(request('role') === 'admin')>Admin</option>
@@ -230,7 +228,7 @@
                 @endif
 
                 @if ($hasStatusColumn)
-                    <div class="relative">
+                    <div class="relative sm:col-span-1 lg:col-span-3">
                         <select name="status" class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                             <option value="">Semua Status</option>
                             <option value="approved" @selected(strtolower(request('status', '')) === 'approved')>Approved</option>
@@ -242,7 +240,7 @@
                     </div>
                 @endif
 
-                <div class="relative">
+                <div class="relative sm:col-span-2 lg:col-span-5">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Cari nama, email, role, atau status..." class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <button type="submit" aria-label="Cari pengguna" class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 transition hover:bg-emerald-100">
@@ -250,9 +248,10 @@
                     </button>
                 </div>
 
-                <div class="flex items-center justify-end">
-                    <a href="{{ route('admin.pengguna.index') }}" title="Reset filter" class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs">
+                <div class="flex items-center justify-end sm:col-span-2 lg:col-span-1">
+                    <a href="{{ route('admin.pengguna.index') }}" title="Reset filter" class="inline-flex h-11 w-full sm:w-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs">
                         <i class="fa-solid fa-rotate-left"></i>
+                        <span class="sm:hidden text-xs font-semibold">Reset Filter</span>
                     </a>
                 </div>
             </form>
@@ -263,7 +262,7 @@
         {{-- ========================================================= --}}
 
         <section id="tableContainer" class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-opacity duration-200">
-            <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+            <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-4 sm:p-5 sm:flex-row sm:items-center">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">Daftar Pengguna</h2>
                     <p class="mt-1 text-xs text-slate-500">Data akun yang terdaftar melalui sistem.</p>
@@ -276,16 +275,16 @@
             </header>
 
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[980px] border-collapse text-left">
+                <table class="w-full min-w-[920px] border-collapse text-left">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            <th class="px-5 py-3">No.</th>
-                            <th class="px-5 py-3">Pengguna</th>
-                            <th class="px-5 py-3">Role</th>
-                            <th class="px-5 py-3">Wilayah Kerja (Scope)</th>
-                            <th class="px-5 py-3">Status</th>
-                            <th class="px-5 py-3">Terdaftar</th>
-                            <th class="px-5 py-3 text-center">Aksi</th>
+                            <th class="w-14 px-4 py-3.5 text-center">No.</th>
+                            <th class="min-w-[200px] px-5 py-3.5">Pengguna</th>
+                            <th class="w-28 px-4 py-3.5">Role</th>
+                            <th class="min-w-[250px] px-5 py-3.5">Wilayah Kerja (Scope)</th>
+                            <th class="w-32 px-4 py-3.5">Status</th>
+                            <th class="w-36 px-4 py-3.5">Terdaftar</th>
+                            <th class="w-28 px-4 py-3.5 text-center">Aksi</th>
                         </tr>
                     </thead>
 
@@ -311,7 +310,7 @@
                             @endphp
 
                             <tr class="transition-colors hover:bg-slate-50/60">
-                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">
+                                <td class="whitespace-nowrap px-4 py-4 text-center text-slate-500">
                                     {{ str_pad($nomor, 2, '0', STR_PAD_LEFT) }}
                                 </td>
 
@@ -332,7 +331,7 @@
                                     </div>
                                 </td>
 
-                                <td class="px-5 py-4">
+                                <td class="px-4 py-4">
                                     <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $roleBadge }}">
                                         {{ ucfirst($role) }}
                                     </span>
@@ -346,33 +345,34 @@
                                         $isPending = strtolower($item->status ?? '') === 'pending';
                                     @endphp
                                     @if ($role === 'admin')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border border-amber-300 bg-amber-50 text-amber-800">
-                                            <i class="fa-solid fa-earth-asia text-[10px]"></i> Global (Semua Wilayah)
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-amber-300 bg-amber-50 text-amber-800 leading-snug">
+                                            <i class="fa-solid fa-earth-asia text-[11px] shrink-0"></i>
+                                            <span>Global (Semua Wilayah)</span>
                                         </span>
                                     @elseif ($scope)
                                         @if ($scope->kabupaten)
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border {{ $isPending ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-sky-300 bg-sky-50 text-sky-800' }}" title="{{ $scope->kabupaten->nama_kabupaten }}">
-                                                <i class="fa-solid {{ $isPending ? 'fa-hourglass-half' : 'fa-location-dot' }} text-[10px]"></i>
-                                                {{ $isPending ? 'Pengajuan' : 'Scope' }} Kab: {{ $scope->kabupaten->nama_kabupaten }}
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border {{ $isPending ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-sky-300 bg-sky-50 text-sky-800' }} leading-snug max-w-[280px]" title="{{ $scope->kabupaten->nama_kabupaten }}">
+                                                <i class="fa-solid {{ $isPending ? 'fa-hourglass-half' : 'fa-location-dot' }} text-[11px] shrink-0"></i>
+                                                <span class="truncate">{{ $isPending ? 'Pengajuan' : 'Scope' }} Kab: {{ $scope->kabupaten->nama_kabupaten }}</span>
                                             </span>
                                         @elseif ($scope->provinsi)
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border {{ $isPending ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-emerald-300 bg-emerald-50 text-emerald-800' }}" title="{{ $scope->provinsi->nama_provinsi }}">
-                                                <i class="fa-solid {{ $isPending ? 'fa-hourglass-half' : 'fa-map' }} text-[10px]"></i>
-                                                {{ $isPending ? 'Pengajuan' : 'Scope' }} Prov: {{ $scope->provinsi->nama_provinsi }} (+ Sub-Kab)
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border {{ $isPending ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-emerald-300 bg-emerald-50 text-emerald-800' }} leading-snug max-w-[280px]" title="{{ $scope->provinsi->nama_provinsi }}">
+                                                <i class="fa-solid {{ $isPending ? 'fa-hourglass-half' : 'fa-map' }} text-[11px] shrink-0"></i>
+                                                <span class="truncate">{{ $isPending ? 'Pengajuan' : 'Scope' }} Prov: {{ $scope->provinsi->nama_provinsi }} (+ Sub-Kab)</span>
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200 bg-slate-100 text-slate-500">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 bg-slate-100 text-slate-500">
                                                 Belum Set
                                             </span>
                                         @endif
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200 bg-slate-100 text-slate-500">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 bg-slate-100 text-slate-500">
                                             Belum Set
                                         </span>
                                     @endif
                                 </td>
 
-                                <td class="px-5 py-4">
+                                <td class="px-4 py-4">
                                     @php
                                         $badgeClass = match ($statusLower) {
                                             'approved', 'aktif' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
@@ -402,7 +402,7 @@
                                     </span>
                                 </td>
 
-                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">
+                                <td class="whitespace-nowrap px-4 py-4 text-slate-500">
                                     <div class="font-medium text-slate-600">
                                         {{ $item->created_at ? $item->created_at->translatedFormat('d M Y') : '-' }}
                                     </div>
@@ -413,8 +413,8 @@
                                     @endif
                                 </td>
 
-                                <td class="px-5 py-4">
-                                    <div class="flex items-center justify-center gap-2">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center justify-center gap-1.5">
                                         <button type="button" title="Edit pengguna" @click="openEditModal({{ json_encode($item) }}, {{ json_encode($item->wilayahScopes->first()) }})" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600">
                                             <i class="fa-regular fa-pen-to-square"></i>
                                         </button>
@@ -448,15 +448,11 @@
         {{-- ========================================================= --}}
 
         @if ($pengguna->hasPages())
-            <section class="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <p class="m-0 text-sm text-slate-500">
-                    Menampilkan
-                    <span class="font-semibold text-slate-700">{{ $pengguna->firstItem() }}</span>
-                    sampai
-                    <span class="font-semibold text-slate-700">{{ $pengguna->lastItem() }}</span>
-                    dari
-                    <span class="font-semibold text-slate-700">{{ $pengguna->total() }}</span>
-                    pengguna
+            <section class="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:flex-row">
+                <p class="mb-0 text-xs text-slate-500">
+                    Menampilkan <span class="font-semibold text-slate-700">{{ $pengguna->firstItem() }}</span>
+                    sampai <span class="font-semibold text-slate-700">{{ $pengguna->lastItem() }}</span>
+                    dari <span class="font-semibold text-slate-700">{{ $pengguna->total() }}</span> entri
                 </p>
 
                 <div class="flex flex-wrap items-center gap-2">
@@ -510,12 +506,13 @@
         {{-- Dedicated Form Modal --}}
         <template x-teleport="body">
             <div x-show="isModalOpen" x-cloak x-transition @keydown.escape.window="closeModal()"
-                class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm">
+                class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 sm:p-4 md:p-6 backdrop-blur-sm">
 
-                <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-emerald-100 relative" @click.outside="closeModal()">
-                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-emerald-100 relative overflow-hidden my-auto" @click.outside="closeModal()">
+                    {{-- Modal Header --}}
+                    <div class="flex items-center justify-between p-5 md:p-6 border-b border-slate-100 bg-white z-10 shrink-0">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                            <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold shrink-0">
                                 <i class="fa-solid" :class="isEdit ? 'fa-user-pen' : 'fa-user-plus'"></i>
                             </div>
                             <div>
@@ -525,19 +522,20 @@
                         </div>
 
                         <button type="button" @click="closeModal()"
-                            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0">
                             <i class="fa-solid fa-xmark text-sm"></i>
                         </button>
                     </div>
 
-                    <form :action="formAction" method="POST" class="pt-6">
+                    {{-- Modal Body Form --}}
+                    <form :action="formAction" method="POST" class="flex-1 overflow-y-auto p-5 md:p-6 space-y-5 text-sm text-slate-700">
                         @csrf
                         <input type="hidden" name="_method" :value="isEdit ? 'PUT' : 'POST'">
                         <input type="hidden" name="userId" :value="userId">
 
-                        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2">
                             <div>
-                                <label for="name" class="mb-1 block text-sm font-semibold text-slate-700">
+                                <label for="name" class="mb-1.5 block text-sm font-semibold text-slate-700">
                                     Nama Pengguna
                                     <span class="text-red-500">*</span>
                                 </label>
@@ -550,7 +548,7 @@
                             </div>
 
                             <div>
-                                <label for="email" class="mb-1 block text-sm font-semibold text-slate-700">
+                                <label for="email" class="mb-1.5 block text-sm font-semibold text-slate-700">
                                     Email
                                     <span class="text-red-500">*</span>
                                 </label>
@@ -564,7 +562,7 @@
 
                             @if ($hasRoleColumn)
                                 <div>
-                                    <label for="role" class="mb-1 block text-sm font-semibold text-slate-700">
+                                    <label for="role" class="mb-1.5 block text-sm font-semibold text-slate-700">
                                         Role
                                         <span class="text-red-500">*</span>
                                     </label>
@@ -599,7 +597,7 @@
 
                             @if ($hasStatusColumn)
                                 <div>
-                                    <label for="status" class="mb-1 block text-sm font-semibold text-slate-700">
+                                    <label for="status" class="mb-1.5 block text-sm font-semibold text-slate-700">
                                         Status
                                         <span class="text-red-500">*</span>
                                     </label>
@@ -618,8 +616,8 @@
                                         <input type="hidden" id="status" name="status" :value="userStatus" required>
                                         <div @click="open = !open"
                                             class="w-full h-11 px-4 py-2.5 rounded-xl border border-[#CFE3D5] bg-white text-sm flex items-center justify-between cursor-pointer hover:border-[#145239] transition-all shadow-2xs">
-                                            <span x-text="label" class="text-slate-800 font-medium"></span>
-                                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                            <span x-text="label" class="text-slate-800 font-medium truncate"></span>
+                                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 shrink-0 ml-2" :class="open ? 'rotate-180' : ''"></i>
                                         </div>
                                         <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
                                             class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-1 space-y-0.5 text-xs">
@@ -646,7 +644,7 @@
 
                             {{-- REGIONAL SCOPE ASSIGNMENT --}}
                             <div x-show="userRole === 'operator'"
-                                class="md:col-span-2 p-4 rounded-2xl bg-[#EEF8F2] border border-[#CFE3D5] space-y-3">
+                                class="sm:col-span-2 p-4 sm:p-5 rounded-2xl bg-[#EEF8F2] border border-[#CFE3D5] space-y-3">
                                 <div class="flex items-center justify-between">
                                     <label class="block text-xs font-bold text-[#1E5E3F] uppercase tracking-wider">
                                         Alokasi Wilayah Kerja Operator (Regional Scope Authorization)
@@ -657,17 +655,17 @@
                                     <div class="p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs flex items-center justify-between"
                                         x-show="isEdit">
                                         <div class="flex items-center gap-2">
-                                            <i class="fa-solid fa-bell-concierge text-amber-600 text-sm"></i>
-                                            <div>
+                                            <i class="fa-solid fa-bell-concierge text-amber-600 text-sm shrink-0"></i>
+                                            <div class="leading-relaxed">
                                                 <span class="font-bold">Pengajuan Wilayah Saat Registrasi:</span>
                                                 @if ($editScope->kabupaten)
                                                     <span
-                                                        class="font-bold text-sky-900 bg-white px-2 py-0.5 rounded ml-1 border border-sky-200">
+                                                        class="inline-block font-bold text-sky-900 bg-white px-2 py-0.5 rounded ml-1 border border-sky-200">
                                                         📍 Kab/Kota: {{ $editScope->kabupaten->nama_kabupaten }}
                                                     </span>
                                                 @elseif ($editScope->provinsi)
                                                     <span
-                                                        class="font-bold text-emerald-900 bg-white px-2 py-0.5 rounded ml-1 border border-emerald-200">
+                                                        class="inline-block font-bold text-emerald-900 bg-white px-2 py-0.5 rounded ml-1 border border-emerald-200">
                                                         🗺️ Provinsi: {{ $editScope->provinsi->nama_provinsi }} (+ Sub-Kab)
                                                     </span>
                                                 @else
@@ -678,11 +676,11 @@
                                     </div>
                                 @endif
 
-                                <p class="text-xs text-slate-600">
+                                <p class="text-xs text-slate-600 leading-relaxed">
                                     Cek & sesuaikan alokasi wilayah kerja data PDRB yang diberikan kepada Operator ini:
                                 </p>
 
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-700 mb-1">Tingkat Wilayah Scope</label>
                                         <div x-data="{
@@ -699,8 +697,8 @@
                                             <input type="hidden" name="scope_type" :value="scopeType">
                                             <div @click="open = !open"
                                                 class="w-full h-11 px-3 py-2.5 rounded-xl border border-[#CFE3D5] bg-white text-xs flex items-center justify-between cursor-pointer hover:border-[#145239] transition-all shadow-2xs">
-                                                <span x-text="label" class="text-slate-800 font-medium"></span>
-                                                <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                                <span x-text="label" class="text-slate-800 font-medium truncate"></span>
+                                                <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 shrink-0 ml-1" :class="open ? 'rotate-180' : ''"></i>
                                             </div>
                                             <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
                                                 class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-1 space-y-0.5 text-xs">
@@ -743,8 +741,8 @@
                                             <input type="hidden" name="provinsi_id" :value="provinsiId">
                                             <div @click="open = !open; if(open) $nextTick(() => $refs.provSearchInput.focus())"
                                                 class="w-full h-11 px-3 py-2.5 rounded-xl border border-[#CFE3D5] bg-white text-xs flex items-center justify-between cursor-pointer hover:border-[#145239] transition-all shadow-2xs">
-                                                <span x-text="selectedName" :class="provinsiId ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
-                                                <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                                <span x-text="selectedName" :class="provinsiId ? 'text-slate-800 font-medium' : 'text-slate-400'" class="truncate"></span>
+                                                <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 shrink-0 ml-1" :class="open ? 'rotate-180' : ''"></i>
                                             </div>
                                             <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
                                                 class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2 text-xs">
@@ -796,8 +794,8 @@
                                             <input type="hidden" name="kabupaten_id" :value="kabupatenId">
                                             <div @click="open = !open; if(open) $nextTick(() => $refs.kabSearchInput.focus())"
                                                 class="w-full h-11 px-3 py-2.5 rounded-xl border border-[#CFE3D5] bg-white text-xs flex items-center justify-between cursor-pointer hover:border-[#145239] transition-all shadow-2xs">
-                                                <span x-text="selectedName" :class="kabupatenId ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
-                                                <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                                                <span x-text="selectedName" :class="kabupatenId ? 'text-slate-800 font-medium' : 'text-slate-400'" class="truncate"></span>
+                                                <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 shrink-0 ml-1" :class="open ? 'rotate-180' : ''"></i>
                                             </div>
                                             <div x-show="open" @click.outside="open = false" x-transition.origin.top.duration.150ms
                                                 class="absolute z-50 left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2 text-xs">
@@ -829,7 +827,7 @@
                             </div>
 
                             <div>
-                                <label for="password" class="mb-1 block text-sm font-semibold text-slate-700">
+                                <label for="password" class="mb-1.5 block text-sm font-semibold text-slate-700">
                                     <span x-text="isEdit ? 'Password Baru' : 'Password'"></span>
                                     <span class="text-red-500" x-show="!isEdit">*</span>
                                 </label>
@@ -839,7 +837,7 @@
                                         :required="!isEdit"
                                         class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 pr-11 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
                                     <button type="button" @click="showPassword = !showPassword"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 animate-none">
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600">
                                         <i :class="showPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye'"></i>
                                     </button>
                                 </div>
@@ -849,7 +847,7 @@
                             </div>
 
                             <div>
-                                <label for="password_confirmation" class="mb-1 block text-sm font-semibold text-slate-700">
+                                <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-slate-700">
                                     Konfirmasi Password
                                     <span class="text-red-500" x-show="!isEdit">*</span>
                                 </label>
@@ -858,20 +856,21 @@
                                         autocomplete="new-password" placeholder="Ulangi password" :required="!isEdit"
                                         class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 pr-11 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
                                     <button type="button" @click="showPasswordConfirmation = !showPasswordConfirmation"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 animate-none">
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600">
                                         <i :class="showPasswordConfirmation ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye'"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
+                        {{-- Modal Footer --}}
                         <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row">
                             <button type="button" @click="closeModal()"
-                                class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
                                 Batal
                             </button>
                             <button type="submit"
-                                class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                                class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-floppy-disk"></i>
                                 <span x-text="isEdit ? 'Simpan Perubahan' : 'Tambah Pengguna'"></span>
                             </button>

@@ -36,9 +36,7 @@ $statStyles = [
 ];
 @endphp
 
-
-
-<div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{
+<div class="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-7 lg:p-8 space-y-6" x-data="{
         isModalOpen: {{ (session('errors') || old('nama_provinsi') || $isModalOpen) ? 'true' : 'false' }},
         isEdit: {{ (old('_method') === 'PUT' || $isEdit) ? 'true' : 'false' }},
         formAction: '{{ old('_method') === 'PUT' || $isEdit ? route('admin.data-wilayah.update', old('wilayah_id', $isEdit ? $editData->id : 0)) : route('admin.data-wilayah.store') }}',
@@ -56,11 +54,9 @@ $statStyles = [
             }
         }
     }">
-    <section
-        class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-6 sm:p-7 md:p-8 shadow-lg text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div class="relative z-10 space-y-2">
-            <div
-                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                 <i class="fa-solid fa-shield-halved text-[#FFD54F]"></i>
                 <span>Menu Admin</span>
             </div>
@@ -72,9 +68,9 @@ $statStyles = [
             </p>
         </div>
 
-        <div class="relative z-10">
+        <div class="relative z-10 w-full sm:w-auto shrink-0">
             <button type="button" @click="openCreateModal()"
-                class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                class="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
                 <i class="fa-solid fa-plus text-sm"></i>
                 <span>Tambah Wilayah</span>
             </button>
@@ -82,71 +78,48 @@ $statStyles = [
     </section>
 
     @if (!$tableExists)
-    <div
-        class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+    <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
         <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-
         <span>
-            Tabel
-            <strong>provinsi, kabupaten, kecamatan, dan kelurahan_desa</strong>
-            belum tersedia lengkap di Supabase.
+            Tabel <strong>provinsi, kabupaten, kecamatan, dan kelurahan_desa</strong> belum tersedia lengkap di Supabase.
         </span>
     </div>
     @endif
 
     @if (session('success'))
-    <div
-        class="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+    <div class="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
         <i class="fa-solid fa-circle-check mt-0.5"></i>
-
-        <span>
-            {{ session('success') }}
-        </span>
+        <span>{{ session('success') }}</span>
     </div>
     @endif
 
     @if (session('error'))
-    <div
-        class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+    <div class="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
         <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
-
-        <span>
-            {{ session('error') }}
-        </span>
+        <span>{{ session('error') }}</span>
     </div>
     @endif
 
     <section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach ($stats as $stat)
         @php
-        $style = $statStyles[$stat['color']]
-        ?? $statStyles['green'];
+        $style = $statStyles[$stat['color']] ?? $statStyles['green'];
         @endphp
 
-        <article
-            class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-            <div
-                class="absolute -mr-8 -mt-8 right-0 top-0 h-20 w-20 rounded-bl-full transition-transform duration-500 group-hover:scale-150 {{ $style['corner'] }}">
-            </div>
+        <article class="group relative overflow-hidden rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+            <div class="absolute -mr-8 -mt-8 right-0 top-0 h-20 w-20 rounded-bl-full transition-transform duration-500 group-hover:scale-150 {{ $style['corner'] }}"></div>
 
             <div class="relative z-10 flex items-center justify-between gap-4">
                 <div>
                     <p class="m-0 text-xs font-semibold text-slate-500">
                         {{ $stat['label'] }}
                     </p>
-
                     <p class="mb-0 mt-2 text-3xl font-black tracking-tight text-slate-800">
-                        {{ number_format(
-                    $stat['value'],
-                    0,
-                    ',',
-                    '.'
-                ) }}
+                        {{ number_format($stat['value'], 0, ',', '.') }}
                     </p>
                 </div>
 
-                <div
-                    class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg text-white shadow-sm {{ $style['icon'] }}">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg text-white shadow-sm {{ $style['icon'] }}">
                     <i class="fa-solid {{ $stat['icon'] }}"></i>
                 </div>
             </div>
@@ -154,11 +127,11 @@ $statStyles = [
         @endforeach
     </section>
 
-    <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+    <section class="mt-6 rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
         <form action="{{ route('admin.data-wilayah.index') }}" method="GET" data-live-filter data-no-loader
-            class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+            class="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-12 items-center">
 
-            <div class="relative min-w-0 xl:col-span-3">
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
                 <select name="kode_kabupaten" id="filterKabupaten"
                     class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <option value="">Semua Kab/Kota</option>
@@ -172,12 +145,10 @@ $statStyles = [
                     @endforeach
                 </select>
 
-                <i
-                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-
-            <div class="relative min-w-0 xl:col-span-3">
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
                 <select name="kode_kecamatan" id="filterKecamatan"
                     class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <option value="">Semua Kecamatan</option>
@@ -191,31 +162,21 @@ $statStyles = [
                     @endforeach
                 </select>
 
-                <i
-                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-
-            <div class="relative min-w-0 xl:col-span-2">
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-2">
                 <select name="status"
                     class="h-11 w-full min-w-0 appearance-none truncate rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <option value="">Semua Status</option>
-
-                    <option value="Aktif" @selected(strtolower(request('status', '' ))==='aktif' )>
-                        Aktif
-                    </option>
-
-                    <option value="Nonaktif" @selected(strtolower(request('status', '' ))==='nonaktif' )>
-                        Nonaktif
-                    </option>
+                    <option value="Aktif" @selected(strtolower(request('status', '' ))==='aktif' )>Aktif</option>
+                    <option value="Nonaktif" @selected(strtolower(request('status', '' ))==='nonaktif' )>Nonaktif</option>
                 </select>
 
-                <i
-                    class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-
-            <div class="relative min-w-0 xl:col-span-3">
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
                 <input type="text" name="search" value="{{ request('search') }}"
                     placeholder="Cari nama atau kode wilayah..."
                     class="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
@@ -226,11 +187,11 @@ $statStyles = [
                 </button>
             </div>
 
-
-            <div class="flex min-w-0 items-center justify-end xl:col-span-1">
+            <div class="flex min-w-0 items-center justify-end sm:col-span-2 xl:col-span-1">
                 <a href="{{ route('admin.data-wilayah.index') }}" title="Reset filter"
-                    class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-2xs">
+                    class="inline-flex h-11 w-full sm:w-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs">
                     <i class="fa-solid fa-rotate-left"></i>
+                    <span class="sm:hidden text-xs font-semibold">Reset Filter</span>
                 </a>
             </div>
         </form>
@@ -239,99 +200,55 @@ $statStyles = [
     <div id="tableContainer" class="transition-opacity duration-200">
         <section id="adminWilayahTableCard"
             class="mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-            <header
-                class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+            <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-4 sm:p-5 sm:flex-row sm:items-center">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-800">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800">
                         Daftar Wilayah
                     </h2>
-
                     <p class="mt-1 text-xs text-slate-500">
                         Data administratif wilayah Provinsi Sumatera Utara.
                     </p>
                 </div>
 
-                <div
-                    class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                <div class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
                     <i class="fa-solid fa-database"></i>
-
-                    {{ number_format(
-            $dataWilayah->total(),
-            0,
-            ',',
-            '.'
-        ) }}
-                    Data
+                    {{ number_format($dataWilayah->total(), 0, ',', '.') }} Data
                 </div>
             </header>
 
             <div id="adminWilayahTableWrapper" class="w-full overflow-x-auto">
                 <table id="adminWilayahTable"
-                    class="w-full min-w-[1150px] border-collapse text-left [&_tr[hidden]]:!hidden">
+                    class="w-full min-w-[1000px] border-collapse text-left [&_tr[hidden]]:!hidden">
                 <thead>
-                    <tr
-                        class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        <th class="px-5 py-3">
-                            No.
-                        </th>
-
-                        <th class="px-5 py-3">
-                            Provinsi
-                        </th>
-
-                        <th class="px-5 py-3">
-                            Kabupaten/Kota
-                        </th>
-
-                        <th class="px-5 py-3">
-                            Kecamatan
-                        </th>
-
-                        <th class="px-5 py-3">
-                            Desa/Kelurahan
-                        </th>
-
-                        <th class="px-5 py-3">
-                            Status
-                        </th>
-
-                        <th class="px-5 py-3 text-center">
-                            Aksi
-                        </th>
+                    <tr class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <th class="px-4 py-3 text-center w-14">No.</th>
+                        <th class="px-5 py-3 min-w-[180px]">Provinsi</th>
+                        <th class="px-5 py-3 min-w-[200px]">Kabupaten/Kota</th>
+                        <th class="px-5 py-3 min-w-[200px]">Kecamatan</th>
+                        <th class="px-5 py-3 min-w-[200px]">Desa/Kelurahan</th>
+                        <th class="px-5 py-3 w-32">Status</th>
+                        <th class="px-5 py-3 text-center w-28">Aksi</th>
                     </tr>
                 </thead>
 
                 <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($dataWilayah as $item)
                     @php
-                    $nomor =
-                    ($dataWilayah->currentPage() - 1)
-                    * $dataWilayah->perPage()
-                    + $loop->iteration;
-
-                    $status = trim(
-                    $item->status ?? 'Aktif'
-                    );
-
+                    $nomor = ($dataWilayah->currentPage() - 1) * $dataWilayah->perPage() + $loop->iteration;
+                    $status = trim($item->status ?? 'Aktif');
                     $statusLower = strtolower($status);
                     @endphp
 
                     <tr class="transition-colors hover:bg-slate-50/60">
-                        <td class="whitespace-nowrap px-5 py-4 text-slate-500">
-                            {{ str_pad(
-                                $nomor,
-                                3,
-                                '0',
-                                STR_PAD_LEFT
-                            ) }}
+                        <td class="whitespace-nowrap px-4 py-4 text-center text-slate-500 font-mono">
+                            {{ str_pad($nomor, 3, '0', STR_PAD_LEFT) }}
                         </td>
 
                         <td class="px-5 py-4">
                             <div class="font-semibold text-slate-700">
                                 {{ $item->nama_provinsi ?: '-' }}
                             </div>
-
-                            <div class="mt-1 text-xs text-slate-400">
+                            <div class="mt-1 text-xs text-slate-400 font-mono">
                                 {{ $item->kode_provinsi ?: '-' }}
                             </div>
                         </td>
@@ -340,8 +257,7 @@ $statStyles = [
                             <div class="font-semibold text-slate-700">
                                 {{ $item->nama_kabupaten ?: '-' }}
                             </div>
-
-                            <div class="mt-1 text-xs text-slate-400">
+                            <div class="mt-1 text-xs text-slate-400 font-mono">
                                 {{ $item->kode_kabupaten ?: '-' }}
                             </div>
                         </td>
@@ -350,8 +266,7 @@ $statStyles = [
                             <div class="font-semibold text-slate-700">
                                 {{ $item->nama_kecamatan ?: '-' }}
                             </div>
-
-                            <div class="mt-1 text-xs text-slate-400">
+                            <div class="mt-1 text-xs text-slate-400 font-mono">
                                 {{ $item->kode_kecamatan ?: '-' }}
                             </div>
                         </td>
@@ -360,42 +275,26 @@ $statStyles = [
                             <div class="font-semibold text-slate-700">
                                 {{ $item->nama_desa ?: '-' }}
                             </div>
-
-                            <div class="mt-1 text-xs text-slate-400">
+                            <div class="mt-1 text-xs text-slate-400 font-mono">
                                 {{ $item->kode_desa ?: '-' }}
                             </div>
                         </td>
 
-                        <td class="px-5 py-4">
-                            <span
-                                class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusLower === 'nonaktif' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
-                                <span
-                                    class="h-1.5 w-1.5 rounded-full {{ $statusLower === 'nonaktif' ? 'bg-red-500' : 'bg-emerald-500' }}"></span>
-
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1 text-xs font-semibold {{ $statusLower === 'nonaktif' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700' }}">
+                                <span class="h-1.5 w-1.5 rounded-full {{ $statusLower === 'nonaktif' ? 'bg-red-500' : 'bg-emerald-500' }}"></span>
                                 {{ $status }}
                             </span>
                         </td>
 
                         <td class="px-5 py-4">
                             <div class="flex items-center justify-center gap-2">
-                                <a href="{{ route(
-                                'admin.data-wilayah.index',
-                                array_merge(
-                                    request()->query(),
-                                    [
-                                        'edit' => $item->id,
-                                        'mode' => 'edit',
-                                    ]
-                                )
-                            ) }}" title="Edit wilayah"
+                                <a href="{{ route('admin.data-wilayah.index', array_merge(request()->query(), ['edit' => $item->id, 'mode' => 'edit'])) }}" title="Edit wilayah"
                                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600">
                                     <i class="fa-regular fa-pen-to-square"></i>
                                 </a>
 
-                                <button type="button" title="Hapus wilayah" data-delete-wilayah data-delete-url="{{ route(
-                                'admin.data-wilayah.destroy',
-                                $item->id
-                            ) }}" data-delete-name="{{ $item->nama_desa }}"
+                                <button type="button" title="Hapus wilayah" data-delete-wilayah data-delete-url="{{ route('admin.data-wilayah.destroy', $item->id) }}" data-delete-name="{{ $item->nama_desa }}"
                                     class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white text-red-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -406,8 +305,7 @@ $statStyles = [
                     <tr>
                         <td colspan="7" class="px-5 py-14 text-center">
                             <div class="mx-auto flex max-w-sm flex-col items-center">
-                                <div
-                                    class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400">
+                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl text-slate-400">
                                     <i class="fa-solid fa-map-location-dot"></i>
                                 </div>
 
@@ -432,61 +330,32 @@ $statStyles = [
     </div>
 
     <footer class="pb-1 pt-8 text-center text-xs text-slate-400">
-        Copyright &copy;
-        {{ date('Y') }}
-        DPMPTSP Provinsi Sumatera Utara
+        Copyright &copy; {{ date('Y') }} DPMPTSP Provinsi Sumatera Utara
     </footer>
 
     @php
     $formValues = [
-    'nama_provinsi' => old(
-    'nama_provinsi',
-    $isEdit ? $editData->nama_provinsi : ''
-    ),
-    'kode_provinsi' => old(
-    'kode_provinsi',
-    $isEdit ? $editData->kode_provinsi : ''
-    ),
-    'nama_kabupaten' => old(
-    'nama_kabupaten',
-    $isEdit ? $editData->nama_kabupaten : ''
-    ),
-    'kode_kabupaten' => old(
-    'kode_kabupaten',
-    $isEdit ? $editData->kode_kabupaten : ''
-    ),
-    'nama_kecamatan' => old(
-    'nama_kecamatan',
-    $isEdit ? $editData->nama_kecamatan : ''
-    ),
-    'kode_kecamatan' => old(
-    'kode_kecamatan',
-    $isEdit ? $editData->kode_kecamatan : ''
-    ),
-    'nama_desa' => old(
-    'nama_desa',
-    $isEdit ? $editData->nama_desa : ''
-    ),
-    'kode_desa' => old(
-    'kode_desa',
-    $isEdit ? $editData->kode_desa : ''
-    ),
+        'nama_provinsi' => old('nama_provinsi', $isEdit ? $editData->nama_provinsi : ''),
+        'kode_provinsi' => old('kode_provinsi', $isEdit ? $editData->kode_provinsi : ''),
+        'nama_kabupaten' => old('nama_kabupaten', $isEdit ? $editData->nama_kabupaten : ''),
+        'kode_kabupaten' => old('kode_kabupaten', $isEdit ? $editData->kode_kabupaten : ''),
+        'nama_kecamatan' => old('nama_kecamatan', $isEdit ? $editData->nama_kecamatan : ''),
+        'kode_kecamatan' => old('kode_kecamatan', $isEdit ? $editData->kode_kecamatan : ''),
+        'nama_desa' => old('nama_desa', $isEdit ? $editData->nama_desa : ''),
+        'kode_desa' => old('kode_desa', $isEdit ? $editData->kode_desa : ''),
     ];
 
-    $selectedStatus = old(
-    'status',
-    $isEdit ? ($editData->status ?? 'Aktif') : 'Aktif'
-    );
+    $selectedStatus = old('status', $isEdit ? ($editData->status ?? 'Aktif') : 'Aktif');
     @endphp
 
     <template x-teleport="body">
         <div x-show="isModalOpen" x-cloak x-transition @keydown.escape.window="closeModal()"
-            class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm">
+            class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 sm:p-4 backdrop-blur-sm">
 
-            <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-emerald-100 relative" @click.outside="closeModal()">
-                <div class="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
+            <div class="bg-white rounded-2xl max-w-3xl w-full p-5 sm:p-6 shadow-2xl border border-emerald-100 relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="closeModal()">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                        <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold shrink-0">
                             <i class="fa-solid" :class="isEdit ? 'fa-map-pen' : 'fa-map-location-dot'"></i>
                         </div>
                         <div>
@@ -498,12 +367,12 @@ $statStyles = [
                     </div>
 
                     <button type="button" @click="closeModal()"
-                        class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                        class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0">
                         <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                 </div>
 
-                <form :action="formAction" method="POST" id="wilayahForm" class="overflow-y-auto pt-4 flex-1"
+                <form :action="formAction" method="POST" id="wilayahForm" class="overflow-y-auto pt-4 flex-1 text-sm text-slate-700 space-y-4"
                     x-data="wilayahFormHandler()" @submit="validateSubmit($event)">
                     @csrf
                     <template x-if="isEdit">
@@ -511,14 +380,11 @@ $statStyles = [
                     </template>
 
                     <input type="hidden" name="nama_provinsi" id="nama_provinsi" :value="nama_provinsi">
-
                     <input type="hidden" name="nama_kabupaten" id="nama_kabupaten" :value="nama_kabupaten">
-
                     <input type="hidden" name="nama_kecamatan" id="nama_kecamatan" :value="nama_kecamatan">
-
                     <input type="hidden" name="nama_desa" id="nama_desa" :value="nama_desa">
 
-                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div>
                             <label class="mb-1 block text-sm font-semibold text-slate-700">
                                 Provinsi
@@ -811,8 +677,7 @@ $statStyles = [
                         @endif
 
                         @if (Schema::hasColumn('kelurahan_desa', 'keterangan'))
-                        <div
-                            class="{{ Schema::hasColumn('kelurahan_desa', 'status') ? 'md:col-span-2' : 'md:col-span-2' }}">
+                        <div class="sm:col-span-2">
                             <label for="keterangan" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Keterangan
                             </label>
@@ -830,14 +695,14 @@ $statStyles = [
                         @endif
                     </div>
 
-                    <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row flex-shrink-0">
+                    <div class="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row shrink-0">
                         <button type="button" @click="closeModal()"
-                            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                            class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
                             Batal
                         </button>
 
                         <button type="submit"
-                            class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                            class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-2">
                             <i class="fa-solid fa-floppy-disk text-xs"></i>
                             <span x-text="isEdit ? 'Simpan Perubahan' : 'Simpan Wilayah'"></span>
                         </button>
@@ -860,11 +725,7 @@ $statStyles = [
         </h3>
 
         <p class="mb-0 mt-2 text-sm leading-relaxed text-slate-500">
-            Data wilayah
-
-            <strong id="deleteWilayahName" class="text-slate-700"></strong>
-
-            akan dihapus. Tindakan ini tidak dapat dibatalkan.
+            Data wilayah <strong id="deleteWilayahName" class="text-slate-700"></strong> akan dihapus. Tindakan ini tidak dapat dibatalkan.
         </p>
 
         <form id="deleteWilayahForm" action="" method="POST"

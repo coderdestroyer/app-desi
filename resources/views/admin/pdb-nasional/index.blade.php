@@ -3,7 +3,7 @@
 @section('title', 'Data PDB Nasional')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 p-5 md:p-7 lg:p-8 space-y-6" x-data="{ 
+<div class="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-7 lg:p-8 space-y-6" x-data="{ 
     isPdbModalOpen: false,
     isDeleteModalOpen: false,
     deleteActionUrl: '',
@@ -53,7 +53,7 @@
     @endif
 
     <!-- Header Banner -->
-    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-6 sm:p-7 md:p-8 shadow-lg text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div class="relative z-10 space-y-2">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                 <i class="fa-solid fa-globe text-[#FFD54F]"></i>
@@ -67,9 +67,9 @@
             </p>
         </div>
 
-        <div class="relative z-10">
+        <div class="relative z-10 w-full sm:w-auto shrink-0">
             <button type="button" @click="isPdbModalOpen = true"
-                class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                class="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
                 <i class="fa-solid fa-plus text-sm"></i>
                 <span>Inisiasi Data PDB Baru</span>
             </button>
@@ -84,9 +84,9 @@
 
     <!-- Data Table Card -->
     <div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-        <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+        <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-4 sm:p-5 sm:flex-row sm:items-center">
             <div>
-                <h2 class="text-lg font-bold text-slate-800">
+                <h2 class="text-base sm:text-lg font-bold text-slate-800">
                     Daftar Record PDB Nasional Terdaftar
                 </h2>
                 <p class="mt-1 text-xs text-slate-500">
@@ -101,20 +101,20 @@
         </header>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+            <table class="w-full text-left border-collapse text-xs min-w-[680px]">
                 <thead>
                     <tr class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase tracking-wider">
-                        <th class="px-5 py-3.5 text-center w-12">No</th>
-                        <th class="px-5 py-3.5 text-center">Tahun PDB Nasional</th>
-                        <th class="px-5 py-3.5 text-center">Sektor Terisi</th>
-                        <th class="px-5 py-3.5 text-right">Total PDB Nasional (Rp Juta)</th>
-                        <th class="px-5 py-3.5 text-center w-36">Aksi & Manajemen</th>
+                        <th class="px-4 py-3.5 text-center w-12">No</th>
+                        <th class="px-5 py-3.5 text-center w-36">Tahun PDB Nasional</th>
+                        <th class="px-4 py-3.5 text-center min-w-[150px]">Sektor Terisi</th>
+                        <th class="px-5 py-3.5 text-right w-44">Total PDB Nasional (Rp Juta)</th>
+                        <th class="px-4 py-3.5 text-center w-28">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse($pdbGroups as $index => $group)
                         <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-5 py-4 text-center text-slate-400">
+                            <td class="px-4 py-4 text-center text-slate-400">
                                 {{ $pdbGroups->firstItem() + $index }}
                             </td>
                             <td class="px-5 py-4 text-center font-mono font-semibold">
@@ -122,16 +122,28 @@
                                     {{ $group->tahun }}
                                 </span>
                             </td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-[#145239] border border-emerald-200">
-                                    <i class="fa-solid fa-check text-[10px]"></i>
-                                    {{ $group->total_sektor }} Sektor Terisi
-                                </span>
+                            <td class="px-4 py-4 text-center whitespace-nowrap">
+                                @if($group->total_sektor >= 17)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-[#145239] border border-emerald-200 leading-snug">
+                                        <i class="fa-solid fa-circle-check text-[11px] text-emerald-600"></i>
+                                        <span>{{ $group->total_sektor }}/17 Sektor</span>
+                                    </span>
+                                @elseif($group->total_sektor > 0)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 leading-snug">
+                                        <i class="fa-solid fa-clock text-[11px] text-amber-600"></i>
+                                        <span>{{ $group->total_sektor }}/17 Sektor</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200 leading-snug">
+                                        <i class="fa-solid fa-circle-minus text-[11px] text-slate-400"></i>
+                                        <span>0 Sektor</span>
+                                    </span>
+                                @endif
                             </td>
-                            <td class="px-5 py-4 text-right font-mono font-bold text-slate-900 text-sm">
+                            <td class="px-5 py-4 text-right font-mono font-bold text-slate-900 text-sm whitespace-nowrap">
                                 Rp {{ number_format($group->total_pdb, 2, ',', '.') }}
                             </td>
-                            <td class="px-5 py-4 text-center">
+                            <td class="px-4 py-4 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1.5">
                                     {{-- Edit Button (Icon Only) --}}
                                     <a href="{{ route('admin.pdb-nasional.entry', ['tahun' => $group->tahun]) }}" 
@@ -168,12 +180,12 @@
 
     <!-- MODAL INISIASI PDB BARU -->
     <template x-teleport="body">
-        <div x-show="isPdbModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
-            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 relative" @click.outside="isPdbModalOpen = false">
+        <div x-show="isPdbModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-transition>
+            <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-emerald-100 relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="isPdbModalOpen = false">
                 {{-- Modal Header --}}
-                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold shrink-0">
                             <i class="fa-solid fa-plus-circle text-lg"></i>
                         </div>
                         <div>
@@ -181,12 +193,12 @@
                             <p class="text-xs text-slate-500">Pilih Tahun PDB Nasional baru</p>
                         </div>
                     </div>
-                    <button type="button" @click="isPdbModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                    <button type="button" @click="isPdbModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0">
                         <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                 </div>
 
-                <form action="{{ route('admin.pdb-nasional.init') }}" method="POST" class="space-y-4 pt-4 text-sm">
+                <form action="{{ route('admin.pdb-nasional.init') }}" method="POST" class="space-y-4 pt-4 text-sm flex-1 overflow-y-auto">
                     @csrf
 
                     {{-- Tahun PDB --}}
@@ -201,7 +213,7 @@
                     </div>
 
                     {{-- Modal Footer --}}
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
                         <button type="button" @click="isPdbModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
                             Batal
                         </button>

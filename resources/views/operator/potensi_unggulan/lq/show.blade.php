@@ -7,7 +7,7 @@
 
     <!-- Top Action Toolbar & Back Button -->
     <div class="flex items-center justify-between">
-        <a href="{{ route('operator.lq.index') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs md:text-sm transition-all shadow-xs">
+        <a href="{{ route('operator.lq.index') }}" class="ml-12 lg:ml-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs md:text-sm transition-all shadow-xs">
             <i class="fa-solid fa-arrow-left text-[#145239]"></i>
             <span>Kembali ke Ringkasan Analisis</span>
         </a>

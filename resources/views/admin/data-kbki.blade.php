@@ -68,8 +68,6 @@ $editBaseUrl = route('admin.data-kbki.index', $editQueryParams) . '&edit=';
 $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
 @endphp
 
-
-
 <div class="min-h-screen bg-[#f7f9fc] p-4 sm:p-6 lg:p-8 space-y-6" x-data="{
         isModalOpen: {{ (session('errors') || old('kode') || $isModalOpen) ? 'true' : 'false' }},
         isEdit: {{ (old('_method') === 'PUT' || $isEdit) ? 'true' : 'false' }},
@@ -88,34 +86,30 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
             }
         }
     }">
-    <section
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="relative z-10 space-y-2">
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
-                    <i class="fa-solid fa-boxes-stacked text-[#FFD54F]"></i>
-                    <span>Menu Admin</span>
-                </div>
-                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
-                    Manajemen Data KBKI
-                </h1>
-                <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
-                    Kelola struktur Seksi, Divisi, Kelompok, Kelas, Subkelas, Kelompok Komoditas, dan Komoditas KBKI 2015.
-                </p>
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-6 sm:p-7 md:p-8 shadow-lg text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div class="relative z-10 space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+                <i class="fa-solid fa-boxes-stacked text-[#FFD54F]"></i>
+                <span>Menu Admin</span>
             </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                Manajemen Data KBKI
+            </h1>
+            <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
+                Kelola struktur Seksi, Divisi, Kelompok, Kelas, Subkelas, Kelompok Komoditas, dan Komoditas KBKI 2015.
+            </p>
+        </div>
 
-            <div class="relative z-10">
-                @if ($columnsReady)
-                <button
-                    type="button"
-                    @click="openCreateModal()"
-                    class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
-                    <i class="fa-solid fa-plus text-sm"></i>
-                    <span>Tambah KBKI</span>
-                </button>
-                @endif
-            </div>
-        </section>
+        <div class="relative z-10 w-full sm:w-auto shrink-0">
+            @if ($columnsReady)
+            <button type="button" @click="openCreateModal()"
+                class="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                <i class="fa-solid fa-plus text-sm"></i>
+                <span>Tambah KBKI</span>
+            </button>
+            @endif
+        </div>
+    </section>
 
     @if (! $tableExists)
     <div class="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
@@ -166,26 +160,18 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
         @endforeach
     </section>
 
-    <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <form
-            action="{{ route('admin.data-kbki.index') }}"
-            method="GET"
-            data-live-filter
-            data-no-loader
-            class="grid w-full min-w-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12">
-            <div class="relative min-w-0 md:col-span-2 xl:col-span-3">
-                <input
-                    type="text"
-                    name="search"
-                    value="{{ request('search') }}"
-                    placeholder="Cari kode, judul, halaman, atau sumber..."
+    <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+        <form action="{{ route('admin.data-kbki.index') }}" method="GET" data-live-filter data-no-loader
+            class="grid w-full min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-12 items-center">
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
+                <input type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Cari kode, judul, halaman, sumber..."
                     class="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                 <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
             </div>
 
-            <div class="relative min-w-0 xl:col-span-2">
-                <select
-                    name="struktur"
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-2">
+                <select name="struktur"
                     class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <option value="">Semua Level</option>
                     @foreach ($structures as $structureOption)
@@ -197,9 +183,8 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-            <div class="relative min-w-0 xl:col-span-3">
-                <select
-                    name="seksi"
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
+                <select name="seksi"
                     class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <option value="">Semua Seksi</option>
                     @foreach ($sections as $section)
@@ -211,9 +196,8 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-            <div class="relative min-w-0 xl:col-span-2">
-                <select
-                    name="status"
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-2">
+                <select name="status"
                     class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     <option value="">Semua Status</option>
                     <option value="Aktif" @selected(request('status')==='Aktif' )>Aktif</option>
@@ -222,9 +206,8 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-            <div class="relative min-w-0 xl:col-span-1">
-                <select
-                    name="per_page"
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-1">
+                <select name="per_page"
                     class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 pr-8 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                     @foreach ($perPageOptions as $perPageOption)
                     <option value="{{ $perPageOption }}" @selected((int) request('per_page', 10)===$perPageOption)>
@@ -235,12 +218,11 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
             </div>
 
-            <div class="flex min-w-0 items-center justify-end xl:col-span-1">
-                <a
-                    href="{{ route('admin.data-kbki.index') }}"
-                    title="Reset filter"
-                    class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-2xs">
-                    <i class="fa-solid fa-rotate-left"></i>
+            <div class="flex min-w-0 items-center justify-end sm:col-span-1 xl:col-span-1">
+                <a href="{{ route('admin.data-kbki.index') }}" title="Reset filter"
+                    class="inline-flex h-11 w-full sm:w-11 flex-shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs">
+                    <i class="fa-solid fa-rotate-left text-sm"></i>
+                    <span class="sm:hidden text-xs font-semibold">Reset Filter</span>
                 </a>
             </div>
         </form>
@@ -248,12 +230,12 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
 
     <div id="tableContainer" class="transition-opacity duration-200">
         <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <header class="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+        <header class="flex flex-col gap-4 border-b border-slate-200 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-                <h2 class="m-0 text-lg font-black text-slate-900">
+                <h2 class="m-0 text-base sm:text-lg font-black text-slate-900">
                     {{ $hierarchyMode ? 'Struktur Hierarki KBKI' : 'Hasil Pencarian KBKI' }}
                 </h2>
-                <p class="mb-0 mt-1 text-sm text-slate-500">
+                <p class="mb-0 mt-1 text-xs text-slate-500">
                     @if ($hierarchyMode)
                     Seluruh Seksi ditampilkan lebih dahulu. Buka Seksi untuk melihat Divisi dan struktur turunannya.
                     @else
@@ -262,12 +244,11 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 </p>
             </div>
 
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                 @if ($hierarchyMode && $dataKbki->isNotEmpty())
-                <div class="relative min-w-[190px]">
-                    <select
-                        id="jumpSection"
-                        class="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-xs font-bold text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                <div class="relative min-w-[180px] flex-1 sm:flex-none">
+                    <select id="jumpSection"
+                        class="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 pr-9 text-xs font-bold text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                         <option value="">Lompat ke Seksi</option>
                         @foreach ($dataKbki->where('level', 1) as $sectionRow)
                         <option value="{{ $sectionRow->kode }}">
@@ -275,26 +256,23 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                         </option>
                         @endforeach
                     </select>
-                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400"></i>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400"></i>
                 </div>
 
-                <button
-                    type="button"
-                    id="collapseAllKbki"
-                    class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">
+                <button type="button" id="collapseAllKbki"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">
                     <i class="fa-solid fa-angles-up"></i>
-                    Tutup Semua
+                    <span class="hidden sm:inline">Tutup Semua</span>
                 </button>
                 @endif
 
-                <a
-                    href="{{ $exportUrl }}"
-                    class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">
+                <a href="{{ $exportUrl }}"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">
                     <i class="fa-solid fa-download"></i>
-                    Ekspor CSV
+                    <span class="hidden sm:inline">Ekspor CSV</span>
                 </a>
 
-                <div class="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 text-xs font-black text-emerald-700">
+                <div class="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 text-xs font-black text-emerald-700">
                     <i class="fa-solid fa-database"></i>
                     {{ number_format($totalData, 0, ',', '.') }} Data
                 </div>
@@ -302,23 +280,23 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
         </header>
 
         <div id="adminKbkiTableWrapper" class="overflow-x-auto">
-            <table id="adminKbkiTable" class="w-full border-collapse text-left min-w-[1260px] [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_td]:!table-cell [&_th]:!whitespace-nowrap [&_tr[hidden]]:!hidden">
+            <table id="adminKbkiTable" class="w-full border-collapse text-left min-w-[1000px] [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_td]:!table-cell [&_tr[hidden]]:!hidden">
                 <thead>
                     <tr class="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
-                        <th class="w-[250px] px-5 py-3">Struktur</th>
-                        <th class="w-[150px] px-4 py-3">Kode</th>
-                        <th class="min-w-[420px] px-4 py-3">Judul KBKI</th>
+                        <th class="w-[220px] px-5 py-3">Struktur</th>
+                        <th class="w-[120px] px-4 py-3">Kode</th>
+                        <th class="min-w-[320px] px-4 py-3">Judul KBKI</th>
                         <th class="w-[95px] px-4 py-3 text-center">Halaman</th>
-                        <th class="w-[130px] px-4 py-3">Status</th>
-                        <th class="min-w-[145px] px-4 py-3">Sumber</th>
-                        <th class="w-[110px] px-4 py-3 text-center">Aksi</th>
+                        <th class="w-[110px] px-4 py-3">Status</th>
+                        <th class="min-w-[130px] px-4 py-3">Sumber</th>
+                        <th class="w-[100px] px-4 py-3 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($dataKbki as $item)
                     @php
                     $level = (int) $item->level;
-                    $indent = max(0, ($level - 1) * 28);
+                    $indent = max(0, ($level - 1) * 20);
                     $hasChildren = (int) $item->child_count > 0;
                     $badgeStyle = $badgeStyles[$item->struktur] ?? 'border-slate-200 bg-slate-50 text-slate-700';
                     $isActive = ($item->status ?? 'Aktif') === 'Aktif';
@@ -334,10 +312,10 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                         >
                         <td class="relative px-5 py-4">
                             @for ($treeLevel = 1; $treeLevel < $level; $treeLevel++)
-                                <span class="absolute top-0 bottom-0 w-[1px] bg-[#dbe3ec]" style="left: {{ 22 + (($treeLevel - 1) * 28) }}px"></span>
+                                <span class="absolute top-0 bottom-0 w-[1px] bg-[#dbe3ec]" style="left: {{ 22 + (($treeLevel - 1) * 20) }}px"></span>
                                 @endfor
                                 @if ($level > 1)
-                                <span class="absolute top-1/2 h-[1px] bg-[#dbe3ec]" style="left: {{ 22 + (($level - 2) * 28) }}px; width: 20px"></span>
+                                <span class="absolute top-1/2 h-[1px] bg-[#dbe3ec]" style="left: {{ 22 + (($level - 2) * 20) }}px; width: 16px"></span>
                                 @endif
                                 <div class="relative flex items-center gap-2" style="padding-left: {{ $indent }}px">
                                     @if ($hasChildren && $hierarchyMode)
@@ -354,7 +332,7 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                                         <i class="fa-solid fa-circle"></i>
                                     </span>
                                     @endif
-                                    <span class="inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-bold {{ $badgeStyle }}">
+                                    <span class="inline-flex whitespace-nowrap rounded-xl border px-2.5 py-1 text-[11px] font-bold {{ $badgeStyle }}">
                                         {{ $item->struktur }}
                                     </span>
                                 </div>
@@ -377,8 +355,8 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                         <td class="px-4 py-4 text-center text-sm font-semibold text-slate-500">
                             {{ $item->halaman ?: '-' }}
                         </td>
-                        <td class="px-4 py-4">
-                            <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold {{ $isActive ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700' }}">
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1 text-xs font-bold {{ $isActive ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700' }}">
                                 <span class="h-1.5 w-1.5 rounded-full {{ $isActive ? 'bg-emerald-500' : 'bg-red-500' }}"></span>
                                 {{ $item->status ?? 'Aktif' }}
                             </span>
@@ -436,12 +414,12 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
 
     <template x-teleport="body">
         <div x-show="isModalOpen" x-cloak x-transition @keydown.escape.window="closeModal()"
-            class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm">
+            class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 sm:p-4 backdrop-blur-sm">
 
-            <div class="bg-white rounded-2xl max-w-6xl w-full p-6 shadow-2xl border border-emerald-100 relative my-6 max-h-[90vh] flex flex-col overflow-hidden" @click.outside="closeModal()">
-                <div class="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
+            <div class="bg-white rounded-2xl max-w-6xl w-full p-5 sm:p-6 shadow-2xl border border-emerald-100 relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="closeModal()">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                        <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold shrink-0">
                             <i class="fa-solid" :class="isEdit ? 'fa-pen-to-square' : 'fa-plus'"></i>
                         </div>
                         <div>
@@ -451,21 +429,21 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                     </div>
 
                     <button type="button" @click="closeModal()"
-                        class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                        class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0">
                         <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                 </div>
 
-                <form :action="formAction" method="POST" class="overflow-y-auto pt-4 flex-1"
+                <form :action="formAction" method="POST" class="overflow-y-auto pt-4 flex-1 space-y-4 text-sm text-slate-700"
                     x-data="kbkiFormHandler()" @submit="validateSubmit($event)">
                     @csrf
                     <template x-if="isEdit">
                         <input type="hidden" name="_method" value="PUT">
                     </template>
 
-            <div class="grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_310px]">
-                <div class="pr-5 lg:pr-8 py-2">
-                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_310px]">
+                <div class="py-2 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div>
                             <label class="mb-1 block text-sm font-bold text-slate-700">
                                 Level Struktur <span class="text-red-500">*</span>
@@ -514,8 +492,8 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                                 <div @click="if(structureConfig && structureConfig.parentLevel !== null) { parentDropdownOpen = !parentDropdownOpen; if(parentDropdownOpen) $nextTick(() => $refs.parentSearchInput.focus()) }"
                                     :class="(structureConfig && structureConfig.parentLevel !== null) ? 'bg-white cursor-pointer hover:border-[#145239]' : 'bg-slate-50 cursor-not-allowed text-slate-400'"
                                     class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] text-sm flex items-center justify-between transition-colors shadow-2xs">
-                                    <span x-text="selectedParentLabel" :class="kode_induk ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
-                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="parentDropdownOpen ? 'rotate-180' : ''"></i>
+                                    <span x-text="selectedParentLabel" :class="kode_induk ? 'text-slate-800 font-medium' : 'text-slate-400'" class="truncate"></span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 shrink-0 ml-1" :class="parentDropdownOpen ? 'rotate-180' : ''"></i>
                                 </div>
 
                                 <div x-show="parentDropdownOpen" @click.outside="parentDropdownOpen = false" x-transition.origin.top.duration.150ms
@@ -597,7 +575,7 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                             @enderror
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label for="judul" class="mb-1 block text-sm font-bold text-slate-700">
                                 Judul KBKI <span class="text-red-500">*</span>
                             </label>
@@ -629,9 +607,9 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                             @enderror
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label for="catatan" class="mb-1 block text-sm font-bold text-slate-700">Catatan</label>
-                            <textarea id="catatan" name="catatan" rows="4" x-model="catatan"
+                            <textarea id="catatan" name="catatan" rows="3" x-model="catatan"
                                 placeholder="Tambahkan catatan bila diperlukan"
                                 class="w-full resize-none rounded-xl border border-[#CFE3D5] px-3.5 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs"></textarea>
                             @error('catatan')
@@ -641,13 +619,13 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                     </div>
                 </div>
 
-                <aside class="border-t border-slate-200 bg-slate-50/70 p-5 lg:border-l lg:border-t-0 sm:p-6">
+                <aside class="border-t border-slate-200 bg-slate-50/70 p-4 sm:p-5 lg:border-l lg:border-t-0 space-y-4">
                     <div class="rounded-2xl border border-emerald-200 bg-white p-4">
                         <div class="flex items-center gap-2 text-sm font-black text-emerald-700">
                             <i class="fa-solid fa-diagram-project"></i>
                             Preview Hierarki
                         </div>
-                        <div class="mt-4 flex flex-wrap items-center gap-2">
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
                             <template x-if="previewChips.length === 0">
                                 <span class="text-xs text-slate-400">Pilih level struktur untuk melihat hierarki.</span>
                             </template>
@@ -668,7 +646,7 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                         </div>
                     </div>
 
-                    <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
                         <div class="flex items-center gap-2 text-sm font-black text-amber-800">
                             <i class="fa-solid fa-lightbulb"></i>
                             Panduan Struktur
@@ -686,13 +664,13 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 </aside>
             </div>
 
-                    <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row flex-shrink-0">
+                    <div class="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row shrink-0">
                         <button type="button" @click="closeModal()"
-                            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                            class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
                             Batal
                         </button>
                         <button type="submit"
-                            class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                            class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-2">
                             <i class="fa-solid fa-floppy-disk text-xs"></i>
                             <span x-text="isEdit ? 'Simpan Perubahan' : 'Simpan Data KBKI'"></span>
                         </button>
