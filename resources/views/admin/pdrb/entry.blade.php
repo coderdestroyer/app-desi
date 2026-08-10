@@ -1,11 +1,13 @@
 @extends('layouts.admin')
 
+@section('title', "Input PDRB {$kabupaten->nama_kabupaten} Tahun {$tahun}")
+
 @section('content')
 <div class="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-7 lg:p-8 space-y-6" x-data="pdrbEntryData()">
 
     {{-- Breadcrumb & Action Bar --}}
     <div class="flex items-center justify-between">
-        <a href="{{ route('admin.pdrb.index') }}" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm font-bold text-[#145239] hover:bg-[#EEF8F2] transition-colors shadow-xs">
+        <a href="{{ route('admin.pdrb.index') }}" class="ml-12 lg:ml-0 inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm font-bold text-[#145239] hover:bg-[#EEF8F2] transition-colors shadow-xs">
             <i class="fa-solid fa-arrow-left text-xs"></i>
             <span>Kembali ke Kelola PDRB Admin</span>
         </a>
@@ -37,7 +39,7 @@
     {{-- Main Form Card --}}
     <form action="{{ route('admin.pdrb.save-entry') }}" method="POST" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 md:p-8 space-y-6">
         @csrf
-        <input type="hidden" name="kabupaten_id" value="{{ $kabupaten->kab_id }}">
+        <input type="hidden" name="kode_kabupaten" value="{{ $kabupaten->kode_kabupaten }}">
         <input type="hidden" name="tahun" value="{{ $tahun }}">
 
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
@@ -93,7 +95,7 @@
             </a>
             <button type="submit" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs sm:text-sm font-extrabold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2.5 transform hover:-translate-y-0.5">
                 <i class="fa-solid fa-floppy-disk text-base"></i>
-                <span>Simpan Data PDRB Admin ({{ $tahun }})</span>
+                <span>Simpan PDRB ({{ $tahun }})</span>
             </button>
         </div>
     </form>
@@ -118,27 +120,24 @@ function pdrbEntryData() {
                 this.rawValues[id] = '';
                 return;
             }
-            // Remove non digits except comma
-            let clean = val.replace(/[^0-9,]/g, '');
-            let parts = clean.split(',');
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            if (parts.length > 2) parts = [parts[0], parts[1]]; // max 1 decimal separator
-            this.formattedValues[id] = parts.join(',');
-
-            // Raw float string for backend
-            let rawStr = parts[0].replace(/\./g, '');
-            if (parts.length > 1 && parts[1] !== '') {
-                rawStr += '.' + parts[1];
+            let clean = val.replace(/[^0-9]/g, '');
+            if (clean === '') {
+                this.formattedValues[id] = '';
+                this.rawValues[id] = '';
+                return;
             }
-            this.rawValues[id] = rawStr;
+            this.rawValues[id] = clean;
+            this.formattedValues[id] = new Intl.NumberFormat('id-ID').format(clean);
         },
         get grandTotal() {
-            let sum = 0;
+            let total = 0;
             Object.values(this.rawValues).forEach(val => {
                 let num = parseFloat(val);
-                if (!isNaN(num)) sum += num;
+                if (!isNaN(num)) {
+                    total += num;
+                }
             });
-            return sum.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total);
         }
     }
 }

@@ -72,8 +72,6 @@
         $deleteBaseUrl = route('admin.data-kbli.destroy', 'PLACEHOLDER');
     @endphp
 
-
-
     <div class="min-h-screen bg-[#f7f9fc] p-4 sm:p-6 lg:p-8 space-y-6" x-data="{
         isModalOpen: {{ (session('errors') || old('kode') || $isModalOpen) ? 'true' : 'false' }},
         isEdit: {{ (old('_method') === 'PUT' || $isEdit) ? 'true' : 'false' }},
@@ -84,7 +82,7 @@
             this.formAction = '{{ route('admin.data-kbli.store') }}';
             this.isModalOpen = true;
         },
-
+        
         closeModal() {
             this.isModalOpen = false;
             if (window.location.search) {
@@ -92,11 +90,9 @@
             }
         }
     }">
-        <section
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+        <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-6 sm:p-7 md:p-8 shadow-lg text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
             <div class="relative z-10 space-y-2">
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                     <i class="fa-solid fa-table-cells-large text-[#FFD54F]"></i>
                     <span>Menu Admin</span>
                 </div>
@@ -104,15 +100,14 @@
                     Manajemen Data KBLI
                 </h1>
                 <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
-                    Kelola struktur Kategori, Golongan Pokok, Golongan, Subgolongan, Kelompok, cakupan, dan pengecualian
-                    KBLI 2025.
+                    Kelola struktur Kategori, Golongan Pokok, Golongan, Subgolongan, Kelompok, cakupan, dan pengecualian KBLI 2025.
                 </p>
             </div>
 
-            <div class="relative z-10">
+            <div class="relative z-10 w-full sm:w-auto shrink-0">
                 @if ($columnsReady)
                     <button type="button" @click="openCreateModal()"
-                        class="px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
+                        class="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
                         <i class="fa-solid fa-plus text-sm"></i>
                         <span>Tambah KBLI</span>
                     </button>
@@ -121,30 +116,26 @@
         </section>
 
         @if (!$tableExists)
-            <div
-                class="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            <div class="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
                 <span>Tabel <strong>data_kbli</strong> belum tersedia di Supabase.</span>
             </div>
         @elseif (!$columnsReady)
-            <div
-                class="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            <div class="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
                 <span>Struktur kolom tabel <strong>data_kbli</strong> belum sesuai dengan dataset KBLI 2025.</span>
             </div>
         @endif
 
         @if (session('success'))
-            <div
-                class="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            <div class="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
                 <i class="fa-solid fa-circle-check mt-0.5"></i>
                 <span>{{ session('success') }}</span>
             </div>
         @endif
 
         @if (session('error'))
-            <div
-                class="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            <div class="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
                 <span>{{ session('error') }}</span>
             </div>
@@ -155,11 +146,8 @@
                 @php
                     $statStyle = $statStyles[$stat['tone']] ?? $statStyles['green'];
                 @endphp
-                <article
-                    class="group relative min-h-[112px] overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md sm:min-h-[118px] sm:p-5">
-                    <div
-                        class="absolute -right-8 -top-8 h-24 w-24 rounded-bl-full transition-transform duration-500 group-hover:scale-125 {{ $statStyle['corner'] }}">
-                    </div>
+                <article class="group relative min-h-[112px] overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md sm:min-h-[118px] sm:p-5">
+                    <div class="absolute -right-8 -top-8 h-24 w-24 rounded-bl-full transition-transform duration-500 group-hover:scale-125 {{ $statStyle['corner'] }}"></div>
                     <div class="relative z-10 flex h-full items-center justify-between gap-4">
                         <div class="min-w-0 flex-1">
                             <p class="m-0 text-sm font-bold leading-5 text-slate-500">
@@ -172,8 +160,7 @@
                                 {{ $stat['description'] }}
                             </p>
                         </div>
-                        <div
-                            class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg shadow-sm sm:h-14 sm:w-14 sm:text-xl {{ $statStyle['icon'] }}">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg shadow-sm sm:h-14 sm:w-14 sm:text-xl {{ $statStyle['icon'] }}">
                             <i class="fa-solid {{ $stat['icon'] }}"></i>
                         </div>
                     </div>
@@ -181,18 +168,17 @@
             @endforeach
         </section>
 
-        <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
             <form action="{{ route('admin.data-kbli.index') }}" method="GET" data-live-filter data-no-loader
-                class="grid w-full min-w-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12">
-                <div class="relative min-w-0 md:col-span-2 xl:col-span-3">
+                class="grid w-full min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-12 items-center">
+                <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
                     <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="Cari kode, judul, cakupan, atau tidak cakupan..."
+                        placeholder="Cari kode, judul, cakupan..."
                         class="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
-                    <i
-                        class="fa-solid fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
+                    <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
                 </div>
 
-                <div class="relative min-w-0 xl:col-span-2">
+                <div class="relative min-w-0 sm:col-span-1 xl:col-span-2">
                     <select name="struktur"
                         class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                         <option value="">Semua Level</option>
@@ -202,11 +188,10 @@
                             </option>
                         @endforeach
                     </select>
-                    <i
-                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                <div class="relative min-w-0 xl:col-span-3">
+                <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
                     <select name="kategori"
                         class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                         <option value="">Semua Kategori</option>
@@ -216,11 +201,10 @@
                             </option>
                         @endforeach
                     </select>
-                    <i
-                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                <div class="relative min-w-0 xl:col-span-3">
+                <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
                     <select name="per_page"
                         class="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm font-medium text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                         @foreach ($perPageOptions as $perPageOption)
@@ -229,14 +213,14 @@
                             </option>
                         @endforeach
                     </select>
-                    <i
-                        class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
                 </div>
 
-                <div class="flex min-w-0 items-center justify-end xl:col-span-1">
+                <div class="flex min-w-0 items-center justify-end sm:col-span-2 xl:col-span-1">
                     <a href="{{ route('admin.data-kbli.index') }}" title="Reset filter"
-                        class="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-2xs">
-                        <i class="fa-solid fa-rotate-left"></i>
+                        class="inline-flex h-11 w-full sm:w-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs">
+                        <i class="fa-solid fa-rotate-left text-sm"></i>
+                        <span class="sm:hidden text-xs font-semibold">Reset Filter</span>
                     </a>
                 </div>
             </form>
@@ -244,13 +228,12 @@
 
         <div id="tableContainer" class="transition-opacity duration-200">
             <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <header
-                class="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+            <header class="flex flex-col gap-4 border-b border-slate-200 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h2 class="m-0 text-lg font-black text-slate-900">
+                    <h2 class="m-0 text-base sm:text-lg font-black text-slate-900">
                         {{ $hierarchyMode ? 'Struktur Hierarki KBLI' : 'Hasil Pencarian KBLI' }}
                     </h2>
-                    <p class="mb-0 mt-1 text-sm text-slate-500">
+                    <p class="mb-0 mt-1 text-xs text-slate-500">
                         @if ($hierarchyMode)
                             Semua kategori ditampilkan terlebih dahulu. Buka kategori untuk melihat data turunannya.
                         @else
@@ -259,11 +242,11 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                     @if ($hierarchyMode && $dataKbli->isNotEmpty())
-                        <div class="relative min-w-[190px]">
+                        <div class="relative min-w-[180px] flex-1 sm:flex-none">
                             <select id="jumpCategory"
-                                class="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-xs font-bold text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                class="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 pr-9 text-xs font-bold text-slate-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
                                 <option value="">Lompat ke kategori</option>
                                 @foreach ($dataKbli->where('level', 1) as $categoryRow)
                                     <option value="{{ $categoryRow->kode }}">
@@ -271,25 +254,23 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <i
-                                class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400"></i>
+                            <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400"></i>
                         </div>
 
                         <button type="button" id="collapseAllKbli"
-                            class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">
+                            class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">
                             <i class="fa-solid fa-angles-up"></i>
-                            Tutup Semua
+                            <span class="hidden sm:inline">Tutup Semua</span>
                         </button>
                     @endif
 
                     <a href="{{ $exportUrl }}"
-                        class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">
+                        class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">
                         <i class="fa-solid fa-download"></i>
-                        Ekspor CSV
+                        <span class="hidden sm:inline">Ekspor CSV</span>
                     </a>
 
-                    <div
-                        class="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 text-xs font-black text-emerald-700">
+                    <div class="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 text-xs font-black text-emerald-700">
                         <i class="fa-solid fa-database"></i>
                         {{ number_format($totalData, 0, ',', '.') }} Data
                     </div>
@@ -298,23 +279,22 @@
 
             <div id="adminKbliTableWrapper" class="overflow-x-auto">
                 <table id="adminKbliTable"
-                    class="w-full border-collapse text-left min-w-[1320px] [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_td]:!table-cell [&_th]:!whitespace-nowrap [&_tr[hidden]]:!hidden">
+                    class="w-full border-collapse text-left min-w-[1000px] [&_thead]:!table-header-group [&_tbody]:!table-row-group [&_tr]:!table-row [&_th]:!table-cell [&_td]:!table-cell [&_tr[hidden]]:!hidden">
                     <thead>
-                        <tr
-                            class="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
-                            <th class="w-[230px] px-5 py-3">Struktur</th>
-                            <th class="w-[110px] px-4 py-3">Kode</th>
-                            <th class="min-w-[320px] px-4 py-3">Judul KBLI</th>
-                            <th class="min-w-[260px] px-4 py-3">Cakupan</th>
-                            <th class="min-w-[260px] px-4 py-3">Tidak Cakupan</th>
-                            <th class="w-[110px] px-4 py-3 text-center">Aksi</th>
+                        <tr class="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
+                            <th class="w-[200px] px-5 py-3">Struktur</th>
+                            <th class="w-[100px] px-4 py-3">Kode</th>
+                            <th class="min-w-[280px] px-4 py-3">Judul KBLI</th>
+                            <th class="min-w-[240px] px-4 py-3">Cakupan</th>
+                            <th class="min-w-[240px] px-4 py-3">Tidak Cakupan</th>
+                            <th class="w-[100px] px-4 py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($dataKbli as $item)
                             @php
                                 $level = (int) $item->level;
-                                $indent = max(0, ($level - 1) * 28);
+                                $indent = max(0, ($level - 1) * 24);
                                 $hasChildren = (int) $item->child_count > 0;
                                 $badgeStyle = $badgeStyles[$item->struktur] ?? 'border-slate-200 bg-slate-50 text-slate-700';
                             @endphp
@@ -324,11 +304,11 @@
                                 <td class="relative px-5 py-4">
                                     @for ($treeLevel = 1; $treeLevel < $level; $treeLevel++)
                                         <span class="absolute top-0 bottom-0 w-[1px] bg-[#dbe3ec]"
-                                            style="left: {{ 22 + (($treeLevel - 1) * 28) }}px"></span>
+                                            style="left: {{ 22 + (($treeLevel - 1) * 24) }}px"></span>
                                     @endfor
                                     @if ($level > 1)
                                         <span class="absolute top-1/2 h-[1px] bg-[#dbe3ec]"
-                                            style="left: {{ 22 + (($level - 2) * 28) }}px; width: 20px"></span>
+                                            style="left: {{ 22 + (($level - 2) * 24) }}px; width: 18px"></span>
                                     @endif
                                     <div class="relative flex items-center gap-2" style="padding-left: {{ $indent }}px">
                                         @if ($hasChildren && $hierarchyMode)
@@ -336,29 +316,25 @@
                                                 aria-label="Buka atau tutup turunan {{ $item->kode }}"
                                                 aria-expanded="{{ $hierarchyMode ? 'false' : 'true' }}"
                                                 class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-[10px] text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600">
-                                                <i
-                                                    class="fa-solid {{ $hierarchyMode ? 'fa-chevron-right' : 'fa-chevron-down' }}"></i>
+                                                <i class="fa-solid {{ $hierarchyMode ? 'fa-chevron-right' : 'fa-chevron-down' }}"></i>
                                             </button>
                                         @else
-                                            <span
-                                                class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center text-[8px] text-slate-300">
+                                            <span class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center text-[8px] text-slate-300">
                                                 <i class="fa-solid fa-circle"></i>
                                             </span>
                                         @endif
-                                        <span
-                                            class="inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-bold {{ $badgeStyle }}">
+                                        <span class="inline-flex whitespace-nowrap rounded-xl border px-2.5 py-1 text-[11px] font-bold {{ $badgeStyle }}">
                                             {{ $item->struktur }}
                                         </span>
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <span
-                                        class="inline-flex rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-mono text-xs font-black text-emerald-700">
+                                    <span class="inline-flex rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-mono text-xs font-black text-emerald-700">
                                         {{ $item->kode }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
-                                    <div class="max-w-[390px] font-semibold leading-relaxed text-slate-700"
+                                    <div class="max-w-[360px] font-semibold leading-relaxed text-slate-700"
                                         title="{{ $item->judul }}">
                                         {{ $item->judul }}
                                     </div>
@@ -371,13 +347,13 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-4 align-top">
-                                    <div class="line-clamp-2 max-w-[320px] text-xs leading-relaxed text-slate-500"
+                                    <div class="line-clamp-2 max-w-[300px] text-xs leading-relaxed text-slate-500"
                                         title="{{ $item->cakupan }}">
                                         {{ $item->cakupan ?: '-' }}
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 align-top">
-                                    <div class="line-clamp-2 max-w-[320px] text-xs leading-relaxed text-slate-500"
+                                    <div class="line-clamp-2 max-w-[300px] text-xs leading-relaxed text-slate-500"
                                         title="{{ $item->tidak_cakupan }}">
                                         {{ $item->tidak_cakupan ?: '-' }}
                                     </div>
@@ -402,13 +378,11 @@
                             <tr>
                                 <td colspan="6" class="px-5 py-16 text-center">
                                     <div class="mx-auto flex max-w-sm flex-col items-center">
-                                        <div
-                                            class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-2xl text-slate-400">
+                                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-2xl text-slate-400">
                                             <i class="fa-solid fa-sitemap"></i>
                                         </div>
                                         <h3 class="mb-0 mt-4 text-base font-bold text-slate-700">Data KBLI tidak ditemukan</h3>
-                                        <p class="mb-0 mt-1 text-sm leading-relaxed text-slate-400">Ubah kata pencarian atau
-                                            filter untuk menampilkan data lainnya.</p>
+                                        <p class="mb-0 mt-1 text-sm leading-relaxed text-slate-400">Ubah kata pencarian atau filter untuk menampilkan data lainnya.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -428,12 +402,12 @@
 
         <template x-teleport="body">
             <div x-show="isModalOpen" x-cloak x-transition @keydown.escape.window="closeModal()"
-                class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm">
+                class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-slate-900/60 p-3 sm:p-4 backdrop-blur-sm">
 
-                <div class="bg-white rounded-2xl max-w-6xl w-full p-6 shadow-2xl border border-emerald-100 relative my-6 max-h-[90vh] flex flex-col overflow-hidden" @click.outside="closeModal()">
-                    <div class="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
+                <div class="bg-white rounded-2xl max-w-6xl w-full p-5 sm:p-6 shadow-2xl border border-emerald-100 relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="closeModal()">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                            <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold shrink-0">
                                 <i class="fa-solid" :class="isEdit ? 'fa-pen-to-square' : 'fa-plus'"></i>
                             </div>
                             <div>
@@ -443,21 +417,21 @@
                         </div>
 
                         <button type="button" @click="closeModal()"
-                            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0">
                             <i class="fa-solid fa-xmark text-sm"></i>
                         </button>
                     </div>
 
-                    <form :action="formAction" method="POST" class="overflow-y-auto pt-4 flex-1"
+                    <form :action="formAction" method="POST" class="overflow-y-auto pt-4 flex-1 space-y-4 text-sm text-slate-700"
                         x-data="kbliFormHandler()" @submit="validateSubmit($event)">
                         @csrf
                         <template x-if="isEdit">
                             <input type="hidden" name="_method" value="PUT">
                         </template>
 
-                    <div class="grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_310px]">
-                        <div class="pr-5 lg:pr-8 py-2">
-                            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_310px]">
+                        <div class="py-2 space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                                 <div>
                                     <label class="mb-1 block text-sm font-bold text-slate-700">
                                         Level Struktur <span class="text-red-500">*</span>
@@ -506,8 +480,8 @@
                                         <div @click="if(structureConfig && structureConfig.parentLevel !== null) { parentDropdownOpen = !parentDropdownOpen; if(parentDropdownOpen) $nextTick(() => $refs.parentSearchInput.focus()) }"
                                             :class="(structureConfig && structureConfig.parentLevel !== null) ? 'bg-white cursor-pointer hover:border-[#145239]' : 'bg-slate-50 cursor-not-allowed text-slate-400'"
                                             class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] text-sm flex items-center justify-between transition-colors shadow-2xs">
-                                            <span x-text="selectedParentLabel" :class="kode_induk ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
-                                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="parentDropdownOpen ? 'rotate-180' : ''"></i>
+                                            <span x-text="selectedParentLabel" :class="kode_induk ? 'text-slate-800 font-medium' : 'text-slate-400'" class="truncate"></span>
+                                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200 shrink-0 ml-1" :class="parentDropdownOpen ? 'rotate-180' : ''"></i>
                                         </div>
 
                                         <div x-show="parentDropdownOpen" @click.outside="parentDropdownOpen = false" x-transition.origin.top.duration.150ms
@@ -578,7 +552,7 @@
                                         </span>
                                         <label for="cakupan" class="text-sm font-bold text-slate-700">Cakupan</label>
                                     </div>
-                                    <textarea id="cakupan" name="cakupan" rows="7" x-model="cakupan"
+                                    <textarea id="cakupan" name="cakupan" rows="5" x-model="cakupan"
                                         placeholder="Jelaskan kegiatan, proses, produk, atau layanan yang termasuk dalam cakupan KBLI ini"
                                         class="w-full resize-none rounded-xl border border-[#CFE3D5] bg-white px-3.5 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs"></textarea>
                                     @error('cakupan')
@@ -593,7 +567,7 @@
                                         </span>
                                         <label for="tidak_cakupan" class="text-sm font-bold text-slate-700">Tidak Cakupan</label>
                                     </div>
-                                    <textarea id="tidak_cakupan" name="tidak_cakupan" rows="7" x-model="tidak_cakupan"
+                                    <textarea id="tidak_cakupan" name="tidak_cakupan" rows="5" x-model="tidak_cakupan"
                                         placeholder="Jelaskan kegiatan yang tidak termasuk dalam cakupan KBLI ini"
                                         class="w-full resize-none rounded-xl border border-[#CFE3D5] bg-white px-3.5 py-3 text-sm leading-relaxed text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#145239] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] shadow-2xs"></textarea>
                                     @error('tidak_cakupan')
@@ -601,7 +575,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="md:col-span-2">
+                                <div class="sm:col-span-2">
                                     <label for="catatan" class="mb-1 block text-sm font-bold text-slate-700">Catatan Data</label>
                                     <textarea id="catatan" name="catatan" rows="3" x-model="catatan"
                                         placeholder="Tambahkan catatan koreksi atau keterangan khusus bila diperlukan"
@@ -613,7 +587,7 @@
                             </div>
                         </div>
 
-                        <aside class="border-t border-slate-200 bg-slate-50/70 p-5 lg:border-l lg:border-t-0 sm:p-6">
+                        <aside class="border-t border-slate-200 bg-slate-50/70 p-4 sm:p-5 lg:border-l lg:border-t-0 space-y-4">
                             <section class="overflow-hidden rounded-2xl border border-emerald-200 bg-white">
                                 <header class="border-b border-emerald-100 bg-emerald-50 px-4 py-3 text-center">
                                     <h3 class="m-0 text-sm font-black text-emerald-800">Preview Hierarki</h3>
@@ -640,12 +614,12 @@
                                 </div>
                             </section>
 
-                            <section class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                            <section class="rounded-2xl border border-slate-200 bg-white p-4">
                                 <h3 class="m-0 flex items-center gap-2 text-sm font-black text-slate-800">
                                     <i class="fa-solid fa-list-check text-emerald-600"></i>
                                     Struktur KBLI 2025
                                 </h3>
-                                <div class="mt-4 space-y-3">
+                                <div class="mt-3 space-y-2.5">
                                     @foreach ([
                                             ['Kategori', 'A', 'Huruf A–V'],
                                             ['Golongan Pokok', '01', '2 digit'],
@@ -654,8 +628,7 @@
                                             ['Kelompok', '01111', '5 digit'],
                                         ] as [$guideLevel, $guideCode, $guideDescription])
                                         <div class="flex items-center gap-3">
-                                            <span
-                                                class="inline-flex min-w-[58px] justify-center rounded-lg border px-2 py-1 font-mono text-[11px] font-black {{ $badgeStyles[$guideLevel] }}">
+                                            <span class="inline-flex min-w-[58px] justify-center rounded-lg border px-2 py-1 font-mono text-[11px] font-black {{ $badgeStyles[$guideLevel] }}">
                                                 {{ $guideCode }}
                                             </span>
                                             <div>
@@ -667,7 +640,7 @@
                                 </div>
                             </section>
 
-                            <section class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                            <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
                                 <h3 class="m-0 flex items-center gap-2 text-sm font-black text-amber-800">
                                     <i class="fa-solid fa-lightbulb"></i>
                                     Panduan Singkat
@@ -682,13 +655,13 @@
                         </aside>
                     </div>
 
-                        <div class="mt-7 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row flex-shrink-0">
+                        <div class="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row shrink-0">
                             <button type="button" @click="closeModal()"
-                                class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
                                 Batal
                             </button>
                             <button type="submit"
-                                class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                                class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-floppy-disk text-xs"></i>
                                 <span x-text="isEdit ? 'Simpan Perubahan' : 'Simpan Data KBLI'"></span>
                             </button>
@@ -707,8 +680,7 @@
             </div>
             <h3 class="mb-0 mt-5 text-xl font-black text-slate-900">Hapus data KBLI?</h3>
             <p class="mb-0 mt-2 text-sm leading-relaxed text-slate-500">
-                Kode <strong id="deleteKbliCode" class="text-slate-700"></strong> — <span id="deleteKbliTitle"></span> akan
-                dihapus.
+                Kode <strong id="deleteKbliCode" class="text-slate-700"></strong> — <span id="deleteKbliTitle"></span> akan dihapus.
             </p>
             <div id="deleteKbliWarning"
                 class="mt-4 hidden rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold leading-relaxed text-amber-800">

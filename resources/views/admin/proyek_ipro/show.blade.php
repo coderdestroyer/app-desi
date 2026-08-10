@@ -8,7 +8,7 @@
     <!-- Top Action & Navigation Bar -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6">
         <div class="flex flex-wrap items-center gap-3">
-            <a href="{{ route('admin.proyek-ipro.index') }}" class="px-4 py-2.5 rounded-xl bg-white border border-[#CFE3D5] text-slate-700 text-xs font-bold hover:bg-slate-50 inline-flex items-center gap-2 transition-all shadow-xs">
+            <a href="{{ route('admin.proyek-ipro.index') }}" class="ml-12 lg:ml-0 px-4 py-2.5 rounded-xl bg-white border border-[#CFE3D5] text-slate-700 text-xs font-bold hover:bg-slate-50 inline-flex items-center gap-2 transition-all shadow-xs">
                 <i class="fa-solid fa-arrow-left"></i>
                 <span>Kembali ke Daftar Proyek</span>
             </a>
