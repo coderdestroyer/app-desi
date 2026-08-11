@@ -33,7 +33,7 @@
     }">
 
         <!-- Header & Action Buttons Card (55:45 Ratio & Multi-Line Flexible Buttons) -->
-        <div class="bg-white rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-6">
+        <div class="bg-white rounded-2xl p-5 sm:p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 sm:gap-6 mb-6">
             <!-- Title & Subtitle Section (~55% - 60% Width) -->
             <div class="w-full lg:w-[55%] xl:w-[60%]">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold mb-2 border border-[#CFE3D5]">
@@ -46,12 +46,12 @@
 
             <!-- Action Buttons (~45% Width) -->
             <div class="w-full lg:w-[45%] xl:w-[40%] flex justify-start lg:justify-end">
-                <div class="flex items-center gap-3 shrink-0">
-                    <a href="{{ route('operator.peluang-investasi') }}" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-[#CFE3D5] shadow-sm transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-arrow-left"></i>
+                <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0">
+                    <a href="{{ route('operator.peluang-investasi') }}" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-[#CFE3D5] shadow-sm transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
                         <span>Kembali ke Dashboard</span>
                     </a>
-                    <button @click="isCreateModalOpen = true" class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white font-bold text-xs shadow-md transition-colors flex items-center gap-2">
+                    <button @click="isCreateModalOpen = true" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white font-bold text-xs shadow-md transition-colors flex items-center justify-center gap-2">
                         <i class="fa-solid fa-plus text-xs"></i>
                         <span>Tambah Proyek Baru</span>
                     </button>
@@ -73,15 +73,15 @@
         @endif
 
         <!-- Filter & Search Bar -->
-        <div class="bg-white rounded-2xl p-5 shadow-sm border border-[#CFE3D5] mb-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-[#CFE3D5] mb-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3.5 sm:gap-4">
             <div class="relative flex-1">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                 <input type="text" x-model="searchQuery" placeholder="Cari nama proyek atau deskripsi..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] focus:ring-1 focus:ring-[#145239] text-sm placeholder:text-slate-400">
             </div>
             
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="relative">
-                    <select x-model="filterKabupaten" class="px-3.5 pr-10 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white appearance-none">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div class="relative w-full sm:w-auto">
+                    <select x-model="filterKabupaten" class="w-full px-3.5 pr-10 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white appearance-none">
                         <option value="">Semua Kabupaten/Kota</option>
                         @foreach($kabupatens as $kab)
                             <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}</option>
@@ -92,8 +92,8 @@
                     </div>
                 </div>
 
-                <div class="relative">
-                    <select x-model="filterSektor" class="px-3.5 pr-10 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white appearance-none">
+                <div class="relative w-full sm:w-auto">
+                    <select x-model="filterSektor" class="w-full px-3.5 pr-10 py-2.5 rounded-xl border border-[#CFE3D5] focus:border-[#145239] text-sm text-slate-700 bg-white appearance-none">
                         <option value="">Semua Sektor Ekonomi</option>
                         @foreach($sektors as $sek)
                             <option value="{{ $sek->sektor_id }}">{{ $sek->nama_sektor }}</option>
@@ -108,8 +108,8 @@
 
         <!-- TABEL MEMANJANG (WIDE ROW TABLE VIEW) -->
         <div class="bg-white rounded-2xl shadow-sm border border-[#CFE3D5] overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left border-collapse">
+            <div class="w-full overflow-x-auto">
+                <table class="w-full min-w-[950px] text-sm text-left border-collapse">
                     <thead class="bg-[#F7FAF8] border-b border-[#EEF8F2]">
                         <tr>
                             <th scope="col" class="px-5 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider min-w-[50px]">No</th>
@@ -213,165 +213,171 @@
         </div>
 
         <!-- Modal Tambah Proyek Baru -->
-        <div x-show="isCreateModalOpen" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
-            <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#CFE3D5]" @click.outside="isCreateModalOpen = false">
-                <div class="flex items-center justify-between pb-4 border-b border-[#EEF8F2] mb-5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-[#EEF8F2] text-[#145239] flex items-center justify-center font-bold">
-                            <i class="fa-solid fa-folder-plus"></i>
+        <template x-teleport="body">
+            <div x-show="isCreateModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-transition>
+                <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-[#CFE3D5] relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="isCreateModalOpen = false">
+                    <div class="flex items-center justify-between pb-4 border-b border-[#EEF8F2] mb-4 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-[#EEF8F2] text-[#145239] flex items-center justify-center font-bold shrink-0">
+                                <i class="fa-solid fa-folder-plus"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base">Buat Proyek Investasi IPRO</h3>
+                                <p class="text-xs text-slate-500">Input parameter utama kelayakan proyek</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-slate-900 text-base">Buat Proyek Investasi IPRO</h3>
-                            <p class="text-xs text-slate-500">Input parameter utama kelayakan proyek</p>
-                        </div>
+                        <button @click="isCreateModalOpen = false" class="text-slate-400 hover:text-slate-600 shrink-0">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
                     </div>
-                    <button @click="isCreateModalOpen = false" class="text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
+
+                    <form action="{{ route('operator.projects.store') }}" method="POST" class="space-y-4 text-sm flex-1 overflow-y-auto pr-1">
+                        @csrf
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Nama Proyek Investasi <span class="text-rose-500">*</span></label>
+                            <input type="text" name="nama_proyek" required placeholder="Contoh: Pembangunan Kawasan Industri Pengolahan Sawit" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Kabupaten / Kota</label>
+                                <div class="relative">
+                                    <select name="kabupaten_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white pr-10 appearance-none">
+                                        <option value="">Pilih Kabupaten/Kota</option>
+                                        @foreach($kabupatens as $kab)
+                                            <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}@if($kab->latitude && $kab->longitude) ({{ $kab->latitude }}, {{ $kab->longitude }})@endif</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5">
+                                        <svg class="w-4 h-4 text-slate-500 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Sektor Ekonomi</label>
+                                <div class="relative">
+                                    <select name="sektor_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white pr-10 appearance-none">
+                                        <option value="">Pilih Sektor</option>
+                                        @foreach($sektors as $sek)
+                                            <option value="{{ $sek->sektor_id }}">{{ $sek->nama_sektor }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5">
+                                        <svg class="w-4 h-4 text-slate-500 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Tahun Awal <span class="text-rose-500">*</span></label>
+                                <input type="number" name="tahun_awal" required value="{{ date('Y') }}" min="2000" max="2100" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Jangka Waktu (Tahun) <span class="text-rose-500">*</span></label>
+                                <input type="number" name="jangka_waktu_tahun" required value="10" min="1" max="50" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm font-mono">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Alamat / Lokasi Spesifik GIS</label>
+                            <input type="text" name="alamat_lokasi" placeholder="Contoh: Jl. Lintas Sumatera Km 45, Medan / Koordinat GIS" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Deskripsi Ringkas</label>
+                            <textarea name="deskripsi" rows="3" placeholder="Tuliskan gambaran umum potensi dan ruang lingkup proyek..." class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm resize-none"></textarea>
+                        </div>
+
+                        <div class="pt-4 border-t border-[#EEF8F2] flex flex-col-reverse sm:flex-row items-center justify-end gap-3 shrink-0">
+                            <button type="button" @click="isCreateModalOpen = false" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                                Batal
+                            </button>
+                            <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors">
+                                Simpan & Buat Proyek
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <form action="{{ route('operator.projects.store') }}" method="POST" class="space-y-4 text-sm">
-                    @csrf
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Nama Proyek Investasi <span class="text-rose-500">*</span></label>
-                        <input type="text" name="nama_proyek" required placeholder="Contoh: Pembangunan Kawasan Industri Pengolahan Sawit" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kabupaten / Kota</label>
-                            <div class="relative">
-                                <select name="kabupaten_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white pr-10 appearance-none">
-                                    <option value="">Pilih Kabupaten/Kota</option>
-                                    @foreach($kabupatens as $kab)
-                                        <option value="{{ $kab->kab_id }}">{{ $kab->nama_kabupaten }}@if($kab->latitude && $kab->longitude) ({{ $kab->latitude }}, {{ $kab->longitude }})@endif</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5">
-                                    <svg class="w-4 h-4 text-slate-500 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Sektor Ekonomi</label>
-                            <div class="relative">
-                                <select name="sektor_id" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm bg-white pr-10 appearance-none">
-                                    <option value="">Pilih Sektor</option>
-                                    @foreach($sektors as $sek)
-                                        <option value="{{ $sek->sektor_id }}">{{ $sek->nama_sektor }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5">
-                                    <svg class="w-4 h-4 text-slate-500 fill-current" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Tahun Awal <span class="text-rose-500">*</span></label>
-                            <input type="number" name="tahun_awal" required value="{{ date('Y') }}" min="2000" max="2100" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm font-mono">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Jangka Waktu (Tahun) <span class="text-rose-500">*</span></label>
-                            <input type="number" name="jangka_waktu_tahun" required value="10" min="1" max="50" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm font-mono">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Alamat / Lokasi Spesifik GIS</label>
-                        <input type="text" name="alamat_lokasi" placeholder="Contoh: Jl. Lintas Sumatera Km 45, Medan / Koordinat GIS" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Deskripsi Ringkas</label>
-                        <textarea name="deskripsi" rows="3" placeholder="Tuliskan gambaran umum potensi dan ruang lingkup proyek..." class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] focus:ring-[#145239] text-sm resize-none"></textarea>
-                    </div>
-
-                    <div class="pt-4 border-t border-[#EEF8F2] flex items-center justify-end gap-3">
-                        <button type="button" @click="isCreateModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
-                            Batal
-                        </button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors">
-                            Simpan & Buat Proyek
-                        </button>
-                    </div>
-                </form>
             </div>
-        </div>
+        </template>
 
         <!-- Modal Edit Proyek -->
-        <div x-show="isEditModalOpen" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
-            <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#CFE3D5]" @click.outside="isEditModalOpen = false">
-                <div class="flex items-center justify-between pb-4 border-b border-[#EEF8F2] mb-5">
-                    <h3 class="font-bold text-slate-900 text-base">Edit Proyek Investasi</h3>
-                    <button @click="isEditModalOpen = false" class="text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
+        <template x-teleport="body">
+            <div x-show="isEditModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-transition>
+                <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-[#CFE3D5] relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="isEditModalOpen = false">
+                    <div class="flex items-center justify-between pb-4 border-b border-[#EEF8F2] mb-4 shrink-0">
+                        <h3 class="font-bold text-slate-900 text-base">Edit Proyek Investasi</h3>
+                        <button @click="isEditModalOpen = false" class="text-slate-400 hover:text-slate-600 shrink-0">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form :action="'{{ url('/operator/projects') }}/' + selectedProject.id" method="POST" class="space-y-4 text-sm flex-1 overflow-y-auto pr-1">
+                        @csrf
+                        @method('PUT')
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Nama Proyek</label>
+                            <input type="text" name="nama_proyek" x-model="selectedProject.nama_proyek" required class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Tahun Awal</label>
+                                <input type="number" name="tahun_awal" x-model="selectedProject.tahun_awal" required class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Jangka Waktu (Tahun)</label>
+                                <input type="number" name="jangka_waktu_tahun" x-model="selectedProject.jangka_waktu_tahun" required class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm font-mono">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Deskripsi</label>
+                            <textarea name="deskripsi" x-model="selectedProject.deskripsi" rows="3" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm resize-none"></textarea>
+                        </div>
+
+                        <div class="pt-4 border-t border-[#EEF8F2] flex flex-col-reverse sm:flex-row items-center justify-end gap-3 shrink-0">
+                            <button type="button" @click="isEditModalOpen = false" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                                Batal
+                            </button>
+                            <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <form :action="'{{ url('/operator/projects') }}/' + selectedProject.id" method="POST" class="space-y-4 text-sm">
-                    @csrf
-                    @method('PUT')
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Nama Proyek</label>
-                        <input type="text" name="nama_proyek" x-model="selectedProject.nama_proyek" required class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Tahun Awal</label>
-                            <input type="number" name="tahun_awal" x-model="selectedProject.tahun_awal" required class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm font-mono">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Jangka Waktu (Tahun)</label>
-                            <input type="number" name="jangka_waktu_tahun" x-model="selectedProject.jangka_waktu_tahun" required class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm font-mono">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Deskripsi</label>
-                        <textarea name="deskripsi" x-model="selectedProject.deskripsi" rows="3" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm resize-none"></textarea>
-                    </div>
-
-                    <div class="pt-4 border-t border-[#EEF8F2] flex items-center justify-end gap-3">
-                        <button type="button" @click="isEditModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
-                            Batal
-                        </button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors">
-                            Simpan Perubahan
-                        </button>
-                    </div>
-                </form>
             </div>
-        </div>
+        </template>
 
         <!-- Modal Hapus Proyek -->
-        <div x-show="isDeleteModalOpen" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
-            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-rose-200" @click.outside="isDeleteModalOpen = false">
-                <div class="text-center p-4">
-                    <div class="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-xl">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
+        <template x-teleport="body">
+            <div x-show="isDeleteModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-transition>
+                <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-rose-200 relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="isDeleteModalOpen = false">
+                    <div class="text-center p-4 overflow-y-auto flex-1">
+                        <div class="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-xl">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">Hapus Proyek Investasi?</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            Proyek <strong class="text-slate-800" x-text="selectedProject.nama_proyek"></strong> beserta seluruh data CAPEX, P&L, dan Arus Kas akan dihapus permanen.
+                        </p>
                     </div>
-                    <h3 class="font-bold text-slate-900 text-base mb-1">Hapus Proyek Investasi?</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                        Proyek <strong class="text-slate-800" x-text="selectedProject.nama_proyek"></strong> beserta seluruh data CAPEX, P&L, dan Arus Kas akan dihapus permanen.
-                    </p>
-                </div>
 
-                <form :action="'{{ url('/operator/projects') }}/' + selectedProject.id" method="POST" class="flex justify-center gap-3 pt-2">
-                    @csrf
-                    @method('DELETE')
-                    <button type="button" @click="isDeleteModalOpen = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-colors">
-                        Ya, Hapus Proyek
-                    </button>
-                </form>
+                    <form :action="'{{ url('/operator/projects') }}/' + selectedProject.id" method="POST" class="flex flex-col-reverse sm:flex-row justify-center gap-3 pt-2 shrink-0">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" @click="isDeleteModalOpen = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                            Batal
+                        </button>
+                        <button type="submit" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-colors">
+                            Ya, Hapus Proyek
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
+        </template>
 
     </div>
 @endsection
