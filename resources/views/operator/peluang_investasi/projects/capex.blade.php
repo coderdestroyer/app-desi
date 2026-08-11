@@ -7,16 +7,16 @@
 <div x-data="capexManager()" x-init="initData()" class="space-y-6">
 
     <!-- Breadcrumb & Top Bar -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <nav class="flex text-sm text-slate-500 space-x-2">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3.5 sm:gap-4">
+        <nav class="flex flex-wrap text-xs sm:text-sm text-slate-500 gap-1.5 items-center">
             <a href="{{ route('operator.projects.index') }}" class="hover:text-[#145239] font-medium">Proyek</a>
             <span>/</span>
-            <a href="{{ route('operator.projects.show', $project->id) }}" class="hover:text-[#145239] font-medium truncate max-w-xs">{{ $project->nama_proyek }}</a>
+            <a href="{{ route('operator.projects.show', $project->id) }}" class="hover:text-[#145239] font-medium truncate max-w-[150px] sm:max-w-xs">{{ $project->nama_proyek }}</a>
             <span>/</span>
             <span class="text-slate-800 font-semibold">Estimasi CAPEX</span>
         </nav>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <!-- Indicator Autosave -->
             <div x-show="autoSaveStatus" x-transition class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all" :class="{
                 'bg-slate-100 text-slate-600 border border-slate-200': autoSaveStatus === 'saving',
@@ -38,20 +38,20 @@
                 <template x-if="autoSaveStatus === 'draft'">
                     <span class="flex items-center gap-1.5">
                         <i class="fa-solid fa-floppy-disk text-amber-600"></i>
-                        <span>Draft lokal tersimpan (Autosave DB per 5 mnt)</span>
+                        <span>Draft lokal (Autosave DB per 5 mnt)</span>
                     </span>
                 </template>
             </div>
 
-            <button @click="toggleMode()" class="px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold shadow-xs transition-colors flex items-center gap-2">
+            <button @click="toggleMode()" class="flex-1 sm:flex-initial px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors flex items-center justify-center gap-2">
                 <i class="fa-solid" :class="isPreviewMode ? 'fa-pen-to-square' : 'fa-eye'"></i>
-                <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau (Preview)'"></span>
+                <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau'"></span>
             </button>
 
-            <button @click="saveData()" :disabled="isSaving" class="bg-[#145239] hover:bg-[#0B5D3D] text-white px-5 py-2 rounded-xl text-sm font-bold shadow-md transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
+            <button @click="saveData()" :disabled="isSaving" class="flex-1 sm:flex-initial bg-[#145239] hover:bg-[#0B5D3D] text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
                 <i x-show="isSaving" class="fa-solid fa-spinner animate-spin"></i>
                 <i x-show="!isSaving" class="fa-solid fa-floppy-disk"></i>
-                <span>Simpan Perubahan</span>
+                <span>Simpan</span>
             </button>
         </div>
     </div>
@@ -60,7 +60,7 @@
     <div x-show="toast.show" x-transition class="p-4 rounded-xl shadow-xs flex items-center justify-between border" :class="toast.isSuccess ? 'bg-[#E7F2EB] border-[#CFE3D5] text-[#145239]' : 'bg-rose-50 border-rose-200 text-rose-800'">
         <div class="flex items-center gap-3">
             <i class="fa-solid text-lg" :class="toast.isSuccess ? 'fa-circle-check text-[#145239]' : 'fa-triangle-exclamation text-rose-500'"></i>
-            <span class="text-sm font-semibold" x-text="toast.message"></span>
+            <span class="text-xs sm:text-sm font-semibold" x-text="toast.message"></span>
         </div>
         <button @click="toast.show = false" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark"></i>
@@ -68,24 +68,24 @@
     </div>
 
     <!-- Main Workspace -->
-    <div class="bg-white rounded-2xl shadow-xs border border-[#CFE3D5] p-6 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-xs border border-[#CFE3D5] p-4 sm:p-5 md:p-6 overflow-hidden">
         
         <!-- Table Title and Desc -->
         <div class="mb-6 border-b border-slate-100 pb-4">
-            <h2 class="text-xl font-bold text-slate-800">Estimasi Biaya Investasi Awal (CAPEX)</h2>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-800">Estimasi Biaya Investasi Awal (CAPEX)</h2>
             <p class="text-xs text-slate-500 mt-1">Gunakan formulir di bawah ini untuk mencatat seluruh biaya modal proyek (tanah, bangunan, alat, perizinan, dll).</p>
         </div>
 
         <!-- Tombol Tambah Dinamis -->
-        <div x-show="!isPreviewMode" class="flex gap-3 mb-4">
+        <div x-show="!isPreviewMode" class="flex flex-wrap gap-3 mb-4">
             <button @click="addParent()" class="px-4 py-2 bg-[#E7F2EB] border border-[#CFE3D5] hover:bg-[#CFE3D5] text-[#145239] rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center gap-2">
                 <span>+ Kategori Utama</span>
             </button>
         </div>
 
         <!-- Tabel Responsive -->
-        <div class="overflow-x-auto border border-[#CFE3D5] rounded-xl pb-6">
-            <table class="w-full text-sm text-left border-collapse">
+        <div class="w-full overflow-x-auto border border-[#CFE3D5] rounded-xl pb-6">
+            <table class="w-full min-w-[900px] text-xs sm:text-sm text-left border-collapse">
                 <thead>
                     <tr class="bg-[#145239] text-white border-b border-[#0B5D3D]">
                         <th class="px-4 py-3 font-semibold text-xs tracking-wider min-w-[60px] border-r border-[#0B5D3D] text-white">No</th>

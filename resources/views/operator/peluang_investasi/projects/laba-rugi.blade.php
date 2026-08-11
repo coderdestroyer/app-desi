@@ -7,16 +7,16 @@
 <div x-data="labaRugiManager()" x-init="initData()" class="space-y-6">
 
     <!-- Breadcrumb & Top Bar -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <nav class="flex text-sm text-slate-500 space-x-2">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3.5 sm:gap-4">
+        <nav class="flex flex-wrap text-xs sm:text-sm text-slate-500 gap-1.5 items-center">
             <a href="{{ route('operator.projects.index') }}" class="hover:text-[#145239] font-medium">Proyek</a>
             <span>/</span>
-            <a href="{{ route('operator.projects.show', $project->id) }}" class="hover:text-[#145239] font-medium truncate max-w-xs">{{ $project->nama_proyek }}</a>
+            <a href="{{ route('operator.projects.show', $project->id) }}" class="hover:text-[#145239] font-medium truncate max-w-[150px] sm:max-w-xs">{{ $project->nama_proyek }}</a>
             <span>/</span>
             <span class="text-slate-800 font-semibold">Proyeksi Laba Rugi</span>
         </nav>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <!-- Indicator Autosave -->
             <div x-show="autoSaveStatus" x-transition class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all" :class="{
                 'bg-slate-100 text-slate-600 border border-slate-200': autoSaveStatus === 'saving',
@@ -38,20 +38,20 @@
                 <template x-if="autoSaveStatus === 'draft'">
                     <span class="flex items-center gap-1.5">
                         <i class="fa-solid fa-floppy-disk text-amber-600"></i>
-                        <span>Draft lokal tersimpan (Autosave DB per 5 mnt)</span>
+                        <span>Draft lokal (Autosave DB per 5 mnt)</span>
                     </span>
                 </template>
             </div>
 
-            <button @click="toggleMode()" class="px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold shadow-xs transition-colors flex items-center gap-2">
+            <button @click="toggleMode()" class="flex-1 sm:flex-initial px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors flex items-center justify-center gap-2">
                 <i class="fa-solid" :class="isPreviewMode ? 'fa-pen-to-square' : 'fa-eye'"></i>
-                <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau (Preview)'"></span>
+                <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau'"></span>
             </button>
 
-            <button @click="saveData()" :disabled="isSaving" class="bg-[#145239] hover:bg-[#0B5D3D] text-white px-5 py-2 rounded-xl text-sm font-bold shadow-md transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
+            <button @click="saveData()" :disabled="isSaving" class="flex-1 sm:flex-initial bg-[#145239] hover:bg-[#0B5D3D] text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
                 <i x-show="isSaving" class="fa-solid fa-spinner animate-spin"></i>
                 <i x-show="!isSaving" class="fa-solid fa-floppy-disk"></i>
-                <span>Simpan Perubahan</span>
+                <span>Simpan</span>
             </button>
         </div>
     </div>
@@ -60,7 +60,7 @@
     <div x-show="toast.show" x-transition class="p-4 rounded-xl shadow-xs flex items-center justify-between border" :class="toast.isSuccess ? 'bg-[#E7F2EB] border-[#CFE3D5] text-[#145239]' : 'bg-rose-50 border-rose-200 text-rose-800'">
         <div class="flex items-center gap-3">
             <i class="fa-solid text-lg" :class="toast.isSuccess ? 'fa-circle-check text-[#145239]' : 'fa-triangle-exclamation text-rose-500'"></i>
-            <span class="text-sm font-semibold" x-text="toast.message"></span>
+            <span class="text-xs sm:text-sm font-semibold" x-text="toast.message"></span>
         </div>
         <button @click="toast.show = false" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark"></i>
@@ -68,29 +68,29 @@
     </div>
 
     <!-- Main Workspace -->
-    <div class="bg-white rounded-2xl shadow-xs border border-[#CFE3D5] p-6 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-xs border border-[#CFE3D5] p-4 sm:p-5 md:p-6 overflow-hidden">
         
         <!-- Table Title and Desc -->
         <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
-                <h2 class="text-xl font-bold text-slate-800">Proyeksi Laba Rugi (Profit & Loss)</h2>
+                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Proyeksi Laba Rugi (Profit & Loss)</h2>
                 <p class="text-xs text-slate-500 mt-1">Buat struktur kategori Anda sendiri secara dinamis hingga 3 level turunan.</p>
             </div>
             
-            <button @click="isSettingsOpen = !isSettingsOpen" class="inline-flex items-center text-xs font-semibold px-3.5 py-2 bg-[#E7F2EB] hover:bg-[#CFE3D5] text-[#145239] rounded-xl transition-colors border border-[#CFE3D5] shadow-xs gap-2">
+            <button @click="isSettingsOpen = !isSettingsOpen" class="w-full md:w-auto inline-flex items-center justify-center text-xs font-semibold px-3.5 py-2 bg-[#E7F2EB] hover:bg-[#CFE3D5] text-[#145239] rounded-xl transition-colors border border-[#CFE3D5] shadow-xs gap-2">
                 <i class="fa-solid fa-sliders text-xs"></i>
                 <span x-text="isSettingsOpen ? 'Tutup Pengaturan Variabel' : 'Pengaturan Variabel'"></span>
             </button>
         </div>
 
         <!-- Pengaturan Variabel P&L Card -->
-        <div x-show="isSettingsOpen" x-transition class="bg-[#F7FAF8] rounded-2xl border border-[#CFE3D5] p-5 mb-6 shadow-xs">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <div x-show="isSettingsOpen" x-transition class="bg-[#F7FAF8] rounded-2xl border border-[#CFE3D5] p-4 sm:p-5 mb-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
                 <div>
-                    <h3 class="text-sm font-bold text-slate-800">Variabel Pengaturan Laba Rugi</h3>
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-800">Variabel Pengaturan Laba Rugi</h3>
                     <p class="text-[11px] text-slate-500">Nilai statis di bawah ini digunakan khusus untuk kalkulasi EBIT, EBT, dan EAT di akhir tabel.</p>
                 </div>
-                <button @click="saveSettings()" :disabled="isSavingSettings" class="bg-[#145239] hover:bg-[#0B5D3D] text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow-md transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
+                <button @click="saveSettings()" :disabled="isSavingSettings" class="w-full sm:w-auto bg-[#145239] hover:bg-[#0B5D3D] text-white px-4 py-2 sm:py-1.5 rounded-xl text-xs font-bold shadow-md transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed gap-2 shrink-0">
                     <i x-show="isSavingSettings" class="fa-solid fa-spinner animate-spin"></i>
                     <i x-show="!isSavingSettings" class="fa-solid fa-floppy-disk"></i>
                     <span>Simpan Pengaturan</span>
@@ -120,21 +120,23 @@
         </div>
 
         <!-- Tombol Tambah Dinamis -->
-        <div x-show="!isPreviewMode" class="flex gap-3 mb-4">
-            <button @click="addParent('PENDAPATAN')" class="px-4 py-2 bg-[#E7F2EB] border border-[#CFE3D5] hover:bg-[#CFE3D5] text-[#145239] rounded-xl text-xs font-bold transition-colors shadow-xs">
-                + Kategori Pendapatan
+        <div x-show="!isPreviewMode" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 mb-4">
+            <button @click="addParent('PENDAPATAN')" class="w-full sm:w-auto px-4 py-2.5 bg-[#E7F2EB] border border-[#CFE3D5] hover:bg-[#CFE3D5] text-[#145239] rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Kategori Pendapatan</span>
             </button>
-            <button @click="addParent('BIAYA_OPERASIONAL')" class="px-4 py-2 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-800 rounded-xl text-xs font-bold transition-colors shadow-xs">
-                + Kategori Biaya Operasional
+            <button @click="addParent('BIAYA_OPERASIONAL')" class="w-full sm:w-auto px-4 py-2.5 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-800 rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Kategori Biaya Operasional</span>
             </button>
         </div>
 
         <!-- Tabel Responsive -->
-        <div class="overflow-x-auto border border-[#CFE3D5] rounded-xl pb-10">
-            <table class="w-full text-sm text-left border-collapse">
+        <div class="w-full overflow-x-auto border border-[#CFE3D5] rounded-xl pb-10">
+            <table class="w-full min-w-[900px] text-xs sm:text-sm text-left border-collapse">
                 <thead>
                     <tr class="bg-[#145239] text-white border-b border-[#0B5D3D]">
-                        <th class="px-4 py-3 font-semibold text-xs tracking-wider min-w-[400px] sticky left-0 bg-[#145239] z-20 border-r border-[#0B5D3D] shadow-[2px_0_5px_rgba(0,0,0,0.15)]">Kategori / Komponen</th>
+                        <th class="px-4 py-3 font-semibold text-xs tracking-wider min-w-[240px] sm:min-w-[320px] md:min-w-[380px] sm:sticky sm:left-0 bg-[#145239] z-20 border-r border-[#0B5D3D] shadow-[2px_0_5px_rgba(0,0,0,0.15)]">Kategori / Komponen</th>
                         <template x-for="year in years" :key="year">
                             <th class="px-4 py-3 font-semibold text-xs tracking-wider text-right min-w-[160px] border-r border-[#0B5D3D] whitespace-nowrap" x-text="'Tahun Ke-' + year"></th>
                         </template>
@@ -144,7 +146,7 @@
                 <!-- ================= 1. BLOK PENDAPATAN ================= -->
                 <tbody x-show="getParents('PENDAPATAN').length > 0">
                     <tr class="bg-[#E7F2EB] text-[#145239] font-bold">
-                        <td class="px-4 py-2.5 sticky left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] shadow-[2px_0_5px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs">A. PENDAPATAN</td>
+                        <td class="px-4 py-2.5 sm:sticky sm:left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] shadow-[2px_0_5px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs">A. PENDAPATAN</td>
                         <td :colspan="years.length" class="bg-[#E7F2EB]"></td>
                     </tr>
                 </tbody>
@@ -153,15 +155,15 @@
                     <tbody class="border-b border-slate-300">
                         <!-- Level 1 -->
                         <tr class="bg-slate-100">
-                            <td class="px-4 py-2 text-slate-800 font-bold sticky left-0 bg-slate-100 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
+                            <td class="px-4 py-2 text-slate-800 font-bold sm:sticky sm:left-0 bg-slate-100 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                 <div x-show="!isPreviewMode" class="flex items-center space-x-2">
-                                    <input type="text" x-model="parent.nama_komponen" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-sm font-bold focus:border-[#145239]" placeholder="Kategori Pendapatan...">
-                                    <button @click="addChild(parent.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-xl text-xs font-bold transition-colors shadow-xs">
-                                        <i class="fa-solid fa-plus mr-1 text-[10px]"></i>
+                                    <input type="text" x-model="parent.nama_komponen" class="w-full min-w-[120px] bg-white border border-slate-300 rounded px-2 py-1 text-xs sm:text-sm font-bold focus:border-[#145239]" placeholder="Kategori Pendapatan...">
+                                    <button @click="addChild(parent.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-lg text-[10px] sm:text-xs font-bold transition-colors shadow-xs">
+                                        <i class="fa-solid fa-plus mr-1 text-[9px]"></i>
                                         Sub
                                     </button>
-                                    <button @click="removeRow(parent.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-semibold transition-colors shadow-xs">
-                                        <i class="fa-solid fa-trash-can mr-1 text-[10px]"></i>
+                                    <button @click="removeRow(parent.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors shadow-xs">
+                                        <i class="fa-solid fa-trash-can mr-1 text-[9px]"></i>
                                         Hapus
                                     </button>
                                 </div>
@@ -179,17 +181,17 @@
                         <template x-for="child in getChildren(parent.temp_id)" :key="child.temp_id">
                             <template x-if="true">
                                 <tr>
-                                    <td class="px-4 py-2 pl-10 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
+                                    <td class="px-4 py-2 pl-6 sm:pl-10 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                         <div class="flex items-center">
-                                            <svg class="w-3 h-3 text-slate-300 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            <svg class="w-3 h-3 text-slate-300 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                             <div x-show="!isPreviewMode" class="flex items-center space-x-2 w-full">
-                                                <input type="text" x-model="child.nama_komponen" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-sm font-semibold focus:border-[#145239]" placeholder="Sub-kategori...">
-                                                <button @click="addChild(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-xl text-xs font-bold transition-colors shadow-xs">
-                                                    <i class="fa-solid fa-plus mr-1 text-[10px]"></i>
+                                                <input type="text" x-model="child.nama_komponen" class="w-full min-w-[100px] bg-white border border-slate-200 rounded px-2 py-1 text-xs sm:text-sm font-semibold focus:border-[#145239]" placeholder="Sub-kategori...">
+                                                <button @click="addChild(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-lg text-[10px] sm:text-xs font-bold transition-colors shadow-xs">
+                                                    <i class="fa-solid fa-plus mr-1 text-[9px]"></i>
                                                     Sub
                                                 </button>
-                                                <button @click="removeRow(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-semibold transition-colors shadow-xs">
-                                                    <i class="fa-solid fa-trash-can mr-1 text-[10px]"></i>
+                                                <button @click="removeRow(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors shadow-xs">
+                                                    <i class="fa-solid fa-trash-can mr-1 text-[9px]"></i>
                                                     Hapus
                                                 </button>
                                             </div>
@@ -210,13 +212,13 @@
                         <template x-for="child in getChildren(parent.temp_id)" :key="'l3_'+child.temp_id">
                             <template x-for="subchild in getChildren(child.temp_id)" :key="subchild.temp_id">
                                 <tr class="bg-slate-50 border-t border-slate-100">
-                                    <td class="px-4 py-2 pl-16 sticky left-0 bg-slate-50 z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
+                                    <td class="px-4 py-2 pl-10 sm:pl-16 sm:sticky sm:left-0 bg-slate-50 z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                         <div class="flex items-center">
-                                            <svg class="w-3 h-3 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            <svg class="w-3 h-3 text-slate-400 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                             <div x-show="!isPreviewMode" class="flex items-center space-x-2 w-full">
-                                                <input type="text" x-model="subchild.nama_komponen" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:border-[#145239]" placeholder="Detail Komponen...">
-                                                <button @click="removeRow(subchild.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-semibold transition-colors shadow-xs">
-                                                    <i class="fa-solid fa-trash-can mr-1 text-[10px]"></i>
+                                                <input type="text" x-model="subchild.nama_komponen" class="w-full min-w-[100px] bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:border-[#145239]" placeholder="Detail Komponen...">
+                                                <button @click="removeRow(subchild.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors shadow-xs">
+                                                    <i class="fa-solid fa-trash-can mr-1 text-[9px]"></i>
                                                     Hapus
                                                 </button>
                                             </div>
@@ -232,7 +234,6 @@
                                 </tr>
                             </template>
                         </template>
-
                     </tbody>
                 </template>
 
@@ -240,7 +241,7 @@
                 <!-- ================= 2. BLOK BIAYA OPERASIONAL ================= -->
                 <tbody x-show="getParents('BIAYA_OPERASIONAL').length > 0">
                     <tr class="bg-rose-100 text-rose-900 font-bold border-t border-b border-rose-200">
-                        <td class="px-4 py-2.5 sticky left-0 bg-rose-100 z-20 border-r border-rose-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs">B. BIAYA OPERASIONAL</td>
+                        <td class="px-4 py-2.5 sm:sticky sm:left-0 bg-rose-100 z-20 border-r border-rose-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] uppercase tracking-wider text-xs">B. BIAYA OPERASIONAL</td>
                         <td :colspan="years.length" class="bg-rose-100"></td>
                     </tr>
                 </tbody>
@@ -249,15 +250,15 @@
                     <tbody class="border-b border-slate-300">
                         <!-- Level 1 -->
                         <tr class="bg-slate-100">
-                            <td class="px-4 py-2 text-slate-800 font-bold sticky left-0 bg-slate-100 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
+                            <td class="px-4 py-2 text-slate-800 font-bold sm:sticky sm:left-0 bg-slate-100 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                 <div x-show="!isPreviewMode" class="flex items-center space-x-2">
-                                    <input type="text" x-model="parent.nama_komponen" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-sm font-bold focus:border-[#145239]" placeholder="Kategori Biaya...">
-                                    <button @click="addChild(parent.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-xl text-xs font-bold transition-colors shadow-xs">
-                                        <i class="fa-solid fa-plus mr-1 text-[10px]"></i>
+                                    <input type="text" x-model="parent.nama_komponen" class="w-full min-w-[120px] bg-white border border-slate-300 rounded px-2 py-1 text-xs sm:text-sm font-bold focus:border-[#145239]" placeholder="Kategori Biaya...">
+                                    <button @click="addChild(parent.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-lg text-[10px] sm:text-xs font-bold transition-colors shadow-xs">
+                                        <i class="fa-solid fa-plus mr-1 text-[9px]"></i>
                                         Sub
                                     </button>
-                                    <button @click="removeRow(parent.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-semibold transition-colors shadow-xs">
-                                        <i class="fa-solid fa-trash-can mr-1 text-[10px]"></i>
+                                    <button @click="removeRow(parent.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors shadow-xs">
+                                        <i class="fa-solid fa-trash-can mr-1 text-[9px]"></i>
                                         Hapus
                                     </button>
                                 </div>
@@ -275,17 +276,17 @@
                         <template x-for="child in getChildren(parent.temp_id)" :key="child.temp_id">
                             <template x-if="true">
                                 <tr>
-                                    <td class="px-4 py-2 pl-10 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
+                                    <td class="px-4 py-2 pl-6 sm:pl-10 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                         <div class="flex items-center">
-                                            <svg class="w-3 h-3 text-slate-300 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            <svg class="w-3 h-3 text-slate-300 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                             <div x-show="!isPreviewMode" class="flex items-center space-x-2 w-full">
-                                                <input type="text" x-model="child.nama_komponen" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-sm font-semibold focus:border-[#145239]" placeholder="Sub-kategori...">
-                                                <button @click="addChild(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-xl text-xs font-bold transition-colors shadow-xs">
-                                                    <i class="fa-solid fa-plus mr-1 text-[10px]"></i>
+                                                <input type="text" x-model="child.nama_komponen" class="w-full min-w-[100px] bg-white border border-slate-200 rounded px-2 py-1 text-xs sm:text-sm font-semibold focus:border-[#145239]" placeholder="Sub-kategori...">
+                                                <button @click="addChild(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-lg text-[10px] sm:text-xs font-bold transition-colors shadow-xs">
+                                                    <i class="fa-solid fa-plus mr-1 text-[9px]"></i>
                                                     Sub
                                                 </button>
-                                                <button @click="removeRow(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-semibold transition-colors shadow-xs">
-                                                    <i class="fa-solid fa-trash-can mr-1 text-[10px]"></i>
+                                                <button @click="removeRow(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors shadow-xs">
+                                                    <i class="fa-solid fa-trash-can mr-1 text-[9px]"></i>
                                                     Hapus
                                                 </button>
                                             </div>
@@ -306,13 +307,13 @@
                         <template x-for="child in getChildren(parent.temp_id)" :key="'l3_'+child.temp_id">
                             <template x-for="subchild in getChildren(child.temp_id)" :key="subchild.temp_id">
                                 <tr class="bg-slate-50 border-t border-slate-100">
-                                    <td class="px-4 py-2 pl-16 sticky left-0 bg-slate-50 z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
+                                    <td class="px-4 py-2 pl-10 sm:pl-16 sm:sticky sm:left-0 bg-slate-50 z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                         <div class="flex items-center">
-                                            <svg class="w-3 h-3 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            <svg class="w-3 h-3 text-slate-400 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                             <div x-show="!isPreviewMode" class="flex items-center space-x-2 w-full">
-                                                <input type="text" x-model="subchild.nama_komponen" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:border-[#145239]" placeholder="Detail Komponen...">
-                                                <button @click="removeRow(subchild.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-semibold transition-colors shadow-xs">
-                                                    <i class="fa-solid fa-trash-can mr-1 text-[10px]"></i>
+                                                <input type="text" x-model="subchild.nama_komponen" class="w-full min-w-[100px] bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:border-[#145239]" placeholder="Detail Komponen...">
+                                                <button @click="removeRow(subchild.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors shadow-xs">
+                                                    <i class="fa-solid fa-trash-can mr-1 text-[9px]"></i>
                                                     Hapus
                                                 </button>
                                             </div>
@@ -348,13 +349,13 @@
 
                     <!-- Total Pendapatan & Biaya Murni -->
                     <tr class="bg-[#E7F2EB] border-t border-[#CFE3D5] font-bold">
-                        <td class="px-4 py-2.5 sticky left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-[#145239] uppercase tracking-wider text-xs">TOTAL PENDAPATAN</td>
+                        <td class="px-4 py-2.5 sm:sticky sm:left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-[#145239] uppercase tracking-wider text-xs">TOTAL PENDAPATAN</td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-2.5 text-right font-mono text-[#145239] border-r border-[#CFE3D5] whitespace-nowrap" x-text="formatRupiah(calculateTotal('PENDAPATAN', year))"></td>
                         </template>
                     </tr>
                     <tr class="bg-rose-100 border-b border-rose-200 font-bold">
-                        <td class="px-4 py-2.5 sticky left-0 bg-rose-100 z-20 border-r border-rose-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-rose-900 uppercase tracking-wider text-xs">TOTAL BIAYA OPERASIONAL</td>
+                        <td class="px-4 py-2.5 sm:sticky sm:left-0 bg-rose-100 z-20 border-r border-rose-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-rose-900 uppercase tracking-wider text-xs">TOTAL BIAYA OPERASIONAL</td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-2.5 text-right font-mono text-rose-900 border-r border-rose-200 whitespace-nowrap" x-text="formatRupiah(calculateTotal('BIAYA_OPERASIONAL', year))"></td>
                         </template>
@@ -362,7 +363,7 @@
 
                     <!-- EBITDA -->
                     <tr class="bg-slate-200 border-y border-slate-300 font-bold">
-                        <td class="px-4 py-3 sticky left-0 bg-slate-200 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-900">EBITDA</td>
+                        <td class="px-4 py-3 sm:sticky sm:left-0 bg-slate-200 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-900">EBITDA</td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-3 text-right font-mono font-bold text-slate-900 border-r border-slate-300 whitespace-nowrap" x-text="formatRupiah(getEBITDA(year))"></td>
                         </template>
@@ -370,7 +371,7 @@
 
                     <!-- Depresiasi -->
                     <tr class="bg-white border-b border-slate-200">
-                        <td class="px-4 py-2 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-700">Depresiasi (-)</td>
+                        <td class="px-4 py-2 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-700">Depresiasi (-)</td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-2 text-right font-mono text-slate-700 border-r border-slate-200 whitespace-nowrap" x-text="formatRupiah(settings.pl_nominal_depresiasi)"></td>
                         </template>
@@ -378,7 +379,7 @@
 
                     <!-- EBIT -->
                     <tr class="bg-slate-200 border-y border-slate-300 font-bold">
-                        <td class="px-4 py-3 sticky left-0 bg-slate-200 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-900">EBIT (Laba Operasional)</td>
+                        <td class="px-4 py-3 sm:sticky sm:left-0 bg-slate-200 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-900">EBIT (Laba Operasional)</td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-3 text-right font-mono font-bold text-slate-900 border-r border-slate-300 whitespace-nowrap" x-text="formatRupiah(getEBIT(year))"></td>
                         </template>
@@ -386,7 +387,7 @@
 
                     <!-- Bunga -->
                     <tr class="bg-white border-b border-slate-200">
-                        <td class="px-4 py-2 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-700">
+                        <td class="px-4 py-2 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-700">
                             Beban Bunga Pinjaman Bank (-) <span class="text-xs text-[#145239] font-bold" x-text="'(' + (settings.suku_bunga_kredit || 8.05) + '%)'"></span>
                         </td>
                         <template x-for="year in years" :key="year">
@@ -396,7 +397,7 @@
 
                     <!-- EBT -->
                     <tr class="bg-slate-200 border-y border-slate-300 font-bold">
-                        <td class="px-4 py-3 sticky left-0 bg-slate-200 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-900">EBT (Laba Sebelum Pajak)</td>
+                        <td class="px-4 py-3 sm:sticky sm:left-0 bg-slate-200 z-20 border-r border-slate-300 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-900">EBT (Laba Sebelum Pajak)</td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-3 text-right font-mono font-bold text-slate-900 border-r border-slate-300 whitespace-nowrap" x-text="formatRupiah(getEBT(year))"></td>
                         </template>
@@ -404,7 +405,7 @@
 
                     <!-- Pajak -->
                     <tr class="bg-white border-b border-slate-200">
-                        <td class="px-4 py-2 sticky left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-700">
+                        <td class="px-4 py-2 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-700">
                             Pajak PPh (-) <span class="text-xs text-slate-500 italic" x-text="'(' + (settings.pl_persentase_pajak_penghasilan || 22) + '% dari EBT)'"></span>
                         </td>
                         <template x-for="year in years" :key="year">
@@ -414,7 +415,7 @@
 
                     <!-- EAT / NET INCOME -->
                     <tr class="bg-[#145239] text-white font-bold border-y-2 border-[#0B5D3D]">
-                        <td class="px-4 py-3.5 sticky left-0 bg-[#145239] z-20 border-r border-[#0B5D3D] shadow-[2px_0_5px_rgba(0,0,0,0.15)] text-white text-base">EAT / LABA BERSIH (NET INCOME)</td>
+                        <td class="px-4 py-3.5 sm:sticky sm:left-0 bg-[#145239] z-20 border-r border-[#0B5D3D] shadow-[2px_0_5px_rgba(0,0,0,0.15)] text-white text-base">EAT / LABA BERSIH (NET INCOME)</td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-3.5 text-right font-mono font-black text-[#FFD54F] border-r border-[#0B5D3D] text-base whitespace-nowrap" x-text="formatRupiah(getEAT(year))"></td>
                         </template>
