@@ -7,20 +7,30 @@
 
     <!-- Alert Messages -->
     @if (session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center gap-3 shadow-xs">
-            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-            <p class="text-sm font-semibold">{{ session('success') }}</p>
+        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                <p class="text-sm font-semibold">{{ session('success') }}</p>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
     @endif
     @if (session('error'))
-        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl flex items-center gap-3 shadow-xs">
-            <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
-            <p class="text-sm font-semibold">{{ session('error') }}</p>
+        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+                <p class="text-sm font-semibold">{{ session('error') }}</p>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
     @endif
 
     <!-- Header & Mode Pill Switcher Card (Exact 55:45 Ratio & Multi-Line Flexible Buttons) -->
-    <div class="bg-white rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+    <div class="bg-white rounded-2xl p-5 sm:p-6 border border-[#CFE3D5] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 sm:gap-6">
         <!-- Title & Subtitle Section (55% Width) -->
         <div class="w-full lg:w-[55%]">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold mb-2 border border-[#CFE3D5]">
@@ -66,10 +76,10 @@
         />
 
         <!-- Table Container -->
-        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
-            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-4 sm:p-5 md:p-6">
+            <div class="mb-5 sm:mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800">Ringkasan Tipologi Sektor Per Wilayah & Tahun</h2>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800">Ringkasan Tipologi Sektor Per Wilayah & Tahun</h2>
                     <p class="text-slate-500 text-xs mt-0.5">Prioritas Wilayah Provinsi Ditampilkan Teratas untuk Setiap Tahun</p>
                 </div>
             </div>
@@ -83,7 +93,7 @@
     <!-- TAB 2: SIMULASI & UPLOAD EXCEL (Custom Mode) -->
     <div x-show="activeTab === 'simulasi'" x-transition class="space-y-6">
         <!-- Info Banner -->
-        <div class="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 flex items-start justify-between gap-4 text-slate-700 text-xs md:text-sm">
+        <div class="p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-slate-700 text-xs md:text-sm">
             <div class="flex items-start gap-3.5">
                 <div class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 font-bold mt-0.5">
                     <i class="fa-solid fa-vials text-[#FFD54F]"></i>
@@ -94,16 +104,16 @@
                 </div>
             </div>
 
-            <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl font-bold transition-all text-xs md:text-sm shadow-sm shrink-0">
+            <button type="button" onclick="document.getElementById('importModal').style.display='flex'" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl font-bold transition-all text-xs md:text-sm shadow-sm shrink-0">
                 <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
                 <span>Unggah Excel</span>
             </button>
         </div>
 
         <!-- Form Card Container -->
-        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
-            <div class="mb-6 border-b border-slate-100 pb-4">
-                <h2 class="text-xl font-bold text-slate-800">{{ $editItem ? 'Edit Data Simulasi Tipologi Sektor' : 'Tambah Simulasi Tipologi Sektor Baru' }}</h2>
+        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-4 sm:p-5 md:p-6">
+            <div class="mb-5 sm:mb-6 border-b border-slate-100 pb-4">
+                <h2 class="text-lg sm:text-xl font-bold text-slate-800">{{ $editItem ? 'Edit Data Simulasi Tipologi Sektor' : 'Tambah Simulasi Tipologi Sektor Baru' }}</h2>
                 <p class="text-slate-500 text-xs mt-0.5">Masukkan variabel nilai LQ & SS custom untuk diuji</p>
             </div>
 
@@ -200,33 +210,33 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3 pt-2">
-                    <button type="submit" class="flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm">
+                <div class="flex flex-col-reverse sm:flex-row items-center gap-3 pt-2">
+                    <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-sm">
                         <i class="fa-solid fa-floppy-disk text-[#FFD54F]"></i>
                         <span>{{ $editItem ? 'Perbarui Data Simulasi' : 'Simpan Data Simulasi' }}</span>
                     </button>
                     @if($editItem)
-                        <a href="{{ route('operator.tipologi.index') }}" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">Batal Edit</a>
+                        <a href="{{ route('operator.tipologi.index') }}" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">Batal Edit</a>
                     @endif
                 </div>
             </form>
         </div>
 
         <!-- Saved Simulations Action Toolbar -->
-        <div class="flex flex-col md:flex-row justify-end items-center gap-3">
-            <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all shadow-xs w-full sm:w-auto">
-                <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
-                <span>Unduh Hasil Analisis (Excel)</span>
-            </button>
-
+        <div class="flex flex-col-reverse sm:flex-row justify-end items-center gap-3">
             <form action="{{ route('operator.tipologi.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all shadow-xs">
+                <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs">
                     <i class="fa-solid fa-trash-can"></i>
                     <span>Hapus Semua Simulasi</span>
                 </button>
             </form>
+
+            <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs w-full sm:w-auto">
+                <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
+                <span>Unduh Hasil Analisis (Excel)</span>
+            </button>
         </div>
     </div>
 
