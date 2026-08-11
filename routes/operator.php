@@ -22,6 +22,7 @@ Route::middleware([
         Route::get('/potensi-unggulan', [OperatorController::class, 'index'])->name('potensi-unggulan');
         Route::get('/pdrb', [OperatorController::class, 'pdrbIndex'])->name('pdrb.index');
         Route::get('/pdb-nasional', [OperatorController::class, 'pdbNasionalIndex'])->name('pdb-nasional.index');
+        Route::get('/pdb-nasional/detail/{tahun}', [OperatorController::class, 'pdbNasionalDetail'])->name('pdb-nasional.detail');
         
         // Modul PDRB Provinsi Operator
         Route::get('/pdrb-provinsi', [OperatorController::class, 'pdrbProvinsiIndex'])->name('pdrb-provinsi.index');

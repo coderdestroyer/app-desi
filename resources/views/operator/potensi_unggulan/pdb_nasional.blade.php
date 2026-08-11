@@ -86,7 +86,7 @@
                         <th class="px-5 py-3.5 text-center w-36">Tahun PDB Nasional</th>
                         <th class="px-4 py-3.5 text-center min-w-[160px]">Sektor Terisi</th>
                         <th class="px-5 py-3.5 text-right min-w-[200px]">Total PDB Nasional (Rp Juta)</th>
-                        <th class="px-4 py-3.5 text-center w-36">Akses Otorisasi</th>
+                        <th class="px-4 py-3.5 text-center w-40">Aksi / Detail PDB</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
@@ -122,10 +122,11 @@
                                 Rp {{ number_format($group->total_pdb, 2, ',', '.') }}
                             </td>
                             <td class="px-4 py-4 text-center whitespace-nowrap">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-semibold text-xs border border-slate-200 whitespace-nowrap">
-                                    <i class="fa-solid fa-lock text-[10px] text-slate-400"></i>
-                                    Read Only
-                                </span>
+                                <a href="{{ route('operator.pdb-nasional.detail', ['tahun' => $group->tahun]) }}" 
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#EEF8F2] hover:bg-[#CFE3D5] text-[#145239] font-bold text-xs border border-[#CFE3D5] transition-colors shadow-2xs">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    <span>Lihat Detail</span>
+                                </a>
                             </td>
                         </tr>
                     @empty

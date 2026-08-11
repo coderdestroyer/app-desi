@@ -414,6 +414,22 @@ class OperatorController extends Controller
     }
 
     /**
+     * Menampilkan detail rincian 17 Sektor PDB Nasional untuk Operator (Read Only Access).
+     */
+    public function pdbNasionalDetail($tahun)
+    {
+        $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
+
+        $existingValues = \App\Models\PdbNasional::where('tahun', $tahun)
+            ->pluck('nilai', 'sektor_id')
+            ->toArray();
+
+        return view('operator.potensi_unggulan.pdb_nasional_detail', compact(
+            'tahun', 'sektors', 'existingValues'
+        ));
+    }
+
+    /**
      * Menampilkan daftar data PDRB Provinsi untuk Operator.
      */
     public function pdrbProvinsiIndex(Request $request)
