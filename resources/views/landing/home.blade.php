@@ -21,7 +21,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+
+    <style>[x-cloak] { display: none !important; }</style>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body>
@@ -83,12 +85,16 @@
         window.trendsData = @json($trendsData);
 
         document.addEventListener("DOMContentLoaded", () => {
+            const mapContainer = document.getElementById("landing-map");
+            if (!mapContainer) return;
+
             // Initialize map centered on Sumatra with zoom level 6
             const map = L.map("landing-map", {
                 zoomControl: true,
                 scrollWheelZoom: true,
                 dragging: true
             }).setView([0.5, 101.5], 6);
+
             // Light, clean CartoDB Positron basemap
             L.tileLayer(
                 "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
@@ -97,12 +103,14 @@
                     maxZoom: 18,
                 }
             ).addTo(map);
+
             let geojsonLayer;
             const sumateraCodes = ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21'];
             const values = Object.values(window.provinsiInvestasi);
             const minVal = Math.min(...values);
             const maxVal = Math.max(...values);
             const range = maxVal - minVal;
+
             function getColor(val) {
                 if (!val) return '#8ce0b7';
                 if (range === 0) return '#145239';
@@ -113,9 +121,11 @@
                 if (pct > 0.2) return '#3db27c'; // Cukup
                 return '#8ce0b7'; // Rendah
             }
+
             function formatTriliun(num) {
                 return 'Rp ' + (num / 1000000000000).toFixed(2) + ' Triliun';
             }
+
             function style(feature) {
                 const name = feature.properties.PROVINSI.toUpperCase().trim();
                 let matchedKey = name;
@@ -130,6 +140,7 @@
                     fillOpacity: 0.85
                 };
             }
+
             function onEachFeature(feature, layer) {
                 const name = feature.properties.PROVINSI.trim();
                 let matchedKey = name.toUpperCase().trim();
@@ -156,7 +167,7 @@
                         layer.bringToFront();
                     },
                     mouseout: function (e) {
-                        geojsonLayer.resetStyle(e.target);
+                        if (geojsonLayer) geojsonLayer.resetStyle(e.target);
                     },
                     click: function (e) {
                         map.fitBounds(e.target.getBounds());
@@ -164,6 +175,29 @@
                     }
                 });
             }
+
+            // Function to force invalidate size & refit
+            function invalidateMapSize() {
+                setTimeout(() => {
+                    map.invalidateSize();
+                    if (geojsonLayer) {
+                        map.fitBounds(geojsonLayer.getBounds(), { padding: [30, 30] });
+                    }
+                }, 150);
+            }
+
+            // Observer to handle map container visibility animation
+            const mapObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        invalidateMapSize();
+                    }
+                });
+            }, { threshold: 0.1 });
+            mapObserver.observe(mapContainer);
+
+            window.addEventListener("resize", invalidateMapSize);
+
             // Fetch Sumatra boundaries from CDN
             fetch('https://cdn.jsdelivr.net/gh/denyherianto/indonesia-geojson-topojson-maps-with-38-provinces@main/GeoJSON/indonesia-38-provinces.geojson')
                 .then(response => {
@@ -181,6 +215,7 @@
                         onEachFeature: onEachFeature
                     }).addTo(map);
                     map.fitBounds(geojsonLayer.getBounds(), { padding: [30, 30] });
+                    invalidateMapSize();
                 })
                 .catch(error => {
                     console.error('Error loading geojson map:', error);
@@ -223,6 +258,7 @@
                             this.setStyle({ color: '#ffffff', weight: 2 });
                         });
                     });
+                    invalidateMapSize();
                 });
 
             // =====================================================
