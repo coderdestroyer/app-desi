@@ -2,7 +2,7 @@
             EXECUTIVE DASHBOARD SECTION
     ========================== -->
 
-    <section id="overview" class="dashboard-grid-section bg-[#f8faf9] pt-[60px] pb-10 px-[10%] flex flex-col items-center w-full border-t border-b border-[#eef2f0] transition-all duration-[1000ms]">
+    <section id="overview" class="dashboard-grid-section bg-[#f8faf9] pt-[35px] pb-10 px-4 sm:px-8 lg:px-[10%] flex flex-col items-center w-full border-t border-b border-[#eef2f0] transition-all duration-[1000ms]">
         <div class="section-title w-full">
             <h5>
                 Overview

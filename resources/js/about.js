@@ -165,7 +165,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
             const navbarHeight = document.querySelector(".main-header")?.offsetHeight || 90;
 
-            const position = target.offsetTop - navbarHeight;
+            const position = Math.max(0, target.offsetTop - navbarHeight);
 
             window.scrollTo({
 
