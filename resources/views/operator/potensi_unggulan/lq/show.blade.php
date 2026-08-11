@@ -6,20 +6,20 @@
 <div class="space-y-6">
 
     <!-- Top Action Toolbar & Back Button -->
-    <div class="flex items-center justify-between">
-        <a href="{{ route('operator.lq.index') }}" class="ml-12 lg:ml-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs md:text-sm transition-all shadow-xs">
+    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <a href="{{ route('operator.lq.index') }}" class="ml-12 lg:ml-0 inline-flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs sm:text-sm transition-all shadow-xs w-full sm:w-auto">
             <i class="fa-solid fa-arrow-left text-[#145239]"></i>
             <span>Kembali ke Ringkasan Analisis</span>
         </a>
 
-        <button type="button" onclick="exportToExcel()" class="inline-flex items-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all shadow-xs">
+        <button type="button" onclick="exportToExcel()" class="inline-flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs w-full sm:w-auto">
             <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
             <span>Unduh Detail 17 Sektor (Excel)</span>
         </button>
     </div>
 
     <!-- Header Banner Info Card -->
-    <div class="bg-white rounded-2xl p-6 border border-[#CFE3D5] shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="bg-white rounded-2xl p-5 sm:p-6 border border-[#CFE3D5] shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold mb-2 border border-[#CFE3D5]">
                 <i class="fa-solid fa-chart-pie text-[#D8A62A]"></i>
@@ -28,20 +28,20 @@
             <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">
                 Analisis LQ {{ $namaDaerah }}
             </h1>
-            <p class="text-slate-500 text-xs md:text-sm mt-1">
+            <p class="text-slate-500 text-xs md:text-sm mt-1 leading-relaxed">
                 Tingkat Wilayah: <strong class="text-slate-700">{{ $tingkatWilayah }}</strong> | Pembanding: <strong class="text-slate-700">{{ $namaPembanding }}</strong> | Tahun: <strong class="text-[#145239] font-extrabold">{{ $tahun }}</strong>
             </p>
         </div>
     </div>
 
     <!-- Table Container -->
-    <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-6">
-        <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-4 sm:p-5 md:p-6">
+        <div class="mb-5 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-                <h2 class="text-xl font-bold text-slate-800">Detail Indikator LQ Per Sektor</h2>
+                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Detail Indikator LQ Per Sektor</h2>
                 <p class="text-slate-500 text-xs mt-0.5">Rincian Perhitungan Basis vs Non-Basis 17 Sektor PDRB</p>
             </div>
-            <form action="{{ route('operator.lq.show') }}" method="GET" class="relative w-full md:w-80">
+            <form action="{{ route('operator.lq.show') }}" method="GET" class="relative w-full sm:w-80">
                 <input type="hidden" name="tingkat_wilayah" value="{{ $tingkatWilayah }}">
                 <input type="hidden" name="tahun" value="{{ $tahun }}">
                 @if(request('kabupaten_id'))
@@ -50,16 +50,16 @@
                 @if(request('provinsi_id'))
                     <input type="hidden" name="provinsi_id" value="{{ request('provinsi_id') }}">
                 @endif
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Sektor atau Kategori..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-[#145239] focus:ring-1 focus:ring-[#145239] outline-none transition-all">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Sektor atau Kategori..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-[#145239] focus:ring-1 focus:ring-[#145239] outline-none transition-all">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 </div>
             </form>
         </div>
 
-        <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
-            <table id="lqDetailTable" class="w-full text-left border-collapse">
-                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
+        <div class="w-full overflow-x-auto border border-slate-200/80 rounded-xl">
+            <table id="lqDetailTable" class="w-full min-w-[900px] text-left border-collapse text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                     <tr>
                         <th class="px-4 py-3.5 w-12 text-center">No</th>
                         <th class="px-4 py-3.5 whitespace-nowrap">Tingkat Wilayah</th>
@@ -72,20 +72,20 @@
                         <th class="px-4 py-3.5 text-center whitespace-nowrap">KATEGORI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+                <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
                     @forelse($sectorData as $index => $data)
                         <tr class="hover:bg-emerald-50/30 transition-colors">
-                            <td class="px-4 py-3.5 text-center font-mono font-semibold text-slate-500">{{ ($sectorData->currentPage() - 1) * $sectorData->perPage() + $loop->iteration }}</td>
-                            <td class="px-4 py-3.5 font-medium">{{ $data['tingkat_wilayah'] }}</td>
-                            <td class="px-4 py-3.5 font-bold text-slate-800">{{ $data['daerah_analisis'] }}</td>
-                            <td class="px-4 py-3.5 text-slate-600 font-medium">{{ $data['daerah_pembanding'] }}</td>
+                            <td class="px-4 py-3.5 text-center font-mono text-slate-400">{{ ($sectorData->currentPage() - 1) * $sectorData->perPage() + $loop->iteration }}</td>
+                            <td class="px-4 py-3.5 font-medium whitespace-nowrap">{{ $data['tingkat_wilayah'] }}</td>
+                            <td class="px-4 py-3.5 font-bold text-slate-800 whitespace-nowrap">{{ $data['daerah_analisis'] }}</td>
+                            <td class="px-4 py-3.5 text-slate-600 font-medium whitespace-nowrap">{{ $data['daerah_pembanding'] }}</td>
                             <td class="px-4 py-3.5 font-medium">{{ $data['sektor'] }}</td>
-                            <td class="px-4 py-3.5 text-center font-mono font-bold">{{ $data['tahun'] }}</td>
-                            <td class="px-4 py-3.5 text-center font-mono font-extrabold text-[#145239]">{{ number_format($data['nilai_lq'], 2, ',', '.') }}</td>
+                            <td class="px-4 py-3.5 text-center font-mono font-bold whitespace-nowrap">{{ $data['tahun'] }}</td>
+                            <td class="px-4 py-3.5 text-center font-mono font-extrabold text-[#145239] whitespace-nowrap">{{ number_format($data['nilai_lq'], 2, ',', '.') }}</td>
                             <td class="px-4 py-3.5 leading-relaxed text-xs text-slate-600">
                                 {{ $data['keterangan'] }}
                             </td>
-                            <td class="px-4 py-3.5 text-center">
+                            <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                 @if($data['kategori'] === 'BASIS')
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                         BASIS

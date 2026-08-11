@@ -55,47 +55,47 @@
     @endif
 
     <!-- Header Banner -->
-    <div class="bg-white rounded-2xl p-6 md:p-8 border border-[#CFE3D5] shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="flex-1 space-y-2">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EEF8F2] text-[#145239] text-xs font-bold border border-[#CFE3D5]">
-                <i class="fa-solid text-[#D8A62A] {{ ($tab ?? 'own') === 'own' ? 'fa-building-columns' : 'fa-city' }}"></i>
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-6 sm:p-7 md:p-8 shadow-lg text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div class="relative z-10 space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
+                <i class="fa-solid text-[#FFD54F] {{ ($tab ?? 'own') === 'own' ? 'fa-building-columns' : 'fa-city' }}"></i>
                 <span>{{ ($tab ?? 'own') === 'own' ? 'Pengelolaan PDRB Provinsi Scope Otorisasi' : 'Mode Lihat Data Makroekonomi' }}</span>
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
                 {{ ($tab ?? 'own') === 'own' ? 'Kelola Data PDRB Provinsi (Scope)' : 'Lihat Data PDRB Daerah (Seluruh Sumatera)' }}
             </h1>
-            <p class="text-slate-500 text-xs md:text-sm max-w-2xl leading-relaxed">
+            <p class="text-emerald-100/90 text-xs md:text-sm max-w-2xl leading-relaxed">
                 {{ ($tab ?? 'own') === 'own' ? 'Kelola data PDRB provinsi otorisasi Anda. Setiap tahun & sektor dapat diisi dan diedit.' : 'Melihat rincian nilai 17 sektor PDRB Kabupaten/Kota dan Provinsi di Sumatera (Read-Only Mode).' }}
             </p>
         </div>
 
-        <div class="shrink-0">
+        <div class="relative z-10 w-full sm:w-auto shrink-0">
             @if(($tab ?? 'own') === 'own' && Auth::user()->hasProvinsiScope())
                 <button type="button" @click="isPdrbModalOpen = true"
-                    class="px-5 py-3 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white font-extrabold text-xs shadow-md transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5">
+                    class="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#FFD54F] hover:bg-amber-400 text-slate-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 border border-amber-300 transform hover:-translate-y-0.5">
                     <i class="fa-solid fa-plus text-sm"></i>
                     <span>Inisiasi Data PDRB Provinsi Baru</span>
                 </button>
             @else
-                <div class="px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-2 shadow-xs">
-                    <i class="fa-solid fa-eye text-[#D8A62A]"></i>
+                <div class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-semibold flex items-center justify-center gap-2 backdrop-blur-sm">
+                    <i class="fa-solid fa-eye text-[#FFD54F]"></i>
                     <span>Mode: Lihat Seluruh Data</span>
                 </div>
             @endif
         </div>
-    </div>
+    </section>
 
     @if(($tab ?? 'own') === 'all')
         {{-- Level Sub-Tabs for Lihat Mode --}}
-        <div class="flex items-center gap-3 border-b border-slate-200 mt-6 pt-1">
+        <div class="flex items-center gap-2 sm:gap-3 border-b border-slate-200 pt-1 overflow-x-auto">
             <a href="{{ route('operator.pdrb.index', ['tab' => 'all']) }}"
-                class="px-5 py-3 rounded-t-xl text-xs md:text-sm font-extrabold transition-all flex items-center gap-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50">
+                class="px-4 sm:px-5 py-3 rounded-t-xl text-xs md:text-sm font-extrabold transition-all flex items-center gap-2 sm:gap-2.5 border-b-2 whitespace-nowrap shrink-0 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100/60">
                 <i class="fa-solid fa-city text-sm"></i>
                 <span>Tingkat Kabupaten / Kota</span>
             </a>
 
             <a href="{{ route('operator.pdrb-provinsi.index', ['tab' => 'all']) }}"
-                class="px-5 py-3 rounded-t-xl text-xs md:text-sm font-extrabold transition-all flex items-center gap-2.5 border-b-2 border-[#145239] text-[#145239] bg-white shadow-xs">
+                class="px-4 sm:px-5 py-3 rounded-t-xl text-xs md:text-sm font-extrabold transition-all flex items-center gap-2 sm:gap-2.5 border-b-2 whitespace-nowrap shrink-0 border-[#145239] text-[#145239] bg-white shadow-xs">
                 <i class="fa-solid fa-building-columns text-sm"></i>
                 <span>Tingkat Provinsi</span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-[#145239] font-bold border border-emerald-200">
@@ -117,10 +117,11 @@
 
     <!-- Data Table Card (Grouped by Provinsi & Tahun) -->
     <div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-        <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-5 sm:flex-row sm:items-center">
+        <header class="flex flex-col justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-4 sm:p-5 sm:flex-row sm:items-center">
             <div>
-                <h2 class="text-lg font-bold text-slate-800">
-                    Daftar Record PDRB Provinsi Terdaftar
+                <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-building-columns text-[#145239]"></i>
+                    <span>Daftar Record PDRB Provinsi Terdaftar</span>
                 </h2>
                 <p class="mt-1 text-xs text-slate-500">
                     @if(($tab ?? 'own') === 'own')
@@ -137,42 +138,54 @@
             </div>
         </header>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+        <div class="w-full overflow-x-auto">
+            <table class="w-full min-w-[780px] border-collapse text-left text-xs">
                 <thead>
                     <tr class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase tracking-wider">
-                        <th class="px-5 py-3.5 text-center w-12">No</th>
-                        <th class="px-5 py-3.5">Provinsi</th>
-                        <th class="px-5 py-3.5 text-center">Tahun PDRB</th>
-                        <th class="px-5 py-3.5 text-center">Sektor Terisi</th>
-                        <th class="px-5 py-3.5 text-right">Total PDRB (Rp Juta)</th>
-                        <th class="px-5 py-3.5 text-center w-36">Aksi & Manajemen</th>
+                        <th class="px-4 py-3.5 text-center w-12">No</th>
+                        <th class="px-5 py-3.5 min-w-[180px]">Provinsi</th>
+                        <th class="px-4 py-3.5 text-center w-28">Tahun PDRB</th>
+                        <th class="px-4 py-3.5 text-center min-w-[150px]">Sektor Terisi</th>
+                        <th class="px-5 py-3.5 text-right w-44">Total PDRB (Rp Juta)</th>
+                        <th class="px-4 py-3.5 text-center w-36">Aksi & Manajemen</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
                     @forelse($pdrbGroups as $index => $group)
                         <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-5 py-4 text-center text-slate-400">
+                            <td class="px-4 py-4 text-center text-slate-400 font-mono">
                                 {{ $pdrbGroups->firstItem() + $index }}
                             </td>
                             <td class="px-5 py-4 text-slate-900 font-bold">
                                 {{ $group->provinsi->nama_provinsi ?? '-' }}
                             </td>
-                            <td class="px-5 py-4 text-center font-mono font-semibold">
+                            <td class="px-4 py-4 text-center font-mono font-semibold whitespace-nowrap">
                                 <span class="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-800">
                                     {{ $group->tahun }}
                                 </span>
                             </td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-[#145239] border border-emerald-200">
-                                    <i class="fa-solid fa-check text-[10px]"></i>
-                                    {{ $group->total_sektor }} Sektor Terisi
-                                </span>
+                            <td class="px-4 py-4 text-center whitespace-nowrap">
+                                @if($group->total_sektor >= 17)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-[#145239] border border-emerald-200 leading-snug">
+                                        <i class="fa-solid fa-circle-check text-[11px] text-emerald-600"></i>
+                                        <span>{{ $group->total_sektor }}/17 Sektor</span>
+                                    </span>
+                                @elseif($group->total_sektor > 0)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 leading-snug">
+                                        <i class="fa-solid fa-clock text-[11px] text-amber-600"></i>
+                                        <span>{{ $group->total_sektor }}/17 Sektor</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200 leading-snug">
+                                        <i class="fa-solid fa-circle-minus text-[11px] text-slate-400"></i>
+                                        <span>0 Sektor</span>
+                                    </span>
+                                @endif
                             </td>
-                            <td class="px-5 py-4 text-right font-mono font-bold text-slate-900 text-sm">
+                            <td class="px-5 py-4 text-right font-mono font-bold text-slate-900 text-sm whitespace-nowrap">
                                 Rp {{ number_format($group->total_pdrb, 2, ',', '.') }}
                             </td>
-                            <td class="px-5 py-4 text-center">
+                            <td class="px-4 py-4 text-center whitespace-nowrap">
                                 @if(Auth::user()->canManageProvinsi($group->provinsi_id))
                                     <div class="flex items-center justify-center gap-1.5">
                                         {{-- Edit Button --}}
@@ -227,12 +240,12 @@
 
     <!-- MODAL INISIASI PDRB PROVINSI BARU -->
     <template x-teleport="body">
-        <div x-show="isPdrbModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
-            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 relative" @click.outside="isPdrbModalOpen = false">
+        <div x-show="isPdrbModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-transition>
+            <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-emerald-100 relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="isPdrbModalOpen = false">
                 {{-- Modal Header --}}
-                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                        <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold shrink-0">
                             <i class="fa-solid fa-building-columns text-lg"></i>
                         </div>
                         <div>
@@ -240,12 +253,12 @@
                             <p class="text-xs text-slate-500">Pilih Provinsi & Tahun yang belum terdaftar</p>
                         </div>
                     </div>
-                    <button type="button" @click="isPdrbModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                    <button type="button" @click="isPdrbModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0">
                         <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                 </div>
 
-                <form action="{{ route('operator.pdrb-provinsi.init') }}" method="POST" class="space-y-4 pt-4 text-sm">
+                <form action="{{ route('operator.pdrb-provinsi.init') }}" method="POST" class="space-y-4 pt-4 text-sm flex-1 overflow-y-auto">
                     @csrf
 
                     <div>
@@ -266,11 +279,11 @@
                         <input type="number" name="tahun" value="{{ date('Y') }}" min="2000" max="2100" class="w-full rounded-xl border-[#CFE3D5] focus:border-[#145239] text-sm h-11 font-mono" required>
                     </div>
 
-                    <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                        <button type="button" @click="isPdrbModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-colors">
+                    <div class="pt-4 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 border-t border-slate-100 shrink-0">
+                        <button type="button" @click="isPdrbModalOpen = false" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-colors">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2">
+                        <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-2">
                             <span>Lanjut ke Input Nilai</span>
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </button>

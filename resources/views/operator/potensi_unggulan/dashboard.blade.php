@@ -3,9 +3,9 @@
 @section('title', 'Dashboard Potensi Unggulan Daerah')
 
 @section('content')
-<div x-data="{ isPdrbModalOpen: false, inputMode: 'batch' }">
+<div x-data="{ isPdrbModalOpen: false, inputMode: 'batch' }" class="space-y-6">
     @if(session('success'))
-        <div class="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
                 <span>{{ session('success') }}</span>
@@ -17,7 +17,7 @@
     @endif
 
     @if(session('error'))
-        <div class="mb-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-semibold flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
                 <span>{{ session('error') }}</span>
@@ -29,199 +29,171 @@
     @endif
 
     <!-- Welcome Header -->
-    <div
-        class="bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] rounded-2xl p-8 md:p-10 pb-16 md:pb-24 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] rounded-2xl p-6 sm:p-8 md:p-10 pb-16 sm:pb-20 md:pb-24 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <!-- Background Ornaments -->
-        <div
-            class="absolute top-0 right-0 w-64 h-64 bg-emerald-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-blob">
-        </div>
-        <div
-            class="absolute bottom-0 right-32 w-48 h-48 bg-yellow-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-blob animation-delay-2000">
-        </div>
-        <div
-            class="absolute top-10 left-1/2 w-72 h-72 bg-emerald-500 rounded-full mix-blend-overlay filter blur-3xl opacity-10 animate-blob animation-delay-4000">
-        </div>
+        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute bottom-0 right-32 w-48 h-48 bg-yellow-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div class="absolute top-10 left-1/2 w-72 h-72 bg-emerald-500 rounded-full mix-blend-overlay filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
 
-        <div class="relative z-10 text-white flex-1">
-            <div
-                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/50 border border-emerald-700/50 text-emerald-100 text-xs font-bold mb-4 backdrop-blur-sm">
+        <div class="relative z-10 text-white flex-1 space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/50 border border-emerald-700/50 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                 <svg class="w-4 h-4 text-[#FFD54F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Dashboard Potensi Unggulan
+                <span>Dashboard Potensi Unggulan</span>
             </div>
-            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">Selamat Datang, <span
-                    class="text-[#FFD54F]">{{ Auth::user()->name }}</span></h1>
-            <p class="text-emerald-100/90 font-medium max-w-xl text-sm leading-relaxed">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+                Selamat Datang, <span class="text-[#FFD54F]">{{ Auth::user()->name }}</span>
+            </h1>
+            <p class="text-emerald-100/90 font-medium max-w-xl text-xs sm:text-sm leading-relaxed">
                 Kelola dan pantau data serta hasil perhitungan analisis investasi dan ekonomi daerah Provinsi Sumatera Utara.
             </p>
         </div>
 
         <!-- Right Side Action & Date Info -->
-        <div class="relative z-10 flex flex-col md:flex-row items-end md:items-center gap-4 mt-4 md:mt-0">
-            <div class="flex flex-col items-end justify-center hidden sm:flex">
-                <span class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">{{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</span>
-                <span class="text-xs font-semibold text-[#FFD54F] uppercase tracking-wider mt-0.5">Tanggal Sistem</span>
-            </div>
+        <div class="relative z-10 flex flex-col items-start md:items-end justify-center shrink-0">
+            <span class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}
+            </span>
+            <span class="text-[10px] sm:text-xs font-semibold text-[#FFD54F] uppercase tracking-wider mt-0.5">Tanggal Sistem</span>
         </div>
     </div>
 
     <!-- Stats Row -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 !-mt-12 md:!-mt-16 relative z-20 px-2 md:px-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 !-mt-10 sm:!-mt-12 md:!-mt-16 relative z-20 px-1 sm:px-2 md:px-4">
         <!-- Stat Card 1 -->
-        <div
-            class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-            <div
-                class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500">
-            </div>
-            <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Total Analisa</p>
-            <div class="flex items-center justify-center gap-3 relative z-10">
-                <div class="bg-emerald-600 text-white p-2 rounded-lg shadow-sm">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-600 mb-1.5 relative z-10 text-center truncate">Total Analisa</p>
+            <div class="flex items-center justify-center gap-2.5 sm:gap-3 relative z-10">
+                <div class="bg-emerald-600 text-white p-2 rounded-xl shadow-xs shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                 </div>
-                <span class="text-3xl font-black text-slate-800">{{ $totalAnalisa ?? 0 }}</span>
+                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $totalAnalisa ?? 0 }}</span>
             </div>
         </div>
 
         <!-- Stat Card 2 -->
-        <div
-            class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-            <div
-                class="absolute top-0 right-0 w-16 h-16 bg-indigo-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500">
-            </div>
-            <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Analisis LQ</p>
-            <div class="flex items-center justify-center gap-3 relative z-10">
-                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-sm">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-600 mb-1.5 relative z-10 text-center truncate">Analisis LQ</p>
+            <div class="flex items-center justify-center gap-2.5 sm:gap-3 relative z-10">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-xs shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                 </div>
-                <span class="text-3xl font-black text-slate-800">{{ $countLq ?? 0 }}</span>
+                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $countLq ?? 0 }}</span>
             </div>
         </div>
 
         <!-- Stat Card 3 -->
-        <div
-            class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-            <div
-                class="absolute top-0 right-0 w-16 h-16 bg-sky-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500">
-            </div>
-            <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Analisis SSA</p>
-            <div class="flex items-center justify-center gap-3 relative z-10">
-                <div class="bg-sky-600 text-white p-2 rounded-lg shadow-sm">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-sky-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-600 mb-1.5 relative z-10 text-center truncate">Analisis SSA</p>
+            <div class="flex items-center justify-center gap-2.5 sm:gap-3 relative z-10">
+                <div class="bg-sky-600 text-white p-2 rounded-xl shadow-xs shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                 </div>
-                <span class="text-3xl font-black text-slate-800">{{ $countSs ?? 0 }}</span>
+                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $countSs ?? 0 }}</span>
             </div>
         </div>
 
         <!-- Stat Card 4 -->
-        <div
-            class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-            <div
-                class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500">
-            </div>
-            <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Analisis TS</p>
-            <div class="flex items-center justify-center gap-3 relative z-10">
-                <div class="bg-emerald-600 text-white p-2 rounded-lg shadow-sm">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-600 mb-1.5 relative z-10 text-center truncate">Analisis TS</p>
+            <div class="flex items-center justify-center gap-2.5 sm:gap-3 relative z-10">
+                <div class="bg-emerald-600 text-white p-2 rounded-xl shadow-xs shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
                 </div>
-                <span class="text-3xl font-black text-slate-800">{{ $countTipologi ?? 0 }}</span>
+                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $countTipologi ?? 0 }}</span>
             </div>
         </div>
 
         <!-- Stat Card 5 -->
-        <div
-            class="bg-white rounded-xl p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-            <div
-                class="absolute top-0 right-0 w-16 h-16 bg-cyan-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500">
-            </div>
-            <p class="text-xs font-bold text-slate-600 mb-2 relative z-10 text-center">Analisis Klassen</p>
-            <div class="flex items-center justify-center gap-3 relative z-10">
-                <div class="bg-cyan-600 text-white p-2 rounded-lg shadow-sm">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="col-span-2 sm:col-span-1 bg-white rounded-2xl p-3.5 sm:p-4 border border-emerald-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-cyan-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500"></div>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-600 mb-1.5 relative z-10 text-center truncate">Analisis Klassen</p>
+            <div class="flex items-center justify-center gap-2.5 sm:gap-3 relative z-10">
+                <div class="bg-cyan-600 text-white p-2 rounded-xl shadow-xs shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
                 </div>
-                <span class="text-3xl font-black text-slate-800">{{ $countKlassen ?? 0 }}</span>
+                <span class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{{ $countKlassen ?? 0 }}</span>
             </div>
         </div>
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 mt-6">
         <!-- Left Column (Wider) -->
         <div class="lg:col-span-2 space-y-6">
-
             <!-- Table Card -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div class="p-5 border-b border-slate-100 bg-slate-50/50">
-                    <h3 class="font-bold text-slate-800 text-lg">Ringkasan Analisis</h3>
+                <div class="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800 text-base sm:text-lg">Ringkasan Analisis</h3>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse min-w-[500px]">
                         <thead>
-                            <tr
-                                class="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
-                                <th class="px-5 py-3">Jenis Analisis</th>
-                                <th class="px-5 py-3">Data Terakhir</th>
-                                <th class="px-5 py-3 text-center">Total Data</th>
-                                <th class="px-5 py-3 text-center">Riwayat</th>
+                            <tr class="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
+                                <th class="px-4 sm:px-5 py-3">Jenis Analisis</th>
+                                <th class="px-4 sm:px-5 py-3">Data Terakhir</th>
+                                <th class="px-4 sm:px-5 py-3 text-center">Total Data</th>
+                                <th class="px-4 sm:px-5 py-3 text-center">Riwayat</th>
                             </tr>
                         </thead>
-                        <tbody class="text-sm divide-y divide-slate-100">
+                        <tbody class="text-xs sm:text-sm divide-y divide-slate-100">
                             <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="px-5 py-3.5 font-medium text-slate-700">Analisis LQ</td>
-                                <td class="px-5 py-3.5 text-slate-500">{{ $statusLq['date'] }}</td>
-                                <td class="px-5 py-3.5 text-center text-slate-600 font-semibold">{{ $countLq }}</td>
-                                <td class="px-5 py-3.5 text-center">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm {{ $statusLq['color'] }}">
+                                <td class="px-4 sm:px-5 py-3.5 font-medium text-slate-700">Analisis LQ</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-slate-500 whitespace-nowrap">{{ $statusLq['date'] }}</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-center text-slate-600 font-semibold">{{ $countLq }}</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-semibold border shadow-2xs {{ $statusLq['color'] }}">
                                         {{ $statusLq['action'] }}
                                     </span>
                                 </td>
                             </tr>
                             <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="px-5 py-3.5 font-medium text-slate-700">Analisis SSA</td>
-                                <td class="px-5 py-3.5 text-slate-500">{{ $statusSs['date'] }}</td>
-                                <td class="px-5 py-3.5 text-center text-slate-600 font-semibold">{{ $countSs }}</td>
-                                <td class="px-5 py-3.5 text-center">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm {{ $statusSs['color'] }}">
+                                <td class="px-4 sm:px-5 py-3.5 font-medium text-slate-700">Analisis SSA</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-slate-500 whitespace-nowrap">{{ $statusSs['date'] }}</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-center text-slate-600 font-semibold">{{ $countSs }}</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-semibold border shadow-2xs {{ $statusSs['color'] }}">
                                         {{ $statusSs['action'] }}
                                     </span>
                                 </td>
                             </tr>
                             <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="px-5 py-3.5 font-medium text-slate-700">Analisis Tipologi Sektor</td>
-                                <td class="px-5 py-3.5 text-slate-500">{{ $statusTipologi['date'] }}</td>
-                                <td class="px-5 py-3.5 text-center text-slate-600 font-semibold">{{ $countTipologi }}</td>
-                                <td class="px-5 py-3.5 text-center">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm {{ $statusTipologi['color'] }}">
+                                <td class="px-4 sm:px-5 py-3.5 font-medium text-slate-700">Analisis Tipologi Sektor</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-slate-500 whitespace-nowrap">{{ $statusTipologi['date'] }}</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-center text-slate-600 font-semibold">{{ $countTipologi }}</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-semibold border shadow-2xs {{ $statusTipologi['color'] }}">
                                         {{ $statusTipologi['action'] }}
                                     </span>
                                 </td>
                             </tr>
                             <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="px-5 py-3.5 font-medium text-slate-700">Analisis Klassen</td>
-                                <td class="px-5 py-3.5 text-slate-500">{{ $statusKlassen['date'] }}</td>
-                                <td class="px-5 py-3.5 text-center text-slate-600 font-semibold">{{ $countKlassen }}</td>
-                                <td class="px-5 py-3.5 text-center">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm {{ $statusKlassen['color'] }}">
+                                <td class="px-4 sm:px-5 py-3.5 font-medium text-slate-700">Analisis Klassen</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-slate-500 whitespace-nowrap">{{ $statusKlassen['date'] }}</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-center text-slate-600 font-semibold">{{ $countKlassen }}</td>
+                                <td class="px-4 sm:px-5 py-3.5 text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-semibold border shadow-2xs {{ $statusKlassen['color'] }}">
                                         {{ $statusKlassen['action'] }}
                                     </span>
                                 </td>
@@ -230,24 +202,20 @@
                     </table>
                 </div>
             </div>
-
-
-
         </div>
 
         <!-- Right Column (Narrower) -->
         <div class="space-y-6">
             <!-- Activity Card -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden sticky top-6">
-                <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800 text-lg">Aktivitas Terbaru</h3>
+                <div class="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-base sm:text-lg">Aktivitas Terbaru</h3>
                     <span class="flex h-3 w-3 relative">
-                        <span
-                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                     </span>
                 </div>
-                <div class="p-5 space-y-5">
+                <div class="p-4 sm:p-5 space-y-4 sm:space-y-5">
                     @forelse($activityLogs->take(5) as $log)
                         @php
                             $iconClass = match (strtolower($log->action)) {
@@ -266,22 +234,18 @@
                             };
                         @endphp
                         <!-- Activity Item -->
-                        <div class="flex items-start gap-4 group cursor-default">
-                            <div
-                                class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 {{ $iconClass }} transition-transform group-hover:scale-110">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">{!! $iconSvg !!}</svg>
+                        <div class="flex items-start gap-3.5 sm:gap-4 group cursor-default">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 {{ $iconClass }} transition-transform group-hover:scale-110">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $iconSvg !!}</svg>
                             </div>
-                            <div class="flex-1">
-                                <p class="text-sm font-medium text-slate-700 leading-tight">{{ $log->desc }}</p>
-                                <p class="text-xs text-slate-400 mt-1.5">{{ $log->created_at->format('d M Y H:i') }} &bull;
-                                    {{ $log->module }}</p>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs sm:text-sm font-medium text-slate-700 leading-tight">{{ $log->desc }}</p>
+                                <p class="text-[11px] sm:text-xs text-slate-400 mt-1">{{ $log->created_at->format('d M Y H:i') }} &bull; {{ $log->module }}</p>
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-6 text-slate-500 text-sm">
-                            <svg class="w-12 h-12 mx-auto text-slate-300 mb-2" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
+                        <div class="text-center py-6 text-slate-500 text-xs sm:text-sm">
+                            <svg class="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                             </svg>
@@ -289,14 +253,12 @@
                         </div>
                     @endforelse
                 </div>
-                <div class="p-4 bg-slate-50/50 border-t border-slate-100 text-sm">
+                <div class="p-4 bg-slate-50/50 border-t border-slate-100 text-xs sm:text-sm">
                     <a href="{{ route('operator.aktivitas') }}"
-                        class="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1 group">
-                        Lihat Semua Aktivitas
-                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        class="text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1 group">
+                        <span>Lihat Semua Aktivitas</span>
+                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
                     </a>
                 </div>
@@ -305,12 +267,12 @@
     </div>
 
     <!-- MODAL INISIASI PDRB BARU (KABUPATEN & TAHUN ONLY) -->
-    <div x-show="isPdrbModalOpen" x-cloak class="fixed inset-0 z-[1000] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 relative" @click.outside="isPdrbModalOpen = false">
+    <div x-show="isPdrbModalOpen" x-cloak class="fixed inset-0 z-[99999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-transition>
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-emerald-100 relative my-auto max-h-[90vh] flex flex-col overflow-hidden" @click.outside="isPdrbModalOpen = false">
             {{-- Modal Header --}}
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold">
+                    <div class="w-10 h-10 rounded-xl bg-[#E7F2EB] text-[#145239] flex items-center justify-center font-bold shrink-0">
                         <i class="fa-solid fa-plus-circle text-lg"></i>
                     </div>
                     <div>
@@ -318,12 +280,12 @@
                         <p class="text-xs text-slate-500">Pilih Daerah & Tahun yang belum terdaftar</p>
                     </div>
                 </div>
-                <button type="button" @click="isPdrbModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                <button type="button" @click="isPdrbModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
 
-            <form action="{{ route('operator.pdrb.init') }}" method="POST" class="space-y-4 pt-4 text-sm">
+            <form action="{{ route('operator.pdrb.init') }}" method="POST" class="space-y-4 pt-4 text-sm flex-1 overflow-y-auto">
                 @csrf
 
                 {{-- Kabupaten / Kota Dropdown --}}
@@ -396,7 +358,7 @@
                 </div>
 
                 {{-- Modal Footer --}}
-                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
                     <button type="button" @click="isPdrbModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
                         Batal
                     </button>

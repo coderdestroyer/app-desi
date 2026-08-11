@@ -8,11 +8,11 @@
     'searchPlaceholder' => 'Cari Wilayah atau Tahun...'
 ])
 
-<section class="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-    <form action="{{ $action }}" method="GET" id="analisaFilterForm" class="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12 items-center">
+<section class="mt-6 rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
+    <form action="{{ $action }}" method="GET" id="analisaFilterForm" class="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-12 items-center">
         
         {{-- Filter Provinsi --}}
-        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-3' : 'xl:col-span-4' }}">
+        <div class="relative min-w-0 sm:col-span-1 {{ $kabupatens !== null ? 'xl:col-span-3' : 'xl:col-span-4' }}">
             <select
                 name="provinsi_id"
                 id="filterProvinsi"
@@ -36,7 +36,7 @@
 
         {{-- Filter Kabupaten / Kota --}}
         @if($kabupatens !== null)
-            <div class="relative min-w-0 xl:col-span-3">
+            <div class="relative min-w-0 sm:col-span-1 xl:col-span-3">
                 <select
                     name="kabupaten_id"
                     id="filterKabupaten"
@@ -93,7 +93,7 @@
         @endif
 
         {{-- Filter Tahun Analisis --}}
-        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-2' : 'xl:col-span-3' }}">
+        <div class="relative min-w-0 sm:col-span-1 {{ $kabupatens !== null ? 'xl:col-span-2' : 'xl:col-span-3' }}">
             <select
                 name="tahun"
                 id="filterTahun"
@@ -114,7 +114,7 @@
         </div>
 
         {{-- Input Search --}}
-        <div class="relative min-w-0 {{ $kabupatens !== null ? 'xl:col-span-3' : 'xl:col-span-4' }}">
+        <div class="relative min-w-0 sm:col-span-1 {{ $kabupatens !== null ? 'xl:col-span-3' : 'xl:col-span-4' }}">
             <input
                 type="text"
                 name="search"
@@ -135,13 +135,14 @@
         </div>
 
         {{-- Reset Filter Button --}}
-        <div class="flex min-w-0 items-center justify-end xl:col-span-1">
+        <div class="flex min-w-0 items-center justify-end sm:col-span-1 xl:col-span-1">
             <a
                 href="{{ $action }}"
                 title="Reset Filter"
-                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs"
+                class="inline-flex h-11 w-full sm:w-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-xs"
             >
                 <i class="fa-solid fa-rotate-left text-sm"></i>
+                <span class="sm:hidden text-xs font-semibold">Reset Filter</span>
             </a>
         </div>
     </form>
