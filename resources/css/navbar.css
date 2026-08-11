@@ -315,6 +315,8 @@
     .navbar-container {
         grid-template-columns: auto auto;
         position: relative;
+        height: 75px;
+        padding: 0 20px;
     }
 
     .mobile-menu-button {
@@ -322,13 +324,13 @@
         justify-self: end;
         background: none;
         border: none;
-        font-size: 30px;
+        font-size: 26px;
         color: #20523f;
         cursor: pointer;
     }
 
     .brand-logo {
-        height: 56px;
+        height: 52px;
         width: auto;
     }
 
@@ -337,23 +339,31 @@
         display: none;
 
         position: absolute;
-        top: 90px;
+        top: 80px;
         left: 15px;
         right: 15px;
 
         flex-direction: column;
         align-items: center;
-        gap: 18px;
+        gap: 14px;
 
         background: #fff;
 
-        padding: 20px;
+        padding: 22px 20px;
 
-        border-radius: 18px;
+        border-radius: 20px;
 
-        box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, .14);
+        border: 1px solid rgba(20, 82, 57, 0.1);
 
         z-index: 999;
+    }
+
+    .main-navigation .nav-link {
+        width: 100%;
+        text-align: center;
+        padding: 8px 0;
+        font-size: 15px;
     }
 
     /* Ditampilkan saat tombol ☰ diklik */
@@ -361,9 +371,28 @@
         display: flex;
     }
 
-    /* Login disembunyikan di HP */
+    /* Login disembunyikan di navbar desktop HP */
     .navbar-action {
         display: none;
     }
 
+    .mobile-only-login {
+        display: flex;
+        width: 100%;
+        margin-top: 8px;
+        padding-top: 14px;
+        border-top: 1px solid #eef2f0;
+    }
+
+    .mobile-only-login .login-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+}
+
+@media (min-width: 769px) {
+    .mobile-only-login {
+        display: none !important;
+    }
 }
