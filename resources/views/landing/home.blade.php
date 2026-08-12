@@ -324,14 +324,10 @@
                 const dataPoints = window.trendsData[provName] || [];
                 const years = dataPoints.map(d => d.tahun);
                 const investasi = dataPoints.map(d => d.investasi / 1000000000000); // T
-                const ekspor = dataPoints.map(d => d.ekspor / 1000000000000); // T
-                const impor = dataPoints.map(d => d.impor / 1000000000000); // T
 
                 if (trendChart) {
                     trendChart.data.labels = years;
                     trendChart.data.datasets[0].data = investasi;
-                    trendChart.data.datasets[1].data = ekspor;
-                    trendChart.data.datasets[2].data = impor;
                     trendChart.update();
                 } else {
                     trendChart = new Chart(ctxTrend, {
@@ -346,20 +342,6 @@
                                     backgroundColor: 'rgba(30, 93, 65, 0.08)',
                                     tension: 0.3,
                                     fill: true
-                                },
-                                {
-                                    label: 'Ekspor',
-                                    data: ekspor,
-                                    borderColor: '#E65100',
-                                    backgroundColor: 'transparent',
-                                    tension: 0.3
-                                },
-                                {
-                                    label: 'Impor',
-                                    data: impor,
-                                    borderColor: '#0288D1',
-                                    backgroundColor: 'transparent',
-                                    tension: 0.3
                                 }
                             ]
                         },
@@ -367,7 +349,7 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                                legend: { position: 'bottom' },
+                                legend: { display: false },
                                 tooltip: {
                                     callbacks: {
                                         label: function (context) {

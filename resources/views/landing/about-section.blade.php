@@ -37,62 +37,10 @@
                     <div class="bg-white rounded-[20px] p-[25px] shadow-[0_10px_35px_rgba(0,0,0,0.05)] border border-[#145239]/5 flex flex-col w-full">
                         <div class="flex justify-between items-center mb-[20px] flex-wrap gap-[10px]">
                             <h3 class="text-base font-bold text-[#145239] m-0 flex items-center gap-[10px]">
-                                <i class="fa-solid fa-line-chart"></i> Tren Investasi & Ekspor-Impor
+                                <i class="fa-solid fa-line-chart"></i> Tren Realisasi Investasi
                             </h3>
-                            <script>
-                                function trendProvinceDropdown() {
-                                    return {
-                                        provinceDropdownOpen: false,
-                                        provinceSearch: '',
-                                        selectedProvince: 'SUMATERA UTARA',
-                                        provinces: @json(array_keys($provinsiInvestasi)),
-                                        get filteredProvinces() {
-                                            if (!this.provinceSearch) return this.provinces;
-                                            return this.provinces.filter(p => p.toLowerCase().includes(this.provinceSearch.toLowerCase()));
-                                        },
-                                        selectProvince(prov) {
-                                            this.selectedProvince = prov;
-                                            this.provinceDropdownOpen = false;
-                                            this.provinceSearch = '';
-                                            if (typeof updateTrendChart === 'function') {
-                                                updateTrendChart(prov);
-                                            }
-                                        }
-                                    };
-                                }
-                            </script>
-
-                            <div x-data="trendProvinceDropdown()" class="relative z-[60] min-w-[200px]">
-                                <div @click="provinceDropdownOpen = !provinceDropdownOpen; if(provinceDropdownOpen) $nextTick(() => $refs.provinceSearchInput.focus())"
-                                    class="w-full h-[42px] px-3.5 py-2 rounded-xl border border-[#CFE3D5] bg-white text-sm flex items-center justify-between cursor-pointer hover:border-[#145239] transition-colors shadow-2xs">
-                                    <span x-text="selectedProvince || 'Pilih Provinsi...'" :class="selectedProvince ? 'text-slate-800 font-medium' : 'text-slate-400'"></span>
-                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200" :class="provinceDropdownOpen ? 'rotate-180' : ''"></i>
-                                </div>
-
-                                <div x-show="provinceDropdownOpen"
-                                    x-cloak
-                                    @click.outside="provinceDropdownOpen = false"
-                                    x-transition.origin.top.duration.150ms
-                                    class="absolute z-50 right-0 mt-1.5 w-[220px] bg-white rounded-xl border border-[#CFE3D5] shadow-2xl overflow-hidden p-2 space-y-2">
-                                    <div class="relative">
-                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
-                                        <input type="text" x-model="provinceSearch" x-ref="provinceSearchInput" placeholder="Cari provinsi..."
-                                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#CFE3D5] focus:border-[#145239] outline-none">
-                                    </div>
-                                    <div class="max-h-48 overflow-y-auto space-y-0.5 text-xs">
-                                        <template x-for="item in filteredProvinces" :key="item">
-                                            <div @click="selectProvince(item)"
-                                                :class="selectedProvince == item ? 'bg-[#EEF8F2] text-[#145239] font-bold' : 'hover:bg-slate-50 text-slate-700'"
-                                                class="px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between">
-                                                <span x-text="item"></span>
-                                                <i x-show="selectedProvince == item" class="fa-solid fa-check text-xs text-[#145239]"></i>
-                                            </div>
-                                        </template>
-                                        <div x-show="filteredProvinces.length === 0" class="px-3 py-2 text-slate-400 text-center italic text-xs">
-                                            Tidak ditemukan
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="px-3.5 py-1.5 rounded-xl border border-[#CFE3D5] bg-[#EEF8F2] text-[#145239] font-semibold text-xs flex items-center gap-2">
+                                <i class="fa-solid fa-location-dot text-xs text-[#145239]"></i> Sumatera Utara
                             </div>
                         </div>
                         <div class="relative w-full" style="min-height: 230px;">
@@ -175,7 +123,7 @@
                         <i class="fa-solid fa-folder-open"></i>
                     </div>
                     <div class="flex flex-col">
-                        <h3 class="text-xl font-bold text-[#145239] mb-1.5">{{ $jumlahProyek }} Proyek</h3>
+                        <h3 class="text-xl font-bold text-[#145239] mb-1.5">{{ number_format($jumlahProyek, 0, ',', '.') }} Proyek</h3>
                         <p class="text-[12px] text-[#666] font-semibold uppercase tracking-[0.5px]">Jumlah Proyek Aktif (IPRO)</p>
                     </div>
                 </div>
