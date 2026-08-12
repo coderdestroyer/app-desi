@@ -429,102 +429,43 @@
                             <label for="excel_id" class="mb-1 block text-sm font-semibold text-slate-700">
                                 ID Excel
                             </label>
-
                             <input id="excel_id" type="number" name="excel_id" value="{{ old('excel_id', $isEdit ? ($editData->excel_id ?? '') : '') }}" placeholder="Opsional"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
                             @error('excel_id')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         @if ($hasStatusColumn)
                             <div>
-                                <label for="excel_id" class="mb-1 block text-sm font-semibold text-slate-700">
-                                    ID Excel
+                                <label for="status" class="mb-1 block text-sm font-semibold text-slate-700">
+                                    Status <span class="text-red-500">*</span>
                                 </label>
-
-                                <input id="excel_id" type="number" name="excel_id"
-                                    value="{{ old('excel_id', $isEdit ? $editData->excel_id : '') }}" placeholder="Opsional"
-                                    class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
-                                @error('excel_id')
-                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
-
-                            @if ($hasStatusColumn)
-                                <div>
-                                    <label for="status" class="mb-1 block text-sm font-semibold text-slate-700">
-                                        Status
-                                        <span class="text-red-500">*</span>
-                                    </label>
-
-                                    @php
-                                        $selectedStatus = old(
-                                            'status',
-                                            $isEdit
-                                            ? ($editData->status ?? 'Aktif')
-                                            : 'Aktif'
-                                        );
-                                    @endphp
-
-                                    <div class="relative">
-                                        <select id="status" name="status" required
-                                            class="h-11 w-full appearance-none rounded-xl border border-[#CFE3D5] bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-                                            <option value="Aktif" @selected(strtolower($selectedStatus) === 'aktif')>
-                                                Aktif
-                                            </option>
-
-                                            <option value="Nonaktif" @selected(strtolower($selectedStatus) === 'nonaktif')>
-                                                Nonaktif
-                                            </option>
-                                        </select>
-                                        <i
-                                            class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
-                                    </div>
-
-                                    @error('status')
-                                        <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                            {{ $message }}
-                                        </p>
-                                    @enderror
+                                @php
+                                    $selectedStatus = old('status', $isEdit ? ($editData->status ?? 'Aktif') : 'Aktif');
+                                @endphp
+                                <div class="relative">
+                                    <select id="status" name="status" required
+                                        class="h-11 w-full appearance-none rounded-xl border border-[#CFE3D5] bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
+                                        <option value="Aktif" @selected(strtolower($selectedStatus) === 'aktif')>Aktif</option>
+                                        <option value="Nonaktif" @selected(strtolower($selectedStatus) === 'nonaktif')>Nonaktif</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
                                 </div>
-                            @endif
-
-                            <div>
-                                <label for="kode_kategori" class="mb-1 block text-sm font-semibold text-slate-700">
-                                    Kode Kategori
-                                </label>
-
-                                <input id="kode_kategori" type="text" name="kode_kategori"
-                                    value="{{ old('kode_kategori', $isEdit ? $editData->kode_kategori : '') }}"
-                                    placeholder="Contoh: 01"
-                                    class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
-                                @error('kode_kategori')
-                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                        {{ $message }}
-                                    </p>
+                                @error('status')
+                                    <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
+                        @endif
 
                         <div>
                             <label for="kode_kategori" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kode Kategori
                             </label>
-
                             <input id="kode_kategori" type="text" name="kode_kategori" value="{{ old('kode_kategori', $isEdit ? ($editData->kode_kategori ?? '') : '') }}" placeholder="Contoh: 01"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
                             @error('kode_kategori')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -532,14 +473,10 @@
                             <label for="kode_kelompok" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kode Kelompok
                             </label>
-
                             <input id="kode_kelompok" type="text" name="kode_kelompok" value="{{ old('kode_kelompok', $isEdit ? ($editData->kode_kelompok ?? '') : '') }}" placeholder="Contoh: 01.01"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
                             @error('kode_kelompok')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -547,128 +484,80 @@
                             <label for="kode_subkelompok" class="mb-1 block text-sm font-semibold text-slate-700">
                                 Kode Subkelompok
                             </label>
-
                             <input id="kode_subkelompok" type="text" name="kode_subkelompok" value="{{ old('kode_subkelompok', $isEdit ? ($editData->kode_subkelompok ?? '') : '') }}" placeholder="Contoh: 0101.30"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
                             @error('kode_subkelompok')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
                             <label for="hs_code" class="mb-1 block text-sm font-semibold text-slate-700">
-                                HS Code
-                                <span class="text-red-500">*</span>
+                                HS Code <span class="text-red-500">*</span>
                             </label>
-
                             <input id="hs_code" type="text" name="hs_code" value="{{ old('hs_code', $isEdit ? ($editData->hs_code ?? '') : '') }}" placeholder="Contoh: 0101.21.00" required
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
                             @error('hs_code')
-                                <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                    {{ $message }}
-                                </p>
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
-                                <input id="kode_subkelompok" type="text" name="kode_subkelompok"
-                                    value="{{ old('kode_subkelompok', $isEdit ? $editData->kode_subkelompok : '') }}"
-                                    placeholder="Contoh: 0101.30"
-                                    class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
+                        <div class="sm:col-span-2">
+                            <label for="uraian_kelompok" class="mb-1 block text-sm font-semibold text-slate-700">
+                                Uraian Kelompok
+                            </label>
                             <input id="uraian_kelompok" type="text" name="uraian_kelompok" value="{{ old('uraian_kelompok', $isEdit ? ($editData->uraian_kelompok ?? '') : '') }}" placeholder="Masukkan uraian kelompok"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
+                            @error('uraian_kelompok')
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                            <div>
-                                <label for="hs_code" class="mb-1 block text-sm font-semibold text-slate-700">
-                                    HS Code
-                                    <span class="text-red-500">*</span>
-                                </label>
-
-                                <input id="hs_code" type="text" name="hs_code"
-                                    value="{{ old('hs_code', $isEdit ? $editData->hs_code : '') }}"
-                                    placeholder="Contoh: 0101.21.00" required
-                                    class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
+                        <div class="sm:col-span-2">
+                            <label for="uraian_subkelompok" class="mb-1 block text-sm font-semibold text-slate-700">
+                                Uraian Subkelompok
+                            </label>
                             <input id="uraian_subkelompok" type="text" name="uraian_subkelompok" value="{{ old('uraian_subkelompok', $isEdit ? ($editData->uraian_subkelompok ?? '') : '') }}" placeholder="Masukkan uraian subkelompok"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
+                            @error('uraian_subkelompok')
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                            <div class="sm:col-span-2">
-                                <label for="uraian_kelompok" class="mb-1 block text-sm font-semibold text-slate-700">
-                                    Uraian Kelompok
-                                </label>
-
-                                <input id="uraian_kelompok" type="text" name="uraian_kelompok"
-                                    value="{{ old('uraian_kelompok', $isEdit ? $editData->uraian_kelompok : '') }}"
-                                    placeholder="Masukkan uraian kelompok"
-                                    class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
+                        <div class="sm:col-span-2">
+                            <label for="uraian_barang" class="mb-1 block text-sm font-semibold text-slate-700">
+                                Uraian Barang <span class="text-red-500">*</span>
+                            </label>
                             <textarea id="uraian_barang" name="uraian_barang" rows="4" placeholder="Masukkan uraian barang" required
                                 class="w-full resize-none rounded-xl border border-[#CFE3D5] px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">{{ old('uraian_barang', $isEdit ? ($editData->uraian_barang ?? '') : '') }}</textarea>
+                            @error('uraian_barang')
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                            <div class="sm:col-span-2">
-                                <label for="uraian_subkelompok" class="mb-1 block text-sm font-semibold text-slate-700">
-                                    Uraian Subkelompok
-                                </label>
-
-                                <input id="uraian_subkelompok" type="text" name="uraian_subkelompok"
-                                    value="{{ old('uraian_subkelompok', $isEdit ? $editData->uraian_subkelompok : '') }}"
-                                    placeholder="Masukkan uraian subkelompok"
-                                    class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
-
+                        <div class="sm:col-span-2">
+                            <label for="keterangan" class="mb-1 block text-sm font-semibold text-slate-700">
+                                Keterangan
+                            </label>
                             <textarea id="keterangan" name="keterangan" rows="3" placeholder="Masukkan keterangan tambahan bila diperlukan"
                                 class="w-full resize-none rounded-xl border border-[#CFE3D5] px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">{{ old('keterangan', $isEdit ? ($editData->keterangan ?? '') : '') }}</textarea>
-
-                            <div class="sm:col-span-2">
-                                <label for="uraian_barang" class="mb-1 block text-sm font-semibold text-slate-700">
-                                    Uraian Barang
-                                    <span class="text-red-500">*</span>
-                                </label>
-
-                                <textarea id="uraian_barang" name="uraian_barang" rows="4"
-                                    placeholder="Masukkan uraian barang" required
-                                    class="w-full resize-none rounded-xl border border-[#CFE3D5] px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">{{ old('uraian_barang', $isEdit ? $editData->uraian_barang : '') }}</textarea>
-
-                                @error('uraian_barang')
-                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <label for="keterangan" class="mb-1 block text-sm font-semibold text-slate-700">
-                                    Keterangan
-                                </label>
-
-                                <textarea id="keterangan" name="keterangan" rows="3"
-                                    placeholder="Masukkan keterangan tambahan bila diperlukan"
-                                    class="w-full resize-none rounded-xl border border-[#CFE3D5] px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">{{ old('keterangan', $isEdit ? $editData->keterangan : '') }}</textarea>
-
-                                @error('keterangan')
-                                    <p class="mb-0 mt-1.5 text-xs text-red-600">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
+                            @error('keterangan')
+                                <p class="mb-0 mt-1.5 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
+                    </div>
 
-                        <div
-                            class="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row shrink-0">
-                            <button type="button" @click="closeModal()"
-                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
-                                Batal
-                            </button>
-
-                            <button type="submit"
-                                class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-floppy-disk text-xs"></i>
-                                <span x-text="isEdit ? 'Simpan Perubahan' : 'Tambah HS Code'"></span>
-                            </button>
-                        </div>
+                    <div class="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row shrink-0">
+                        <button type="button" @click="closeModal()"
+                            class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                            Batal
+                        </button>
+                        <button type="submit"
+                            class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#145239] hover:bg-[#0B5D3D] text-white text-xs font-bold shadow-md transition-colors flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i>
+                            <span x-text="isEdit ? 'Simpan Perubahan' : 'Tambah HS Code'"></span>
+                        </button>
+                    </div>
                     </form>
                 </div>
             </div>
