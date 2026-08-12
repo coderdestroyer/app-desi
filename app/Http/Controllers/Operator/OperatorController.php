@@ -225,22 +225,26 @@ class OperatorController extends Controller
         }
 
         $kabupaten = \App\Models\Kabupaten::find($request->kabupaten_id);
-        $savedCount = 0;
+        $sektors = \App\Models\Sektor::pluck('sektor_id');
+        $filledCount = 0;
 
-        foreach ($request->sektor_values as $sektorId => $nilai) {
-            if ($nilai !== null && $nilai !== '') {
-                \App\Models\PdrbSumateraKabupaten::updateOrCreate(
-                    [
-                        'kabupaten_id' => $request->kabupaten_id,
-                        'sektor_id' => $sektorId,
-                        'tahun' => $request->tahun,
-                    ],
-                    [
-                        'nilai_pdrb' => (float) $nilai,
-                    ]
-                );
-                $savedCount++;
+        foreach ($sektors as $sektorId) {
+            $rawVal = $request->sektor_values[$sektorId] ?? null;
+            $val = ($rawVal !== null && $rawVal !== '') ? (float) $rawVal : 0;
+            if ($val > 0) {
+                $filledCount++;
             }
+
+            \App\Models\PdrbSumateraKabupaten::updateOrCreate(
+                [
+                    'kabupaten_id' => $request->kabupaten_id,
+                    'sektor_id' => $sektorId,
+                    'tahun' => $request->tahun,
+                ],
+                [
+                    'nilai_pdrb' => $val,
+                ]
+            );
         }
 
         app(\App\Services\AnalysisSyncService::class)->syncKabupaten((int)$request->kabupaten_id, (int)$request->tahun);
@@ -250,10 +254,10 @@ class OperatorController extends Controller
         self::logActivity(
             'Data PDRB',
             'diperbarui',
-            "Menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} ({$savedCount} sektor terisi)"
+            "Menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)"
         );
 
-        return redirect()->route('operator.pdrb.index')->with('success', "Berhasil menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
+        return redirect()->route('operator.pdrb.index')->with('success', "Berhasil menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)!");
     }
 
     /**
@@ -582,22 +586,26 @@ class OperatorController extends Controller
         }
 
         $provinsi = \App\Models\Provinsi::find($request->provinsi_id);
-        $savedCount = 0;
+        $sektors = \App\Models\Sektor::pluck('sektor_id');
+        $filledCount = 0;
 
-        foreach ($request->sektor_values as $sektorId => $nilai) {
-            if ($nilai !== null && $nilai !== '') {
-                \App\Models\PdrbSumateraProvinsi::updateOrCreate(
-                    [
-                        'provinsi_id' => $request->provinsi_id,
-                        'sektor_id' => $sektorId,
-                        'tahun' => $request->tahun,
-                    ],
-                    [
-                        'nilai_pdrb' => (float) $nilai,
-                    ]
-                );
-                $savedCount++;
+        foreach ($sektors as $sektorId) {
+            $rawVal = $request->sektor_values[$sektorId] ?? null;
+            $val = ($rawVal !== null && $rawVal !== '') ? (float) $rawVal : 0;
+            if ($val > 0) {
+                $filledCount++;
             }
+
+            \App\Models\PdrbSumateraProvinsi::updateOrCreate(
+                [
+                    'provinsi_id' => $request->provinsi_id,
+                    'sektor_id' => $sektorId,
+                    'tahun' => $request->tahun,
+                ],
+                [
+                    'nilai_pdrb' => $val,
+                ]
+            );
         }
 
         app(\App\Services\AnalysisSyncService::class)->syncProvinsiAndChildren((int)$request->provinsi_id, (int)$request->tahun);
@@ -607,10 +615,10 @@ class OperatorController extends Controller
         self::logActivity(
             'Data PDRB Provinsi',
             'diperbarui',
-            "Menyimpan nilai PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} ({$savedCount} sektor terisi)"
+            "Menyimpan nilai PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)"
         );
 
-        return redirect()->route('operator.pdrb-provinsi.index')->with('success', "Berhasil menyimpan nilai PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
+        return redirect()->route('operator.pdrb-provinsi.index')->with('success', "Berhasil menyimpan nilai PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)!");
     }
 
     /**

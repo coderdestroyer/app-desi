@@ -13,18 +13,55 @@
         </a>
     </div>
 
+    {{-- Flash Notifications --}}
+    @if(session('success'))
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+
+    @if(session('info'))
+        <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-sky-600 text-base"></i>
+                <span>{{ session('info') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-sky-500 hover:text-sky-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+
     {{-- Banner Header --}}
     <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#145239] via-[#0F8A5F] to-[#1E5D41] p-6 sm:p-7 md:p-8 shadow-lg text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div class="space-y-2 sm:space-y-3 relative z-10">
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/60 border border-emerald-700/60 text-emerald-100 text-xs font-bold backdrop-blur-sm">
                 <i class="fa-solid fa-shield-halved text-[#FFD54F]"></i>
-                <span>Admin Input & Edit Mode (Full Access)</span>
+                <span>Admin Input & Edit Mode</span>
             </div>
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
                 {{ $kabupaten->nama_kabupaten }} &bull; Tahun {{ $tahun }}
             </h1>
             <p class="text-emerald-100/90 text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed">
-                Silakan isikan atau perbarui nilai PDRB (dalam <strong>Rp Juta</strong>) untuk 17 Sektor Lapangan Usaha BPS di bawah ini. Nilai otomatis diformat dengan pemisah ribuan (titik).
+                Silakan isikan atau perbarui nilai PDRB untuk 17 Sektor Lapangan Usaha BPS di bawah ini.
             </p>
         </div>
 
@@ -39,7 +76,7 @@
     {{-- Main Form Card --}}
     <form action="{{ route('admin.pdrb.save-entry') }}" method="POST" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 md:p-8 space-y-6">
         @csrf
-        <input type="hidden" name="kode_kabupaten" value="{{ $kabupaten->kode_kabupaten }}">
+        <input type="hidden" name="kabupaten_id" value="{{ $kabupaten->kab_id }}">
         <input type="hidden" name="tahun" value="{{ $tahun }}">
 
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">

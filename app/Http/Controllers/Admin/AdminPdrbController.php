@@ -94,9 +94,9 @@ class AdminPdrbController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('kabupaten', function ($kq) use ($search) {
                         $kq->whereRaw('LOWER(nama_kabupaten) LIKE ?', ["%{$search}%"])
-                           ->orWhereHas('provinsi', function ($pq) use ($search) {
-                               $pq->whereRaw('LOWER(nama_provinsi) LIKE ?', ["%{$search}%"]);
-                           });
+                            ->orWhereHas('provinsi', function ($pq) use ($search) {
+                                $pq->whereRaw('LOWER(nama_provinsi) LIKE ?', ["%{$search}%"]);
+                            });
                     });
                     if (is_numeric($search)) {
                         $q->orWhere('tahun', (int) $search);
@@ -119,13 +119,27 @@ class AdminPdrbController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('admin.pdrb.index', compact(
-                    'pdrbGroups', 'provinsis', 'kabupatens', 'sektors', 'availableYears', 'selectedProvinsiId', 'type', 'allKabupatenList'
+                    'pdrbGroups',
+                    'provinsis',
+                    'kabupatens',
+                    'sektors',
+                    'availableYears',
+                    'selectedProvinsiId',
+                    'type',
+                    'allKabupatenList'
                 ))->render(),
             ]);
         }
 
         return view('admin.pdrb.index', compact(
-            'pdrbGroups', 'provinsis', 'kabupatens', 'sektors', 'availableYears', 'selectedProvinsiId', 'type', 'allKabupatenList'
+            'pdrbGroups',
+            'provinsis',
+            'kabupatens',
+            'sektors',
+            'availableYears',
+            'selectedProvinsiId',
+            'type',
+            'allKabupatenList'
         ));
     }
 
@@ -195,7 +209,10 @@ class AdminPdrbController extends Controller
             ->toArray();
 
         return view('admin.pdrb.entry', compact(
-            'kabupaten', 'tahun', 'sektors', 'existingValues'
+            'kabupaten',
+            'tahun',
+            'sektors',
+            'existingValues'
         ));
     }
 
@@ -213,7 +230,10 @@ class AdminPdrbController extends Controller
             ->toArray();
 
         return view('admin.pdrb.entry_provinsi', compact(
-            'provinsi', 'tahun', 'sektors', 'existingValues'
+            'provinsi',
+            'tahun',
+            'sektors',
+            'existingValues'
         ));
     }
 
@@ -229,29 +249,36 @@ class AdminPdrbController extends Controller
         ]);
 
         $kabupaten = Kabupaten::findOrFail($request->kabupaten_id);
-        $savedCount = 0;
+        $sektors = Sektor::pluck('sektor_id');
+        $filledCount = 0;
 
-        foreach ($request->sektor_values as $sektorId => $nilai) {
-            if ($nilai !== null && $nilai !== '') {
-                PdrbSumateraKabupaten::updateOrCreate(
-                    [
-                        'kabupaten_id' => $request->kabupaten_id,
-                        'sektor_id' => $sektorId,
-                        'tahun' => $request->tahun,
-                    ],
-                    [
-                        'nilai_pdrb' => (float) $nilai,
-                    ]
-                );
-                $savedCount++;
+        foreach ($sektors as $sektorId) {
+            $rawVal = $request->sektor_values[$sektorId] ?? null;
+            $val = ($rawVal !== null && $rawVal !== '') ? (float) $rawVal : 0;
+            if ($val > 0) {
+                $filledCount++;
             }
+
+            PdrbSumateraKabupaten::updateOrCreate(
+                [
+                    'kabupaten_id' => $request->kabupaten_id,
+                    'sektor_id' => $sektorId,
+                    'tahun' => $request->tahun,
+                ],
+                [
+                    'nilai_pdrb' => $val,
+                ]
+            );
         }
 
         app(\App\Services\AnalysisSyncService::class)->syncKabupaten((int)$request->kabupaten_id, (int)$request->tahun);
 
         \Illuminate\Support\Facades\Cache::flush();
 
-        return redirect()->route('admin.pdrb.index', ['type' => 'kabupaten'])->with('success', "Berhasil menyimpan data PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
+        return redirect()->route('admin.pdrb.entry', [
+            'kabupaten_id' => $request->kabupaten_id,
+            'tahun' => $request->tahun,
+        ])->with('success', "Berhasil menyimpan data PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi)!");
     }
 
     /**
@@ -266,29 +293,36 @@ class AdminPdrbController extends Controller
         ]);
 
         $provinsi = Provinsi::findOrFail($request->provinsi_id);
-        $savedCount = 0;
+        $sektors = Sektor::pluck('sektor_id');
+        $filledCount = 0;
 
-        foreach ($request->sektor_values as $sektorId => $nilai) {
-            if ($nilai !== null && $nilai !== '') {
-                PdrbSumateraProvinsi::updateOrCreate(
-                    [
-                        'provinsi_id' => $request->provinsi_id,
-                        'sektor_id' => $sektorId,
-                        'tahun' => $request->tahun,
-                    ],
-                    [
-                        'nilai_pdrb' => (float) $nilai,
-                    ]
-                );
-                $savedCount++;
+        foreach ($sektors as $sektorId) {
+            $rawVal = $request->sektor_values[$sektorId] ?? null;
+            $val = ($rawVal !== null && $rawVal !== '') ? (float) $rawVal : 0;
+            if ($val > 0) {
+                $filledCount++;
             }
+
+            PdrbSumateraProvinsi::updateOrCreate(
+                [
+                    'provinsi_id' => $request->provinsi_id,
+                    'sektor_id' => $sektorId,
+                    'tahun' => $request->tahun,
+                ],
+                [
+                    'nilai_pdrb' => $val,
+                ]
+            );
         }
 
         app(\App\Services\AnalysisSyncService::class)->syncProvinsiAndChildren((int)$request->provinsi_id, (int)$request->tahun);
 
         \Illuminate\Support\Facades\Cache::flush();
 
-        return redirect()->route('admin.pdrb.index', ['type' => 'provinsi'])->with('success', "Berhasil menyimpan data PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
+        return redirect()->route('admin.pdrb.provinsi-entry', [
+            'provinsi_id' => $request->provinsi_id,
+            'tahun' => $request->tahun,
+        ])->with('success', "Berhasil menyimpan data PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} (17/17 sektor tersimpan)!");
     }
 
     /**
@@ -329,4 +363,3 @@ class AdminPdrbController extends Controller
         return redirect()->back()->with('success', "Seluruh data PDRB Provinsi {$namaProv} Tahun {$tahun} berhasil dihapus dari database.");
     }
 }
-
