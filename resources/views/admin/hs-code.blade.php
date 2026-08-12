@@ -391,7 +391,7 @@
                                 ID Excel
                             </label>
 
-                            <input id="excel_id" type="number" name="excel_id" value="{{ old('excel_id', $isEdit ? $editData->excel_id : '') }}" placeholder="Opsional"
+                            <input id="excel_id" type="number" name="excel_id" value="{{ old('excel_id', $isEdit ? ($editData->excel_id ?? '') : '') }}" placeholder="Opsional"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
 
                             @error('excel_id')
@@ -444,7 +444,7 @@
                                 Kode Kategori
                             </label>
 
-                            <input id="kode_kategori" type="text" name="kode_kategori" value="{{ old('kode_kategori', $isEdit ? $editData->kode_kategori : '') }}" placeholder="Contoh: 01"
+                            <input id="kode_kategori" type="text" name="kode_kategori" value="{{ old('kode_kategori', $isEdit ? ($editData->kode_kategori ?? '') : '') }}" placeholder="Contoh: 01"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
 
                             @error('kode_kategori')
@@ -459,7 +459,7 @@
                                 Kode Kelompok
                             </label>
 
-                            <input id="kode_kelompok" type="text" name="kode_kelompok" value="{{ old('kode_kelompok', $isEdit ? $editData->kode_kelompok : '') }}" placeholder="Contoh: 01.01"
+                            <input id="kode_kelompok" type="text" name="kode_kelompok" value="{{ old('kode_kelompok', $isEdit ? ($editData->kode_kelompok ?? '') : '') }}" placeholder="Contoh: 01.01"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
 
                             @error('kode_kelompok')
@@ -474,7 +474,7 @@
                                 Kode Subkelompok
                             </label>
 
-                            <input id="kode_subkelompok" type="text" name="kode_subkelompok" value="{{ old('kode_subkelompok', $isEdit ? $editData->kode_subkelompok : '') }}" placeholder="Contoh: 0101.30"
+                            <input id="kode_subkelompok" type="text" name="kode_subkelompok" value="{{ old('kode_subkelompok', $isEdit ? ($editData->kode_subkelompok ?? '') : '') }}" placeholder="Contoh: 0101.30"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
 
                             @error('kode_subkelompok')
@@ -490,7 +490,7 @@
                                 <span class="text-red-500">*</span>
                             </label>
 
-                            <input id="hs_code" type="text" name="hs_code" value="{{ old('hs_code', $isEdit ? $editData->hs_code : '') }}" placeholder="Contoh: 0101.21.00" required
+                            <input id="hs_code" type="text" name="hs_code" value="{{ old('hs_code', $isEdit ? ($editData->hs_code ?? '') : '') }}" placeholder="Contoh: 0101.21.00" required
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 font-mono text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
 
                             @error('hs_code')
@@ -505,7 +505,7 @@
                                 Uraian Kelompok
                             </label>
 
-                            <input id="uraian_kelompok" type="text" name="uraian_kelompok" value="{{ old('uraian_kelompok', $isEdit ? $editData->uraian_kelompok : '') }}" placeholder="Masukkan uraian kelompok"
+                            <input id="uraian_kelompok" type="text" name="uraian_kelompok" value="{{ old('uraian_kelompok', $isEdit ? ($editData->uraian_kelompok ?? '') : '') }}" placeholder="Masukkan uraian kelompok"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
 
                             @error('uraian_kelompok')
@@ -520,7 +520,7 @@
                                 Uraian Subkelompok
                             </label>
 
-                            <input id="uraian_subkelompok" type="text" name="uraian_subkelompok" value="{{ old('uraian_subkelompok', $isEdit ? $editData->uraian_subkelompok : '') }}" placeholder="Masukkan uraian subkelompok"
+                            <input id="uraian_subkelompok" type="text" name="uraian_subkelompok" value="{{ old('uraian_subkelompok', $isEdit ? ($editData->uraian_subkelompok ?? '') : '') }}" placeholder="Masukkan uraian subkelompok"
                                 class="h-11 w-full rounded-xl border border-[#CFE3D5] px-4 text-sm text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">
 
                             @error('uraian_subkelompok')
@@ -537,7 +537,7 @@
                             </label>
 
                             <textarea id="uraian_barang" name="uraian_barang" rows="4" placeholder="Masukkan uraian barang" required
-                                class="w-full resize-none rounded-xl border border-[#CFE3D5] px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">{{ old('uraian_barang', $isEdit ? $editData->uraian_barang : '') }}</textarea>
+                                class="w-full resize-none rounded-xl border border-[#CFE3D5] px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">{{ old('uraian_barang', $isEdit ? ($editData->uraian_barang ?? '') : '') }}</textarea>
 
                             @error('uraian_barang')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -552,7 +552,7 @@
                             </label>
 
                             <textarea id="keterangan" name="keterangan" rows="3" placeholder="Masukkan keterangan tambahan bila diperlukan"
-                                class="w-full resize-none rounded-xl border border-[#CFE3D5] px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">{{ old('keterangan', $isEdit ? $editData->keterangan : '') }}</textarea>
+                                class="w-full resize-none rounded-xl border border-[#CFE3D5] px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all focus:border-[#145239] focus:ring-2 focus:ring-[#145239]/20 hover:border-[#145239] shadow-2xs">{{ old('keterangan', $isEdit ? ($editData->keterangan ?? '') : '') }}</textarea>
 
                             @error('keterangan')
                                 <p class="mb-0 mt-1.5 text-xs text-red-600">
@@ -666,16 +666,14 @@
                     document.body.style.overflow = '';
                 }
 
-                deleteButtons.forEach(function (button) {
-                    button.addEventListener(
-                        'click',
-                        function () {
-                            openDeleteModal(
-                                button.dataset.deleteUrl,
-                                button.dataset.deleteName
-                            );
-                        }
-                    );
+                document.addEventListener('click', function (event) {
+                    const button = event.target.closest('[data-delete-hs]');
+                    if (button) {
+                        openDeleteModal(
+                            button.dataset.deleteUrl,
+                            button.dataset.deleteName
+                        );
+                    }
                 });
 
                 cancelDelete?.addEventListener(

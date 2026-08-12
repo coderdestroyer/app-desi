@@ -60,13 +60,13 @@
                 'corner' => 'bg-teal-50',
             ],
         ];
-        $selectedStructure = old('struktur', $isEdit ? $editData->struktur : '');
-        $selectedParent = old('kode_induk', $isEdit ? $editData->kode_induk : '');
-        $selectedCode = old('kode', $isEdit ? $editData->kode : '');
-        $selectedTitle = old('judul', $isEdit ? $editData->judul : '');
-        $selectedCakupan = old('cakupan', $isEdit ? $editData->cakupan : '');
-        $selectedTidakCakupan = old('tidak_cakupan', $isEdit ? $editData->tidak_cakupan : '');
-        $selectedCatatan = old('catatan', $isEdit ? $editData->catatan : '');
+        $selectedStructure = old('struktur', $isEdit ? ($editData->struktur ?? '') : '');
+        $selectedParent = old('kode_induk', $isEdit ? ($editData->kode_induk ?? '') : '');
+        $selectedCode = old('kode', $isEdit ? ($editData->kode ?? '') : '');
+        $selectedTitle = old('judul', $isEdit ? ($editData->judul ?? '') : '');
+        $selectedCakupan = old('cakupan', $isEdit ? ($editData->cakupan ?? '') : '');
+        $selectedTidakCakupan = old('tidak_cakupan', $isEdit ? ($editData->tidak_cakupan ?? '') : '');
+        $selectedCatatan = old('catatan', $isEdit ? ($editData->catatan ?? '') : '');
         $editQueryParams = array_merge(request()->except(['edit', 'mode']), ['mode' => 'edit']);
         $editBaseUrl = route('admin.data-kbli.index', $editQueryParams) . '&edit=';
         $deleteBaseUrl = route('admin.data-kbli.destroy', 'PLACEHOLDER');
@@ -832,8 +832,9 @@
                     document.body.style.overflow = '';
                 }
 
-                document.querySelectorAll('[data-delete-kbli]').forEach(function (button) {
-                    button.addEventListener('click', function () {
+                document.addEventListener('click', function (event) {
+                    const button = event.target.closest('[data-delete-kbli]');
+                    if (button) {
                         const childCount = Number(button.dataset.deleteChildren || 0);
 
                         if (deleteForm) {
@@ -857,7 +858,7 @@
                         deleteModal?.classList.remove('hidden');
                         deleteModal?.classList.add('flex');
                         document.body.style.overflow = 'hidden';
-                    });
+                    }
                 });
 
                 cancelDelete?.addEventListener('click', closeDeleteModal);
