@@ -1,7 +1,7 @@
 # Spesifikasi & Struktur Database Terintegrasi (PostgreSQL)
 ## Dashboard Executive Investment DPMPTSP + IPRO Project Calculation Engine
 
-**Versi Database:** 3.2 (Pre-Calculated Materialized Analysis Engine & Regional Scoped Authorization)  
+**Versi Database:** 3.3 (Pre-Calculated Materialized Analysis Engine, Regional Scoped Authorization & Data Investasi Daerah)  
 **Database Engine:** PostgreSQL 15+  
 **Standar Presisi Uang:** `NUMERIC(20, 2)`  
 **Standar Waktu:** `TIMESTAMPTZ` (`TIMESTAMP WITH TIME ZONE`)  
@@ -39,6 +39,8 @@ erDiagram
     sektor ||--o{ pdrb_sumatera_provinsi : "diklasifikasikan"
     kabupaten ||--o{ pdrb_sumatera_kabupaten : "memiliki PDRB"
     sektor ||--o{ pdrb_sumatera_kabupaten : "diklasifikasikan"
+    
+    provinsi ||--o{ data_investasi : "memiliki data realisasi investasi"
     
     kabupaten ||--o{ projects : "lokasi kabupaten proyek IPRO"
     kecamatan ||--o{ projects : "lokasi kecamatan proyek IPRO"
@@ -252,7 +254,7 @@ CREATE TABLE data_hs_code (
 
 ---
 
-### DOMAIN 4: Master Data Ekonomi Makro & PDRB (Scoped CRUD Source Data)
+### DOMAIN 4: Master Data Ekonomi Makro, PDRB & Realisasi Investasi Daerah (Scoped CRUD Source Data)
 
 #### 13. Tabel `pdb_nasional`
 Data PDB Tingkat Nasional Indonesia (Khusus dikelola oleh Admin).
@@ -296,11 +298,28 @@ CREATE TABLE pdrb_sumatera_kabupaten (
 );
 ```
 
+#### 16. Tabel `data_investasi`
+Menampung data realisasi/nilai investasi daerah per wilayah dan tahun (misal data Sumatera Utara).
+```sql
+CREATE TABLE data_investasi (
+    id BIGSERIAL PRIMARY KEY,
+    provinsi_id BIGINT NOT NULL REFERENCES provinsi(provinsi_id) ON DELETE CASCADE,
+    tahun INT NOT NULL,
+    nilai_investasi NUMERIC(20, 2) NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_data_investasi_tahun ON data_investasi(tahun);
+CREATE INDEX idx_data_investasi_provinsi ON data_investasi(provinsi_id);
+CREATE INDEX idx_data_investasi_tahun_provinsi ON data_investasi(tahun, provinsi_id);
+```
+
 ---
 
 ### DOMAIN 5: Rekapitulasi Hasil Analisis (Materialized Summaries) & Simulasi Operator
 
-#### 16. Tabel `analysis_results`
+#### 17. Tabel `analysis_results`
 ```sql
 CREATE TABLE analysis_results (
     id BIGSERIAL PRIMARY KEY,
@@ -314,7 +333,7 @@ CREATE TABLE analysis_results (
 );
 ```
 
-#### 17. Tabel `summary_lq_results` (Pre-Calculated LQ Summary)
+#### 18. Tabel `summary_lq_results` (Pre-Calculated LQ Summary)
 Menyimpan hasil perhitungan Location Quotient (LQ) per wilayah, sektor, dan tahun.
 ```sql
 CREATE TABLE summary_lq_results (
@@ -336,7 +355,7 @@ CREATE INDEX idx_summary_lq_tahun ON summary_lq_results(tahun);
 CREATE INDEX idx_summary_lq_kategori ON summary_lq_results(kategori);
 ```
 
-#### 18. Tabel `summary_klassen_results` (Pre-Calculated Klassen Typology Summary)
+#### 19. Tabel `summary_klassen_results` (Pre-Calculated Klassen Typology Summary)
 Menyimpan hasil perhitungan Tipologi Klassen per wilayah, sektor, dan periode (tahun_awal vs tahun_akhir).
 ```sql
 CREATE TABLE summary_klassen_results (
@@ -363,7 +382,7 @@ CREATE INDEX idx_summary_klassen_periode ON summary_klassen_results(tahun_awal, 
 CREATE INDEX idx_summary_klassen_kuadran ON summary_klassen_results(kuadran);
 ```
 
-#### 19. Tabel `summary_shift_share_results` (Pre-Calculated Shift-Share Summary)
+#### 20. Tabel `summary_shift_share_results` (Pre-Calculated Shift-Share Summary)
 Menyimpan hasil komponen Shift-Share (National Growth, Proportional Shift, Differential Shift) per wilayah, sektor, dan periode.
 ```sql
 CREATE TABLE summary_shift_share_results (
@@ -389,7 +408,7 @@ CREATE INDEX idx_summary_ss_wilayah ON summary_shift_share_results(provinsi_id, 
 CREATE INDEX idx_summary_ss_periode ON summary_shift_share_results(tahun_awal, tahun_akhir);
 ```
 
-#### 20. Tabel `summary_tipologi_sektor_results` (Pre-Calculated Sector Typology Summary)
+#### 21. Tabel `summary_tipologi_sektor_results` (Pre-Calculated Sector Typology Summary)
 Menyimpan hasil penggabungan LQ & Shift-Share menjadi Tipologi Sektor.
 ```sql
 CREATE TABLE summary_tipologi_sektor_results (
@@ -413,7 +432,7 @@ CREATE INDEX idx_summary_tipologi_tahun ON summary_tipologi_sektor_results(tahun
 CREATE INDEX idx_summary_tipologi_klasifikasi ON summary_tipologi_sektor_results(klasifikasi_sektor);
 ```
 
-#### 21. Tabel `summary_indikator_results` (Pre-Calculated Economic Indicators Summary)
+#### 22. Tabel `summary_indikator_results` (Pre-Calculated Economic Indicators Summary)
 Menyimpan hasil perhitungan Indikator Ekonomi (Laju Pertumbuhan % & Kontribusi PDRB %) per wilayah, sektor, dan tahun.
 ```sql
 CREATE TABLE summary_indikator_results (
@@ -438,7 +457,7 @@ CREATE INDEX idx_summary_indikator_tahun ON summary_indikator_results(tahun);
 
 ### DOMAIN 6: Engine Proyek Investasi (IPRO Engine)
 
-#### 22. Tabel `projects`
+#### 23. Tabel `projects`
 ```sql
 CREATE TABLE projects (
     id BIGSERIAL PRIMARY KEY,
@@ -466,7 +485,7 @@ CREATE TABLE projects (
 );
 ```
 
-#### 23. Tabel `capex_components`
+#### 24. Tabel `capex_components`
 ```sql
 CREATE TABLE capex_components (
     id BIGSERIAL PRIMARY KEY,
@@ -485,7 +504,7 @@ CREATE TABLE capex_components (
 );
 ```
 
-#### 24. Tabel `pl_components`
+#### 25. Tabel `pl_components`
 ```sql
 CREATE TABLE pl_components (
     id BIGSERIAL PRIMARY KEY,
@@ -500,7 +519,7 @@ CREATE TABLE pl_components (
 );
 ```
 
-#### 25. Tabel `pl_yearly_data`
+#### 26. Tabel `pl_yearly_data`
 ```sql
 CREATE TABLE pl_yearly_data (
     id BIGSERIAL PRIMARY KEY,
