@@ -254,10 +254,13 @@ class OperatorController extends Controller
         self::logActivity(
             'Data PDRB',
             'diperbarui',
-            "Menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)"
+            "Menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi)"
         );
 
-        return redirect()->route('operator.pdrb.index')->with('success', "Berhasil menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)!");
+        return redirect()->route('operator.pdrb.entry', [
+            'kabupaten_id' => $request->kabupaten_id,
+            'tahun' => $request->tahun,
+        ])->with('success', "Berhasil menyimpan nilai PDRB {$kabupaten->nama_kabupaten} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi)!");
     }
 
     /**
@@ -387,6 +390,24 @@ class OperatorController extends Controller
 
         return view('operator.potensi_unggulan.pdrb_entry', compact(
             'kabupaten', 'tahun', 'sektors', 'existingValues', 'isReadOnly'
+        ));
+    }
+
+    /**
+     * Menampilkan Halaman Khusus View Detail Nilai Sektor PDRB Kab/Kota (Read Only dari menu Lihat PDRB Daerah).
+     */
+    public function pdrbDetail($kabupaten_id, $tahun)
+    {
+        $kabupaten = \App\Models\Kabupaten::findOrFail($kabupaten_id);
+        $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
+
+        $existingValues = \App\Models\PdrbSumateraKabupaten::where('kabupaten_id', $kabupaten_id)
+            ->where('tahun', $tahun)
+            ->pluck('nilai_pdrb', 'sektor_id')
+            ->toArray();
+
+        return view('operator.potensi_unggulan.pdrb_detail', compact(
+            'kabupaten', 'tahun', 'sektors', 'existingValues'
         ));
     }
 
@@ -569,6 +590,24 @@ class OperatorController extends Controller
     }
 
     /**
+     * Menampilkan halaman dedicated View Detail Nilai Sektor PDRB Provinsi (Read Only dari menu Lihat PDRB Daerah).
+     */
+    public function pdrbProvinsiDetail($provinsi_id, $tahun)
+    {
+        $provinsi = \App\Models\Provinsi::findOrFail($provinsi_id);
+        $sektors = \App\Models\Sektor::orderBy('sektor_id')->get();
+
+        $existingValues = \App\Models\PdrbSumateraProvinsi::where('provinsi_id', $provinsi_id)
+            ->where('tahun', $tahun)
+            ->pluck('nilai_pdrb', 'sektor_id')
+            ->toArray();
+
+        return view('operator.potensi_unggulan.pdrb_provinsi_detail', compact(
+            'provinsi', 'tahun', 'sektors', 'existingValues'
+        ));
+    }
+
+    /**
      * Menyimpan nilai 17 sektor PDRB Provinsi.
      */
     public function saveEntryPdrbProvinsi(Request $request)
@@ -615,10 +654,13 @@ class OperatorController extends Controller
         self::logActivity(
             'Data PDRB Provinsi',
             'diperbarui',
-            "Menyimpan nilai PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)"
+            "Menyimpan nilai PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi)"
         );
 
-        return redirect()->route('operator.pdrb-provinsi.index')->with('success', "Berhasil menyimpan nilai PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)!");
+        return redirect()->route('operator.pdrb-provinsi.entry', [
+            'provinsi_id' => $request->provinsi_id,
+            'tahun' => $request->tahun,
+        ])->with('success', "Berhasil menyimpan nilai PDRB Provinsi {$provinsi->nama_provinsi} Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi)!");
     }
 
     /**

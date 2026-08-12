@@ -191,7 +191,7 @@
                                 Rp {{ number_format($group->total_pdrb, 2, ',', '.') }}
                             </td>
                             <td class="px-4 py-4 text-center whitespace-nowrap">
-                                @if(Auth::user()->canAccessKabupaten($group->kabupaten_id))
+                                @if(($tab ?? 'own') === 'own' && Auth::user()->canAccessKabupaten($group->kabupaten_id))
                                     <div class="flex items-center justify-center gap-1.5">
                                         {{-- Edit Button (Icon Only) --}}
                                         <a href="{{ route('operator.pdrb.entry', ['kabupaten_id' => $group->kabupaten_id, 'tahun' => $group->tahun]) }}"
@@ -209,7 +209,7 @@
                                         </button>
                                     </div>
                                 @else
-                                    <a href="{{ route('operator.pdrb.entry', ['kabupaten_id' => $group->kabupaten_id, 'tahun' => $group->tahun]) }}"
+                                    <a href="{{ route('operator.pdrb.detail', ['kabupaten_id' => $group->kabupaten_id, 'tahun' => $group->tahun]) }}"
                                         class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition-colors text-xs font-bold"
                                         title="Lihat Rincian Sektor PDRB">
                                         <i class="fa-solid fa-eye text-xs"></i>
