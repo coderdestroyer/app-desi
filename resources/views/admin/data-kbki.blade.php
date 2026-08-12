@@ -55,14 +55,14 @@ $statStyles = [
 'cyan' => ['icon' => 'bg-cyan-600 text-white', 'corner' => 'bg-cyan-50'],
 'teal' => ['icon' => 'bg-teal-700 text-white', 'corner' => 'bg-teal-50'],
 ];
-$selectedStructure = old('struktur', $isEdit ? $editData->struktur : '');
-$selectedParent = old('kode_induk', $isEdit ? $editData->kode_induk : '');
-$selectedCode = old('kode', $isEdit ? $editData->kode : '');
-$selectedTitle = old('judul', $isEdit ? $editData->judul : '');
-$selectedPage = old('halaman', $isEdit ? $editData->halaman : '');
-$selectedSource = old('sumber_sheet', $isEdit ? $editData->sumber_sheet : 'Input Web');
-$selectedNote = old('catatan', $isEdit ? $editData->catatan : '');
-$selectedStatus = old('status', $isEdit ? $editData->status : 'Aktif');
+$selectedStructure = old('struktur', $isEdit ? ($editData->struktur ?? '') : '');
+$selectedParent = old('kode_induk', $isEdit ? ($editData->kode_induk ?? '') : '');
+$selectedCode = old('kode', $isEdit ? ($editData->kode ?? '') : '');
+$selectedTitle = old('judul', $isEdit ? ($editData->judul ?? '') : '');
+$selectedPage = old('halaman', $isEdit ? ($editData->halaman ?? '') : '');
+$selectedSource = old('sumber_sheet', $isEdit ? ($editData->sumber_sheet ?? 'Input Web') : 'Input Web');
+$selectedNote = old('catatan', $isEdit ? ($editData->catatan ?? '') : '');
+$selectedStatus = old('status', $isEdit ? ($editData->status ?? 'Aktif') : 'Aktif');
 $editQueryParams = array_merge(request()->except(['edit', 'mode']), ['mode' => 'edit']);
 $editBaseUrl = route('admin.data-kbki.index', $editQueryParams) . '&edit=';
 $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
@@ -844,8 +844,9 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
             document.body.style.overflow = '';
         }
 
-        document.querySelectorAll('[data-delete-kbki]').forEach(function(button) {
-            button.addEventListener('click', function() {
+        document.addEventListener('click', function(event) {
+            const button = event.target.closest('[data-delete-kbki]');
+            if (button) {
                 const childCount = Number(button.dataset.deleteChildren || 0);
 
                 if (deleteForm) {
@@ -869,7 +870,7 @@ $deleteBaseUrl = route('admin.data-kbki.destroy', 'PLACEHOLDER');
                 deleteModal?.classList.remove('hidden');
                 deleteModal?.classList.add('flex');
                 document.body.style.overflow = 'hidden';
-            });
+            }
         });
 
         cancelDelete?.addEventListener('click', closeDeleteModal);
