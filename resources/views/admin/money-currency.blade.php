@@ -85,7 +85,7 @@
                         "
                     >
                         Konversi Rupiah dan Dollar Amerika menggunakan
-                        kurs terbaru dari CurrencyFreaks.
+                        kurs terbaru secara real-time.
                     </p>
                 </div>
 
@@ -1122,9 +1122,9 @@
                                 text-slate-500
                             "
                         >
-                            Data kurs diperoleh dari CurrencyFreaks
-                            dan disimpan selama 10 menit agar aplikasi
-                            tetap cepat serta hemat kuota API.
+                            Data kurs diperoleh secara langsung dari penyedia
+                            layanan kurs mata uang dan disimpan selama 10 menit
+                            agar aplikasi tetap cepat dan efisien.
                         </p>
                     </div>
                 </div>

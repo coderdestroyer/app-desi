@@ -96,7 +96,7 @@ class MoneyCurrencyController extends Controller
 
         $rateData = $this->resolveRate();
 
-        if (! $rateData['rate']) {
+        if (!$rateData['rate']) {
             return back()
                 ->withInput()
                 ->withErrors([
@@ -169,7 +169,7 @@ class MoneyCurrencyController extends Controller
          */
         if (
             str_contains($amount, ',') &&
-            ! str_contains($amount, '.')
+            !str_contains($amount, '.')
         ) {
             return str_replace(',', '.', $amount);
         }
@@ -189,12 +189,12 @@ class MoneyCurrencyController extends Controller
     }
 
     /**
-     * Mengambil kurs dari cache atau API CurrencyFreaks.
+     * Mengambil kurs dari cache atau API (ExchangeRate-API / Frankfurter / CurrencyFreaks).
      */
     private function resolveRate(): array
     {
-        $freshCacheKey = 'currencyfreaks.usd_idr.fresh';
-        $backupCacheKey = 'currencyfreaks.usd_idr.backup';
+        $freshCacheKey = 'currency.usd_idr.fresh';
+        $backupCacheKey = 'currency.usd_idr.backup';
 
         $cachedRate = Cache::get($freshCacheKey);
 
@@ -216,12 +216,12 @@ class MoneyCurrencyController extends Controller
             );
 
             /*
-             * Backup digunakan apabila API sedang gangguan.
+             * Backup digunakan apabila seluruh API sedang gangguan.
              */
             Cache::put(
                 $backupCacheKey,
                 $rateData,
-                now()->addDays(2)
+                now()->addDays(7)
             );
 
             return [
@@ -239,81 +239,120 @@ class MoneyCurrencyController extends Controller
                     ...$backupRate,
                     'is_stale' => true,
                     'error' =>
-                        'API CurrencyFreaks sedang tidak dapat '
-                        . 'dihubungi. Sistem menggunakan kurs '
-                        . 'terakhir yang tersimpan.',
+                        'Layanan API kurs sedang tidak dapat dihubungi. '
+                        . 'Sistem menggunakan kurs terakhir yang tersimpan.',
                 ];
             }
 
+            // Standby estimated rate fallback agar fitur kalkulator tetap berfungsi
             return [
-                'rate' => null,
-                'updated_at' => null,
-                'is_stale' => false,
+                'rate' => 16200.0,
+                'updated_at' => now()->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i') . ' WIB (Estimasi)',
+                'is_stale' => true,
                 'error' =>
-                    'Kurs terbaru belum dapat diambil dari '
-                    . 'CurrencyFreaks. Periksa API key dan '
-                    . 'koneksi internet.',
+                    'Tidak dapat terhubung ke API kurs secara langsung. '
+                    . 'Sistem menggunakan nilai acuan kurs estimasi (1 USD = Rp16.200).',
             ];
         }
     }
 
     /**
-     * Mengambil kurs USD ke IDR terbaru.
+     * Mengambil kurs USD ke IDR terbaru menggunakan beberapa penyedia API.
      */
     private function requestLatestRate(): array
     {
-        $apiKey = config('services.currencyfreaks.api_key');
+        // 1. Penyedia Utama: ExchangeRate-API (Gratis, tanpa API Key, sangat stabil)
+        try {
+            $response = Http::withoutVerifying()
+                ->acceptJson()
+                ->connectTimeout(5)
+                ->timeout(10)
+                ->get('https://open.er-api.com/v6/latest/USD');
 
+            if ($response->successful()) {
+                $data = $response->json();
+                $rate = data_get($data, 'rates.IDR');
+
+                if (is_numeric($rate) && (float) $rate > 0) {
+                    $timestamp = $data['time_last_update_unix'] ?? null;
+                    $dateStr = $timestamp
+                        ? Carbon::createFromTimestamp($timestamp)->toIso8601String()
+                        : null;
+
+                    return [
+                        'rate' => (float) $rate,
+                        'updated_at' => $this->formatApiDate($dateStr),
+                    ];
+                }
+            }
+        } catch (Throwable $e) {
+            // Lanjut ke penyedia cadangan berikutnya
+        }
+
+        // 2. Cadangan 1: Frankfurter API (Gratis, data ECB, tanpa API Key)
+        try {
+            $response = Http::withoutVerifying()
+                ->acceptJson()
+                ->connectTimeout(5)
+                ->timeout(10)
+                ->get('https://api.frankfurter.dev/v1/latest?from=USD&to=IDR');
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $rate = data_get($data, 'rates.IDR');
+
+                if (is_numeric($rate) && (float) $rate > 0) {
+                    return [
+                        'rate' => (float) $rate,
+                        'updated_at' => $this->formatApiDate($data['date'] ?? null),
+                    ];
+                }
+            }
+        } catch (Throwable $e) {
+            // Lanjut ke penyedia cadangan berikutnya
+        }
+
+        // 3. Cadangan 2: CurrencyFreaks (jika API Key diatur di .env)
+        $apiKey = config('services.currencyfreaks.api_key');
         $baseUrl = rtrim(
-            (string) config(
-                'services.currencyfreaks.base_url'
-            ),
+            (string) config('services.currencyfreaks.base_url', 'https://api.currencyfreaks.com/v2.0'),
             '/'
         );
 
-        if (! $apiKey) {
-            throw new RuntimeException(
-                'CURRENCYFREAKS_API_KEY belum diatur.'
-            );
+        if (!empty($apiKey)) {
+            try {
+                $response = Http::withoutVerifying()
+                    ->acceptJson()
+                    ->connectTimeout(5)
+                    ->timeout(10)
+                    ->get($baseUrl . '/rates/latest', [
+                        'apikey' => $apiKey,
+                        'symbols' => 'IDR',
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $rate = data_get($data, 'rates.IDR');
+
+                    if (is_numeric($rate) && (float) $rate > 0) {
+                        return [
+                            'rate' => (float) $rate,
+                            'updated_at' => $this->formatApiDate($data['date'] ?? null),
+                        ];
+                    }
+                }
+            } catch (Throwable $e) {
+                // Lanjut ke exception
+            }
         }
 
-        $response = Http::acceptJson()
-            ->connectTimeout(5)
-            ->timeout(12)
-            ->retry(2, 500)
-            ->get(
-                $baseUrl . '/rates/latest',
-                [
-                    'apikey' => $apiKey,
-                    'symbols' => 'IDR',
-                ]
-            );
-
-        $response->throw();
-
-        $data = $response->json();
-        $rate = data_get($data, 'rates.IDR');
-
-        if (! is_numeric($rate) || (float) $rate <= 0) {
-            throw new RuntimeException(
-                'Nilai kurs IDR tidak ditemukan pada respons API.'
-            );
-        }
-
-        return [
-            /*
-             * Contoh:
-             * 1 USD = 16.200 IDR.
-             */
-            'rate' => (float) $rate,
-
-            'updated_at' => $this->formatApiDate(
-                $data['date'] ?? null
-            ),
-        ];
+        throw new RuntimeException(
+            'Gagal mengambil nilai kurs IDR dari seluruh penyedia layanan API.'
+        );
     }
 
     /**
+     * Mengubah waktu API ke WIB dengan locale bahasa Indonesia.
      * Mengubah waktu API ke WIB.
      */
     private function formatApiDate(?string $date): string
@@ -321,10 +360,12 @@ class MoneyCurrencyController extends Controller
         try {
             return Carbon::parse($date)
                 ->setTimezone('Asia/Jakarta')
+                ->locale('id')
                 ->translatedFormat('d F Y, H:i') . ' WIB';
         } catch (Throwable $exception) {
             return now()
                 ->setTimezone('Asia/Jakarta')
+                ->locale('id')
                 ->translatedFormat('d F Y, H:i') . ' WIB';
         }
     }
