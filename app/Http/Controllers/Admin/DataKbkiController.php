@@ -731,8 +731,17 @@ class DataKbkiController extends Controller
         if (! isset($row->judul)) {
             $row->judul = $row->nama ?? '';
         }
+        if (! isset($row->halaman)) {
+            $row->halaman = null;
+        }
+        if (! isset($row->sumber_sheet)) {
+            $row->sumber_sheet = 'Input Web';
+        }
         if (! isset($row->catatan)) {
             $row->catatan = $row->deskripsi ?? '';
+        }
+        if (! isset($row->status)) {
+            $row->status = 'Aktif';
         }
 
         return $row;

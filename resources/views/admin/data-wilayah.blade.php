@@ -802,15 +802,14 @@ $statStyles = [
             document.body.style.overflow = '';
         }
 
-        document.querySelectorAll(
-            '[data-delete-wilayah]'
-        ).forEach(function(button) {
-            button.addEventListener('click', function() {
+        document.addEventListener('click', function(event) {
+            const button = event.target.closest('[data-delete-wilayah]');
+            if (button) {
                 openDeleteModal(
                     button.dataset.deleteUrl,
                     button.dataset.deleteName
                 );
-            });
+            }
         });
 
         cancelDelete?.addEventListener(
