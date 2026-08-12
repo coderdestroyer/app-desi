@@ -159,14 +159,14 @@
                             <ul class="list-none m-0 p-0 space-y-1 border-l-2 border-[#ffd457]/40 pl-2">
                                 <li>
                                     <a href="{{ route('operator.pdrb.index', ['tab' => 'all']) }}"
-                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ (request()->routeIs('operator.pdrb.*') && request('tab') === 'all') || (request()->routeIs('operator.pdrb-provinsi.*') && request('tab') === 'all') ? 'active' : '' }}">
+                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.pdrb.detail') || request()->routeIs('operator.pdrb-provinsi.detail') || (request()->routeIs('operator.pdrb.index') && request('tab') === 'all') || (request()->routeIs('operator.pdrb-provinsi.index') && request('tab') === 'all') ? 'active' : '' }}">
                                         <i class="fa-solid fa-eye text-[12px] w-4 text-center"></i>
                                         <span>Lihat PDRB Daerah</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ route('operator.pdrb.index', ['tab' => 'own']) }}"
-                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.pdrb.*') && (request('tab', 'own') === 'own') ? 'active' : '' }}">
+                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.pdrb.entry') || (request()->routeIs('operator.pdrb.index') && request('tab', 'own') === 'own') ? 'active' : '' }}">
                                         <i class="fa-solid fa-file-pen text-[12px] w-4 text-center"></i>
                                         <span>Kelola Kab/Kota</span>
                                     </a>
@@ -174,7 +174,7 @@
                                 @if(Auth::user()?->hasProvinsiScope())
                                 <li>
                                     <a href="{{ route('operator.pdrb-provinsi.index', ['tab' => 'own']) }}"
-                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.pdrb-provinsi.*') && (request('tab', 'own') === 'own') ? 'active' : '' }}">
+                                        class="group min-h-[42px] flex items-center gap-3 py-2 px-3 rounded-lg text-white/85 text-xs font-medium transition-all hover:text-white hover:bg-white/10 [&.active]:text-[#176541] [&.active]:bg-[#ffd457] [&.active]:font-bold {{ request()->routeIs('operator.pdrb-provinsi.entry') || (request()->routeIs('operator.pdrb-provinsi.index') && request('tab', 'own') === 'own') ? 'active' : '' }}">
                                         <i class="fa-solid fa-building-columns text-[12px] w-4 text-center"></i>
                                         <span>Kelola Provinsi</span>
                                     </a>

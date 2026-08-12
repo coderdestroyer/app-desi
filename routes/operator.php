@@ -26,12 +26,14 @@ Route::middleware([
         
         // Modul PDRB Provinsi Operator
         Route::get('/pdrb-provinsi', [OperatorController::class, 'pdrbProvinsiIndex'])->name('pdrb-provinsi.index');
+        Route::get('/pdrb-provinsi/detail/{provinsi_id}/{tahun}', [OperatorController::class, 'pdrbProvinsiDetail'])->name('pdrb-provinsi.detail');
         Route::post('/pdrb-provinsi/init', [OperatorController::class, 'initPdrbProvinsi'])->name('pdrb-provinsi.init');
         Route::get('/pdrb-provinsi/entry/{provinsi_id}/{tahun}', [OperatorController::class, 'entryPdrbProvinsi'])->name('pdrb-provinsi.entry');
         Route::post('/pdrb-provinsi/save-entry', [OperatorController::class, 'saveEntryPdrbProvinsi'])->name('pdrb-provinsi.save-entry');
         Route::delete('/pdrb-provinsi/group/{provinsi_id}/{tahun}', [OperatorController::class, 'destroyGroupPdrbProvinsi'])->name('pdrb-provinsi.destroy-group');
 
         Route::post('/pdrb/init', [OperatorController::class, 'initPdrb'])->name('pdrb.init');
+        Route::get('/pdrb/detail/{kabupaten_id}/{tahun}', [OperatorController::class, 'pdrbDetail'])->name('pdrb.detail');
         Route::get('/pdrb/entry/{kabupaten_id}/{tahun}', [OperatorController::class, 'entryPdrb'])->name('pdrb.entry');
         Route::post('/pdrb/save-entry', [OperatorController::class, 'saveEntryPdrb'])->name('pdrb.save-entry');
         Route::delete('/pdrb/group/{kabupaten_id}/{tahun}', [OperatorController::class, 'destroyGroupPdrb'])->name('pdrb.destroy-group');
