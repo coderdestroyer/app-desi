@@ -34,4 +34,9 @@ class Provinsi extends Model
     {
         return $this->hasMany(PdrbSumateraProvinsi::class, 'provinsi_id', 'provinsi_id');
     }
+
+    public function dataInvestasi()
+    {
+        return $this->hasMany(DataInvestasi::class, 'provinsi_id', 'provinsi_id');
+    }
 }
