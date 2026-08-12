@@ -90,28 +90,32 @@ class AdminPdbNasionalController extends Controller
             'sektor_values' => 'required|array',
         ]);
 
-        $savedCount = 0;
+        $sektors = Sektor::pluck('sektor_id');
+        $filledCount = 0;
 
-        foreach ($request->sektor_values as $sektorId => $nilai) {
-            if ($nilai !== null && $nilai !== '') {
-                PdbNasional::updateOrCreate(
-                    [
-                        'kode_wilayah' => '00',
-                        'sektor_id' => $sektorId,
-                        'tahun' => $request->tahun,
-                    ],
-                    [
-                        'nilai' => (float) $nilai,
-                    ]
-                );
-                $savedCount++;
+        foreach ($sektors as $sektorId) {
+            $rawVal = $request->sektor_values[$sektorId] ?? null;
+            $val = ($rawVal !== null && $rawVal !== '') ? (float) $rawVal : 0;
+            if ($val > 0) {
+                $filledCount++;
             }
+
+            PdbNasional::updateOrCreate(
+                [
+                    'kode_wilayah' => '00',
+                    'sektor_id' => $sektorId,
+                    'tahun' => $request->tahun,
+                ],
+                [
+                    'nilai' => $val,
+                ]
+            );
         }
 
         Cache::flush();
 
         if (function_exists('fastcgi_finish_request')) {
-            session()->flash('success', "Berhasil menyimpan data PDB Nasional Tahun {$request->tahun} ({$savedCount} sektor terisi)! Hasil analisis makro sedang diperbarui.");
+            session()->flash('success', "Berhasil menyimpan data PDB Nasional Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)! Hasil analisis makro sedang diperbarui.");
             redirect()->route('admin.pdb-nasional.index')->send();
             fastcgi_finish_request();
             app(\App\Services\AnalysisSyncService::class)->syncAllForYear((int)$request->tahun);
@@ -120,7 +124,7 @@ class AdminPdbNasionalController extends Controller
 
         app(\App\Services\AnalysisSyncService::class)->syncAllForYear((int)$request->tahun);
 
-        return redirect()->route('admin.pdb-nasional.index')->with('success', "Berhasil menyimpan data PDB Nasional Tahun {$request->tahun} ({$savedCount} sektor terisi)!");
+        return redirect()->route('admin.pdb-nasional.index')->with('success', "Berhasil menyimpan data PDB Nasional Tahun {$request->tahun} (17/17 sektor tersimpan, {$filledCount} sektor terisi > 0)!");
     }
 
     /**
