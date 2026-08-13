@@ -280,8 +280,7 @@
                 }
                 parents = this.getParents();
                 if (parents.length < 2) {
-                    const firstParentIdx = this.rows.findIndex(r => r.parent_temp_id === null);
-                    this.rows.splice(firstParentIdx + 1, 0, {
+                    this.rows.push({
                         id: null,
                         temp_id: 'temp_def_2',
                         parent_temp_id: null,
@@ -289,6 +288,8 @@
                         volume: null, satuan: '', luas: null, harga_m2: null
                     });
                 }
+
+                this.normalizeRowsOrder();
 
                 if (this.hasUnsavedChanges) {
                     this.pushHistoryGuard();
@@ -476,6 +477,44 @@
                 return this.rows.filter(r => r.parent_temp_id === parentTempId);
             },
 
+            normalizeRowsOrder() {
+                const parents = this.getParents();
+                if (parents.length === 0) return;
+
+                const firstParent = parents[0];
+                let lastParent = null;
+
+                let lastParentIdx = parents.findIndex(p => 
+                    p.temp_id === 'temp_def_2' || 
+                    (p.nama_komponen && p.nama_komponen.toLowerCase().includes('fasilitas service'))
+                );
+
+                if (lastParentIdx === -1 && parents.length > 1) {
+                    lastParentIdx = parents.length - 1;
+                }
+
+                if (lastParentIdx !== -1 && parents.length > 1) {
+                    lastParent = parents[lastParentIdx];
+                }
+
+                const middleParents = parents.filter(p => p !== firstParent && p !== lastParent);
+
+                let orderedParents = [firstParent];
+                middleParents.forEach(p => orderedParents.push(p));
+                if (lastParent) {
+                    orderedParents.push(lastParent);
+                }
+
+                let newRows = [];
+                orderedParents.forEach(p => {
+                    newRows.push(p);
+                    const children = this.rows.filter(r => r.parent_temp_id === p.temp_id);
+                    children.forEach(c => newRows.push(c));
+                });
+
+                this.rows = newRows;
+            },
+
             addParent() {
                 const parents = this.getParents();
                 const newParent = {
@@ -496,6 +535,7 @@
                 } else {
                     this.rows.push(newParent);
                 }
+                this.normalizeRowsOrder();
             },
 
             addChild(parentTempId) {
