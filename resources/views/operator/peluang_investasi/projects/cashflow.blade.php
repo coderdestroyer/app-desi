@@ -17,11 +17,12 @@
         </nav>
 
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <!-- Indicator Autosave -->
-            <div x-show="autoSaveStatus" x-transition class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all" :class="{
+            <!-- Indicator Autosave & Countdown -->
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs" :class="{
                 'bg-slate-100 text-slate-600 border border-slate-200': autoSaveStatus === 'saving',
                 'bg-[#EEF8F2] text-[#145239] border border-[#CFE3D5]': autoSaveStatus === 'saved',
-                'bg-amber-50 text-amber-700 border border-amber-200': autoSaveStatus === 'draft'
+                'bg-amber-50 text-amber-700 border border-amber-200': autoSaveStatus === 'draft',
+                'bg-slate-50 text-slate-600 border border-slate-200': !autoSaveStatus
             }">
                 <template x-if="autoSaveStatus === 'saving'">
                     <span class="flex items-center gap-1.5">
@@ -32,13 +33,19 @@
                 <template x-if="autoSaveStatus === 'saved'">
                     <span class="flex items-center gap-1.5">
                         <i class="fa-solid fa-cloud-arrow-up text-[#145239]"></i>
-                        <span x-text="'Tersimpan ' + lastSavedTime"></span>
+                        <span x-text="'Tersimpan ' + (lastSavedTime ? lastSavedTime + ' • ' : '') + 'Autosave DB (' + formattedCountdown + ')'"></span>
                     </span>
                 </template>
                 <template x-if="autoSaveStatus === 'draft'">
                     <span class="flex items-center gap-1.5">
                         <i class="fa-solid fa-floppy-disk text-amber-600"></i>
-                        <span>Draft lokal (Autosave DB per 5 mnt)</span>
+                        <span x-text="'Draft lokal • Autosave DB (' + formattedCountdown + ')'"></span>
+                    </span>
+                </template>
+                <template x-if="!autoSaveStatus">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock text-slate-500"></i>
+                        <span x-text="'Autosave DB (' + formattedCountdown + ')'"></span>
                     </span>
                 </template>
             </div>
@@ -136,7 +143,7 @@
                         <td class="px-4 py-2.5 sticky left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] font-bold uppercase tracking-wider text-xs">
                             Arus Kas Operasional
                         </td>
-                        <td :colspan="jangkaWaktu.length + 1" class="bg-[#E7F2EB]"></td>
+                        <td :colspan="jangkaWaktu + 1" class="bg-[#E7F2EB]"></td>
                     </tr>
 
                     <tr class="bg-[#EEF8F2] border-b border-[#CFE3D5] hover:bg-[#E7F2EB] transition-colors">
@@ -164,14 +171,14 @@
                         <td class="px-4 py-2.5 sticky left-0 bg-blue-100 z-20 border-r border-blue-200 font-bold uppercase tracking-wider text-xs">
                             Arus Kas Non-Operasional
                         </td>
-                        <td :colspan="jangkaWaktu.length + 1" class="bg-blue-100"></td>
+                        <td :colspan="jangkaWaktu + 1" class="bg-blue-100"></td>
                     </tr>
 
                     <tr class="bg-[#EEF8F2] border-b border-[#CFE3D5] hover:bg-[#E7F2EB] transition-colors">
                         <td class="px-4 py-2 pl-8 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] text-[#145239] font-medium">
                             Setoran Modal
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="formatRupiah(getEquityAmount())"></td>
+                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="formatRupiah(equityAmount)"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
                             <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
                         </template>
@@ -181,7 +188,7 @@
                         <td class="px-4 py-2 pl-8 sticky left-0 bg-[#EEF8F2] z-20 border-r border-[#CFE3D5] text-[#145239] font-medium">
                             Penarikan Kredit
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="formatRupiah(getDebtAmount())"></td>
+                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-semibold border-r border-[#CFE3D5]" x-text="formatRupiah(debtAmount)"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
                             <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
                         </template>
@@ -191,7 +198,7 @@
                         <td class="px-4 py-2 pl-8 sticky left-0 bg-[#E7F2EB] z-20 border-r border-[#CFE3D5] font-bold uppercase text-xs tracking-wider">
                             Kas Masuk Non-operasional
                         </td>
-                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-bold border-r border-[#CFE3D5]" x-text="formatRupiah(getTotalKasMasukNonOps(0))"></td>
+                        <td class="px-4 py-2 text-right font-mono text-[#145239] font-bold border-r border-[#CFE3D5]" x-text="formatRupiah(equityAmount + debtAmount)"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
                             <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-[#CFE3D5]">-</td>
                         </template>
@@ -213,7 +220,7 @@
                         </td>
                         <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="getAngsuranPokok(t) > 0 ? formatRupiah(-getAngsuranPokok(t)) : '-'"></td>
+                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="(pokokMap[t] && pokokMap[t] > 0) ? formatRupiah(-pokokMap[t]) : '-'"></td>
                         </template>
                     </tr>
 
@@ -223,7 +230,7 @@
                         </td>
                         <td class="px-4 py-2 text-right font-mono text-slate-400 border-r border-rose-200">-</td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="getBebanBunga(t) > 0 ? formatRupiah(-getBebanBunga(t)) : '-'"></td>
+                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-semibold border-r border-rose-200" x-text="(bungaMap[t] && bungaMap[t] > 0) ? formatRupiah(-bungaMap[t]) : '-'"></td>
                         </template>
                     </tr>
 
@@ -233,7 +240,7 @@
                         </td>
                         <td class="px-4 py-2 text-right font-mono text-rose-900 font-bold border-r border-rose-200" x-text="formatRupiah(-totalCapex)"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-bold border-r border-rose-200" x-text="(getAngsuranPokok(t) + getBebanBunga(t)) > 0 ? formatRupiah(-(getAngsuranPokok(t) + getBebanBunga(t))) : '-'"></td>
+                            <td class="px-4 py-2 text-right font-mono text-rose-900 font-bold border-r border-rose-200" x-text="((pokokMap[t] || 0) + (bungaMap[t] || 0)) > 0 ? formatRupiah(-((pokokMap[t] || 0) + (bungaMap[t] || 0))) : '-'"></td>
                         </template>
                     </tr>
 
@@ -242,9 +249,9 @@
                         <td class="px-4 py-2.5 sticky left-0 bg-slate-200 z-20 border-r border-slate-300 font-bold uppercase text-xs tracking-wider">
                             Saldo
                         </td>
-                        <td class="px-4 py-2.5 text-right font-mono text-slate-900 font-bold border-r border-slate-300" x-text="formatRupiah(getNetCashflow(0))"></td>
+                        <td class="px-4 py-2.5 text-right font-mono text-slate-900 font-bold border-r border-slate-300" x-text="formatRupiah(netCashflowMap[0])"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-2.5 text-right font-mono text-slate-900 font-bold border-r border-slate-300" x-text="formatRupiah(getNetCashflow(t))"></td>
+                            <td class="px-4 py-2.5 text-right font-mono text-slate-900 font-bold border-r border-slate-300" x-text="formatRupiah(netCashflowMap[t])"></td>
                         </template>
                     </tr>
 
@@ -252,9 +259,9 @@
                         <td class="px-4 py-3 sticky left-0 bg-[#145239] z-20 border-r border-[#0B5D3D] font-bold text-white text-base">
                             Akumulasi Saldo
                         </td>
-                        <td class="px-4 py-3 text-right font-mono text-[#FFD54F] font-black border-r border-[#0B5D3D] text-base" x-text="formatRupiah(getAkumulasiSaldo(0))"></td>
+                        <td class="px-4 py-3 text-right font-mono text-[#FFD54F] font-black border-r border-[#0B5D3D] text-base" x-text="formatRupiah(akumulasiMap[0])"></td>
                         <template x-for="t in jangkaWaktu" :key="t">
-                            <td class="px-4 py-3 text-right font-mono text-[#FFD54F] font-black border-r border-[#0B5D3D] text-base" x-text="formatRupiah(getAkumulasiSaldo(t))"></td>
+                            <td class="px-4 py-3 text-right font-mono text-[#FFD54F] font-black border-r border-[#0B5D3D] text-base" x-text="formatRupiah(akumulasiMap[t])"></td>
                         </template>
                     </tr>
 
@@ -276,11 +283,18 @@
             pendapatanPerTahun: @json($pendapatanPerTahun),
             opexPerTahun: @json($opexPerTahun),
             settings: {
-                rasio_modal_sendiri: {{ (float) $project->rasio_modal_sendiri }},
-                rasio_pinjaman_kredit: {{ (float) $project->rasio_pinjaman_kredit }},
-                suku_bunga_kredit: {{ (float) $project->suku_bunga_kredit }},
-                tenor_kredit_tahun: {{ (int) $project->tenor_kredit_tahun }},
+                rasio_modal_sendiri: {{ (float) ($project->rasio_modal_sendiri ?: 60) }},
+                rasio_pinjaman_kredit: {{ (float) ($project->rasio_pinjaman_kredit ?: 40) }},
+                suku_bunga_kredit: {{ (float) ($project->suku_bunga_kredit ?: 8.05) }},
+                tenor_kredit_tahun: {{ (int) ($project->tenor_kredit_tahun ?: 5) }},
             },
+            equityAmount: 0,
+            debtAmount: 0,
+            pokokMap: {},
+            bungaMap: {},
+            netCashflowMap: {},
+            akumulasiMap: {},
+            toast: { show: false, message: '', isSuccess: true },
             isSaving: false,
             hasUnsavedChanges: false,
             showLeaveModal: false,
@@ -288,10 +302,16 @@
             isGuardPushed: false,
             autoSaveStatus: '',
             lastSavedTime: '',
-            autoSaveTimeout: null,
+            countdownSeconds: 300,
+            countdownInterval: null,
             localDraftTimeout: null,
-            fiveMinIntervalTimer: null,
             storageKey: 'cashflow_settings_draft_' + {{ $project->id }},
+
+            get formattedCountdown() {
+                const m = Math.floor(this.countdownSeconds / 60);
+                const s = this.countdownSeconds % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            },
 
             initData() {
                 const localDraft = localStorage.getItem(this.storageKey);
@@ -307,22 +327,91 @@
                     } catch (e) {}
                 }
 
+                this.recalculate();
+
                 if (this.hasUnsavedChanges) {
                     this.pushHistoryGuard();
                 }
 
                 this.$watch('settings', () => {
+                    this.recalculate();
                     this.triggerAutoSave();
-                });
+                }, { deep: true });
 
-                // Autosave to DB interval 5 minutes (300.000 ms)
-                this.fiveMinIntervalTimer = setInterval(() => {
-                    if (this.hasUnsavedChanges) {
-                        this.autoSaveSettings();
-                    }
-                }, 300000);
-
+                this.startCountdownTimer();
                 this.setupNavigationInterception();
+            },
+
+            startCountdownTimer() {
+                if (this.countdownInterval) clearInterval(this.countdownInterval);
+                this.countdownSeconds = 300;
+                this.countdownInterval = setInterval(() => {
+                    if (this.countdownSeconds > 0) {
+                        this.countdownSeconds--;
+                    } else {
+                        if (this.hasUnsavedChanges) {
+                            this.autoSaveSettings();
+                        }
+                        this.countdownSeconds = 300;
+                    }
+                }, 1000);
+            },
+
+            recalculate() {
+                const totalCapex = parseFloat(this.totalCapex) || 0;
+                const rasioEquity = parseFloat(this.settings.rasio_modal_sendiri) || 0;
+                const rasioDebt = parseFloat(this.settings.rasio_pinjaman_kredit) || 0;
+                const sukuBunga = parseFloat(this.settings.suku_bunga_kredit) || 0;
+                const tenor = parseInt(this.settings.tenor_kredit_tahun) || 1;
+
+                this.equityAmount = totalCapex * (rasioEquity / 100);
+                this.debtAmount = totalCapex * (rasioDebt / 100);
+
+                const rate = sukuBunga / 100;
+                let pmt = 0;
+                if (this.debtAmount > 0 && tenor > 0) {
+                    if (rate > 0) {
+                        const factor = Math.pow(1 + rate, tenor);
+                        pmt = this.debtAmount * (rate * factor) / (factor - 1);
+                    } else {
+                        pmt = this.debtAmount / tenor;
+                    }
+                }
+
+                const pokokMap = {};
+                const bungaMap = {};
+                const netCashflowMap = { 0: -totalCapex };
+                const akumulasiMap = { 0: -totalCapex };
+
+                let runningAccumulated = -totalCapex;
+
+                for (let t = 1; t <= this.jangkaWaktu; t++) {
+                    let pokok = 0;
+                    let bunga = 0;
+
+                    if (t <= tenor && this.debtAmount > 0) {
+                        bunga = this.debtAmount * rate;
+                        pokok = Math.max(0, pmt - bunga);
+                    }
+
+                    pokokMap[t] = pokok;
+                    bungaMap[t] = bunga;
+
+                    const pend = parseFloat(this.pendapatanPerTahun[t]) || 0;
+                    const opex = parseFloat(this.opexPerTahun[t]) || 0;
+                    const opBersih = pend - opex;
+
+                    const netCashflow = opBersih - pokok - bunga;
+                    netCashflowMap[t] = netCashflow;
+
+                    runningAccumulated += netCashflow;
+                    akumulasiMap[t] = runningAccumulated;
+                }
+
+                this.pokokMap = pokokMap;
+                this.bungaMap = bungaMap;
+                this.netCashflowMap = netCashflowMap;
+                this.akumulasiMap = akumulasiMap;
             },
 
             pushHistoryGuard() {
@@ -432,6 +521,7 @@
                         this.autoSaveStatus = 'saved';
                         this.hasUnsavedChanges = false;
                         this.isGuardPushed = false;
+                        this.countdownSeconds = 300; // Reset countdown to 5:00
                         localStorage.removeItem(this.storageKey);
                         return true;
                     } else {
@@ -481,79 +571,6 @@
                 }
             },
 
-            getEquityAmount() {
-                return (this.settings.rasio_modal_sendiri / 100) * this.totalCapex;
-            },
-
-            getDebtAmount() {
-                return (this.settings.rasio_pinjaman_kredit / 100) * this.totalCapex;
-            },
-
-            getTotalKasMasukNonOps(t) {
-                if (t === 0) {
-                    return this.getEquityAmount() + this.getDebtAmount();
-                }
-                return 0;
-            },
-
-            getPMT() {
-                const debt = this.getDebtAmount();
-                const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
-                const rate = (parseFloat(this.settings.suku_bunga_kredit) || 0) / 100;
-
-                if (debt <= 0 || tenor <= 0) return 0;
-                if (rate <= 0) return debt / tenor;
-
-                const factor = Math.pow(1 + rate, tenor);
-                return debt * (rate * factor) / (factor - 1);
-            },
-
-            getAngsuranPokok(t) {
-                const debt = this.getDebtAmount();
-                const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
-                if (t >= 1 && t <= tenor && debt > 0) {
-                    const pmt = this.getPMT();
-                    const bunga = this.getBebanBunga(t);
-                    return Math.max(0, pmt - bunga);
-                }
-                return 0;
-            },
-
-            getBebanBunga(t) {
-                const debt = this.getDebtAmount();
-                const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
-                const rate = (parseFloat(this.settings.suku_bunga_kredit) || 0) / 100;
-
-                if (t >= 1 && t <= tenor && debt > 0) {
-                    return debt * rate;
-                }
-                return 0;
-            },
-
-            getOperasionalBersih(t) {
-                const pend = parseFloat(this.pendapatanPerTahun[t]) || 0;
-                const opex = parseFloat(this.opexPerTahun[t]) || 0;
-                return pend - opex;
-            },
-
-            getNetCashflow(t) {
-                if (t === 0) {
-                    return -this.totalCapex;
-                }
-                const opBersih = this.getOperasionalBersih(t);
-                const pokok = this.getAngsuranPokok(t);
-                const bunga = this.getBebanBunga(t);
-                return opBersih - pokok - bunga;
-            },
-
-            getAkumulasiSaldo(t) {
-                let cumulative = this.getNetCashflow(0);
-                for (let i = 1; i <= t; i++) {
-                    cumulative += this.getNetCashflow(i);
-                }
-                return cumulative;
-            },
-
             formatRupiah(val) {
                 if (val === null || val === undefined || isNaN(val)) return '0';
                 const isNeg = val < 0;
@@ -572,11 +589,11 @@
                 this.isSaving = false;
                 if (success) {
                     this.toast.isSuccess = true;
-                    this.toast.message = 'Pengaturan pembiayaan berhasil disimpan ke database.';
+                    this.toast.message = 'Parameter Pembiayaan & Kredit berhasil disimpan ke database!';
                     this.toast.show = true;
                 } else {
                     this.toast.isSuccess = false;
-                    this.toast.message = 'Gagal menyimpan pengaturan.';
+                    this.toast.message = 'Gagal menyimpan pengaturan ke database.';
                     this.toast.show = true;
                 }
             }
