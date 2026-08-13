@@ -129,7 +129,7 @@
                 </div>
                 <div class="bg-amber-50 rounded-xl p-3.5 sm:p-4 border border-amber-200">
                     <span class="block text-[11px] sm:text-xs font-semibold text-[#D4A017] uppercase tracking-wider">Suku Bunga Kredit</span>
-                    <span class="text-lg sm:text-xl font-black text-slate-800 font-mono mt-1 block">{{ number_format($project->suku_bunga_kredit ?: 8.05, 2) }}% / thn</span>
+                    <span class="text-lg sm:text-xl font-black text-slate-800 font-mono mt-1 block">{{ number_format($project->suku_bunga_kredit ?: 8.05, 2) }}% / tahun</span>
                 </div>
                 <div class="bg-emerald-50 rounded-xl p-3.5 sm:p-4 border border-emerald-200">
                     <span class="block text-[11px] sm:text-xs font-semibold text-emerald-800 uppercase tracking-wider">Tenor Kredit</span>

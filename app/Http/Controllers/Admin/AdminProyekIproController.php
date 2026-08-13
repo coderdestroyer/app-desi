@@ -57,8 +57,10 @@ class AdminProyekIproController extends Controller
 
         // 1. Hitung total CAPEX riil
         $parents = $project->capexComponents->where('parent_id', null)->sortBy('id')->values();
-        $parent0Id = isset($parents[0]) ? $parents[0]->id : null;
-        $parent1Id = isset($parents[1]) ? $parents[1]->id : null;
+        $parentFirst = $parents->first();
+        $parentLast = ($parents->count() > 1) ? $parents->last() : null;
+        $parent0Id = $parentFirst ? $parentFirst->id : null;
+        $parent1Id = ($parentLast && $parentLast->id !== $parent0Id) ? $parentLast->id : null;
 
         $totalCapex = 0;
         $subtotalParent0 = 0;
