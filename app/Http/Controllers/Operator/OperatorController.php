@@ -366,7 +366,7 @@ class OperatorController extends Controller
             ->get()
             ->count();
 
-        return view('operator.potensi_unggulan.pdrb', compact(
+        return view('operator.potensi_unggulan.pdrb.index', compact(
             'pdrbGroups', 'provinsis', 'kabupatens', 'sektors', 'availableYears',
             'selectedProvinsiId', 'selectedKabupatenId', 'tab', 'ownCount', 'allCount'
         ));
@@ -388,7 +388,7 @@ class OperatorController extends Controller
             ->pluck('nilai_pdrb', 'sektor_id')
             ->toArray();
 
-        return view('operator.potensi_unggulan.pdrb_entry', compact(
+        return view('operator.potensi_unggulan.pdrb.entry', compact(
             'kabupaten', 'tahun', 'sektors', 'existingValues', 'isReadOnly'
         ));
     }
@@ -406,7 +406,7 @@ class OperatorController extends Controller
             ->pluck('nilai_pdrb', 'sektor_id')
             ->toArray();
 
-        return view('operator.potensi_unggulan.pdrb_detail', compact(
+        return view('operator.potensi_unggulan.pdrb.detail', compact(
             'kabupaten', 'tahun', 'sektors', 'existingValues'
         ));
     }
@@ -425,6 +425,10 @@ class OperatorController extends Controller
             $query->where('tahun', $request->tahun);
         }
 
+        if ($request->filled('search')) {
+            $query->where('tahun', 'LIKE', "%{$request->search}%");
+        }
+
         $pdbGroups = $query->orderBy('tahun', 'desc')
             ->paginate(15)
             ->withQueryString();
@@ -433,7 +437,7 @@ class OperatorController extends Controller
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
 
-        return view('operator.potensi_unggulan.pdb_nasional', compact(
+        return view('operator.potensi_unggulan.pdb_nasional.index', compact(
             'pdbGroups', 'sektors', 'availableYears'
         ));
     }
@@ -449,7 +453,7 @@ class OperatorController extends Controller
             ->pluck('nilai', 'sektor_id')
             ->toArray();
 
-        return view('operator.potensi_unggulan.pdb_nasional_detail', compact(
+        return view('operator.potensi_unggulan.pdb_nasional.detail', compact(
             'tahun', 'sektors', 'existingValues'
         ));
     }
@@ -529,7 +533,7 @@ class OperatorController extends Controller
             ->get()
             ->count();
 
-        return view('operator.potensi_unggulan.pdrb_provinsi', compact(
+        return view('operator.potensi_unggulan.pdrb_provinsi.index', compact(
             'pdrbGroups', 'provinsis', 'sektors', 'availableYears',
             'selectedProvinsiId', 'tab', 'ownCount', 'allCount'
         ));
@@ -584,7 +588,7 @@ class OperatorController extends Controller
             ->pluck('nilai_pdrb', 'sektor_id')
             ->toArray();
 
-        return view('operator.potensi_unggulan.pdrb_provinsi_entry', compact(
+        return view('operator.potensi_unggulan.pdrb_provinsi.entry', compact(
             'provinsi', 'tahun', 'sektors', 'existingValues', 'isReadOnly'
         ));
     }
@@ -602,7 +606,7 @@ class OperatorController extends Controller
             ->pluck('nilai_pdrb', 'sektor_id')
             ->toArray();
 
-        return view('operator.potensi_unggulan.pdrb_provinsi_detail', compact(
+        return view('operator.potensi_unggulan.pdrb_provinsi.detail', compact(
             'provinsi', 'tahun', 'sektors', 'existingValues'
         ));
     }

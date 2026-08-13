@@ -12,7 +12,7 @@
         class="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-12 items-center"
     >
         {{-- Filter Tahun PDB --}}
-        <div class="relative min-w-0 sm:col-span-1 xl:col-span-11">
+        <div class="relative min-w-0 sm:col-span-1 xl:col-span-6">
             <select
                 name="tahun"
                 id="filterTahun"
@@ -30,6 +30,25 @@
             </select>
 
             <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600"></i>
+        </div>
+
+        {{-- Input Search --}}
+        <div class="relative min-w-0 sm:col-span-1 xl:col-span-5">
+            <input
+                type="text"
+                name="search"
+                value="{{ request('search') }}"
+                placeholder="Cari tahun PDB..."
+                class="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            >
+
+            <button
+                type="submit"
+                aria-label="Cari PDB"
+                class="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 transition hover:bg-emerald-100"
+            >
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
         </div>
 
         {{-- Reset Filter Button --}}
