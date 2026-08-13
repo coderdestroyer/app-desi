@@ -24,20 +24,36 @@ class ProfitLossController extends Controller
 
         $project->load(['capexComponents']);
 
+        $parents = $project->capexComponents->where('parent_id', null)->sortBy('id')->values();
+        $parentFirst = $parents->first();
+        $parentLast = ($parents->count() > 1) ? $parents->last() : null;
+        $parent0Id = $parentFirst ? $parentFirst->id : null;
+        $parent1Id = ($parentLast && $parentLast->id !== $parent0Id) ? $parentLast->id : null;
+
         $totalCapex = 0;
+        $subtotalParent0 = 0;
+        $subtotalParent1 = 0;
+
         foreach ($project->capexComponents as $comp) {
             if ($comp->parent_id !== null) {
                 $vol = $comp->volume && $comp->volume > 0 ? (float)$comp->volume : 1;
                 $luas = $comp->luas && $comp->luas > 0 ? (float)$comp->luas : 0;
                 $harga = $comp->harga_m2 ? (float)$comp->harga_m2 : 0;
 
-                if ($luas > 0) {
-                    $totalCapex += $vol * $luas * $harga;
-                } else {
-                    $totalCapex += $vol * $harga;
+                $itemTotal = ($luas > 0) ? ($vol * $luas * $harga) : ($vol * $harga);
+                $totalCapex += $itemTotal;
+
+                if ($comp->parent_id === $parent0Id) {
+                    $subtotalParent0 += $itemTotal;
+                } else if ($comp->parent_id === $parent1Id) {
+                    $subtotalParent1 += $itemTotal;
                 }
             }
         }
+
+        $depreciableCapex = max(0, $totalCapex - $subtotalParent0 - $subtotalParent1);
+        $tenorTahun = max(1, (int) $project->jangka_waktu_tahun);
+        $calculatedDepresiasi = $depreciableCapex / $tenorTahun;
 
         $components = $project->plComponents()
             ->with('yearlyData')
@@ -47,26 +63,30 @@ class ProfitLossController extends Controller
         $pajakRaw = (float) $project->pl_persentase_pajak_penghasilan;
         $pajakPct = ($pajakRaw > 0) ? $pajakRaw : 22.00;
 
-        $bungaRaw = (float) $project->suku_bunga_kredit;
-        $bungaPct = ($bungaRaw > 0) ? $bungaRaw : 8.05;
+        $bungaPct = (float) $project->suku_bunga_kredit;
+        $savedDepresiasi = (float) $project->pl_nominal_depresiasi;
+        $nominalDepresiasi = ($savedDepresiasi > 0) ? $savedDepresiasi : $calculatedDepresiasi;
 
         if ($request->wantsJson()) {
             return response()->json([
                 'components' => $components,
                 'total_capex' => $totalCapex,
+                'subtotal_persiapan' => $subtotalParent0,
+                'subtotal_fasilitas' => $subtotalParent1,
+                'calculated_depresiasi' => $calculatedDepresiasi,
                 'settings' => [
                     'pl_persentase_pajak_penghasilan' => $pajakPct,
                     'pl_nominal_bunga' => (float) $project->pl_nominal_bunga,
-                    'pl_nominal_depresiasi' => (float) $project->pl_nominal_depresiasi,
-                    'rasio_modal_sendiri' => (float) ($project->rasio_modal_sendiri ?: 60),
-                    'rasio_pinjaman_kredit' => (float) ($project->rasio_pinjaman_kredit ?: 40),
+                    'pl_nominal_depresiasi' => $nominalDepresiasi,
+                    'rasio_modal_sendiri' => (float) $project->rasio_modal_sendiri,
+                    'rasio_pinjaman_kredit' => (float) $project->rasio_pinjaman_kredit,
                     'suku_bunga_kredit' => $bungaPct,
-                    'tenor_kredit_tahun' => (int) ($project->tenor_kredit_tahun ?: 5),
+                    'tenor_kredit_tahun' => (int) $project->tenor_kredit_tahun,
                 ]
             ]);
         }
 
-        return view('operator.peluang_investasi.projects.laba-rugi', compact('project', 'totalCapex'));
+        return view('operator.peluang_investasi.projects.laba-rugi', compact('project', 'totalCapex', 'calculatedDepresiasi', 'nominalDepresiasi'));
     }
 
     public function updateSettings(Request $request, Project $project)
@@ -105,14 +125,32 @@ class ProfitLossController extends Controller
             'components' => 'nullable|array',
             'components.*.temp_id' => 'required|string',
             'components.*.parent_temp_id' => 'nullable|string',
-            'components.*.nama_komponen' => 'required|string|max:255',
+            'components.*.nama_komponen' => 'nullable|string|max:255',
             'components.*.tipe_kategori' => 'required|in:PENDAPATAN,BIAYA_OPERASIONAL',
             'components.*.yearly_data' => 'nullable|array',
             'components.*.yearly_data.*' => 'nullable|numeric|min:0',
+            'settings' => 'nullable|array',
+            'settings.pl_persentase_pajak_penghasilan' => 'nullable|numeric|min:0|max:100',
+            'settings.pl_nominal_depresiasi' => 'nullable|numeric|min:0',
+            'settings.suku_bunga_kredit' => 'nullable|numeric|min:0|max:100',
         ]);
 
         try {
             DB::transaction(function () use ($project, $request) {
+                if ($request->has('settings')) {
+                    $s = $request->input('settings', []);
+                    $pajakInput = $s['pl_persentase_pajak_penghasilan'] ?? null;
+                    $pajakSave = (is_numeric($pajakInput) && (float)$pajakInput > 0) ? (float)$pajakInput : 22.00;
+                    $bungaInput = $s['suku_bunga_kredit'] ?? null;
+                    $bungaSave = (is_numeric($bungaInput) && (float)$bungaInput > 0) ? (float)$bungaInput : 8.05;
+
+                    $project->update([
+                        'pl_persentase_pajak_penghasilan' => $pajakSave,
+                        'pl_nominal_depresiasi' => $s['pl_nominal_depresiasi'] ?? 0,
+                        'suku_bunga_kredit' => $bungaSave,
+                    ]);
+                }
+
                 $existing = $project->plComponents()->get();
                 foreach($existing as $comp) {
                     $comp->yearlyData()->delete();
@@ -139,9 +177,10 @@ class ProfitLossController extends Controller
                 for ($i = 0; $i < 3; $i++) {
                     $nextPending = [];
                     foreach ($pending as $c) {
+                        $namaComp = !empty(trim($c['nama_komponen'] ?? '')) ? $c['nama_komponen'] : '(Tanpa Nama)';
                         if (empty($c['parent_temp_id'])) {
                             $new = $project->plComponents()->create([
-                                'nama_komponen' => $c['nama_komponen'],
+                                'nama_komponen' => $namaComp,
                                 'tipe_kategori' => $c['tipe_kategori'],
                             ]);
                             $idMap[$c['temp_id']] = $new->id;
@@ -150,7 +189,7 @@ class ProfitLossController extends Controller
                         else if (isset($idMap[$c['parent_temp_id']])) {
                             $new = $project->plComponents()->create([
                                 'parent_id' => $idMap[$c['parent_temp_id']],
-                                'nama_komponen' => $c['nama_komponen'],
+                                'nama_komponen' => $namaComp,
                                 'tipe_kategori' => $c['tipe_kategori'],
                             ]);
                             $idMap[$c['temp_id']] = $new->id;

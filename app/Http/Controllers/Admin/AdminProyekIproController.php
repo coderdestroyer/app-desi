@@ -56,19 +56,38 @@ class AdminProyekIproController extends Controller
         ])->findOrFail($id);
 
         // 1. Hitung total CAPEX riil
+        $parents = $project->capexComponents->where('parent_id', null)->sortBy('id')->values();
+        $parentFirst = $parents->first();
+        $parentLast = ($parents->count() > 1) ? $parents->last() : null;
+        $parent0Id = $parentFirst ? $parentFirst->id : null;
+        $parent1Id = ($parentLast && $parentLast->id !== $parent0Id) ? $parentLast->id : null;
+
         $totalCapex = 0;
+        $subtotalParent0 = 0;
+        $subtotalParent1 = 0;
+
         foreach ($project->capexComponents as $comp) {
             if ($comp->parent_id !== null) {
                 $vol = $comp->volume && $comp->volume > 0 ? (float)$comp->volume : 1;
                 $luas = $comp->luas && $comp->luas > 0 ? (float)$comp->luas : 0;
                 $harga = $comp->harga_m2 ? (float)$comp->harga_m2 : 0;
 
-                if ($luas > 0) {
-                    $totalCapex += $vol * $luas * $harga;
-                } else {
-                    $totalCapex += $vol * $harga;
+                $itemTotal = ($luas > 0) ? ($vol * $luas * $harga) : ($vol * $harga);
+                $totalCapex += $itemTotal;
+
+                if ($comp->parent_id === $parent0Id) {
+                    $subtotalParent0 += $itemTotal;
+                } else if ($comp->parent_id === $parent1Id) {
+                    $subtotalParent1 += $itemTotal;
                 }
             }
+        }
+
+        $depreciableCapex = max(0, $totalCapex - $subtotalParent0 - $subtotalParent1);
+        $tenorTahun = max(1, (int) $project->jangka_waktu_tahun);
+        $calculatedDepresiasi = $depreciableCapex / $tenorTahun;
+        if ((float)$project->pl_nominal_depresiasi <= 0) {
+            $project->pl_nominal_depresiasi = $calculatedDepresiasi;
         }
 
         // Kelompokkan Komponen CAPEX
@@ -141,8 +160,8 @@ class AdminProyekIproController extends Controller
         });
 
         // 3. Parameter Keuangan & Rasio Modal
-        $rasioEquity = (float)($project->rasio_modal_sendiri ?: 60);
-        $rasioDebt = (float)($project->rasio_pinjaman_kredit ?: 40);
+        $rasioEquity = (float) $project->rasio_modal_sendiri;
+        $rasioDebt = (float) $project->rasio_pinjaman_kredit;
         $equityAmount = $totalCapex * ($rasioEquity / 100);
         $debtAmount = $totalCapex * ($rasioDebt / 100);
 

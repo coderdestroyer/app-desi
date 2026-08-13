@@ -59,23 +59,83 @@ class CashFlowController extends Controller
             }
         }
 
+        $rasioEquity = (float) $project->rasio_modal_sendiri;
+        $rasioDebt = (float) $project->rasio_pinjaman_kredit;
+        $sukuBunga = (float) $project->suku_bunga_kredit;
+        $tenor = (int) $project->tenor_kredit_tahun;
+
+        $equityAmount = $totalCapex * ($rasioEquity / 100);
+        $debtAmount = $totalCapex * ($rasioDebt / 100);
+
+        $pokokPerTahun = [];
+        $bungaPerTahun = [];
+        $netCashflowPerTahun = [0 => -$totalCapex];
+        $akumulasiSaldoPerTahun = [0 => -$totalCapex];
+
+        $rate = $sukuBunga / 100;
+        $pmt = 0;
+        if ($debtAmount > 0 && $tenor > 0) {
+            if ($rate > 0) {
+                $factor = pow(1 + $rate, $tenor);
+                $pmt = $debtAmount * ($rate * $factor) / ($factor - 1);
+            } else {
+                $pmt = $debtAmount / $tenor;
+            }
+        }
+
+        for ($t = 1; $t <= $project->jangka_waktu_tahun; $t++) {
+            if ($t <= $tenor && $debtAmount > 0) {
+                $bunga = $debtAmount * $rate;
+                $pokok = max(0, $pmt - $bunga);
+            } else {
+                $pokok = 0;
+                $bunga = 0;
+            }
+
+            $pokokPerTahun[$t] = $pokok;
+            $bungaPerTahun[$t] = $bunga;
+
+            $opBersih = ($pendapatanPerTahun[$t] ?? 0) - ($opexPerTahun[$t] ?? 0);
+            $netCashflow = $opBersih - $pokok - $bunga;
+            $netCashflowPerTahun[$t] = $netCashflow;
+
+            $akumulasiSaldoPerTahun[$t] = $akumulasiSaldoPerTahun[$t - 1] + $netCashflow;
+        }
+
         if ($request->wantsJson()) {
             return response()->json([
                 'total_capex' => $totalCapex,
+                'equity_amount' => $equityAmount,
+                'debt_amount' => $debtAmount,
                 'pendapatan_per_tahun' => $pendapatanPerTahun,
                 'opex_per_tahun' => $opexPerTahun,
+                'pokok_per_tahun' => $pokokPerTahun,
+                'bunga_per_tahun' => $bungaPerTahun,
+                'net_cashflow_per_tahun' => $netCashflowPerTahun,
+                'akumulasi_saldo_per_tahun' => $akumulasiSaldoPerTahun,
                 'settings' => [
-                    'rasio_modal_sendiri' => (float) $project->rasio_modal_sendiri,
-                    'rasio_pinjaman_kredit' => (float) $project->rasio_pinjaman_kredit,
-                    'suku_bunga_kredit' => (float) $project->suku_bunga_kredit,
-                    'tenor_kredit_tahun' => (int) $project->tenor_kredit_tahun,
+                    'rasio_modal_sendiri' => $rasioEquity,
+                    'rasio_pinjaman_kredit' => $rasioDebt,
+                    'suku_bunga_kredit' => $sukuBunga,
+                    'tenor_kredit_tahun' => $tenor,
                     'pl_persentase_pajak_penghasilan' => (float) $project->pl_persentase_pajak_penghasilan,
                     'pl_persentase_pajak_daerah' => (float) $project->pl_persentase_pajak_daerah,
                 ]
             ]);
         }
 
-        return view('operator.peluang_investasi.projects.cashflow', compact('project', 'totalCapex', 'pendapatanPerTahun', 'opexPerTahun'));
+        return view('operator.peluang_investasi.projects.cashflow', compact(
+            'project',
+            'totalCapex',
+            'equityAmount',
+            'debtAmount',
+            'pendapatanPerTahun',
+            'opexPerTahun',
+            'pokokPerTahun',
+            'bungaPerTahun',
+            'netCashflowPerTahun',
+            'akumulasiSaldoPerTahun'
+        ));
     }
 
     public function updateSettings(Request $request, Project $project)

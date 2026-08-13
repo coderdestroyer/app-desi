@@ -109,11 +109,12 @@
                                         <span x-show="isPreviewMode" x-text="parent.nama_komponen" class="uppercase"></span>
                                     </div>
                                     <div x-show="!isPreviewMode" class="flex items-center gap-1.5 flex-shrink-0">
+                                        <span x-show="parentIndex === 0 || parentIndex === getParents().length - 1" class="text-[10px] text-[#145239] bg-white/80 px-2 py-1 rounded-xl border border-[#CFE3D5] font-semibold shrink-0">Kategori Default</span>
                                         <button @click="addChild(parent.temp_id)" title="Tambah Sub-komponen" class="inline-flex items-center justify-center px-2.5 py-1.5 bg-white text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-xl text-xs font-bold transition-colors shadow-xs">
                                             <i class="fa-solid fa-plus mr-1 text-[10px]"></i>
                                             Sub
                                         </button>
-                                        <button @click="removeRow(parent.temp_id)" title="Hapus Kategori" class="inline-flex items-center justify-center px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-semibold transition-colors shadow-xs">
+                                        <button x-show="parentIndex > 0 && parentIndex < getParents().length - 1" @click="removeRow(parent.temp_id)" title="Hapus Kategori" class="inline-flex items-center justify-center px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-xl text-xs font-semibold transition-colors shadow-xs">
                                             <i class="fa-solid fa-trash-can mr-1 text-[10px]"></i>
                                             Hapus
                                         </button>
@@ -251,6 +252,29 @@
                     } else {
                         this.rows = [];
                     }
+                }
+
+                // Enforce minimum 2 default parent categories
+                let parents = this.getParents();
+                if (parents.length < 1) {
+                    this.rows.unshift({
+                        id: null,
+                        temp_id: 'temp_def_1',
+                        parent_temp_id: null,
+                        nama_komponen: 'Persiapan',
+                        volume: null, satuan: '', luas: null, harga_m2: null
+                    });
+                }
+                parents = this.getParents();
+                if (parents.length < 2) {
+                    const firstParentIdx = this.rows.findIndex(r => r.parent_temp_id === null);
+                    this.rows.splice(firstParentIdx + 1, 0, {
+                        id: null,
+                        temp_id: 'temp_def_2',
+                        parent_temp_id: null,
+                        nama_komponen: 'Fasilitas Service dan Pendukung',
+                        volume: null, satuan: '', luas: null, harga_m2: null
+                    });
                 }
 
                 if (this.hasUnsavedChanges) {
@@ -430,7 +454,8 @@
             },
 
             addParent() {
-                this.rows.push({
+                const parents = this.getParents();
+                const newParent = {
                     id: null,
                     temp_id: this.generateTempId(),
                     parent_temp_id: null,
@@ -439,7 +464,15 @@
                     satuan: '',
                     luas: null,
                     harga_m2: null
-                });
+                };
+
+                if (parents.length >= 2) {
+                    const lastParent = parents[parents.length - 1];
+                    const lastParentIdx = this.rows.findIndex(r => r.temp_id === lastParent.temp_id);
+                    this.rows.splice(lastParentIdx, 0, newParent);
+                } else {
+                    this.rows.push(newParent);
+                }
             },
 
             addChild(parentTempId) {

@@ -101,7 +101,14 @@ class ProjectController extends Controller
 
         $validated['status_publikasi'] = $validated['status_publikasi'] ?? 'published';
 
-        Auth::user()->projects()->create($validated);
+        $project = Auth::user()->projects()->create($validated);
+
+        $project->capexComponents()->create([
+            'nama_komponen' => 'Persiapan',
+        ]);
+        $project->capexComponents()->create([
+            'nama_komponen' => 'Fasilitas Service dan Pendukung',
+        ]);
 
         return redirect()->route('operator.projects.index')
             ->with('success', 'Proyek investasi IPRO berhasil dibuat!');
