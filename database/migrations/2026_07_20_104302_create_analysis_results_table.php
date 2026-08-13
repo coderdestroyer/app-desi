@@ -12,8 +12,9 @@ return new class extends Migration
     {
         Schema::create('analysis_results', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('type');
-            $table->string('title');
+            $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->json('results');
             $table->timestamps();

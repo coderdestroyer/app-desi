@@ -331,10 +331,10 @@ CREATE INDEX idx_data_investasi_tahun_sektor ON data_investasi(tahun, nama_sekto
 ```sql
 CREATE TABLE analysis_results (
     id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    title VARCHAR(255) NOT NULL,
+    user_id BIGINT NULL REFERENCES users(id) ON DELETE CASCADE,
     type VARCHAR(50) NOT NULL, -- 'lq', 'shift_share', 'tipologi_sektor', 'tipologi_klassen'
-    parameters JSONB NOT NULL,
+    title VARCHAR(255) NULL,
+    description TEXT NULL,
     results JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
