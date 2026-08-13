@@ -112,8 +112,22 @@ class TipologiController extends Controller
 
         $editItem = null;
         if ($request->has('edit')) {
-            $editItem = AnalysisResult::where('type', 'tipologi_sektor')->find((int)$request->edit);
+            $found = AnalysisResult::where('type', 'tipologi_sektor')->find((int)$request->edit);
+            if ($found) {
+                $editItem = array_merge(['id' => $found->id], $found->results ?? []);
+            }
         }
+
+        $simulasiList = AnalysisResult::where('type', 'tipologi_sektor')
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                return array_merge([
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'created_at' => $item->created_at,
+                ], $item->results ?? []);
+            });
 
         $provinsis = Cache::remember('master_provinsis', 3600, function () {
             return Provinsi::orderBy('nama_provinsi')->get();
@@ -138,6 +152,7 @@ class TipologiController extends Controller
 
         return view('operator.potensi_unggulan.tipologi.index', [
             'tipologiData' => $paginatedData,
+            'simulasiList' => $simulasiList,
             'editItem' => $editItem,
             'provinsis' => $provinsis,
             'kabupatens' => $kabupatens,
@@ -254,9 +269,10 @@ class TipologiController extends Controller
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
         AnalysisResult::create([
-            'user_id' => Auth::id(),
             'type' => 'tipologi_sektor',
+            'title' => 'Simulasi Tipologi Sektor ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
             'results' => array_merge($validated, [
+                'user_id' => Auth::id(),
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'lq' => $lq,
@@ -342,5 +358,87 @@ class TipologiController extends Controller
         Cache::flush();
 
         return redirect()->route('operator.tipologi.index')->with('success', 'Seluruh data simulasi Tipologi Sektor berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $data = $request->json()->all();
+        if (empty($data)) {
+            $data = $request->all();
+        }
+
+        if (!is_array($data) || empty($data)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data impor tidak valid atau kosong.'
+            ], 422);
+        }
+
+        $count = 0;
+        foreach ($data as $row) {
+            if (!is_array($row)) continue;
+
+            $prov = $row['Provinsi'] ?? $row['provinsi'] ?? 'SUMATERA UTARA';
+            $kab = $row['Kabupaten/Kota'] ?? $row['Kabupaten'] ?? $row['kabupaten'] ?? null;
+            $sektor = $row['Sektor'] ?? $row['sektor'] ?? '';
+            $tahun = (int) ($row['Tahun'] ?? $row['tahun'] ?? date('Y'));
+
+            $lq = (float) ($row['Nilai LQ'] ?? $row['nilai_lq'] ?? $row['lq'] ?? 0);
+            $cij = (float) ($row['Nilai SS'] ?? $row['shift_share_net'] ?? $row['ss'] ?? $row['nilai_ss'] ?? 0);
+
+            if (empty($sektor)) continue;
+
+            $tingkatWilayah = ($kab && strtoupper($kab) !== 'PROVINSI' && $kab !== '-') ? 'Kabupaten/Kota' : 'Provinsi';
+
+            $kuadran = '';
+            if ($lq >= 1 && $cij >= 0) $kuadran = 'Kuadran I';
+            elseif ($lq < 1 && $cij >= 0) $kuadran = 'Kuadran II';
+            elseif ($lq >= 1 && $cij < 0) $kuadran = 'Kuadran III';
+            else $kuadran = 'Kuadran IV';
+
+            $kategoriMap = [
+                'Kuadran I' => 'Maju dan Tumbuh Cepat',
+                'Kuadran II' => 'Potensial / Cepat Berkembang',
+                'Kuadran III' => 'Maju tapi Tertekan',
+                'Kuadran IV' => 'Relatif Tertinggal',
+            ];
+
+            $daerahAnalisis = ($tingkatWilayah === 'Provinsi') 
+                ? strtoupper($prov) 
+                : strtoupper($kab ?? $prov);
+                
+            $daerahPembanding = ($tingkatWilayah === 'Provinsi') 
+                ? 'PDB NASIONAL' 
+                : 'PDRB ' . strtoupper($prov);
+
+            AnalysisResult::create([
+                'type' => 'tipologi_sektor',
+                'title' => 'Simulasi Tipologi Sektor ' . $daerahAnalisis . ' (' . $sektor . ')',
+                'results' => [
+                    'user_id' => Auth::id(),
+                    'tingkat_wilayah' => $tingkatWilayah,
+                    'provinsi' => $prov,
+                    'kabupaten' => $kab,
+                    'sektor' => $sektor,
+                    'tahun' => $tahun,
+                    'nilai_lq' => $lq,
+                    'shift_share_net' => $cij,
+                    'lq' => $lq,
+                    'cij' => $cij,
+                    'daerah_analisis' => $daerahAnalisis,
+                    'daerah_pembanding' => $daerahPembanding,
+                    'kuadran' => $kuadran,
+                    'kategori_sektor' => $kategoriMap[$kuadran] ?? $kuadran,
+                ],
+            ]);
+            $count++;
+        }
+
+        Cache::flush();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mengimpor {$count} data simulasi Tipologi Sektor."
+        ]);
     }
 }

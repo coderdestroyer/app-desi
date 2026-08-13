@@ -114,8 +114,22 @@ class KlassenController extends Controller
 
         $editItem = null;
         if ($request->has('edit')) {
-            $editItem = AnalysisResult::where('type', 'tipologi_klassen')->find((int)$request->edit);
+            $found = AnalysisResult::where('type', 'tipologi_klassen')->find((int)$request->edit);
+            if ($found) {
+                $editItem = array_merge(['id' => $found->id], $found->results ?? []);
+            }
         }
+
+        $simulasiList = AnalysisResult::where('type', 'tipologi_klassen')
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                return array_merge([
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'created_at' => $item->created_at,
+                ], $item->results ?? []);
+            });
 
         $provinsis = Cache::remember('master_provinsis', 3600, function () {
             return Provinsi::orderBy('nama_provinsi')->get();
@@ -140,6 +154,7 @@ class KlassenController extends Controller
 
         return view('operator.potensi_unggulan.klassen.index', [
             'klassenData' => $paginatedData,
+            'simulasiList' => $simulasiList,
             'editItem' => $editItem,
             'provinsis' => $provinsis,
             'kabupatens' => $kabupatens,
@@ -263,9 +278,10 @@ class KlassenController extends Controller
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
         AnalysisResult::create([
-            'user_id' => Auth::id(),
             'type' => 'tipologi_klassen',
+            'title' => 'Simulasi Tipologi Klassen ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
             'results' => array_merge($validated, [
+                'user_id' => Auth::id(),
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'kuadran' => $kuadran,
@@ -351,5 +367,91 @@ class KlassenController extends Controller
         Cache::flush();
 
         return redirect()->route('operator.klassen.index')->with('success', 'Seluruh data simulasi Tipologi Klassen berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $data = $request->json()->all();
+        if (empty($data)) {
+            $data = $request->all();
+        }
+
+        if (!is_array($data) || empty($data)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data impor tidak valid atau kosong.'
+            ], 422);
+        }
+
+        $count = 0;
+        foreach ($data as $row) {
+            if (!is_array($row)) continue;
+
+            $prov = $row['Provinsi'] ?? $row['provinsi'] ?? 'SUMATERA UTARA';
+            $kab = $row['Kabupaten/Kota'] ?? $row['Kabupaten'] ?? $row['kabupaten'] ?? null;
+            $sektor = $row['Sektor'] ?? $row['sektor'] ?? '';
+            $tahun = (int) ($row['Tahun'] ?? $row['tahun'] ?? date('Y'));
+
+            $ri = (float) ($row['laju_pertumbuhan_daerah'] ?? $row['r_i'] ?? 0);
+            $rp = (float) ($row['laju_pertumbuhan_pembanding'] ?? $row['r_p'] ?? 0);
+            $yi = (float) ($row['kontribusi_daerah'] ?? $row['y_i'] ?? 0);
+            $yp = (float) ($row['kontribusi_pembanding'] ?? $row['y_p'] ?? 0);
+
+            if (empty($sektor)) continue;
+
+            $kuadran = '';
+            if ($ri >= $rp && $yi >= $yp) $kuadran = 'Kuadran I';
+            elseif ($ri < $rp && $yi >= $yp) $kuadran = 'Kuadran II';
+            elseif ($ri >= $rp && $yi < $yp) $kuadran = 'Kuadran III';
+            else $kuadran = 'Kuadran IV';
+
+            $klasifikasiMap = [
+                'Kuadran I' => 'Sektor Maju dan Tumbuh Pesat',
+                'Kuadran II' => 'Sektor Maju tapi Tertekan',
+                'Kuadran III' => 'Sektor Berkembang Cepat / Potensial',
+                'Kuadran IV' => 'Sektor Relatif Tertinggal',
+            ];
+
+            $tingkatWilayah = ($kab && strtoupper($kab) !== 'PROVINSI' && $kab !== '-') ? 'Kabupaten/Kota' : 'Provinsi';
+
+            $daerahAnalisis = ($tingkatWilayah === 'Provinsi') 
+                ? strtoupper($prov) 
+                : strtoupper($kab ?? $prov);
+                
+            $daerahPembanding = ($tingkatWilayah === 'Provinsi') 
+                ? 'PDB NASIONAL' 
+                : 'PDRB ' . strtoupper($prov);
+
+            AnalysisResult::create([
+                'type' => 'tipologi_klassen',
+                'title' => 'Simulasi Tipologi Klassen ' . $daerahAnalisis . ' (' . $sektor . ')',
+                'results' => [
+                    'user_id' => Auth::id(),
+                    'tingkat_wilayah' => $tingkatWilayah,
+                    'provinsi' => $prov,
+                    'kabupaten' => $kab,
+                    'sektor' => $sektor,
+                    'tahun' => $tahun,
+                    'tahun_awal' => $tahun - 1,
+                    'tahun_akhir' => $tahun,
+                    'laju_pertumbuhan_daerah' => $ri,
+                    'laju_pertumbuhan_pembanding' => $rp,
+                    'kontribusi_daerah' => $yi,
+                    'kontribusi_pembanding' => $yp,
+                    'daerah_analisis' => $daerahAnalisis,
+                    'daerah_pembanding' => $daerahPembanding,
+                    'kuadran' => $kuadran,
+                    'klasifikasi_sektor' => $klasifikasiMap[$kuadran] ?? $kuadran,
+                ],
+            ]);
+            $count++;
+        }
+
+        Cache::flush();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mengimpor {$count} data simulasi Tipologi Klassen."
+        ]);
     }
 }

@@ -101,8 +101,22 @@ class LQController extends Controller
 
         $editItem = null;
         if ($request->has('edit')) {
-            $editItem = AnalysisResult::where('type', 'lq')->find((int)$request->edit);
+            $found = AnalysisResult::where('type', 'lq')->find((int)$request->edit);
+            if ($found) {
+                $editItem = array_merge(['id' => $found->id], $found->results ?? []);
+            }
         }
+
+        $simulasiList = AnalysisResult::where('type', 'lq')
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                return array_merge([
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'created_at' => $item->created_at,
+                ], $item->results ?? []);
+            });
 
         $provinsis = Cache::remember('master_provinsis', 3600, function () {
             return Provinsi::orderBy('nama_provinsi')->get();
@@ -127,6 +141,7 @@ class LQController extends Controller
 
         return view('operator.potensi_unggulan.lq.index', [
             'lqData' => $paginatedData,
+            'simulasiList' => $simulasiList,
             'editItem' => $editItem,
             'provinsis' => $provinsis,
             'kabupatens' => $kabupatens,
@@ -229,9 +244,10 @@ class LQController extends Controller
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
         AnalysisResult::create([
-            'user_id' => Auth::id(),
             'type' => 'lq',
+            'title' => 'Simulasi LQ ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
             'results' => array_merge($validated, [
+                'user_id' => Auth::id(),
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'nilai_lq' => $lq,
@@ -310,5 +326,86 @@ class LQController extends Controller
         Cache::flush();
 
         return redirect()->route('operator.lq.index')->with('success', 'Seluruh data simulasi LQ berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $data = $request->json()->all();
+        if (empty($data)) {
+            $data = $request->all();
+        }
+
+        if (!is_array($data) || empty($data)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data impor tidak valid atau kosong.'
+            ], 422);
+        }
+
+        $count = 0;
+        foreach ($data as $row) {
+            if (!is_array($row)) continue;
+
+            $prov = $row['Provinsi'] ?? $row['provinsi'] ?? 'SUMATERA UTARA';
+            $kab = $row['Kabupaten/Kota'] ?? $row['Kabupaten'] ?? $row['kabupaten'] ?? null;
+            $sektor = $row['Sektor'] ?? $row['sektor'] ?? '';
+            $tahun = (int) ($row['Tahun'] ?? $row['tahun'] ?? date('Y'));
+
+            $pdrbSektorAnalisis = (float) ($row['PDRB Sektor Analisis'] ?? $row['pdrb_sektor_analisis'] ?? $row['PDRB Sektor'] ?? 0);
+            $totalPdrbAnalisis = (float) ($row['Total PDRB Analisis'] ?? $row['total_pdrb_analisis'] ?? $row['Total PDRB'] ?? 0);
+            $pdrbSektorPembanding = (float) ($row['PDRB Sektor Pembanding'] ?? $row['pdrb_sektor_pembanding'] ?? 0);
+            $totalPdrbPembanding = (float) ($row['Total PDRB Pembanding'] ?? $row['total_pdrb_pembanding'] ?? 0);
+
+            if (empty($sektor)) continue;
+
+            $persenAnalisis = ($totalPdrbAnalisis > 0) ? ($pdrbSektorAnalisis / $totalPdrbAnalisis) : 0;
+            $persenPembanding = ($totalPdrbPembanding > 0) ? ($pdrbSektorPembanding / $totalPdrbPembanding) : 0;
+            $lq = ($persenPembanding > 0) ? round($persenAnalisis / $persenPembanding, 4) : 0;
+
+            $kategori = ($lq >= 1.0) ? 'BASIS' : 'NON-BASIS';
+            $keterangan = ($lq >= 1.0) 
+                ? 'Sektor Unggulan (LQ >= 1). Peranannya di daerah lebih dominan dibanding rata-rata acuan.'
+                : 'Sektor Non-Unggulan (LQ < 1). Peranannya lebih rendah dibanding rata-rata acuan.';
+
+            $tingkatWilayah = ($kab && strtoupper($kab) !== 'PROVINSI' && $kab !== '-') ? 'Kabupaten/Kota' : 'Provinsi';
+
+            $daerahAnalisis = ($tingkatWilayah === 'Provinsi') 
+                ? strtoupper($prov) 
+                : strtoupper($kab ?? $prov);
+                
+            $daerahPembanding = ($tingkatWilayah === 'Provinsi') 
+                ? 'PDB NASIONAL' 
+                : 'PDRB ' . strtoupper($prov);
+
+            AnalysisResult::create([
+                'type' => 'lq',
+                'title' => 'Simulasi LQ ' . $daerahAnalisis . ' (' . $sektor . ')',
+                'results' => [
+                    'user_id' => Auth::id(),
+                    'tingkat_wilayah' => $tingkatWilayah,
+                    'provinsi' => $prov,
+                    'kabupaten' => $kab,
+                    'sektor' => $sektor,
+                    'tahun' => $tahun,
+                    'pdrb_sektor_analisis' => $pdrbSektorAnalisis,
+                    'total_pdrb_analisis' => $totalPdrbAnalisis,
+                    'pdrb_sektor_pembanding' => $pdrbSektorPembanding,
+                    'total_pdrb_pembanding' => $totalPdrbPembanding,
+                    'daerah_analisis' => $daerahAnalisis,
+                    'daerah_pembanding' => $daerahPembanding,
+                    'nilai_lq' => $lq,
+                    'kategori' => $kategori,
+                    'keterangan' => $keterangan,
+                ],
+            ]);
+            $count++;
+        }
+
+        Cache::flush();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mengimpor {$count} data simulasi LQ."
+        ]);
     }
 }

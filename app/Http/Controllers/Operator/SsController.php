@@ -112,8 +112,22 @@ class SsController extends Controller
 
         $editItem = null;
         if ($request->has('edit')) {
-            $editItem = AnalysisResult::where('type', 'shift_share')->find((int)$request->edit);
+            $found = AnalysisResult::where('type', 'shift_share')->find((int)$request->edit);
+            if ($found) {
+                $editItem = array_merge(['id' => $found->id], $found->results ?? []);
+            }
         }
+
+        $simulasiList = AnalysisResult::where('type', 'shift_share')
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                return array_merge([
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'created_at' => $item->created_at,
+                ], $item->results ?? []);
+            });
 
         $provinsis = Cache::remember('master_provinsis', 3600, function () {
             return Provinsi::orderBy('nama_provinsi')->get();
@@ -138,6 +152,7 @@ class SsController extends Controller
 
         return view('operator.potensi_unggulan.ss.index', [
             'ssData' => $paginatedData,
+            'simulasiList' => $simulasiList,
             'editItem' => $editItem,
             'provinsis' => $provinsis,
             'kabupatens' => $kabupatens,
@@ -251,9 +266,10 @@ class SsController extends Controller
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
         AnalysisResult::create([
-            'user_id' => Auth::id(),
             'type' => 'shift_share',
+            'title' => 'Simulasi Shift-Share ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
             'results' => array_merge($validated, [
+                'user_id' => Auth::id(),
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'nij' => $nij,
@@ -338,5 +354,103 @@ class SsController extends Controller
         Cache::flush();
 
         return redirect()->route('operator.ss.index')->with('success', 'Seluruh data simulasi Shift-Share berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $data = $request->json()->all();
+        if (empty($data)) {
+            $data = $request->all();
+        }
+
+        if (!is_array($data) || empty($data)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data impor tidak valid atau kosong.'
+            ], 422);
+        }
+
+        $count = 0;
+        foreach ($data as $row) {
+            if (!is_array($row)) continue;
+
+            $prov = $row['Provinsi'] ?? $row['provinsi'] ?? 'SUMATERA UTARA';
+            $kab = $row['Kabupaten/Kota'] ?? $row['Kabupaten'] ?? $row['kabupaten'] ?? null;
+            $sektor = $row['Sektor'] ?? $row['sektor'] ?? '';
+            $tahunAwal = (int) ($row['Tahun Awal'] ?? $row['tahun_awal'] ?? date('Y') - 1);
+            $tahunAkhir = (int) ($row['Tahun Akhir'] ?? $row['tahun_akhir'] ?? $row['Tahun'] ?? $row['tahun'] ?? date('Y'));
+
+            $yAwal = (float) ($row['PDRB Sektor Analisis Awal'] ?? $row['komponen_n'] ?? 0);
+            $yAkhir = (float) ($row['PDRB Sektor Analisis Akhir'] ?? $row['komponen_p'] ?? 0);
+            $yPembandingAwal = (float) ($row['PDRB Sektor Pembanding Awal'] ?? 0);
+            $yPembandingAkhir = (float) ($row['PDRB Sektor Pembanding Akhir'] ?? 0);
+            $totalPembandingAwal = (float) ($row['Total PDRB Pembanding Awal'] ?? 0);
+            $totalPembandingAkhir = (float) ($row['Total PDRB Pembanding Akhir'] ?? 0);
+
+            if (empty($sektor)) continue;
+
+            if (isset($row['komponen_n']) && isset($row['komponen_p']) && isset($row['komponen_d'])) {
+                $nij = (float) $row['komponen_n'];
+                $mij = (float) $row['komponen_p'];
+                $cij = (float) $row['komponen_d'];
+            } else {
+                $growthTotalPembanding = ($totalPembandingAwal > 0) ? ($totalPembandingAkhir / $totalPembandingAwal) - 1 : 0;
+                $growthSektorPembanding = ($yPembandingAwal > 0) ? ($yPembandingAkhir / $yPembandingAwal) - 1 : 0;
+                $growthSektorDaerah = ($yAwal > 0) ? ($yAkhir / $yAwal) - 1 : 0;
+
+                $nij = $yAwal * $growthTotalPembanding;
+                $mij = $yAwal * ($growthSektorPembanding - $growthTotalPembanding);
+                $cij = $yAwal * ($growthSektorDaerah - $growthSektorPembanding);
+            }
+
+            $dij = $nij + $mij + $cij;
+            $kategoriPertumbuhan = $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat';
+            $kategoriDayaSaing = $cij >= 0 ? 'Daya Saing Baik' : 'Tidak Dapat Bersaing';
+
+            $tingkatWilayah = ($kab && strtoupper($kab) !== 'PROVINSI' && $kab !== '-') ? 'Kabupaten/Kota' : 'Provinsi';
+
+            $daerahAnalisis = ($tingkatWilayah === 'Provinsi') 
+                ? strtoupper($prov) 
+                : strtoupper($kab ?? $prov);
+                
+            $daerahPembanding = ($tingkatWilayah === 'Provinsi') 
+                ? 'PDB NASIONAL' 
+                : 'PDRB ' . strtoupper($prov);
+
+            AnalysisResult::create([
+                'type' => 'shift_share',
+                'title' => 'Simulasi Shift-Share ' . $daerahAnalisis . ' (' . $sektor . ')',
+                'results' => [
+                    'user_id' => Auth::id(),
+                    'tingkat_wilayah' => $tingkatWilayah,
+                    'provinsi' => $prov,
+                    'kabupaten' => $kab,
+                    'sektor' => $sektor,
+                    'tahun' => $tahunAkhir,
+                    'tahun_awal' => $tahunAwal,
+                    'tahun_akhir' => $tahunAkhir,
+                    'komponen_n' => $nij,
+                    'komponen_p' => $mij,
+                    'komponen_d' => $cij,
+                    'daerah_analisis' => $daerahAnalisis,
+                    'daerah_pembanding' => $daerahPembanding,
+                    'nij' => $nij,
+                    'mij' => $mij,
+                    'cij' => $cij,
+                    'dij' => $dij,
+                    'total_shift' => $dij,
+                    'kategori_pertumbuhan' => $kategoriPertumbuhan,
+                    'kategori_daya_saing' => $kategoriDayaSaing,
+                ],
+            ]);
+            $count++;
+        }
+
+        Cache::flush();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mengimpor {$count} data simulasi Shift-Share."
+        ]);
     }
 }
