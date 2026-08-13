@@ -25,8 +25,21 @@
                     <div class="bg-white rounded-[20px] p-[25px] shadow-[0_10px_35px_rgba(0,0,0,0.05)] border border-[#145239]/5 flex flex-col w-full">
                         <div class="flex justify-between items-center mb-[20px] flex-wrap gap-[10px]">
                             <h3 class="text-base font-bold text-[#145239] m-0 flex items-center gap-[10px]">
-                                <i class="fa-solid fa-pie-chart"></i> Top 5 Sektor Potensial ({{ $latestYear }})
+                                <i class="fa-solid fa-pie-chart"></i> Top 5 Sektor Potensial ({{ $latestPdrbYear }})
                             </h3>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#CFE3D5] bg-[#EEF8F2]">
+                                <i class="fa-solid fa-location-dot text-[11px] text-[#145239] shrink-0"></i>
+                                <div class="relative flex items-center">
+                                    <select id="topSectorProvinsiSelect" class="appearance-none [appearance:none] bg-none [background-image:none] bg-transparent text-[#145239] font-semibold text-xs border-none p-0 pr-4 outline-none focus:outline-none focus:ring-0 cursor-pointer leading-none">
+                                        @foreach($provinsiList as $provName)
+                                            <option value="{{ strtoupper(trim($provName)) }}" class="bg-white text-[#145239]" {{ strtoupper(trim($provName)) === 'SUMATERA UTARA' ? 'selected' : '' }}>
+                                                {{ ucwords(strtolower(trim($provName))) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down text-[9px] text-[#145239] absolute right-0 pointer-events-none"></i>
+                                </div>
+                            </div>
                         </div>
                         <div class="relative w-full" style="min-height: 230px;">
                             <canvas id="topSectorsChart"></canvas>
@@ -54,7 +67,7 @@
                     <div class="bg-white rounded-[20px] p-[25px] shadow-[0_10px_35px_rgba(0,0,0,0.05)] border border-[#145239]/5 h-full flex flex-col">
                         <div class="mb-[20px] flex-shrink-0">
                             <h3 class="text-base font-bold text-[#145239] m-0 flex items-center gap-[10px]">
-                                <i class="fa-solid fa-map-location-dot"></i> Sebaran Potensi Ekonomi & GIS ({{ $latestYear }})
+                                <i class="fa-solid fa-map-location-dot"></i> Sebaran Potensi Ekonomi & GIS ({{ $latestPdrbYear }})
                             </h3>
                         </div>
                         <div id="landing-map" class="w-full rounded-lg z-10 flex-grow min-h-[340px]"></div>
@@ -117,14 +130,14 @@
                     </div>
                 </div>
 
-                {{-- Card 3: Proyek Aktif --}}
+                {{-- Card 3: Jumlah Data Investasi --}}
                 <div class="metric-card bg-white rounded-[18px] p-6 flex items-center gap-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] border border-[#145239]/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(20,82,57,0.08)] cursor-pointer">
                     <div class="w-[54px] h-[54px] rounded-[14px] bg-[#EEF8F2] text-[#1E5D41] flex items-center justify-center text-[22px] shrink-0">
-                        <i class="fa-solid fa-folder-open"></i>
+                        <i class="fa-solid fa-database"></i>
                     </div>
                     <div class="flex flex-col">
-                        <h3 class="text-xl font-bold text-[#145239] mb-1.5">{{ number_format($jumlahProyek, 0, ',', '.') }} Proyek</h3>
-                        <p class="text-[12px] text-[#666] font-semibold uppercase tracking-[0.5px]">Jumlah Proyek Aktif (IPRO)</p>
+                        <h3 class="text-xl font-bold text-[#145239] mb-1.5">{{ number_format($jumlahDataInvestasi, 0, ',', '.') }} Data</h3>
+                        <p class="text-[12px] text-[#666] font-semibold uppercase tracking-[0.5px]">Jumlah Data Investasi ({{ $latestYear }})</p>
                     </div>
                 </div>
             </div>

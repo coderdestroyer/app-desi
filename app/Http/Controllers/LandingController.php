@@ -11,24 +11,23 @@ class LandingController extends Controller
     {
         $provinsiInvestasi = [];
         
-        // Dynamic latest year from DB (check data_investasi or pdrb_sumatera_provinsi)
-        $latestYear = DB::table('data_investasi')->max('tahun')
-            ?? DB::table('pdrb_sumatera_provinsi')->max('tahun')
-            ?? 2025;
+        // Latest year for PDRB & Investasi
+        $latestPdrbYear = DB::table('pdrb_sumatera_provinsi')->max('tahun') ?? 2025;
+        $latestYear = DB::table('data_investasi')->max('tahun') ?? $latestPdrbYear;
 
         // Default values for metrics
         $totalRealisasi = 0;
         $pdrbTertinggiNama = 'SUMATERA UTARA';
         $pdrbTertinggiNilai = 0;
-        $jumlahProyek = 0;
+        $jumlahDataInvestasi = 0;
         $topSectors = [];
+        $allTopSectors = [];
+        $provinsiList = [];
         $trendsData = [];
 
         try {
             // 1. PDRB Per Provinsi for latest available PDRB year
-            $pdrbYear = DB::table('pdrb_sumatera_provinsi')
-                ->where('tahun', '<=', $latestYear)
-                ->max('tahun') ?? $latestYear;
+            $pdrbYear = $latestPdrbYear;
 
             $provinsiInvestasi = DB::table('pdrb_sumatera_provinsi')
                 ->join('provinsi', 'pdrb_sumatera_provinsi.provinsi_id', '=', 'provinsi.provinsi_id')
@@ -63,45 +62,34 @@ class LandingController extends Controller
                 }
             }
 
-            // 3. Jumlah Proyek (100% Real DB dari count tabel projects IPRO)
-            $jumlahProyek = DB::table('projects')->count();
+            // 3. Jumlah Data Investasi (100% Real DB dari count tabel data_investasi untuk $latestYear)
+            $jumlahDataInvestasi = DB::table('data_investasi')->where('tahun', $latestYear)->count();
+            if ($jumlahDataInvestasi === 0) {
+                $jumlahDataInvestasi = DB::table('data_investasi')->count();
+            }
 
-            // 4. Top 5 sektor potensial (Diambil dari PDRB Sumatera Utara tahun terbaru)
-            $topSectors = DB::table('pdrb_sumatera_provinsi')
+            // 4. Top 5 sektor potensial per Provinsi untuk $pdrbYear
+            $allTopSectors = DB::table('pdrb_sumatera_provinsi')
                 ->join('sektor', 'pdrb_sumatera_provinsi.sektor_id', '=', 'sektor.sektor_id')
                 ->join('provinsi', 'pdrb_sumatera_provinsi.provinsi_id', '=', 'provinsi.provinsi_id')
                 ->where('pdrb_sumatera_provinsi.tahun', $pdrbYear)
-                ->where('provinsi.nama_provinsi', 'like', '%SUMATERA UTARA%')
-                ->select('sektor.nama_sektor', 'pdrb_sumatera_provinsi.nilai_pdrb as total_pdrb')
-                ->orderBy('pdrb_sumatera_provinsi.nilai_pdrb', 'desc')
-                ->limit(5)
+                ->select('provinsi.nama_provinsi', 'sektor.nama_sektor', 'pdrb_sumatera_provinsi.nilai_pdrb as total_pdrb')
                 ->get()
-                ->map(function ($item) {
-                    return [
-                        'nama_sektor' => trim($item->nama_sektor),
-                        'total_pdrb' => (float)$item->total_pdrb
-                    ];
+                ->groupBy(function($item) {
+                    return strtoupper(trim($item->nama_provinsi));
                 })
-                ->toArray();
-
-            // Jika PDRB Sumut belum ada, fallback ke agregasi seluruh provinsi di Sumatera
-            if (empty($topSectors)) {
-                $topSectors = DB::table('pdrb_sumatera_provinsi')
-                    ->join('sektor', 'pdrb_sumatera_provinsi.sektor_id', '=', 'sektor.sektor_id')
-                    ->where('pdrb_sumatera_provinsi.tahun', $pdrbYear)
-                    ->select('sektor.nama_sektor', DB::raw('SUM(nilai_pdrb) as total_pdrb'))
-                    ->groupBy('sektor.nama_sektor')
-                    ->orderBy('total_pdrb', 'desc')
-                    ->limit(5)
-                    ->get()
-                    ->map(function ($item) {
+                ->map(function($group) {
+                    return $group->sortByDesc('total_pdrb')->take(5)->map(function($item) {
                         return [
                             'nama_sektor' => trim($item->nama_sektor),
                             'total_pdrb' => (float)$item->total_pdrb
                         ];
-                    })
-                    ->toArray();
-            }
+                    })->values()->toArray();
+                })
+                ->toArray();
+
+            $topSectors = $allTopSectors['SUMATERA UTARA'] ?? reset($allTopSectors) ?: [];
+            $provinsiList = array_keys($allTopSectors);
 
             // 5. Trends data (Real DB)
             $trendsData = DB::table('pdrb_sumatera_provinsi')
@@ -168,16 +156,24 @@ class LandingController extends Controller
                 ['nama_sektor' => 'PERDAGANGAN BESAR DAN ECERAN', 'total_pdrb' => 250000000000000],
                 ['nama_sektor' => 'KONSTRUKSI', 'total_pdrb' => 190000000000000],
             ];
+            $allTopSectors['SUMATERA UTARA'] = $topSectors;
+        }
+
+        if (empty($provinsiList)) {
+            $provinsiList = array_keys($provinsiInvestasi);
         }
 
         return view('landing.home', compact(
             'provinsiInvestasi',
             'latestYear',
+            'latestPdrbYear',
             'totalRealisasi',
             'pdrbTertinggiNama',
             'pdrbTertinggiNilai',
-            'jumlahProyek',
+            'jumlahDataInvestasi',
             'topSectors',
+            'allTopSectors',
+            'provinsiList',
             'trendsData'
         ));
     }

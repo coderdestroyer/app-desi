@@ -82,6 +82,7 @@
     <script>
         window.provinsiInvestasi = @json($provinsiInvestasi);
         window.topSectorsData = @json($topSectors);
+        window.allTopSectorsData = @json($allTopSectors);
         window.trendsData = @json($trendsData);
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -265,21 +266,28 @@
             // CHART 1: TOP 5 POTENTIAL SECTORS
             // =====================================================
             const ctxSectors = document.getElementById("topSectorsChart").getContext("2d");
-            const sectorNames = window.topSectorsData.map(s => {
-                let name = s.nama_sektor;
-                name = name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-                if (name.length > 30) name = name.substring(0, 28) + "..";
-                return name;
-            });
-            const sectorValues = window.topSectorsData.map(s => s.total_pdrb / 1000000000000); // in Triliun
+            let topSectorsChart;
 
-            new Chart(ctxSectors, {
+            function formatSectorData(rawSectors) {
+                const names = rawSectors.map(s => {
+                    let name = s.nama_sektor;
+                    name = name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+                    if (name.length > 30) name = name.substring(0, 28) + "..";
+                    return name;
+                });
+                const values = rawSectors.map(s => s.total_pdrb / 1000000000000);
+                return { names, values };
+            }
+
+            const initialSectors = formatSectorData(window.topSectorsData);
+
+            topSectorsChart = new Chart(ctxSectors, {
                 type: 'bar',
                 data: {
-                    labels: sectorNames,
+                    labels: initialSectors.names,
                     datasets: [{
                         label: 'PDRB (Triliun Rp)',
-                        data: sectorValues,
+                        data: initialSectors.values,
                         backgroundColor: '#1E5D41',
                         borderRadius: 8,
                         borderWidth: 0,
@@ -313,6 +321,19 @@
                     }
                 }
             });
+
+            // Dropdown listener for switching Top 5 Sectors by Province
+            const sectorProvSelect = document.getElementById('topSectorProvinsiSelect');
+            if (sectorProvSelect) {
+                sectorProvSelect.addEventListener('change', (e) => {
+                    const selectedProv = e.target.value;
+                    const provSectors = window.allTopSectorsData[selectedProv] || window.topSectorsData;
+                    const formatted = formatSectorData(provSectors);
+                    topSectorsChart.data.labels = formatted.names;
+                    topSectorsChart.data.datasets[0].data = formatted.values;
+                    topSectorsChart.update();
+                });
+            }
 
             // =====================================================
             // CHART 2: TIME-SERIES LINE CHART (TRENDS)
