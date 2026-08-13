@@ -1,6 +1,6 @@
 @props(['action', 'type' => 'master'])
 
-<div id="importModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" style="display: none;">
+<div id="importModal" class="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4" style="display: none;">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden relative">
         <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
             <h3 class="text-lg font-bold text-slate-800">Unggah Data Analisis</h3>
@@ -693,7 +693,11 @@
                 if (result.success) {
                     statusEl.textContent = result.message || 'Berhasil! Memuat ulang halaman...';
                     statusEl.className = 'text-sm font-medium mt-2 text-emerald-600 block';
-                    setTimeout(() => window.location.reload(), 1000);
+                    setTimeout(() => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('tab', 'simulasi');
+                        window.location.href = url.toString();
+                    }, 1000);
                 } else {
                     throw new Error(result.message || 'Terjadi kesalahan saat menyimpan data.');
                 }

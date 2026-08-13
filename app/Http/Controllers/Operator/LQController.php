@@ -99,24 +99,36 @@ class LQController extends Controller
             return $item;
         });
 
+        $userId = Auth::id();
         $editItem = null;
         if ($request->has('edit')) {
-            $found = AnalysisResult::where('type', 'lq')->find((int)$request->edit);
+            $found = AnalysisResult::where('type', 'lq')
+                ->where(function ($q) use ($userId) {
+                    $q->where('user_id', $userId)
+                      ->orWhereRaw("results->>'user_id' = ?", [(string)$userId]);
+                })
+                ->find((int)$request->edit);
             if ($found) {
                 $editItem = array_merge(['id' => $found->id], $found->results ?? []);
             }
         }
 
         $simulasiList = AnalysisResult::where('type', 'lq')
+            ->where(function ($q) use ($userId) {
+                $q->where('user_id', $userId)
+                  ->orWhereRaw("results->>'user_id' = ?", [(string)$userId]);
+            })
             ->latest()
-            ->get()
-            ->map(function ($item) {
-                return array_merge([
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'created_at' => $item->created_at,
-                ], $item->results ?? []);
-            });
+            ->paginate(10, ['*'], 'sim_page')
+            ->withQueryString();
+
+        $simulasiList->getCollection()->transform(function ($item) {
+            return array_merge([
+                'id' => $item->id,
+                'title' => $item->title,
+                'created_at' => $item->created_at,
+            ], $item->results ?? []);
+        });
 
         $provinsis = Cache::remember('master_provinsis', 3600, function () {
             return Provinsi::orderBy('nama_provinsi')->get();
@@ -244,10 +256,10 @@ class LQController extends Controller
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
         AnalysisResult::create([
+            'user_id' => Auth::id(),
             'type' => 'lq',
             'title' => 'Simulasi LQ ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
             'results' => array_merge($validated, [
-                'user_id' => Auth::id(),
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'nilai_lq' => $lq,
@@ -258,7 +270,7 @@ class LQController extends Controller
 
         Cache::flush();
 
-        return redirect()->route('operator.lq.index')->with('success', 'Data simulasi LQ berhasil disimpan.');
+        return redirect()->route('operator.lq.index', ['tab' => 'simulasi'])->with('tab', 'simulasi')->with('success', 'Data simulasi LQ berhasil disimpan.');
     }
 
     public function update(Request $request, $id)
@@ -306,26 +318,39 @@ class LQController extends Controller
 
         Cache::flush();
 
-        return redirect()->route('operator.lq.index')->with('success', 'Data simulasi LQ berhasil diperbarui.');
+        return redirect()->route('operator.lq.index', ['tab' => 'simulasi'])->with('tab', 'simulasi')->with('success', 'Data simulasi LQ berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $item = AnalysisResult::where('type', 'lq')->findOrFail($id);
+        $userId = Auth::id();
+        $item = AnalysisResult::where('type', 'lq')
+            ->where(function ($q) use ($userId) {
+                $q->where('user_id', $userId)
+                  ->orWhereRaw("results->>'user_id' = ?", [(string)$userId]);
+            })
+            ->findOrFail($id);
+
         $item->delete();
 
         Cache::flush();
 
-        return redirect()->route('operator.lq.index')->with('success', 'Data simulasi LQ berhasil dihapus.');
+        return redirect()->route('operator.lq.index', ['tab' => 'simulasi'])->with('tab', 'simulasi')->with('success', 'Data simulasi LQ berhasil dihapus.');
     }
 
     public function empty()
     {
-        AnalysisResult::where('type', 'lq')->delete();
+        $userId = Auth::id();
+        AnalysisResult::where('type', 'lq')
+            ->where(function ($q) use ($userId) {
+                $q->where('user_id', $userId)
+                  ->orWhereRaw("results->>'user_id' = ?", [(string)$userId]);
+            })
+            ->delete();
 
         Cache::flush();
 
-        return redirect()->route('operator.lq.index')->with('success', 'Seluruh data simulasi LQ berhasil dihapus.');
+        return redirect()->route('operator.lq.index', ['tab' => 'simulasi'])->with('tab', 'simulasi')->with('success', 'Seluruh data simulasi LQ berhasil dihapus.');
     }
 
     public function import(Request $request)
@@ -378,10 +403,10 @@ class LQController extends Controller
                 : 'PDRB ' . strtoupper($prov);
 
             AnalysisResult::create([
+                'user_id' => Auth::id(),
                 'type' => 'lq',
                 'title' => 'Simulasi LQ ' . $daerahAnalisis . ' (' . $sektor . ')',
                 'results' => [
-                    'user_id' => Auth::id(),
                     'tingkat_wilayah' => $tingkatWilayah,
                     'provinsi' => $prov,
                     'kabupaten' => $kab,
