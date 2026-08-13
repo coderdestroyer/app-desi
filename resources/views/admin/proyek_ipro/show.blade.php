@@ -750,14 +750,31 @@
                 return this.getEBITDA(year) - (parseFloat(this.settings.pl_nominal_depresiasi) || 0);
             },
 
+            getPMT() {
+                const debt = this.getDebtAmount();
+                const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
+                const rate = (parseFloat(this.settings.suku_bunga_kredit) || 8.05) / 100;
+
+                if (debt > 0 && tenor > 0) {
+                    if (rate > 0) {
+                        const factor = Math.pow(1 + rate, tenor);
+                        return debt * (rate * factor) / (factor - 1);
+                    } else {
+                        return debt / tenor;
+                    }
+                }
+                return 0;
+            },
+
             getBebanBunga(year) {
                 const debt = this.getDebtAmount();
                 const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
                 const rate = (parseFloat(this.settings.suku_bunga_kredit) || 8.05) / 100;
 
-                if (year > tenor || debt <= 0) return 0;
-                const sisaPokokAwal = debt - ((year - 1) * (debt / tenor));
-                return sisaPokokAwal > 0 ? sisaPokokAwal * rate : 0;
+                if (year <= tenor && debt > 0) {
+                    return debt * rate;
+                }
+                return 0;
             },
 
             getEBT(year) {
@@ -787,8 +804,10 @@
             getAngsuranPokok(year) {
                 const debt = this.getDebtAmount();
                 const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
-                if (year <= tenor && tenor > 0) {
-                    return debt / tenor;
+                if (year <= tenor && debt > 0) {
+                    const pmt = this.getPMT();
+                    const bunga = this.getBebanBunga(year);
+                    return Math.max(0, pmt - bunga);
                 }
                 return 0;
             },
