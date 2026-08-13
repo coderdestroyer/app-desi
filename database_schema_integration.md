@@ -299,20 +299,28 @@ CREATE TABLE pdrb_sumatera_kabupaten (
 ```
 
 #### 16. Tabel `data_investasi`
-Menampung data realisasi/nilai investasi daerah per wilayah dan tahun (misal data Sumatera Utara).
+Menampung data rinci realisasi LKPM per perusahaan, status penanaman modal (PMDN/PMA), lokasi kabupaten/kota, sektor LKPM, dan tahun.
 ```sql
 CREATE TABLE data_investasi (
     id BIGSERIAL PRIMARY KEY,
+    id_laporan_lkpm BIGINT NULL,
+    id_proyek_nku BIGINT NULL,
+    nama_perusahaan VARCHAR(255) NOT NULL,
+    status VARCHAR(20) NOT NULL, -- 'PMDN', 'PMA'
     provinsi_id BIGINT NOT NULL REFERENCES provinsi(provinsi_id) ON DELETE CASCADE,
+    kabupaten_id BIGINT NULL REFERENCES kabupaten(kab_id) ON DELETE SET NULL,
+    nama_sektor VARCHAR(255) NULL, -- Sektor LKPM BKPM
     tahun INT NOT NULL,
     nilai_investasi NUMERIC(20, 2) NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_data_investasi_tahun ON data_investasi(tahun);
-CREATE INDEX idx_data_investasi_provinsi ON data_investasi(provinsi_id);
-CREATE INDEX idx_data_investasi_tahun_provinsi ON data_investasi(tahun, provinsi_id);
+CREATE INDEX idx_data_investasi_lkpm ON data_investasi(id_laporan_lkpm);
+CREATE INDEX idx_data_investasi_perusahaan ON data_investasi(nama_perusahaan);
+CREATE INDEX idx_data_investasi_status ON data_investasi(status);
+CREATE INDEX idx_data_investasi_tahun_wilayah ON data_investasi(tahun, provinsi_id, kabupaten_id);
+CREATE INDEX idx_data_investasi_tahun_sektor ON data_investasi(tahun, nama_sektor);
 ```
 
 ---
