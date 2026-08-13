@@ -25,10 +25,8 @@ class ProfitLossController extends Controller
         $project->load(['capexComponents']);
 
         $parents = $project->capexComponents->where('parent_id', null)->sortBy('id')->values();
-        $parentFirst = $parents->first();
-        $parentLast = ($parents->count() > 1) ? $parents->last() : null;
-        $parent0Id = $parentFirst ? $parentFirst->id : null;
-        $parent1Id = ($parentLast && $parentLast->id !== $parent0Id) ? $parentLast->id : null;
+        $parent0Id = isset($parents[0]) ? $parents[0]->id : null;
+        $parent1Id = isset($parents[1]) ? $parents[1]->id : null;
 
         $totalCapex = 0;
         $subtotalParent0 = 0;
@@ -36,9 +34,9 @@ class ProfitLossController extends Controller
 
         foreach ($project->capexComponents as $comp) {
             if ($comp->parent_id !== null) {
-                $vol = $comp->volume && $comp->volume > 0 ? (float)$comp->volume : 1;
-                $luas = $comp->luas && $comp->luas > 0 ? (float)$comp->luas : 0;
-                $harga = $comp->harga_m2 ? (float)$comp->harga_m2 : 0;
+                $vol = $comp->volume && $comp->volume > 0 ? (float) $comp->volume : 1;
+                $luas = $comp->luas && $comp->luas > 0 ? (float) $comp->luas : 0;
+                $harga = $comp->harga_m2 ? (float) $comp->harga_m2 : 0;
 
                 $itemTotal = ($luas > 0) ? ($vol * $luas * $harga) : ($vol * $harga);
                 $totalCapex += $itemTotal;
@@ -52,8 +50,8 @@ class ProfitLossController extends Controller
         }
 
         $depreciableCapex = max(0, $totalCapex - $subtotalParent0 - $subtotalParent1);
-        $tenorTahun = max(1, (int) $project->jangka_waktu_tahun);
-        $calculatedDepresiasi = $depreciableCapex / $tenorTahun;
+        $jangkaWaktuTahun = max(1, (int) $project->jangka_waktu_tahun);
+        $calculatedDepresiasi = $depreciableCapex / $jangkaWaktuTahun;
 
         $components = $project->plComponents()
             ->with('yearlyData')
@@ -64,8 +62,7 @@ class ProfitLossController extends Controller
         $pajakPct = ($pajakRaw > 0) ? $pajakRaw : 22.00;
 
         $bungaPct = (float) $project->suku_bunga_kredit;
-        $savedDepresiasi = (float) $project->pl_nominal_depresiasi;
-        $nominalDepresiasi = ($savedDepresiasi > 0) ? $savedDepresiasi : $calculatedDepresiasi;
+        $nominalDepresiasi = $calculatedDepresiasi;
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -100,10 +97,10 @@ class ProfitLossController extends Controller
         ]);
 
         $pajakInput = $request->input('pl_persentase_pajak_penghasilan');
-        $pajakSave = (is_numeric($pajakInput) && (float)$pajakInput > 0) ? (float)$pajakInput : 22.00;
+        $pajakSave = (is_numeric($pajakInput) && (float) $pajakInput > 0) ? (float) $pajakInput : 22.00;
 
         $bungaInput = $request->input('suku_bunga_kredit');
-        $bungaSave = (is_numeric($bungaInput) && (float)$bungaInput > 0) ? (float)$bungaInput : 8.05;
+        $bungaSave = (is_numeric($bungaInput) && (float) $bungaInput > 0) ? (float) $bungaInput : 8.05;
 
         $project->update([
             'pl_persentase_pajak_penghasilan' => $pajakSave,
@@ -140,9 +137,9 @@ class ProfitLossController extends Controller
                 if ($request->has('settings')) {
                     $s = $request->input('settings', []);
                     $pajakInput = $s['pl_persentase_pajak_penghasilan'] ?? null;
-                    $pajakSave = (is_numeric($pajakInput) && (float)$pajakInput > 0) ? (float)$pajakInput : 22.00;
+                    $pajakSave = (is_numeric($pajakInput) && (float) $pajakInput > 0) ? (float) $pajakInput : 22.00;
                     $bungaInput = $s['suku_bunga_kredit'] ?? null;
-                    $bungaSave = (is_numeric($bungaInput) && (float)$bungaInput > 0) ? (float)$bungaInput : 8.05;
+                    $bungaSave = (is_numeric($bungaInput) && (float) $bungaInput > 0) ? (float) $bungaInput : 8.05;
 
                     $project->update([
                         'pl_persentase_pajak_penghasilan' => $pajakSave,
@@ -152,7 +149,7 @@ class ProfitLossController extends Controller
                 }
 
                 $existing = $project->plComponents()->get();
-                foreach($existing as $comp) {
+                foreach ($existing as $comp) {
                     $comp->yearlyData()->delete();
                 }
                 $project->plComponents()->delete();
@@ -161,7 +158,7 @@ class ProfitLossController extends Controller
                 $idMap = [];
                 $pending = $components;
 
-                $saveYearlyData = function($model, $yearlyData) {
+                $saveYearlyData = function ($model, $yearlyData) {
                     if (!empty($yearlyData)) {
                         foreach ($yearlyData as $tahunKe => $nilai) {
                             if (is_numeric($nilai) && $nilai > 0) {
@@ -185,8 +182,7 @@ class ProfitLossController extends Controller
                             ]);
                             $idMap[$c['temp_id']] = $new->id;
                             $saveYearlyData($new, $c['yearly_data'] ?? []);
-                        } 
-                        else if (isset($idMap[$c['parent_temp_id']])) {
+                        } else if (isset($idMap[$c['parent_temp_id']])) {
                             $new = $project->plComponents()->create([
                                 'parent_id' => $idMap[$c['parent_temp_id']],
                                 'nama_komponen' => $namaComp,
@@ -194,8 +190,7 @@ class ProfitLossController extends Controller
                             ]);
                             $idMap[$c['temp_id']] = $new->id;
                             $saveYearlyData($new, $c['yearly_data'] ?? []);
-                        } 
-                        else {
+                        } else {
                             $nextPending[] = $c;
                         }
                     }

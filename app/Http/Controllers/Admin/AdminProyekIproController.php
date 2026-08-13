@@ -22,7 +22,7 @@ class AdminProyekIproController extends Controller
             $search = strtolower(trim($request->search));
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(nama_proyek) LIKE ?', ["%{$search}%"])
-                  ->orWhereRaw('LOWER(deskripsi) LIKE ?', ["%{$search}%"]);
+                    ->orWhereRaw('LOWER(deskripsi) LIKE ?', ["%{$search}%"]);
             });
         }
 
@@ -47,20 +47,18 @@ class AdminProyekIproController extends Controller
     public function show($id)
     {
         $project = Project::with([
-            'user', 
-            'kabupaten', 
+            'user',
+            'kabupaten',
             'kecamatan',
-            'sektor', 
-            'capexComponents', 
+            'sektor',
+            'capexComponents',
             'plComponents.yearlyData'
         ])->findOrFail($id);
 
         // 1. Hitung total CAPEX riil
         $parents = $project->capexComponents->where('parent_id', null)->sortBy('id')->values();
-        $parentFirst = $parents->first();
-        $parentLast = ($parents->count() > 1) ? $parents->last() : null;
-        $parent0Id = $parentFirst ? $parentFirst->id : null;
-        $parent1Id = ($parentLast && $parentLast->id !== $parent0Id) ? $parentLast->id : null;
+        $parent0Id = isset($parents[0]) ? $parents[0]->id : null;
+        $parent1Id = isset($parents[1]) ? $parents[1]->id : null;
 
         $totalCapex = 0;
         $subtotalParent0 = 0;
@@ -68,9 +66,9 @@ class AdminProyekIproController extends Controller
 
         foreach ($project->capexComponents as $comp) {
             if ($comp->parent_id !== null) {
-                $vol = $comp->volume && $comp->volume > 0 ? (float)$comp->volume : 1;
-                $luas = $comp->luas && $comp->luas > 0 ? (float)$comp->luas : 0;
-                $harga = $comp->harga_m2 ? (float)$comp->harga_m2 : 0;
+                $vol = $comp->volume && $comp->volume > 0 ? (float) $comp->volume : 1;
+                $luas = $comp->luas && $comp->luas > 0 ? (float) $comp->luas : 0;
+                $harga = $comp->harga_m2 ? (float) $comp->harga_m2 : 0;
 
                 $itemTotal = ($luas > 0) ? ($vol * $luas * $harga) : ($vol * $harga);
                 $totalCapex += $itemTotal;
@@ -84,11 +82,9 @@ class AdminProyekIproController extends Controller
         }
 
         $depreciableCapex = max(0, $totalCapex - $subtotalParent0 - $subtotalParent1);
-        $tenorTahun = max(1, (int) $project->jangka_waktu_tahun);
-        $calculatedDepresiasi = $depreciableCapex / $tenorTahun;
-        if ((float)$project->pl_nominal_depresiasi <= 0) {
-            $project->pl_nominal_depresiasi = $calculatedDepresiasi;
-        }
+        $jangkaWaktuTahun = max(1, (int) $project->jangka_waktu_tahun);
+        $calculatedDepresiasi = $depreciableCapex / $jangkaWaktuTahun;
+        $project->pl_nominal_depresiasi = $calculatedDepresiasi;
 
         // Kelompokkan Komponen CAPEX
         $capexParents = $project->capexComponents->where('parent_id', null);
@@ -98,9 +94,9 @@ class AdminProyekIproController extends Controller
             $subtotal = 0;
             $itemList = [];
             foreach ($items as $item) {
-                $v = $item->volume && $item->volume > 0 ? (float)$item->volume : 1;
-                $l = $item->luas && $item->luas > 0 ? (float)$item->luas : 0;
-                $h = $item->harga_m2 ? (float)$item->harga_m2 : 0;
+                $v = $item->volume && $item->volume > 0 ? (float) $item->volume : 1;
+                $l = $item->luas && $item->luas > 0 ? (float) $item->luas : 0;
+                $h = $item->harga_m2 ? (float) $item->harga_m2 : 0;
                 $tot = ($l > 0) ? ($v * $l * $h) : ($v * $h);
                 $subtotal += $tot;
 
@@ -166,13 +162,13 @@ class AdminProyekIproController extends Controller
         $debtAmount = $totalCapex * ($rasioDebt / 100);
 
         return view('admin.proyek_ipro.show', compact(
-            'project', 
-            'totalCapex', 
-            'capexList', 
+            'project',
+            'totalCapex',
+            'capexList',
             'pendapatanPerTahun',
             'opexPerTahun',
             'plComponentsFormatted',
-            'equityAmount', 
+            'equityAmount',
             'debtAmount'
         ));
     }

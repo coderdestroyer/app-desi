@@ -83,9 +83,23 @@ class CapexController extends Controller
                     return !empty($item['parent_temp_id']);
                 });
 
+                $orderedParents = [];
+                if (count($parents) >= 2) {
+                    $firstDefault = $parents[0];
+                    $lastDefault = $parents[count($parents) - 1];
+                    $middle = array_slice($parents, 1, count($parents) - 2);
+                    $orderedParents[] = $firstDefault;
+                    $orderedParents[] = $lastDefault;
+                    foreach ($middle as $m) {
+                        $orderedParents[] = $m;
+                    }
+                } else {
+                    $orderedParents = $parents;
+                }
+
                 $idMap = [];
 
-                foreach ($parents as $p) {
+                foreach ($orderedParents as $p) {
                     $newParent = $project->capexComponents()->create([
                         'nama_komponen' => $p['nama_komponen'],
                         'volume' => null,

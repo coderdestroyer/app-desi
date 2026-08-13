@@ -707,6 +707,9 @@
                                 this.settings.suku_bunga_kredit = 8.05;
                             }
                         }
+                        if (data.calculated_depresiasi !== undefined) {
+                            this.settings.pl_nominal_depresiasi = parseFloat(data.calculated_depresiasi) || 0;
+                        }
                         if (data.total_capex !== undefined) {
                             this.totalCapex = parseFloat(data.total_capex) || 0;
                         }
