@@ -14,4 +14,9 @@ class DataInvestasi extends Model
     {
         return $this->belongsTo(Provinsi::class, 'provinsi_id', 'provinsi_id');
     }
+
+    public function kabupaten()
+    {
+        return $this->belongsTo(Kabupaten::class, 'kabupaten_id', 'kab_id');
+    }
 }
