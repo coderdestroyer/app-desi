@@ -27,7 +27,7 @@
 </div>
 
 <script>
-    (function () {
+    (function() {
         const loader = document.getElementById('pageLoader');
         const loaderTextEl = document.getElementById('pageLoaderText');
         if (!loader) return;
@@ -95,12 +95,12 @@
         };
 
         // Listen for custom show-loader events
-        window.addEventListener('show-loader', function (e) {
+        window.addEventListener('show-loader', function(e) {
             const text = e.detail && e.detail.text ? e.detail.text : 'Memproses Data';
             showLoader(text);
         });
 
-        window.addEventListener('hide-loader', function () {
+        window.addEventListener('hide-loader', function() {
             isNavigating = false;
             hideLoader();
         });
@@ -111,19 +111,23 @@
         if (document.readyState === 'complete') {
             hideLoader();
         } else {
-            window.addEventListener('load', hideLoader, { once: true });
+            window.addEventListener('load', hideLoader, {
+                once: true
+            });
             document.addEventListener('DOMContentLoaded', function() {
                 domContentTimer = setTimeout(hideLoader, 200);
-            }, { once: true });
+            }, {
+                once: true
+            });
         }
 
         // Show loader on page navigation / unload
-        window.addEventListener('beforeunload', function () {
+        window.addEventListener('beforeunload', function() {
             showLoader(loaderTextEl ? loaderTextEl.innerText : 'Memuat Halaman');
         });
 
         // Handle page restoration from back/forward cache
-        window.addEventListener('pageshow', function (event) {
+        window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
                 isNavigating = false;
                 hideLoader();
@@ -131,21 +135,21 @@
         });
 
         // Handle clicks on internal navigation links & action buttons
-        document.addEventListener('click', function (e) {
+        document.addEventListener('click', function(e) {
             const link = e.target.closest('a');
             if (!link) return;
 
             const href = link.getAttribute('href');
             const target = link.getAttribute('target');
 
-            if (!href || 
-                href.startsWith('#') || 
-                href.startsWith('javascript:') || 
-                href.startsWith('mailto:') || 
-                href.startsWith('tel:') || 
-                target === '_blank' || 
-                e.ctrlKey || 
-                e.metaKey || 
+            if (!href ||
+                href.startsWith('#') ||
+                href.startsWith('javascript:') ||
+                href.startsWith('mailto:') ||
+                href.startsWith('tel:') ||
+                target === '_blank' ||
+                e.ctrlKey ||
+                e.metaKey ||
                 link.hasAttribute('download') ||
                 link.hasAttribute('data-no-loader')) {
                 return;
@@ -172,7 +176,7 @@
         });
 
         // Handle non-ajax form submissions dynamically
-        document.addEventListener('submit', function (e) {
+        document.addEventListener('submit', function(e) {
             const form = e.target;
             if (form && !form.hasAttribute('data-no-loader') && form.target !== '_blank') {
                 let loaderText = form.getAttribute('data-loader-text');

@@ -3,7 +3,19 @@
 @section('title', 'Analisis Klassen')
 
 @section('content')
-<div x-data="{ activeTab: '{{ $editItem ? 'simulasi' : 'real' }}' }" class="space-y-6">
+<div x-data="{ 
+    activeTab: '{{ ($editItem || session('tab') === 'simulasi' || request('tab') === 'simulasi' || request('sim_page')) ? 'simulasi' : 'real' }}',
+    isDeleteModalOpen: false,
+    deleteActionUrl: '',
+    deleteTargetName: '',
+    deleteTargetYear: '',
+    openDeleteModal(url, name, year) {
+        this.deleteActionUrl = url;
+        this.deleteTargetName = name || 'Simulasi';
+        this.deleteTargetYear = year || '-';
+        this.isDeleteModalOpen = true;
+    }
+}" class="space-y-6">
 
     <!-- Alert Messages -->
     @if (session('success'))
@@ -111,13 +123,21 @@
         </div>
 
         <!-- Form Card Container -->
-        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-4 sm:p-5 md:p-6">
-            <div class="mb-5 sm:mb-6 border-b border-slate-100 pb-4">
-                <h2 class="text-lg sm:text-xl font-bold text-slate-800">{{ $editItem ? 'Edit Data Simulasi Klassen' : 'Tambah Simulasi Klassen Baru' }}</h2>
-                <p class="text-slate-500 text-xs mt-0.5">Masukkan variabel nilai PDRB multi-tahun custom untuk diuji</p>
+        <div id="formSimulasiCard" class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-4 sm:p-5 md:p-6">
+            <div class="mb-5 sm:mb-6 border-b border-slate-100 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h2 id="formTitleText" class="text-lg sm:text-xl font-bold text-slate-800">{{ $editItem ? 'Edit Data Simulasi Klassen' : 'Tambah Simulasi Klassen Baru' }}</h2>
+                    <p id="formSubTitleText" class="text-slate-500 text-xs mt-0.5">Masukkan variabel nilai PDRB multi-tahun custom untuk diuji</p>
+                </div>
+                <div id="editBadgeNotice" class="{{ $editItem ? '' : 'hidden' }}">
+                    <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen text-amber-600"></i>
+                        <span>Sedang Mengedit Log Terpilih</span>
+                    </span>
+                </div>
             </div>
 
-            <form action="{{ $editItem ? route('operator.klassen.update', $editItem['id']) : route('operator.klassen.store') }}" method="POST" class="space-y-6" x-data="{ 
+            <form id="klassenForm" action="{{ $editItem ? route('operator.klassen.update', $editItem['id']) : route('operator.klassen.store') }}" method="POST" class="space-y-6" x-data="{ 
                 tingkat_wilayah: '{{ old('tingkat_wilayah', $editItem['tingkat_wilayah'] ?? 'Kabupaten/Kota') }}',
                 provinsi: '{{ old('provinsi', $editItem['provinsi'] ?? '') }}',
                 get listKabupaten() {
@@ -156,15 +176,17 @@
                 }
             }">
                 @csrf
-                @if($editItem)
-                    @method('PUT')
-                @endif
+                <div id="methodPutContainer">
+                    @if($editItem)
+                        @method('PUT')
+                    @endif
+                </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
                     <div class="space-y-2 col-span-1">
                         <label class="op-label">Tingkat Wilayah</label>
                         <div class="relative">
-                            <select name="tingkat_wilayah" x-model="tingkat_wilayah" class="op-input op-input-icon op-select" required>
+                            <select id="field_tingkat_wilayah" name="tingkat_wilayah" x-model="tingkat_wilayah" class="op-input op-input-icon op-select" required>
                                 <option value="Kabupaten/Kota">Kabupaten/Kota</option>
                                 <option value="Provinsi">Provinsi</option>
                             </select>
@@ -177,7 +199,7 @@
                     <div class="space-y-2 col-span-1">
                         <label class="op-label">Sektor</label>
                         <div class="relative">
-                            <input list="sektor-list" name="sektor" value="{{ old('sektor', $editItem['sektor'] ?? '') }}" class="op-input op-input-icon op-datalist" placeholder="Pilih Sektor" required>
+                            <input id="field_sektor" list="sektor-list" name="sektor" value="{{ old('sektor', $editItem['sektor'] ?? '') }}" class="op-input op-input-icon op-datalist" placeholder="Pilih Sektor" required>
                             <datalist id="sektor-list">
                                 <option value="PERTANIAN, KEHUTANAN, DAN PERIKANAN">
                                 <option value="PERTAMBANGAN DAN PENGGALIAN">
@@ -198,7 +220,7 @@
                     <div class="space-y-2 col-span-1">
                         <label class="op-label">Provinsi</label>
                         <div class="relative">
-                            <input list="provinsi-list" name="provinsi" x-model="provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
+                            <input id="field_provinsi" list="provinsi-list" name="provinsi" x-model="provinsi" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Provinsi" required>
                             <datalist id="provinsi-list">
                                 <template x-for="prov in Object.keys(window.daftarWilayah)" :key="prov">
                                     <option :value="prov"></option>
@@ -213,7 +235,7 @@
                     <div class="space-y-2 col-span-1" x-show="tingkat_wilayah === 'Kabupaten/Kota'">
                         <label class="op-label">Kabupaten / Kota</label>
                         <div class="relative">
-                            <input list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
+                            <input id="field_kabupaten" list="kabupaten-list" name="kabupaten" value="{{ old('kabupaten', $editItem['kabupaten'] ?? '') }}" :required="tingkat_wilayah === 'Kabupaten/Kota'" autocomplete="off" class="op-input op-input-icon op-datalist" placeholder="Pilih atau ketik Kab/Kota">
                             <datalist id="kabupaten-list">
                                 <template x-for="kab in listKabupaten" :key="kab">
                                     <option :value="kab"></option>
@@ -285,38 +307,154 @@
                 <div class="flex flex-col-reverse sm:flex-row items-center gap-3 pt-2">
                     <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-sm">
                         <i class="fa-solid fa-floppy-disk text-[#FFD54F]"></i>
-                        <span>{{ $editItem ? 'Perbarui Data Simulasi' : 'Simpan Data Simulasi' }}</span>
+                        <span id="submitBtnText">{{ $editItem ? 'Perbarui Data Simulasi' : 'Simpan Data Simulasi' }}</span>
                     </button>
-                    @if($editItem)
-                        <a href="{{ route('operator.klassen.index') }}" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">Batal Edit</a>
-                    @endif
+                    <a id="cancelEditBtn" href="{{ route('operator.klassen.index') }}" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors {{ $editItem ? '' : 'hidden' }}">Batal Edit</a>
                 </div>
             </form>
         </div>
 
+        <!-- Tabel Log Hasil Simulasi Operator -->
+        <div class="bg-white rounded-2xl border border-[#CFE3D5] shadow-xs p-4 sm:p-5 md:p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-[#145239]"></i>
+                        <span>Riwayat Log Hasil Simulasi Tipologi Klassen</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Klik pada salah satu baris di bawah untuk memuat data ke dalam form edit di atas</p>
+                </div>
+                <span class="px-3 py-1 bg-[#EEF8F2] text-[#145239] border border-[#CFE3D5] rounded-xl text-xs font-bold">
+                    Total: {{ count($simulasiList ?? []) }} Data Simulasi
+                </span>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+                <table id="klassenTable" class="w-full text-xs text-left text-slate-700">
+                    <thead class="bg-[#145239] text-white uppercase text-[11px] font-semibold tracking-wider">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-12">#</th>
+                            <th class="px-4 py-3">Wilayah Analisis</th>
+                            <th class="px-4 py-3">Sektor</th>
+                            <th class="px-4 py-3 text-center">Periode Tahun</th>
+                            <th class="px-4 py-3 text-right">Laju Pertumbuhan (Gi)</th>
+                            <th class="px-4 py-3 text-right">Laju Pembanding (Gr)</th>
+                            <th class="px-4 py-3 text-right">Rasio Kontribusi (Si)</th>
+                            <th class="px-4 py-3 text-right">Kontribusi Pembanding (Sr)</th>
+                            <th class="px-4 py-3 text-center">Kuadran / Klasifikasi</th>
+                            <th class="px-4 py-3 text-center">Tanggal Log</th>
+                            <th class="px-4 py-3 text-center w-16">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        @forelse($simulasiList ?? [] as $index => $sim)
+                            <tr onclick="editKlassenItem({{ json_encode($sim) }})" class="hover:bg-emerald-50/70 cursor-pointer transition-colors group">
+                                <td class="px-4 py-3 text-center font-bold text-slate-500">{{ $index + 1 }}</td>
+                                <td class="px-4 py-3 font-semibold text-slate-800 group-hover:text-[#145239]">
+                                    {{ $sim['daerah_analisis'] ?? ($sim['kabupaten'] ?? $sim['provinsi'] ?? '-') }}
+                                    <span class="block text-[10px] text-slate-400 font-normal">Pembanding: {{ $sim['daerah_pembanding'] ?? '-' }}</span>
+                                </td>
+                                <td class="px-4 py-3 font-medium text-slate-700">{{ $sim['sektor'] ?? '-' }}</td>
+                                <td class="px-4 py-3 text-center font-bold text-slate-600">
+                                    {{ $sim['tahun_awal'] ?? '' }} - {{ $sim['tahun_akhir'] ?? ($sim['tahun'] ?? '') }}
+                                </td>
+                                <td class="px-4 py-3 text-right font-bold text-slate-800">{{ number_format($sim['gi'] ?? $sim['laju_pertumbuhan_sektor'] ?? 0, 2, ',', '.') }}%</td>
+                                <td class="px-4 py-3 text-right font-semibold text-slate-600">{{ number_format($sim['gr'] ?? $sim['laju_pertumbuhan_pembanding'] ?? 0, 2, ',', '.') }}%</td>
+                                <td class="px-4 py-3 text-right font-bold text-slate-800">{{ number_format($sim['si'] ?? $sim['kontribusi_sektor'] ?? 0, 2, ',', '.') }}%</td>
+                                <td class="px-4 py-3 text-right font-semibold text-slate-600">{{ number_format($sim['sr'] ?? $sim['kontribusi_pembanding'] ?? 0, 2, ',', '.') }}%</td>
+                                <td class="px-4 py-3 text-center">
+                                    @php
+                                        $kd = $sim['kuadran'] ?? '';
+                                        $badgeClass = match($kd) {
+                                            'Kuadran I' => 'bg-[#EEF8F2] text-[#145239] border-[#CFE3D5]',
+                                            'Kuadran II' => 'bg-amber-50 text-amber-800 border-amber-200',
+                                            'Kuadran III' => 'bg-blue-50 text-blue-800 border-blue-200',
+                                            default => 'bg-slate-100 text-slate-700 border-slate-200',
+                                        };
+                                    @endphp
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-[11px] font-bold border {{ $badgeClass }}">
+                                        {{ $kd }} - {{ $sim['klasifikasi_sektor'] ?? $sim['kategori_sektor'] ?? '-' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-center text-slate-500 text-[11px]">
+                                    {{ isset($sim['created_at']) ? \Carbon\Carbon::parse($sim['created_at'])->format('d/m/Y H:i') : '-' }}
+                                </td>
+                                <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
+                                    <button type="button" @click="openDeleteModal('{{ route('operator.klassen.destroy', $sim['id']) }}', '{{ str_replace('\'', '\\\'', $sim['sektor'] ?? $sim['daerah_analisis'] ?? 'Simulasi') }}', '{{ $sim['tahun'] ?? '' }}')" class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 flex items-center justify-center transition-colors" title="Hapus Simulasi">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="11" class="px-4 py-8 text-center text-slate-400">
+                                    <i class="fa-solid fa-inbox text-2xl mb-2 block text-slate-300"></i>
+                                    <span>Belum ada log data simulasi yang tersimpan.</span>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <x-pagination :paginator="$simulasiList" />
+        </div>
+
         <!-- Saved Simulations Action Toolbar -->
         <div class="flex flex-col-reverse sm:flex-row justify-end items-center gap-3">
-            <form action="{{ route('operator.klassen.empty') }}" method="POST" onsubmit="return confirmDeleteAll(event, this);" class="w-full sm:w-auto">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span>Hapus Semua Simulasi</span>
-                </button>
-            </form>
-
-            <button type="button" onclick="exportToExcel()" class="flex items-center justify-center gap-2 bg-[#145239] hover:bg-[#0F8A5F] text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs w-full sm:w-auto">
-                <i class="fa-solid fa-file-excel text-[#FFD54F]"></i>
-                <span>Unduh Hasil Analisis (Excel)</span>
+            <button type="button" @click="openDeleteModal('{{ route('operator.klassen.empty') }}', 'Seluruh Data Simulasi', 'Semua Tahun')" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs">
+                <i class="fa-solid fa-trash-can"></i>
+                <span>Hapus Semua Simulasi</span>
             </button>
+
+            <!-- Delete Confirmation Modal -->
+            <x-confirm-delete-modal title="Konfirmasi Hapus Data Simulasi" warningMessage="Tindakan ini akan menghapus log data simulasi terpilih dan tidak dapat dibatalkan." />
         </div>
-    </div>
 
 </div>
 
+@push('modals')
 <x-import-modal action="{{ route('operator.klassen.import') }}" type="klassen" />
+@endpush
 
 <script>
+    function editKlassenItem(sim) {
+        if(!sim) return;
+
+        var form = document.getElementById('klassenForm');
+        if(!form) return;
+
+        form.action = '/operator/analisis-klassen/' + sim.id;
+        document.getElementById('methodPutContainer').innerHTML = '<input type="hidden" name="_method" value="PUT">';
+
+        document.getElementById('field_sektor').value = sim.sektor || '';
+
+        var provEl = document.getElementById('field_provinsi');
+        if(provEl) {
+            provEl.value = sim.provinsi || '';
+            provEl.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        var twEl = document.getElementById('field_tingkat_wilayah');
+        if(twEl) {
+            twEl.value = sim.tingkat_wilayah || 'Kabupaten/Kota';
+            twEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        setTimeout(function() {
+            var kabEl = document.getElementById('field_kabupaten');
+            if(kabEl) kabEl.value = sim.kabupaten || '';
+        }, 50);
+
+        document.getElementById('formTitleText').innerText = 'Edit Data Simulasi Tipologi Klassen';
+        document.getElementById('formSubTitleText').innerText = 'Mengubah variabel log simulasi terpilih';
+        document.getElementById('submitBtnText').innerText = 'Perbarui Data Simulasi';
+        document.getElementById('editBadgeNotice').classList.remove('hidden');
+        document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+        document.getElementById('formSimulasiCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
     function exportToExcel() {
         var table = document.getElementById("klassenTable");
         var clone = table.cloneNode(true);
