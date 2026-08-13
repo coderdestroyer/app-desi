@@ -271,18 +271,16 @@
 <script>
     function registerCashflow() {
         Alpine.data('cashflowManager', () => ({
-            totalCapex: {
-                {
-                    $totalCapex
-                }
-            },
-            jangkaWaktu: {
-                {
-                    $project - > jangka_waktu_tahun
-                }
-            },
+            totalCapex: {{ $totalCapex }},
+            jangkaWaktu: {{ $project->jangka_waktu_tahun }},
             pendapatanPerTahun: @json($pendapatanPerTahun),
             opexPerTahun: @json($opexPerTahun),
+            settings: {
+                rasio_modal_sendiri: {{ (float) $project->rasio_modal_sendiri }},
+                rasio_pinjaman_kredit: {{ (float) $project->rasio_pinjaman_kredit }},
+                suku_bunga_kredit: {{ (float) $project->suku_bunga_kredit }},
+                tenor_kredit_tahun: {{ (int) $project->tenor_kredit_tahun }},
+            },
             isSaving: false,
             hasUnsavedChanges: false,
             showLeaveModal: false,
@@ -293,11 +291,7 @@
             autoSaveTimeout: null,
             localDraftTimeout: null,
             fiveMinIntervalTimer: null,
-            storageKey: 'cashflow_settings_draft_' + {
-                {
-                    $project - > id
-                }
-            },
+            storageKey: 'cashflow_settings_draft_' + {{ $project->id }},
 
             initData() {
                 const localDraft = localStorage.getItem(this.storageKey);
@@ -502,11 +496,25 @@
                 return 0;
             },
 
+            getPMT() {
+                const debt = this.getDebtAmount();
+                const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
+                const rate = (parseFloat(this.settings.suku_bunga_kredit) || 0) / 100;
+
+                if (debt <= 0 || tenor <= 0) return 0;
+                if (rate <= 0) return debt / tenor;
+
+                const factor = Math.pow(1 + rate, tenor);
+                return debt * (rate * factor) / (factor - 1);
+            },
+
             getAngsuranPokok(t) {
                 const debt = this.getDebtAmount();
-                const tenor = parseInt(this.settings.tenor_kredit_tahun) || 1;
+                const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
                 if (t >= 1 && t <= tenor && debt > 0) {
-                    return debt / tenor;
+                    const pmt = this.getPMT();
+                    const bunga = this.getBebanBunga(t);
+                    return Math.max(0, pmt - bunga);
                 }
                 return 0;
             },

@@ -33,6 +33,33 @@ class Project extends Model
         'tenor_kredit_tahun',
     ];
 
+    protected $attributes = [
+        'rasio_modal_sendiri' => 60.00,
+        'rasio_pinjaman_kredit' => 40.00,
+        'suku_bunga_kredit' => 8.05,
+        'tenor_kredit_tahun' => 5,
+    ];
+
+    public function getRasioModalSendiriAttribute($value): float
+    {
+        return (float) ($value && (float)$value > 0 ? $value : 60.00);
+    }
+
+    public function getRasioPinjamanKreditAttribute($value): float
+    {
+        return (float) ($value && (float)$value > 0 ? $value : 40.00);
+    }
+
+    public function getSukuBungaKreditAttribute($value): float
+    {
+        return (float) ($value && (float)$value > 0 ? $value : 8.05);
+    }
+
+    public function getTenorKreditTahunAttribute($value): int
+    {
+        return (int) ($value && (int)$value > 0 ? $value : 5);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

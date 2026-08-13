@@ -100,10 +100,17 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Depresiasi (Nominal per Tahun)</label>
-                    <input type="number" min="0" x-model.number="settings.pl_nominal_depresiasi" @input="if(settings.pl_nominal_depresiasi < 0) settings.pl_nominal_depresiasi = 0" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:border-[#145239] focus:ring-[#145239] font-mono shadow-xs" placeholder="0">
-                </div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-xs text-slate-500 font-bold">Rp</span>
+                        <input type="text" 
+                               :value="formatRupiah(settings.pl_nominal_depresiasi)" 
+                               @input="let raw = $event.target.value.replace(/[^0-9]/g, ''); settings.pl_nominal_depresiasi = raw ? parseFloat(raw) : 0; $event.target.value = formatRupiah(settings.pl_nominal_depresiasi);" 
+                               class="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-2.5 py-1.5 text-xs focus:border-[#145239] focus:ring-[#145239] font-mono shadow-xs" 
+                               placeholder="0">
+                    </div>
+                    <p class="text-[10px] text-[#145239] mt-1 font-medium"><i class="fa-solid fa-calculator mr-1"></i>Otomatis: (Total CAPEX - Persiapan - Fasilitas Pendukung) / {{ $project->jangka_waktu_tahun }} Tahun</p>                </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Suku Bunga Pinjaman (% / Thn)</label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Suku Bunga Pinjaman (% / Tahun)</label>
                     <div class="relative">
                         <input type="number" step="0.01" min="0" max="100" x-model.number="settings.suku_bunga_kredit" @input="if(settings.suku_bunga_kredit < 0) settings.suku_bunga_kredit = 0" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 pr-7 text-xs focus:border-[#145239] focus:ring-[#145239] font-mono shadow-xs" placeholder="8.05">
                         <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-xs text-slate-400 font-bold">%</span>
@@ -388,7 +395,8 @@
                     <!-- Bunga -->
                     <tr class="bg-white border-b border-slate-200">
                         <td class="px-4 py-2 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-700">
-                            Beban Bunga Pinjaman Bank (-) <span class="text-xs text-[#145239] font-bold" x-text="'(' + (settings.suku_bunga_kredit || 8.05) + '%)'"></span>
+                            Beban Bunga Pinjaman Bank (-)
+                            <!-- <span class="text-xs text-[#145239] font-bold" x-text="'(' + (settings.suku_bunga_kredit || 8.05) + '%)'"></span> -->
                         </td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-2 text-right font-mono text-slate-700 border-r border-slate-200 whitespace-nowrap" x-text="formatRupiah(getBebanBunga(year))"></td>
@@ -406,7 +414,8 @@
                     <!-- Pajak -->
                     <tr class="bg-white border-b border-slate-200">
                         <td class="px-4 py-2 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)] text-slate-700">
-                            Pajak PPh (-) <span class="text-xs text-slate-500 italic" x-text="'(' + (settings.pl_persentase_pajak_penghasilan || 22) + '% dari EBT)'"></span>
+                            Pajak PPh (-)
+                            <!-- <span class="text-xs text-slate-500 italic" x-text="'(' + (settings.pl_persentase_pajak_penghasilan || 22) + '% dari EBT)'"></span> -->
                         </td>
                         <template x-for="year in years" :key="year">
                             <td class="px-4 py-2 text-right font-mono text-slate-700 border-r border-slate-200 whitespace-nowrap" x-text="formatRupiah(getPajakPenghasilan(year))"></td>
@@ -438,6 +447,7 @@
             projectId: {{ $project->id }},
             years: [],
             
+            isInitializing: false,
             isPreviewMode: false,
             isSaving: false,
             isSavingSettings: false,
@@ -565,6 +575,7 @@
             },
 
             triggerAutoSave() {
+                if (this.isInitializing) return;
                 this.hasUnsavedChanges = true;
                 this.pushHistoryGuard();
                 clearTimeout(this.localDraftTimeout);
@@ -594,7 +605,7 @@
                             'X-CSRF-TOKEN': csrfMeta ? csrfMeta.getAttribute('content') : '{{ csrf_token() }}',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ components: this.rows })
+                        body: JSON.stringify({ components: this.rows, settings: this.settings })
                     });
                     if (response.ok) {
                         const now = new Date();
@@ -605,10 +616,13 @@
                         localStorage.removeItem(this.storageKey);
                         return true;
                     } else {
+                        const errData = await response.json().catch(() => ({}));
+                        console.error('Server Save Failed:', errData);
                         this.autoSaveStatus = 'draft';
                         return false;
                     }
                 } catch (error) {
+                    console.error('Network/Server Error during save:', error);
                     this.autoSaveStatus = 'draft';
                     return false;
                 }
@@ -652,6 +666,7 @@
             },
 
             async loadData() {
+                this.isInitializing = true;
                 try {
                     const response = await fetch(`/operator/projects/${this.projectId}/laba-rugi`, {
                         headers: { 'Accept': 'application/json' }
@@ -703,6 +718,15 @@
                     }
                 } catch (error) {
                     console.error('Gagal memuat data', error);
+                } finally {
+                    this.$nextTick(() => {
+                        this.isInitializing = false;
+                        const localDraft = localStorage.getItem(this.storageKey);
+                        if (!localDraft) {
+                            this.hasUnsavedChanges = false;
+                            this.autoSaveStatus = 'saved';
+                        }
+                    });
                 }
             },
 
@@ -872,7 +896,11 @@
                 this.isSaving = false;
                 if (success) {
                     this.showToast('Data Laba Rugi berhasil disimpan ke database.', true);
+                    this.isInitializing = true;
                     await this.loadData();
+                    this.hasUnsavedChanges = false;
+                    this.autoSaveStatus = 'saved';
+                    localStorage.removeItem(this.storageKey);
                     this.isPreviewMode = true; 
                 } else {
                     this.showToast('Gagal menyimpan data.', false);

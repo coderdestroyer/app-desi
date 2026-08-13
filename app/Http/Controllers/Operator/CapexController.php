@@ -19,6 +19,21 @@ class CapexController extends Controller
             ->orderBy('id')
             ->get();
 
+        if ($components->isEmpty()) {
+            DB::transaction(function () use ($project) {
+                $project->capexComponents()->create([
+                    'nama_komponen' => 'Persiapan',
+                ]);
+                $project->capexComponents()->create([
+                    'nama_komponen' => 'Fasilitas Service dan Pendukung',
+                ]);
+            });
+
+            $components = $project->capexComponents()
+                ->orderBy('id')
+                ->get();
+        }
+
         if ($request->wantsJson()) {
             return response()->json([
                 'components' => $components
@@ -52,9 +67,17 @@ class CapexController extends Controller
 
                 $components = $request->input('components', []);
 
-                $parents = array_filter($components, function ($item) {
+                $parents = array_values(array_filter($components, function ($item) {
                     return empty($item['parent_temp_id']);
-                });
+                }));
+
+                // Enforce minimum 2 default parent categories if missing
+                if (count($parents) < 1) {
+                    $parents[] = ['temp_id' => 'def_1', 'nama_komponen' => 'Persiapan'];
+                }
+                if (count($parents) < 2) {
+                    $parents[] = ['temp_id' => 'def_2', 'nama_komponen' => 'Fasilitas Service dan Pendukung'];
+                }
 
                 $children = array_filter($components, function ($item) {
                     return !empty($item['parent_temp_id']);
