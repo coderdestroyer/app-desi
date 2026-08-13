@@ -17,11 +17,12 @@
         </nav>
 
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <!-- Indicator Autosave -->
-            <div x-show="autoSaveStatus" x-transition class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all" :class="{
+            <!-- Indicator Autosave & Countdown -->
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs" :class="{
                 'bg-slate-100 text-slate-600 border border-slate-200': autoSaveStatus === 'saving',
-                'bg-[#E7F2EB] text-[#145239] border border-[#CFE3D5]': autoSaveStatus === 'saved',
-                'bg-amber-50 text-amber-700 border border-amber-200': autoSaveStatus === 'draft'
+                'bg-[#EEF8F2] text-[#145239] border border-[#CFE3D5]': autoSaveStatus === 'saved',
+                'bg-amber-50 text-amber-700 border border-amber-200': autoSaveStatus === 'draft',
+                'bg-slate-50 text-slate-600 border border-slate-200': !autoSaveStatus
             }">
                 <template x-if="autoSaveStatus === 'saving'">
                     <span class="flex items-center gap-1.5">
@@ -32,13 +33,19 @@
                 <template x-if="autoSaveStatus === 'saved'">
                     <span class="flex items-center gap-1.5">
                         <i class="fa-solid fa-cloud-arrow-up text-[#145239]"></i>
-                        <span x-text="'Tersimpan ' + lastSavedTime"></span>
+                        <span x-text="'Tersimpan ' + (lastSavedTime ? lastSavedTime + ' • ' : '') + 'Autosave DB (' + formattedCountdown + ')'"></span>
                     </span>
                 </template>
                 <template x-if="autoSaveStatus === 'draft'">
                     <span class="flex items-center gap-1.5">
                         <i class="fa-solid fa-floppy-disk text-amber-600"></i>
-                        <span>Draft lokal (Autosave DB per 5 mnt)</span>
+                        <span x-text="'Draft lokal • Autosave DB (' + formattedCountdown + ')'"></span>
+                    </span>
+                </template>
+                <template x-if="!autoSaveStatus">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock text-slate-500"></i>
+                        <span x-text="'Autosave DB (' + formattedCountdown + ')'"></span>
                     </span>
                 </template>
             </div>
@@ -472,10 +479,16 @@
             isGuardPushed: false,
             autoSaveStatus: '',
             lastSavedTime: '',
-            autoSaveTimeout: null,
+            countdownSeconds: 300,
+            countdownInterval: null,
             localDraftTimeout: null,
-            fiveMinIntervalTimer: null,
             storageKey: 'labarugi_draft_' + {{ $project->id }},
+
+            get formattedCountdown() {
+                const m = Math.floor(this.countdownSeconds / 60);
+                const s = this.countdownSeconds % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            },
 
             initData() {
                 for (let i = 1; i <= this.jangkaWaktuTahun; i++) {
@@ -505,14 +518,23 @@
                 this.$watch('rows', () => { this.triggerAutoSave(); });
                 this.$watch('settings', () => { this.triggerAutoSave(); });
 
-                // Autosave to DB interval 5 minutes (300.000 ms)
-                this.fiveMinIntervalTimer = setInterval(() => {
-                    if (this.hasUnsavedChanges) {
-                        this.autoSaveToServer();
-                    }
-                }, 300000);
-
+                this.startCountdownTimer();
                 this.setupNavigationInterception();
+            },
+
+            startCountdownTimer() {
+                if (this.countdownInterval) clearInterval(this.countdownInterval);
+                this.countdownSeconds = 300;
+                this.countdownInterval = setInterval(() => {
+                    if (this.countdownSeconds > 0) {
+                        this.countdownSeconds--;
+                    } else {
+                        if (this.hasUnsavedChanges) {
+                            this.autoSaveToServer();
+                        }
+                        this.countdownSeconds = 300;
+                    }
+                }, 1000);
             },
 
             pushHistoryGuard() {
@@ -613,6 +635,7 @@
                         this.autoSaveStatus = 'saved';
                         this.hasUnsavedChanges = false;
                         this.isGuardPushed = false;
+                        this.countdownSeconds = 300;
                         localStorage.removeItem(this.storageKey);
                         return true;
                     } else {
