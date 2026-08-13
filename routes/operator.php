@@ -20,6 +20,7 @@ Route::middleware([
     ->group(function () {
         Route::get('/dashboard', [OperatorController::class, 'selection'])->name('dashboard');
         Route::get('/potensi-unggulan', [OperatorController::class, 'index'])->name('potensi-unggulan');
+        Route::get('/data-investasi', [\App\Http\Controllers\Operator\OperatorDataInvestasiController::class, 'index'])->name('data-investasi.index');
         Route::get('/pdrb', [OperatorController::class, 'pdrbIndex'])->name('pdrb.index');
         Route::get('/pdb-nasional', [OperatorController::class, 'pdbNasionalIndex'])->name('pdb-nasional.index');
         Route::get('/pdb-nasional/detail/{tahun}', [OperatorController::class, 'pdbNasionalDetail'])->name('pdb-nasional.detail');

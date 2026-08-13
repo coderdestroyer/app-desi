@@ -205,4 +205,16 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/pdb-nasional/entry/{tahun}', [AdminPdbNasionalController::class, 'entry'])->name('pdb-nasional.entry');
         Route::post('/pdb-nasional/save-entry', [AdminPdbNasionalController::class, 'saveEntry'])->name('pdb-nasional.save-entry');
         Route::delete('/pdb-nasional/group/{tahun}', [AdminPdbNasionalController::class, 'destroyGroup'])->name('pdb-nasional.destroy-group');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kelola Data Investasi (Admin Full Access)
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/data-investasi', [\App\Http\Controllers\Admin\AdminDataInvestasiController::class, 'index'])->name('data-investasi.index');
+        Route::post('/data-investasi', [\App\Http\Controllers\Admin\AdminDataInvestasiController::class, 'store'])->name('data-investasi.store');
+        Route::post('/data-investasi/import', [\App\Http\Controllers\Admin\AdminDataInvestasiController::class, 'import'])->name('data-investasi.import');
+        Route::get('/data-investasi/template', [\App\Http\Controllers\Admin\AdminDataInvestasiController::class, 'template'])->name('data-investasi.template');
+        Route::put('/data-investasi/{id}', [\App\Http\Controllers\Admin\AdminDataInvestasiController::class, 'update'])->name('data-investasi.update');
+        Route::delete('/data-investasi/{id}', [\App\Http\Controllers\Admin\AdminDataInvestasiController::class, 'destroy'])->name('data-investasi.destroy');
     });
