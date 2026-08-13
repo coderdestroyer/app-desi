@@ -69,9 +69,9 @@
             </h1>
             <p class="text-emerald-100/90 text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed">
                 @if($isReadOnly ?? false)
-                    Melihat rincian nilai PDRB Provinsi (dalam <strong>Rp Juta</strong>) untuk 17 Sektor Lapangan Usaha BPS.
+                    Melihat rincian nilai PDRB Provinsi untuk 17 Sektor Lapangan Usaha BPS.
                 @else
-                    Silakan isikan atau perbarui nilai PDRB Provinsi (dalam <strong>Rp Juta</strong>) untuk 17 Sektor Lapangan Usaha BPS di bawah ini. Nilai otomatis diformat dengan pemisah ribuan (titik).
+                    Silakan isikan atau perbarui nilai PDRB Provinsi untuk 17 Sektor Lapangan Usaha BPS di bawah ini.
                 @endif
             </p>
         </div>
