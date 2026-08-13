@@ -24,7 +24,7 @@
                 PDB Nasional &bull; Tahun {{ $tahun }}
             </h1>
             <p class="text-emerald-100/90 text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed">
-                Rincian nilai PDB Nasional per 17 Sektor Lapangan Usaha BPS (dalam <strong>Rp Juta</strong>) untuk acuan perhitungan Analisis Makroekonomi.
+                Rincian nilai PDB Nasional per 17 Sektor Lapangan Usaha BPS untuk acuan perhitungan Analisis Makroekonomi.
             </p>
         </div>
 

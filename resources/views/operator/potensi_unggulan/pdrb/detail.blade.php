@@ -24,7 +24,7 @@
                 {{ $kabupaten->nama_kabupaten }} &bull; Tahun {{ $tahun }}
             </h1>
             <p class="text-emerald-100/90 text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed">
-                Melihat rincian nilai PDRB (dalam <strong>Rp Juta</strong>) untuk 17 Sektor Lapangan Usaha BPS di Kabupaten/Kota ini.
+                Melihat rincian nilai PDRB untuk 17 Sektor Lapangan Usaha BPS di Kabupaten/Kota ini.
             </p>
         </div>
 
