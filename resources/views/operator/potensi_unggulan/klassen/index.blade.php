@@ -358,9 +358,9 @@
                                 <td class="px-4 py-3 text-center font-bold text-slate-600">
                                     {{ $sim['tahun_awal'] ?? '' }} - {{ $sim['tahun_akhir'] ?? ($sim['tahun'] ?? '') }}
                                 </td>
-                                <td class="px-4 py-3 text-right font-bold text-slate-800">{{ number_format($sim['gi'] ?? $sim['laju_pertumbuhan_sektor'] ?? 0, 2, ',', '.') }}%</td>
+                                <td class="px-4 py-3 text-right font-bold text-slate-800">{{ number_format($sim['gi'] ?? $sim['laju_pertumbuhan_daerah'] ?? $sim['laju_pertumbuhan_sektor'] ?? 0, 2, ',', '.') }}%</td>
                                 <td class="px-4 py-3 text-right font-semibold text-slate-600">{{ number_format($sim['gr'] ?? $sim['laju_pertumbuhan_pembanding'] ?? 0, 2, ',', '.') }}%</td>
-                                <td class="px-4 py-3 text-right font-bold text-slate-800">{{ number_format($sim['si'] ?? $sim['kontribusi_sektor'] ?? 0, 2, ',', '.') }}%</td>
+                                <td class="px-4 py-3 text-right font-bold text-slate-800">{{ number_format($sim['si'] ?? $sim['kontribusi_daerah'] ?? $sim['kontribusi_sektor'] ?? 0, 2, ',', '.') }}%</td>
                                 <td class="px-4 py-3 text-right font-semibold text-slate-600">{{ number_format($sim['sr'] ?? $sim['kontribusi_pembanding'] ?? 0, 2, ',', '.') }}%</td>
                                 <td class="px-4 py-3 text-center">
                                     @php
