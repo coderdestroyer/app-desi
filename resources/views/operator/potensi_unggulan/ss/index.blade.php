@@ -242,8 +242,8 @@
 
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('pdrb_sektor_pembanding_akhir', $editItem['pdrb_sektor_pembanding_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
                         <label class="op-label">PDRB Sektor Pembanding (Akhir)</label>
-                        <input id="field_total_pdrb_pembanding_akhir_visible" type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 550.000" required>
-                        <input id="field_total_pdrb_pembanding_akhir" type="hidden" name="total_pdrb_pembanding_akhir" :value="val.replace(/\./g, '')">
+                        <input id="field_pdrb_sektor_pembanding_akhir_visible" type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 550.000" required>
+                        <input id="field_pdrb_sektor_pembanding_akhir" type="hidden" name="pdrb_sektor_pembanding_akhir" :value="val.replace(/\./g, '')">
                     </div>
 
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('total_pdrb_pembanding_awal', $editItem['total_pdrb_pembanding_awal'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
@@ -254,8 +254,8 @@
 
                     <div class="space-y-2 col-span-1" x-data="{ val: '{{ old('total_pdrb_pembanding_akhir', $editItem['total_pdrb_pembanding_akhir'] ?? '') }}'.split('.')[0], format(v) { let raw = v.toString().replace(/[^0-9]/g, ''); return raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } }" x-init="val = format(val)">
                         <label class="op-label">Total PDRB Pembanding (Akhir)</label>
-                        <input id="field_total_pdrb_pembanding_akhir_2_visible" type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 5.500.000" required>
-                        <input id="field_total_pdrb_pembanding_akhir_2" type="hidden" name="total_pdrb_pembanding_akhir" :value="val.replace(/\./g, '')">
+                        <input id="field_total_pdrb_pembanding_akhir_visible" type="text" x-model="val" @input="val = format($event.target.value)" class="op-input" placeholder="Contoh: 5.500.000" required>
+                        <input id="field_total_pdrb_pembanding_akhir" type="hidden" name="total_pdrb_pembanding_akhir" :value="val.replace(/\./g, '')">
                     </div>
                 </div>
 
@@ -397,14 +397,14 @@
         document.getElementById('field_pdrb_sektor_pembanding_awal_visible').value = fmtVal(sim.pdrb_sektor_pembanding_awal ?? 0);
         document.getElementById('field_pdrb_sektor_pembanding_awal_visible').dispatchEvent(new Event('input', { bubbles: true }));
 
-        document.getElementById('field_total_pdrb_pembanding_akhir_visible').value = fmtVal(sim.pdrb_sektor_pembanding_akhir ?? sim.total_pdrb_pembanding_akhir ?? 0);
-        document.getElementById('field_total_pdrb_pembanding_akhir_visible').dispatchEvent(new Event('input', { bubbles: true }));
+        document.getElementById('field_pdrb_sektor_pembanding_akhir_visible').value = fmtVal(sim.pdrb_sektor_pembanding_akhir ?? 0);
+        document.getElementById('field_pdrb_sektor_pembanding_akhir_visible').dispatchEvent(new Event('input', { bubbles: true }));
 
         document.getElementById('field_total_pdrb_pembanding_awal_visible').value = fmtVal(sim.total_pdrb_pembanding_awal ?? 0);
         document.getElementById('field_total_pdrb_pembanding_awal_visible').dispatchEvent(new Event('input', { bubbles: true }));
 
-        document.getElementById('field_total_pdrb_pembanding_akhir_2_visible').value = fmtVal(sim.total_pdrb_pembanding_akhir ?? 0);
-        document.getElementById('field_total_pdrb_pembanding_akhir_2_visible').dispatchEvent(new Event('input', { bubbles: true }));
+        document.getElementById('field_total_pdrb_pembanding_akhir_visible').value = fmtVal(sim.total_pdrb_pembanding_akhir ?? 0);
+        document.getElementById('field_total_pdrb_pembanding_akhir_visible').dispatchEvent(new Event('input', { bubbles: true }));
 
         var provEl = document.getElementById('field_provinsi');
         if(provEl) {

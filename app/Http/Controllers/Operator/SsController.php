@@ -253,17 +253,42 @@ class SsController extends Controller
         $validated = $request->validate([
             'tingkat_wilayah' => 'required|string',
             'sektor' => 'required|string',
-            'tahun' => 'required|numeric',
+            'tahun_awal' => 'required|numeric',
+            'tahun_akhir' => 'required|numeric',
             'provinsi' => 'required|string',
             'kabupaten' => 'nullable|string',
-            'komponen_n' => 'required|numeric',
-            'komponen_p' => 'required|numeric',
-            'komponen_d' => 'required|numeric',
+            'pdrb_sektor_analisis_awal' => 'nullable|numeric',
+            'pdrb_sektor_analisis_akhir' => 'nullable|numeric',
+            'pdrb_sektor_pembanding_awal' => 'nullable|numeric',
+            'pdrb_sektor_pembanding_akhir' => 'nullable|numeric',
+            'total_pdrb_pembanding_awal' => 'nullable|numeric',
+            'total_pdrb_pembanding_akhir' => 'nullable|numeric',
+            'komponen_n' => 'nullable|numeric',
+            'komponen_p' => 'nullable|numeric',
+            'komponen_d' => 'nullable|numeric',
         ]);
 
-        $nij = (float)$validated['komponen_n'];
-        $mij = (float)$validated['komponen_p'];
-        $cij = (float)$validated['komponen_d'];
+        $yAwal = (float)($validated['pdrb_sektor_analisis_awal'] ?? 0);
+        $yAkhir = (float)($validated['pdrb_sektor_analisis_akhir'] ?? 0);
+        $yPembandingAwal = (float)($validated['pdrb_sektor_pembanding_awal'] ?? 0);
+        $yPembandingAkhir = (float)($validated['pdrb_sektor_pembanding_akhir'] ?? 0);
+        $totalPembandingAwal = (float)($validated['total_pdrb_pembanding_awal'] ?? 0);
+        $totalPembandingAkhir = (float)($validated['total_pdrb_pembanding_akhir'] ?? 0);
+
+        if (isset($validated['komponen_n']) && isset($validated['komponen_p']) && isset($validated['komponen_d']) && $request->filled('komponen_n')) {
+            $nij = (float)$validated['komponen_n'];
+            $mij = (float)$validated['komponen_p'];
+            $cij = (float)$validated['komponen_d'];
+        } else {
+            $growthTotalPembanding = ($totalPembandingAwal > 0) ? ($totalPembandingAkhir / $totalPembandingAwal) - 1 : 0;
+            $growthSektorPembanding = ($yPembandingAwal > 0) ? ($yPembandingAkhir / $yPembandingAwal) - 1 : 0;
+            $growthSektorDaerah = ($yAwal > 0) ? ($yAkhir / $yAwal) - 1 : 0;
+
+            $nij = $yAwal * $growthTotalPembanding;
+            $mij = $yAwal * ($growthSektorPembanding - $growthTotalPembanding);
+            $cij = $yAwal * ($growthSektorDaerah - $growthSektorPembanding);
+        }
+
         $dij = $nij + $mij + $cij;
 
         $kategoriPertumbuhan = $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat';
@@ -277,17 +302,32 @@ class SsController extends Controller
             ? 'PDB NASIONAL' 
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
+        $tahunAwal = (int)($validated['tahun_awal'] ?? 2021);
+        $tahunAkhir = (int)($validated['tahun_akhir'] ?? 2022);
+
         AnalysisResult::create([
             'user_id' => Auth::id(),
             'type' => 'shift_share',
             'title' => 'Simulasi Shift-Share ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
             'results' => array_merge($validated, [
+                'tahun' => $tahunAkhir,
+                'tahun_awal' => $tahunAwal,
+                'tahun_akhir' => $tahunAkhir,
+                'pdrb_sektor_analisis_awal' => $yAwal,
+                'pdrb_sektor_analisis_akhir' => $yAkhir,
+                'pdrb_sektor_pembanding_awal' => $yPembandingAwal,
+                'pdrb_sektor_pembanding_akhir' => $yPembandingAkhir,
+                'total_pdrb_pembanding_awal' => $totalPembandingAwal,
+                'total_pdrb_pembanding_akhir' => $totalPembandingAkhir,
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'nij' => $nij,
                 'mij' => $mij,
                 'cij' => $cij,
                 'dij' => $dij,
+                'komponen_n' => $nij,
+                'komponen_p' => $mij,
+                'komponen_d' => $cij,
                 'total_shift' => $dij,
                 'kategori_pertumbuhan' => $kategoriPertumbuhan,
                 'kategori_daya_saing' => $kategoriDayaSaing,
@@ -301,22 +341,53 @@ class SsController extends Controller
 
     public function update(Request $request, $id)
     {
-        $item = AnalysisResult::where('type', 'shift_share')->findOrFail($id);
+        $userId = Auth::id();
+        $item = AnalysisResult::where('type', 'shift_share')
+            ->where(function ($q) use ($userId) {
+                $q->where('user_id', $userId)
+                  ->orWhereRaw("results->>'user_id' = ?", [(string)$userId]);
+            })
+            ->findOrFail($id);
 
         $validated = $request->validate([
             'tingkat_wilayah' => 'required|string',
             'sektor' => 'required|string',
-            'tahun' => 'required|numeric',
+            'tahun_awal' => 'required|numeric',
+            'tahun_akhir' => 'required|numeric',
             'provinsi' => 'required|string',
             'kabupaten' => 'nullable|string',
-            'komponen_n' => 'required|numeric',
-            'komponen_p' => 'required|numeric',
-            'komponen_d' => 'required|numeric',
+            'pdrb_sektor_analisis_awal' => 'nullable|numeric',
+            'pdrb_sektor_analisis_akhir' => 'nullable|numeric',
+            'pdrb_sektor_pembanding_awal' => 'nullable|numeric',
+            'pdrb_sektor_pembanding_akhir' => 'nullable|numeric',
+            'total_pdrb_pembanding_awal' => 'nullable|numeric',
+            'total_pdrb_pembanding_akhir' => 'nullable|numeric',
+            'komponen_n' => 'nullable|numeric',
+            'komponen_p' => 'nullable|numeric',
+            'komponen_d' => 'nullable|numeric',
         ]);
 
-        $nij = (float)$validated['komponen_n'];
-        $mij = (float)$validated['komponen_p'];
-        $cij = (float)$validated['komponen_d'];
+        $yAwal = (float)($validated['pdrb_sektor_analisis_awal'] ?? 0);
+        $yAkhir = (float)($validated['pdrb_sektor_analisis_akhir'] ?? 0);
+        $yPembandingAwal = (float)($validated['pdrb_sektor_pembanding_awal'] ?? 0);
+        $yPembandingAkhir = (float)($validated['pdrb_sektor_pembanding_akhir'] ?? 0);
+        $totalPembandingAwal = (float)($validated['total_pdrb_pembanding_awal'] ?? 0);
+        $totalPembandingAkhir = (float)($validated['total_pdrb_pembanding_akhir'] ?? 0);
+
+        if (isset($validated['komponen_n']) && isset($validated['komponen_p']) && isset($validated['komponen_d']) && $request->filled('komponen_n')) {
+            $nij = (float)$validated['komponen_n'];
+            $mij = (float)$validated['komponen_p'];
+            $cij = (float)$validated['komponen_d'];
+        } else {
+            $growthTotalPembanding = ($totalPembandingAwal > 0) ? ($totalPembandingAkhir / $totalPembandingAwal) - 1 : 0;
+            $growthSektorPembanding = ($yPembandingAwal > 0) ? ($yPembandingAkhir / $yPembandingAwal) - 1 : 0;
+            $growthSektorDaerah = ($yAwal > 0) ? ($yAkhir / $yAwal) - 1 : 0;
+
+            $nij = $yAwal * $growthTotalPembanding;
+            $mij = $yAwal * ($growthSektorPembanding - $growthTotalPembanding);
+            $cij = $yAwal * ($growthSektorDaerah - $growthSektorPembanding);
+        }
+
         $dij = $nij + $mij + $cij;
 
         $kategoriPertumbuhan = $dij >= 0 ? 'Pertumbuhan Cepat' : 'Pertumbuhan Lambat';
@@ -330,14 +401,30 @@ class SsController extends Controller
             ? 'PDB NASIONAL' 
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
+        $tahunAwal = (int)($validated['tahun_awal'] ?? 2021);
+        $tahunAkhir = (int)($validated['tahun_akhir'] ?? 2022);
+
         $item->update([
+            'title' => 'Simulasi Shift-Share ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
             'results' => array_merge($validated, [
+                'tahun' => $tahunAkhir,
+                'tahun_awal' => $tahunAwal,
+                'tahun_akhir' => $tahunAkhir,
+                'pdrb_sektor_analisis_awal' => $yAwal,
+                'pdrb_sektor_analisis_akhir' => $yAkhir,
+                'pdrb_sektor_pembanding_awal' => $yPembandingAwal,
+                'pdrb_sektor_pembanding_akhir' => $yPembandingAkhir,
+                'total_pdrb_pembanding_awal' => $totalPembandingAwal,
+                'total_pdrb_pembanding_akhir' => $totalPembandingAkhir,
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'nij' => $nij,
                 'mij' => $mij,
                 'cij' => $cij,
                 'dij' => $dij,
+                'komponen_n' => $nij,
+                'komponen_p' => $mij,
+                'komponen_d' => $cij,
                 'total_shift' => $dij,
                 'kategori_pertumbuhan' => $kategoriPertumbuhan,
                 'kategori_daya_saing' => $kategoriDayaSaing,
@@ -405,12 +492,12 @@ class SsController extends Controller
             $tahunAwal = (int) ($row['Tahun Awal'] ?? $row['tahun_awal'] ?? date('Y') - 1);
             $tahunAkhir = (int) ($row['Tahun Akhir'] ?? $row['tahun_akhir'] ?? $row['Tahun'] ?? $row['tahun'] ?? date('Y'));
 
-            $yAwal = (float) ($row['PDRB Sektor Analisis Awal'] ?? $row['komponen_n'] ?? 0);
-            $yAkhir = (float) ($row['PDRB Sektor Analisis Akhir'] ?? $row['komponen_p'] ?? 0);
-            $yPembandingAwal = (float) ($row['PDRB Sektor Pembanding Awal'] ?? 0);
-            $yPembandingAkhir = (float) ($row['PDRB Sektor Pembanding Akhir'] ?? 0);
-            $totalPembandingAwal = (float) ($row['Total PDRB Pembanding Awal'] ?? 0);
-            $totalPembandingAkhir = (float) ($row['Total PDRB Pembanding Akhir'] ?? 0);
+            $yAwal = (float) ($row['PDRB Sektor Analisis Awal'] ?? $row['pdrb_sektor_analisis_awal'] ?? $row['komponen_n'] ?? 0);
+            $yAkhir = (float) ($row['PDRB Sektor Analisis Akhir'] ?? $row['pdrb_sektor_analisis_akhir'] ?? $row['komponen_p'] ?? 0);
+            $yPembandingAwal = (float) ($row['PDRB Sektor Pembanding Awal'] ?? $row['pdrb_sektor_pembanding_awal'] ?? 0);
+            $yPembandingAkhir = (float) ($row['PDRB Sektor Pembanding Akhir'] ?? $row['pdrb_sektor_pembanding_akhir'] ?? 0);
+            $totalPembandingAwal = (float) ($row['Total PDRB Pembanding Awal'] ?? $row['total_pdrb_pembanding_awal'] ?? 0);
+            $totalPembandingAkhir = (float) ($row['Total PDRB Pembanding Akhir'] ?? $row['total_pdrb_pembanding_akhir'] ?? 0);
 
             if (empty($sektor)) continue;
 
@@ -454,6 +541,12 @@ class SsController extends Controller
                     'tahun' => $tahunAkhir,
                     'tahun_awal' => $tahunAwal,
                     'tahun_akhir' => $tahunAkhir,
+                    'pdrb_sektor_analisis_awal' => $yAwal,
+                    'pdrb_sektor_analisis_akhir' => $yAkhir,
+                    'pdrb_sektor_pembanding_awal' => $yPembandingAwal,
+                    'pdrb_sektor_pembanding_akhir' => $yPembandingAkhir,
+                    'total_pdrb_pembanding_awal' => $totalPembandingAwal,
+                    'total_pdrb_pembanding_akhir' => $totalPembandingAkhir,
                     'komponen_n' => $nij,
                     'komponen_p' => $mij,
                     'komponen_d' => $cij,
