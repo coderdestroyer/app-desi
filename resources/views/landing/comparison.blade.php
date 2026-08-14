@@ -1,21 +1,29 @@
-@php
-    use Illuminate\Support\Str;
-@endphp
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analisis Sektor | DPMPTSP Provinsi Sumatera Utara</title>
 
-@vite([
-    'resources/css/navbar.css',
-    'resources/css/home.css',
-    'resources/css/about.css',
-    'resources/css/analysis.css',
-    'resources/css/comparison.css',
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
 
-    'resources/js/navbar.js',
-    'resources/js/home.js',
-    'resources/js/about.js',
-    'resources/js/analysis.js',
-    'resources/js/comparison.js',
-])
+    @vite([
+        'resources/css/navbar.css',
+        'resources/css/home.css',
+        'resources/css/about.css',
+        'resources/css/analysis.css',
+        'resources/css/comparison.css',
 
+        'resources/js/navbar.js',
+        'resources/js/home.js',
+        'resources/js/about.js',
+        'resources/js/analysis.js',
+        'resources/js/comparison.js',
+    ])
+</head>
+<body>
 
 {{-- NAVBAR --}}
 @include('partials.landing.navbar')
@@ -399,6 +407,5 @@
 
 </section>
 
-
-<script>
-</script>
+</body>
+</html>

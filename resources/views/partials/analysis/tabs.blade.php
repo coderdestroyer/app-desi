@@ -56,7 +56,7 @@
 
                                         @foreach($columns as $column)
 
-                                            <th>{{ ucwords(str_replace('_',' ',$column)) }}</th>
+                                            <th>{{ \Illuminate\Support\Str::replace(['Ssa', 'Lq'], ['SSA', 'LQ'], ucwords(str_replace('_',' ',$column))) }}</th>
 
                                         @endforeach
 
@@ -98,7 +98,7 @@
 
                                     {{ number_format($value,4,',','.') }}
 
-                                @elseif(in_array($column,['nij','mij','cij','dij']))
+                                @elseif(in_array($column,['nij','mij','cij','dij','nilai_ssa']))
 
                                     {{ number_format($value,2,',','.') }}
 

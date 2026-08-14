@@ -8,7 +8,11 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Peta Investasi | DPMPTSP Pulau Sumatera</title>
+    <title>Peta Investasi | DPMPTSP Provinsi Sumatera Utara</title>
+
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
 
     @vite([
         'resources/css/navbar.css',

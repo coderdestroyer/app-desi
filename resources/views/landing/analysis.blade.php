@@ -1,22 +1,31 @@
-@php
-    use Illuminate\Support\Str;
-@endphp
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analisis Sektoral | DPMPTSP Provinsi Sumatera Utara</title>
 
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-/>
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-sumut.png') }}">
 
-@vite([
-    'resources/css/navbar.css',
-    'resources/css/home.css',
-    'resources/css/about.css',
-    'resources/css/analysis.css',
-    'resources/js/navbar.js',
-    'resources/js/home.js',
-    'resources/js/about.js',
-    'resources/js/analysis.js',
-])
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+
+    @vite([
+        'resources/css/navbar.css',
+        'resources/css/home.css',
+        'resources/css/about.css',
+        'resources/css/analysis.css',
+        'resources/js/navbar.js',
+        'resources/js/home.js',
+        'resources/js/about.js',
+        'resources/js/analysis.js',
+    ])
+</head>
+<body>
 
 @include('partials.landing.navbar')
 
@@ -93,3 +102,6 @@
     window.dashboardCharts = @json($dashboard['charts'] ?? []);
 </script>
 @endif
+
+</body>
+</html>

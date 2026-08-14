@@ -160,6 +160,9 @@ class DashboardAnalysisService
                 'nilai_lq' => $lq,
                 'lq' => $lq,
                 'cij' => $cij,
+                'dij' => $cij,
+                'nilai_ssa' => $cij,
+                'shift_share_net' => $cij,
                 'kuadran' => $kuadran,
                 'kategori_sektor' => $item->klasifikasi_sektor,
                 'kategori_lq' => $lq >= 1 ? 'Basis' : 'Non Basis',
@@ -181,16 +184,26 @@ class DashboardAnalysisService
         }
 
         return $query->get()->map(function ($item) {
+            $growthDaerah = (float)$item->growth_daerah;
+            $growthPembanding = (float)$item->growth_pembanding;
+            $shareDaerah = (float)$item->share_daerah;
+            $sharePembanding = (float)$item->share_pembanding;
+
             return (object) [
                 'kab_id' => $item->kabupaten_id,
                 'sektor_id' => $item->sektor_id,
                 'sektor' => (object) ['nama_sektor' => $item->sektor->nama_sektor ?? 'Sektor ' . $item->sektor_id],
                 'tahun' => $item->tahun_akhir,
-                'laju_pertumbuhan' => (float)$item->growth_daerah,
-                'laju_pertumbuhan_acuan' => (float)$item->growth_pembanding,
-                'kontribusi_pdrb' => (float)$item->share_daerah,
-                'kontribusi_acuan' => (float)$item->share_pembanding,
+                'laju_pertumbuhan' => $growthDaerah,
+                'laju_pertumbuhan_acuan' => $growthPembanding,
+                'kontribusi_pdrb' => $shareDaerah,
+                'kontribusi_acuan' => $sharePembanding,
+                'pertumbuhan_kabupaten' => $growthDaerah,
+                'pertumbuhan_provinsi' => $growthPembanding,
+                'kontribusi_kabupaten' => $shareDaerah,
+                'kontribusi_provinsi' => $sharePembanding,
                 'kuadran' => $item->kuadran,
+                'klassen' => $item->kategori_kuadran,
                 'klasifikasi_sektor' => $item->kategori_kuadran,
             ];
         });
@@ -203,7 +216,7 @@ class DashboardAnalysisService
         $rows = $this->baseLqQuery($kabId, $tahun);
         return [
             'header' => [
-                'kabupaten' => optional($rows->first()?->kabupaten)->nama_kabupaten ?? '-',
+                'kabupaten' => $this->getKabupatenName($kabId),
                 'tahun' => $tahun,
                 'title' => 'Hasil Analisis LQ',
                 'description' =>
@@ -272,7 +285,7 @@ class DashboardAnalysisService
         $basis    = $this->countBy($rows, 'kategori', 'Basis');
         $nonBasis = $this->countBy($rows, 'kategori', 'Non Basis');
 
-        $total = $basis + $nonBasis;
+        $total = max(1, $basis + $nonBasis);
 
         return [
 
@@ -406,7 +419,7 @@ class DashboardAnalysisService
 
         return [
             'header' => [
-                'kabupaten' => optional($rows->first()?->kabupaten)->nama_kabupaten ?? '-',
+                'kabupaten' => $this->getKabupatenName($kabId),
                 'tahun' => $tahun,
                 'title' => 'Hasil Analisis Shift Share',
                 'description' =>
@@ -628,7 +641,7 @@ class DashboardAnalysisService
 
         return [
             'header' => [
-                'kabupaten' => optional($rows->first()?->kabupaten)->nama_kabupaten ?? '-',
+                'kabupaten' => $this->getKabupatenName($kabId),
                 'tahun' => $tahun,
                 'title' => 'Hasil Analisis Tipologi Sektor',
                 'description' =>
@@ -828,7 +841,7 @@ class DashboardAnalysisService
                 'nama_sektor' => $row->sektor->nama_sektor,
 
                 // Nilai SSA
-                'nilai_ssa'   => round((float) ($row->dij ?? 0), 2),
+                'nilai_ssa'   => round((float) ($row->nilai_ssa ?? $row->cij ?? $row->dij ?? 0), 2),
 
                 // Nilai LQ
                 'nilai_lq'    => round((float) ($row->nilai_lq ?? 0), 2),
@@ -855,7 +868,7 @@ class DashboardAnalysisService
 
         return [
             'header' => [
-                'kabupaten' => optional($rows->first()?->kabupaten)->nama_kabupaten ?? '-',
+                'kabupaten' => $this->getKabupatenName($kabId),
                 'tahun' => $tahun,
                 'title' => 'Hasil Analisis Tipologi Klassen',
                 'description' =>
@@ -1047,6 +1060,11 @@ class DashboardAnalysisService
     }
 
     /** ============ Shared Helpers ============ */
+
+    private function getKabupatenName(int $kabId): string
+    {
+        return \App\Models\Kabupaten::where('kab_id', $kabId)->value('nama_kabupaten') ?? '-';
+    }
 
     private function total(Collection $rows): int
     {

@@ -26,7 +26,7 @@
 
                             <th>
 
-                                {{ ucwords(str_replace('_',' ', $column)) }}
+                                {{ \Illuminate\Support\Str::replace(['Ssa', 'Lq'], ['SSA', 'LQ'], ucwords(str_replace('_',' ', $column))) }}
 
                             </th>
 
@@ -75,10 +75,10 @@
 
                         {{ number_format((float)$value,4,',','.') }}
 
-                    {{-- Nij, Mij, Cij, Dij --}}
-                    @elseif(in_array($column,['nij','mij','cij','dij']))
+                    {{-- Nij, Mij, Cij, Dij, Nilai SSA --}}
+                    @elseif(in_array($column,['nij','mij','cij','dij','nilai_ssa']))
 
-                        {{ number_format((float)$value,2,',','.') }}
+                        {{ number_format((float)$value, 2, ',', '.') }}
 
                     {{-- Pertumbuhan & Kontribusi (%) --}}
                     @elseif(in_array($column,[
