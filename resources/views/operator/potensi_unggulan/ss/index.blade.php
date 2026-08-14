@@ -4,7 +4,7 @@
 
 @section('content')
 <div x-data="{ 
-    activeTab: '{{ ($editItem || session('tab') === 'simulasi' || request('tab') === 'simulasi' || request('sim_page')) ? 'simulasi' : 'real' }}',
+    activeTab: '{{ ($editItem || session('tab') === 'simulasi' || request('tab') === 'simulasi' || request('sim_page') || $errors->any()) ? 'simulasi' : 'real' }}',
     isDeleteModalOpen: false,
     deleteActionUrl: '',
     deleteTargetName: '',
@@ -264,7 +264,7 @@
                         <i class="fa-solid fa-floppy-disk text-[#FFD54F]"></i>
                         <span id="submitBtnText">{{ $editItem ? 'Perbarui Data Simulasi' : 'Simpan Data Simulasi' }}</span>
                     </button>
-                    <a id="cancelEditBtn" href="{{ route('operator.ss.index') }}" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors {{ $editItem ? '' : 'hidden' }}">Batal Edit</a>
+                    <a id="cancelEditBtn" href="{{ route('operator.ss.index', ['tab' => 'simulasi']) }}" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors {{ $editItem ? '' : 'hidden' }}">Batal Edit</a>
                 </div>
             </form>
         </div>
