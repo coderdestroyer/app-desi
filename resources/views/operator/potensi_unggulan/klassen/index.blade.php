@@ -446,6 +446,51 @@
             if(kabEl) kabEl.value = sim.kabupaten || '';
         }, 50);
 
+        try {
+            var alpineData = Alpine.$data(form);
+            if (alpineData) {
+                var tAwal = sim.tahun_awal || (sim.tahun ? sim.tahun - 1 : '2021');
+                var tAkhir = sim.tahun_akhir || sim.tahun || '2022';
+                
+                var y1_s = sim.pdrb_sektor_analisis_awal || 0;
+                var y1_tot = sim.total_pdrb_analisis_awal || 0;
+                var y1_p_s = sim.pdrb_sektor_pembanding_awal || 0;
+                var y1_p_tot = sim.total_pdrb_pembanding_awal || 0;
+
+                var y2_s = sim.pdrb_sektor_analisis_akhir || 0;
+                var y2_tot = sim.total_pdrb_analisis_akhir || 0;
+                var y2_p_s = sim.pdrb_sektor_pembanding_akhir || 0;
+                var y2_p_tot = sim.total_pdrb_pembanding_akhir || 0;
+
+                alpineData.years = [
+                    {
+                        tahun: tAwal,
+                        pdrb_sektor_analisis: String(y1_s).split('.')[0],
+                        total_pdrb_analisis: String(y1_tot).split('.')[0],
+                        pdrb_sektor_pembanding: String(y1_p_s).split('.')[0],
+                        total_pdrb_pembanding: String(y1_p_tot).split('.')[0],
+                        pdrb_sektor_analisis_fmt: alpineData.format(y1_s),
+                        total_pdrb_analisis_fmt: alpineData.format(y1_tot),
+                        pdrb_sektor_pembanding_fmt: alpineData.format(y1_p_s),
+                        total_pdrb_pembanding_fmt: alpineData.format(y1_p_tot)
+                    },
+                    {
+                        tahun: tAkhir,
+                        pdrb_sektor_analisis: String(y2_s).split('.')[0],
+                        total_pdrb_analisis: String(y2_tot).split('.')[0],
+                        pdrb_sektor_pembanding: String(y2_p_s).split('.')[0],
+                        total_pdrb_pembanding: String(y2_p_tot).split('.')[0],
+                        pdrb_sektor_analisis_fmt: alpineData.format(y2_s),
+                        total_pdrb_analisis_fmt: alpineData.format(y2_tot),
+                        pdrb_sektor_pembanding_fmt: alpineData.format(y2_p_s),
+                        total_pdrb_pembanding_fmt: alpineData.format(y2_p_tot)
+                    }
+                ];
+            }
+        } catch(e) {
+            console.error('Error populating Klassen Alpine years:', e);
+        }
+
         document.getElementById('formTitleText').innerText = 'Edit Data Simulasi Tipologi Klassen';
         document.getElementById('formSubTitleText').innerText = 'Mengubah variabel log simulasi terpilih';
         document.getElementById('submitBtnText').innerText = 'Perbarui Data Simulasi';
