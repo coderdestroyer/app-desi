@@ -108,11 +108,79 @@ class ComparisonService
 
     private function getSummary(Collection $rows): array
     {
+        if ($rows->isEmpty()) {
+            return [
+                'growth' => [
+                    'average' => '-',
+                    'highest' => ['tahun' => '-', 'nilai' => '-'],
+                ],
+                'contribution' => [
+                    'average' => '-',
+                    'highest' => ['tahun' => '-', 'nilai' => '-'],
+                ],
+                'lq' => [
+                    'nilai' => '-',
+                    'tahun' => '-',
+                    'status' => '-',
+                    'change' => 0,
+                ],
+                'tipologi' => [
+                    'kategori' => '-',
+                    'tahun' => '-',
+                    'movement' => '-',
+                ],
+            ];
+        }
+
+        $sortedByYear = $rows->sortBy('tahun')->values();
+        $lastRow = $sortedByYear->last();
+        $prevRow = $sortedByYear->count() > 1 ? $sortedByYear->get($sortedByYear->count() - 2) : null;
+
+        $highestGrowth = $rows->sortByDesc('pertumbuhan_kabupaten')->first();
+        $highestContribution = $rows->sortByDesc('kontribusi_kabupaten')->first();
+
+        $avgGrowth = round((float) $rows->avg('pertumbuhan_kabupaten'), 2);
+        $avgContribution = round((float) $rows->avg('kontribusi_kabupaten'), 2);
+
+        $lqChange = 0;
+        if ($prevRow && (float)$prevRow->nilai_lq != 0) {
+            $lqChange = round((((float)$lastRow->nilai_lq - (float)$prevRow->nilai_lq) / abs((float)$prevRow->nilai_lq)) * 100, 2);
+        }
+
+        $klassenDesc = match ($lastRow->kuadran ?? '') {
+            'Kuadran I'   => 'Sektor Maju & Tumbuh Pesat',
+            'Kuadran II'  => 'Sektor Maju tapi Lambat',
+            'Kuadran III' => 'Sektor Berkembang Potensial',
+            'Kuadran IV'  => 'Sektor Relatif Tertinggal',
+            default       => '-',
+        };
+
         return [
-            'total_tahun' => $rows->pluck('tahun')->unique()->count(),
-            'total_sektor' => $rows->pluck('sektor_id')->unique()->count(),
-            'avg_lq' => round($rows->avg('nilai_lq'), 2),
-            'avg_growth' => round($rows->avg('pertumbuhan_kabupaten'), 2),
+            'growth' => [
+                'average' => number_format($avgGrowth, 2, ',', '.'),
+                'highest' => [
+                    'tahun' => $highestGrowth->tahun ?? '-',
+                    'nilai' => number_format((float) ($highestGrowth->pertumbuhan_kabupaten ?? 0), 2, ',', '.'),
+                ],
+            ],
+            'contribution' => [
+                'average' => number_format($avgContribution, 2, ',', '.'),
+                'highest' => [
+                    'tahun' => $highestContribution->tahun ?? '-',
+                    'nilai' => number_format((float) ($highestContribution->kontribusi_kabupaten ?? 0), 2, ',', '.'),
+                ],
+            ],
+            'lq' => [
+                'nilai' => number_format((float) ($lastRow->nilai_lq ?? 0), 3, ',', '.'),
+                'tahun' => $lastRow->tahun ?? '-',
+                'status' => $lastRow->kategori ?? 'Non Basis',
+                'change' => $lqChange,
+            ],
+            'tipologi' => [
+                'kategori' => $lastRow->kuadran ?? '-',
+                'tahun' => $lastRow->tahun ?? '-',
+                'movement' => $klassenDesc,
+            ],
         ];
     }
 
@@ -183,15 +251,22 @@ class ComparisonService
     private function getTrendTable(Collection $rows): array
     {
         return $rows->map(function ($r) {
+            $kategori = match ($r->kuadran) {
+                'Kuadran I'   => 'Sektor Unggulan',
+                'Kuadran II'  => 'Sektor Potensial',
+                'Kuadran III' => 'Sektor Berkembang',
+                default       => 'Sektor Relatif Tertinggal',
+            };
+
             return [
                 'tahun' => $r->tahun,
-                'sektor' => $r->sektor->nama_sektor ?? '-',
-                'pertumbuhan' => $r->pertumbuhan_kabupaten . '%',
-                'kontribusi' => $r->kontribusi_kabupaten . '%',
-                'lq' => $r->nilai_lq,
-                'kategori_lq' => $r->kategori,
-                'dij' => $r->dij,
-                'kuadran' => $r->kuadran,
+                'growth' => (float) $r->pertumbuhan_kabupaten,
+                'contribution' => (float) $r->kontribusi_kabupaten,
+                'lq' => (float) $r->nilai_lq,
+                'ssa' => (float) $r->dij,
+                'status_lq' => $r->kategori ?? 'Non Basis',
+                'kuadran' => $r->kuadran ?? '-',
+                'kategori' => $kategori,
             ];
         })->toArray();
     }

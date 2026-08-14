@@ -1,268 +1,8 @@
-/* ==============================
-   ANALYSIS PAGE
-================================ */
-
-.analysis-page {
-    min-height: 100vh;
-    background: #f8faf5;
-    padding: 90px 7%;
-}
-
-
-/* TITLE */
-
-.analysis-page h1 {
-    text-align: center;
-    font-size: 42px;
-    font-weight: 800;
-    color: #00663f;
-    margin-bottom: 60px;
-}
-
-
-/* ==============================
-   FILTER SECTION
-================================ */
-
-.filter-box {
-    width: 100%;
-    background: #ffffff;
-
-    padding: 32px;
-
-    border-radius: 18px;
-    border: 1px solid #d7dde8;
-
-    display: grid;
-    grid-template-columns: 1.3fr 1.3fr 1.3fr 0.8fr auto;
-    gap: 24px;
-
-    align-items: center;
-
-    margin-bottom: 50px;
-}
-
-
-.filter-box select {
-
-    height: 62px;
-
-    padding: 0 18px;
-
-    border-radius: 8px;
-
-    border: 1px solid #9aa7bc;
-
-    background: white;
-
-    font-size: 15px;
-
-    cursor: pointer;
-
-}
-
-
-.filter-box select:focus {
-
-    outline: none;
-
-    border-color: #00663f;
-
-}
-
-
-.filter-box button {
-
-    height: 62px;
-
-    padding: 0 35px;
-
-    border-radius: 12px;
-
-    border: none;
-
-    background: #00663f;
-
-    color: white;
-
-    font-size: 16px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition: .25s;
-
-}
-
-
-.filter-box button:hover {
-
-    transform: translateY(-2px);
-
-    background:#004d30;
-
-}
-
-
-
-/* ==============================
-   SUMMARY CARD
-================================ */
-
-
-.summary-grid {
-
-    display: grid;
-
-    grid-template-columns: repeat(4,1fr);
-
-    gap: 32px;
-
-    margin-bottom: 50px;
-
-}
-
-
-
-.summary-card {
-
-    background: white;
-
-    min-height: 180px;
-
-    border-radius: 18px;
-
-    padding: 42px 35px;
-
-    border: 1px solid #d7dde8;
-
-
-    transition:.25s;
-
-}
-
-
-.summary-card:hover {
-
-    transform: translateY(-5px);
-
-    box-shadow: 0 15px 35px rgba(0,0,0,.08);
-
-}
-
-
-.summary-card h3 {
-
-    font-size: 42px;
-
-    font-weight: 800;
-
-    color:#00663f;
-
-    margin-bottom:20px;
-
-}
-
-
-.summary-card strong {
-
-    display:block;
-
-    font-size:17px;
-
-    margin-bottom:12px;
-
-}
-
-
-.summary-card p {
-
-    color:#555;
-
-    font-size:15px;
-
-}
-
-
-
-/* ==============================
-   CHART
-================================ */
-
-
-.chart-box {
-
-    width:100%;
-
-    height:380px;
-
-    background:white;
-
-    padding:35px;
-
-    border-radius:18px;
-
-    border:1px solid #d7dde8;
-
-}
-
-
-.chart-box canvas {
-
-    width:100% !important;
-
-    height:100% !important;
-
-}
-
-
-
-
-/* ==============================
- RESPONSIVE
-================================ */
-
-
-@media(max-width:1000px){
-
-
-    .filter-box {
-
-        grid-template-columns:1fr 1fr;
-
-    }
-
-
-    .summary-grid{
-
-        grid-template-columns:1fr 1fr;
-
-    }
-
-
-}
-
-
-@media(max-width:600px){
-
-
-    .analysis-page{
-
-        padding:60px 5%;
-
-    }
-
-
-    .filter-box,
-    .summary-grid{
-
-        grid-template-columns:1fr;
-
-    }
-
-
-}.text-left{
+/* ==========================================================
+   ANALYSIS PAGE UTILITIES
+========================================================== */
+
+.text-left{
     text-align:left;
 }
 
@@ -275,6 +15,7 @@
     font-variant-numeric:tabular-nums;
     font-feature-settings:"tnum";
 }
+
 /* ==========================================================
    ANALYSIS PAGE
 ========================================================== */
@@ -290,27 +31,17 @@
 }
 
 .analysis-title{
-
     text-align:center;
-
     font-size:42px;
-
     font-weight:800;
-
     color:#00663f;
-
-    margin-top: 60px;
-
-    margin-bottom:40px;
-
+    margin-top: 30px;
+    margin-bottom:24px;
 }
 
 .analysis-header{
-
-    margin:40px 0;
-
+    margin:24px 0;
     text-align:center;
-
 }
 
 .analysis-header h2{
@@ -368,7 +99,7 @@
 
     align-items:center;
 
-    margin-bottom:50px;
+    margin-bottom:28px;
 
 }
 
@@ -438,20 +169,19 @@
 ========================================== */
 
 .summary-section{
-    margin:40px 0 45px;
+    margin:36px 0 0;
 }
 
 .summary-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:24px;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:20px;
 }
 
 .summary-card{
     display:flex;
     flex-direction:column;
-    min-height:250px;
-    padding:28px;
+    padding:24px 22px;
     border-radius:22px;
     border:1px solid #E6EDF5;
     transition:all .25s ease;
@@ -467,13 +197,13 @@
 .summary-top{
     display:flex;
     align-items:center;
-    gap:18px;
-    margin-bottom:28px;
+    gap:16px;
+    margin-bottom:18px;
 }
 
 .summary-icon{
-    width:58px;
-    height:58px;
+    width:52px;
+    height:52px;
     border-radius:50%;
     border:3px solid;
     display:flex;
@@ -483,12 +213,12 @@
 }
 
 .summary-icon i{
-    font-size:24px;
+    font-size:22px;
     color:#EFC53A;
 }
 
 .summary-value{
-    font-size:56px;
+    font-size:48px;
     font-weight:800;
     line-height:1;
     color:#253043;
@@ -496,22 +226,18 @@
 
 /* ===== BOTTOM ===== */
 
-.summary-bottom{
-    margin-top:auto;
-}
-
 .summary-bottom h4{
-    font-size:18px;
+    font-size:17px;
     font-weight:700;
     line-height:1.4;
-    margin-bottom:12px;
+    margin-bottom:8px;
     color:#253043;
 }
 
 .summary-bottom p{
     margin:0;
-    font-size:15px;
-    line-height:1.7;
+    font-size:14px;
+    line-height:1.6;
     color:#667085;
 }
 
@@ -682,7 +408,7 @@
 
 .ranking-section{
 
-    margin-top:40px;
+    margin-top:24px;
 
 }
 
@@ -1003,7 +729,7 @@
 ========================================== */
 .table-card{
 
-    margin-top:32px;
+    margin-top:24px;
 
     background:#fff;
 
@@ -1028,13 +754,21 @@
 
     width:100%;
 
-    border-collapse:collapse;
+    border-collapse:separate;
+
+    border-spacing:0;
 
     table-layout:auto;
 
 }
 
 .analysis-table th{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:10;
 
     background:#F8FAFC;
 
@@ -1047,6 +781,8 @@
     font-weight:700;
 
     white-space:normal;
+
+    box-shadow:0 2px 4px rgba(0,0,0,.04);
 
 }
 
@@ -1211,7 +947,8 @@
 }
 
 .tabs-body .table-responsive{
-    overflow-x:auto;
+    max-height:550px;
+    overflow:auto;
 }
 
 .tabs-body .analysis-table{
