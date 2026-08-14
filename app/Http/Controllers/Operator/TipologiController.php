@@ -246,6 +246,17 @@ class TipologiController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->has('nilai_ss') && !$request->has('shift_share_net')) {
+            $request->merge(['shift_share_net' => $request->nilai_ss]);
+        }
+
+        if ($request->filled('nilai_lq')) {
+            $request->merge(['nilai_lq' => str_replace(',', '.', str_replace('.', '', $request->nilai_lq))]);
+        }
+        if ($request->filled('shift_share_net')) {
+            $request->merge(['shift_share_net' => str_replace(',', '.', str_replace('.', '', $request->shift_share_net))]);
+        }
+
         $validated = $request->validate([
             'tingkat_wilayah' => 'required|string',
             'sektor' => 'required|string',
@@ -289,6 +300,8 @@ class TipologiController extends Controller
                 'daerah_pembanding' => $daerahPembanding,
                 'lq' => $lq,
                 'cij' => $cij,
+                'shift_share_net' => $cij,
+                'nilai_ss' => $cij,
                 'kuadran' => $kuadran,
                 'kategori_sektor' => $kategoriMap[$kuadran] ?? $kuadran,
             ]),
@@ -301,7 +314,24 @@ class TipologiController extends Controller
 
     public function update(Request $request, $id)
     {
-        $item = AnalysisResult::where('type', 'tipologi_sektor')->findOrFail($id);
+        $userId = Auth::id();
+        $item = AnalysisResult::where('type', 'tipologi_sektor')
+            ->where(function ($q) use ($userId) {
+                $q->where('user_id', $userId)
+                  ->orWhereRaw("results->>'user_id' = ?", [(string)$userId]);
+            })
+            ->findOrFail($id);
+
+        if ($request->has('nilai_ss') && !$request->has('shift_share_net')) {
+            $request->merge(['shift_share_net' => $request->nilai_ss]);
+        }
+
+        if ($request->filled('nilai_lq')) {
+            $request->merge(['nilai_lq' => str_replace(',', '.', str_replace('.', '', $request->nilai_lq))]);
+        }
+        if ($request->filled('shift_share_net')) {
+            $request->merge(['shift_share_net' => str_replace(',', '.', str_replace('.', '', $request->shift_share_net))]);
+        }
 
         $validated = $request->validate([
             'tingkat_wilayah' => 'required|string',
@@ -338,11 +368,14 @@ class TipologiController extends Controller
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
         $item->update([
+            'title' => 'Simulasi Tipologi Sektor ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
             'results' => array_merge($validated, [
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'lq' => $lq,
                 'cij' => $cij,
+                'shift_share_net' => $cij,
+                'nilai_ss' => $cij,
                 'kuadran' => $kuadran,
                 'kategori_sektor' => $kategoriMap[$kuadran] ?? $kuadran,
             ]),
