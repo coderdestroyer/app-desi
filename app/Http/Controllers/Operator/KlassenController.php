@@ -254,19 +254,51 @@ class KlassenController extends Controller
         $validated = $request->validate([
             'tingkat_wilayah' => 'required|string',
             'sektor' => 'required|string',
-            'tahun' => 'required|numeric',
             'provinsi' => 'required|string',
             'kabupaten' => 'nullable|string',
-            'laju_pertumbuhan_daerah' => 'required|numeric',
-            'laju_pertumbuhan_pembanding' => 'required|numeric',
-            'kontribusi_daerah' => 'required|numeric',
-            'kontribusi_pembanding' => 'required|numeric',
         ]);
 
-        $r_i = $validated['laju_pertumbuhan_daerah'] / 100;
-        $r_p = $validated['laju_pertumbuhan_pembanding'] / 100;
-        $y_i = $validated['kontribusi_daerah'] / 100;
-        $y_p = $validated['kontribusi_pembanding'] / 100;
+        if ($request->has('tahun') && is_array($request->tahun) && count($request->tahun) >= 2) {
+            $tahunArr = $request->tahun;
+            $pdrbSektorArr = $request->pdrb_sektor_analisis ?? [];
+            $totalPdrbArr = $request->total_pdrb_analisis ?? [];
+            $pdrbPembandingArr = $request->pdrb_sektor_pembanding ?? [];
+            $totalPembandingArr = $request->total_pdrb_pembanding ?? [];
+
+            $tahunAwal = (int) ($tahunArr[0] ?? date('Y') - 1);
+            $tahunAkhir = (int) ($tahunArr[count($tahunArr) - 1] ?? date('Y'));
+
+            $yAwal = (float) str_replace(',', '.', str_replace('.', '', $pdrbSektorArr[0] ?? 0));
+            $yAkhir = (float) str_replace(',', '.', str_replace('.', '', $pdrbSektorArr[count($pdrbSektorArr) - 1] ?? 0));
+
+            $totalYAwal = (float) str_replace(',', '.', str_replace('.', '', $totalPdrbArr[0] ?? 0));
+            $totalYAkhir = (float) str_replace(',', '.', str_replace('.', '', $totalPdrbArr[count($totalPdrbArr) - 1] ?? 0));
+
+            $yPembandingAwal = (float) str_replace(',', '.', str_replace('.', '', $pdrbPembandingArr[0] ?? 0));
+            $yPembandingAkhir = (float) str_replace(',', '.', str_replace('.', '', $pdrbPembandingArr[count($pdrbPembandingArr) - 1] ?? 0));
+
+            $totalPembandingAwal = (float) str_replace(',', '.', str_replace('.', '', $totalPembandingArr[0] ?? 0));
+            $totalPembandingAkhir = (float) str_replace(',', '.', str_replace('.', '', $totalPembandingArr[count($totalPembandingArr) - 1] ?? 0));
+
+            $ri = ($yAwal > 0) ? (($yAkhir - $yAwal) / $yAwal) * 100 : 0;
+            $rp = ($totalPembandingAwal > 0) ? (($totalPembandingAkhir - $totalPembandingAwal) / $totalPembandingAwal) * 100 : 0;
+            $yi = ($totalYAkhir > 0) ? ($yAkhir / $totalYAkhir) * 100 : 0;
+            $yp = ($totalPembandingAkhir > 0) ? ($yPembandingAkhir / $totalPembandingAkhir) * 100 : 0;
+        } else {
+            $tahunAwal = (int) ($request->tahun_awal ?? $request->tahun - 1 ?? date('Y') - 1);
+            $tahunAkhir = (int) ($request->tahun_akhir ?? $request->tahun ?? date('Y'));
+            $ri = (float) ($request->laju_pertumbuhan_daerah ?? 0);
+            $rp = (float) ($request->laju_pertumbuhan_pembanding ?? 0);
+            $yi = (float) ($request->kontribusi_daerah ?? 0);
+            $yp = (float) ($request->kontribusi_pembanding ?? 0);
+            $yAwal = 0; $yAkhir = 0; $totalYAwal = 0; $totalYAkhir = 0;
+            $yPembandingAwal = 0; $yPembandingAkhir = 0; $totalPembandingAwal = 0; $totalPembandingAkhir = 0;
+        }
+
+        $r_i = $ri / 100;
+        $r_p = $rp / 100;
+        $y_i = $yi / 100;
+        $y_p = $yp / 100;
 
         $kuadran = '';
         if ($r_i >= $r_p && $y_i >= $y_p) $kuadran = 'Kuadran I';
@@ -293,12 +325,35 @@ class KlassenController extends Controller
             'user_id' => Auth::id(),
             'type' => 'tipologi_klassen',
             'title' => 'Simulasi Tipologi Klassen ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
-            'results' => array_merge($validated, [
+            'results' => [
+                'tingkat_wilayah' => $validated['tingkat_wilayah'],
+                'provinsi' => $validated['provinsi'],
+                'kabupaten' => $validated['kabupaten'] ?? null,
+                'sektor' => $validated['sektor'],
+                'tahun' => $tahunAkhir,
+                'tahun_awal' => $tahunAwal,
+                'tahun_akhir' => $tahunAkhir,
+                'pdrb_sektor_analisis_awal' => $yAwal,
+                'pdrb_sektor_analisis_akhir' => $yAkhir,
+                'total_pdrb_analisis_awal' => $totalYAwal,
+                'total_pdrb_analisis_akhir' => $totalYAkhir,
+                'pdrb_sektor_pembanding_awal' => $yPembandingAwal,
+                'pdrb_sektor_pembanding_akhir' => $yPembandingAkhir,
+                'total_pdrb_pembanding_awal' => $totalPembandingAwal,
+                'total_pdrb_pembanding_akhir' => $totalPembandingAkhir,
+                'laju_pertumbuhan_daerah' => $ri,
+                'laju_pertumbuhan_pembanding' => $rp,
+                'kontribusi_daerah' => $yi,
+                'kontribusi_pembanding' => $yp,
+                'r_i' => $r_i,
+                'r_p' => $r_p,
+                'y_i' => $y_i,
+                'y_p' => $y_p,
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'kuadran' => $kuadran,
-                'klasifikasi_sektor' => $klasifikasiMap[$kuadran],
-            ]),
+                'klasifikasi_sektor' => $klasifikasiMap[$kuadran] ?? $kuadran,
+            ],
         ]);
 
         Cache::flush();
@@ -308,24 +363,62 @@ class KlassenController extends Controller
 
     public function update(Request $request, $id)
     {
-        $item = AnalysisResult::where('type', 'tipologi_klassen')->findOrFail($id);
+        $userId = Auth::id();
+        $item = AnalysisResult::where('type', 'tipologi_klassen')
+            ->where(function ($q) use ($userId) {
+                $q->where('user_id', $userId)
+                  ->orWhereRaw("results->>'user_id' = ?", [(string)$userId]);
+            })
+            ->findOrFail($id);
 
         $validated = $request->validate([
             'tingkat_wilayah' => 'required|string',
             'sektor' => 'required|string',
-            'tahun' => 'required|numeric',
             'provinsi' => 'required|string',
             'kabupaten' => 'nullable|string',
-            'laju_pertumbuhan_daerah' => 'required|numeric',
-            'laju_pertumbuhan_pembanding' => 'required|numeric',
-            'kontribusi_daerah' => 'required|numeric',
-            'kontribusi_pembanding' => 'required|numeric',
         ]);
 
-        $r_i = $validated['laju_pertumbuhan_daerah'] / 100;
-        $r_p = $validated['laju_pertumbuhan_pembanding'] / 100;
-        $y_i = $validated['kontribusi_daerah'] / 100;
-        $y_p = $validated['kontribusi_pembanding'] / 100;
+        if ($request->has('tahun') && is_array($request->tahun) && count($request->tahun) >= 2) {
+            $tahunArr = $request->tahun;
+            $pdrbSektorArr = $request->pdrb_sektor_analisis ?? [];
+            $totalPdrbArr = $request->total_pdrb_analisis ?? [];
+            $pdrbPembandingArr = $request->pdrb_sektor_pembanding ?? [];
+            $totalPembandingArr = $request->total_pdrb_pembanding ?? [];
+
+            $tahunAwal = (int) ($tahunArr[0] ?? date('Y') - 1);
+            $tahunAkhir = (int) ($tahunArr[count($tahunArr) - 1] ?? date('Y'));
+
+            $yAwal = (float) str_replace(',', '.', str_replace('.', '', $pdrbSektorArr[0] ?? 0));
+            $yAkhir = (float) str_replace(',', '.', str_replace('.', '', $pdrbSektorArr[count($pdrbSektorArr) - 1] ?? 0));
+
+            $totalYAwal = (float) str_replace(',', '.', str_replace('.', '', $totalPdrbArr[0] ?? 0));
+            $totalYAkhir = (float) str_replace(',', '.', str_replace('.', '', $totalPdrbArr[count($totalPdrbArr) - 1] ?? 0));
+
+            $yPembandingAwal = (float) str_replace(',', '.', str_replace('.', '', $pdrbPembandingArr[0] ?? 0));
+            $yPembandingAkhir = (float) str_replace(',', '.', str_replace('.', '', $pdrbPembandingArr[count($pdrbPembandingArr) - 1] ?? 0));
+
+            $totalPembandingAwal = (float) str_replace(',', '.', str_replace('.', '', $totalPembandingArr[0] ?? 0));
+            $totalPembandingAkhir = (float) str_replace(',', '.', str_replace('.', '', $totalPembandingArr[count($totalPembandingArr) - 1] ?? 0));
+
+            $ri = ($yAwal > 0) ? (($yAkhir - $yAwal) / $yAwal) * 100 : 0;
+            $rp = ($totalPembandingAwal > 0) ? (($totalPembandingAkhir - $totalPembandingAwal) / $totalPembandingAwal) * 100 : 0;
+            $yi = ($totalYAkhir > 0) ? ($yAkhir / $totalYAkhir) * 100 : 0;
+            $yp = ($totalPembandingAkhir > 0) ? ($yPembandingAkhir / $totalPembandingAkhir) * 100 : 0;
+        } else {
+            $tahunAwal = (int) ($request->tahun_awal ?? $request->tahun - 1 ?? date('Y') - 1);
+            $tahunAkhir = (int) ($request->tahun_akhir ?? $request->tahun ?? date('Y'));
+            $ri = (float) ($request->laju_pertumbuhan_daerah ?? 0);
+            $rp = (float) ($request->laju_pertumbuhan_pembanding ?? 0);
+            $yi = (float) ($request->kontribusi_daerah ?? 0);
+            $yp = (float) ($request->kontribusi_pembanding ?? 0);
+            $yAwal = 0; $yAkhir = 0; $totalYAwal = 0; $totalYAkhir = 0;
+            $yPembandingAwal = 0; $yPembandingAkhir = 0; $totalPembandingAwal = 0; $totalPembandingAkhir = 0;
+        }
+
+        $r_i = $ri / 100;
+        $r_p = $rp / 100;
+        $y_i = $yi / 100;
+        $y_p = $yp / 100;
 
         $kuadran = '';
         if ($r_i >= $r_p && $y_i >= $y_p) $kuadran = 'Kuadran I';
@@ -349,12 +442,36 @@ class KlassenController extends Controller
             : 'PDRB ' . strtoupper($validated['provinsi']);
 
         $item->update([
-            'results' => array_merge($validated, [
+            'title' => 'Simulasi Tipologi Klassen ' . $daerahAnalisis . ' (' . $validated['sektor'] . ')',
+            'results' => [
+                'tingkat_wilayah' => $validated['tingkat_wilayah'],
+                'provinsi' => $validated['provinsi'],
+                'kabupaten' => $validated['kabupaten'] ?? null,
+                'sektor' => $validated['sektor'],
+                'tahun' => $tahunAkhir,
+                'tahun_awal' => $tahunAwal,
+                'tahun_akhir' => $tahunAkhir,
+                'pdrb_sektor_analisis_awal' => $yAwal,
+                'pdrb_sektor_analisis_akhir' => $yAkhir,
+                'total_pdrb_analisis_awal' => $totalYAwal,
+                'total_pdrb_analisis_akhir' => $totalYAkhir,
+                'pdrb_sektor_pembanding_awal' => $yPembandingAwal,
+                'pdrb_sektor_pembanding_akhir' => $yPembandingAkhir,
+                'total_pdrb_pembanding_awal' => $totalPembandingAwal,
+                'total_pdrb_pembanding_akhir' => $totalPembandingAkhir,
+                'laju_pertumbuhan_daerah' => $ri,
+                'laju_pertumbuhan_pembanding' => $rp,
+                'kontribusi_daerah' => $yi,
+                'kontribusi_pembanding' => $yp,
+                'r_i' => $r_i,
+                'r_p' => $r_p,
+                'y_i' => $y_i,
+                'y_p' => $y_p,
                 'daerah_analisis' => $daerahAnalisis,
                 'daerah_pembanding' => $daerahPembanding,
                 'kuadran' => $kuadran,
-                'klasifikasi_sektor' => $klasifikasiMap[$kuadran],
-            ]),
+                'klasifikasi_sektor' => $klasifikasiMap[$kuadran] ?? $kuadran,
+            ],
         ]);
 
         Cache::flush();
@@ -408,26 +525,77 @@ class KlassenController extends Controller
             ], 422);
         }
 
-        $count = 0;
+        $grouped = [];
         foreach ($data as $row) {
             if (!is_array($row)) continue;
-
             $prov = $row['Provinsi'] ?? $row['provinsi'] ?? 'SUMATERA UTARA';
-            $kab = $row['Kabupaten/Kota'] ?? $row['Kabupaten'] ?? $row['kabupaten'] ?? null;
+            $kab = $row['Kabupaten/Kota'] ?? $row['Kabupaten'] ?? $row['kabupaten'] ?? '-';
             $sektor = $row['Sektor'] ?? $row['sektor'] ?? '';
-            $tahun = (int) ($row['Tahun'] ?? $row['tahun'] ?? date('Y'));
-
-            $ri = (float) ($row['laju_pertumbuhan_daerah'] ?? $row['r_i'] ?? 0);
-            $rp = (float) ($row['laju_pertumbuhan_pembanding'] ?? $row['r_p'] ?? 0);
-            $yi = (float) ($row['kontribusi_daerah'] ?? $row['y_i'] ?? 0);
-            $yp = (float) ($row['kontribusi_pembanding'] ?? $row['y_p'] ?? 0);
-
             if (empty($sektor)) continue;
 
+            $key = strtoupper($prov) . '|' . strtoupper($kab) . '|' . strtoupper($sektor);
+            $grouped[$key][] = $row;
+        }
+
+        $count = 0;
+        foreach ($grouped as $key => $rows) {
+            usort($rows, function($a, $b) {
+                $tA = (int)($a['Tahun'] ?? $a['tahun'] ?? 0);
+                $tB = (int)($b['Tahun'] ?? $b['tahun'] ?? 0);
+                return $tA <=> $tB;
+            });
+
+            $firstRow = $rows[0];
+            $prov = $firstRow['Provinsi'] ?? $firstRow['provinsi'] ?? 'SUMATERA UTARA';
+            $kab = $firstRow['Kabupaten/Kota'] ?? $firstRow['Kabupaten'] ?? $firstRow['kabupaten'] ?? null;
+            $sektor = $firstRow['Sektor'] ?? $firstRow['sektor'] ?? '';
+
+            if (count($rows) >= 2) {
+                $rowAwal = $rows[0];
+                $rowAkhir = $rows[count($rows) - 1];
+
+                $tahunAwal = (int) ($rowAwal['Tahun'] ?? $rowAwal['tahun'] ?? date('Y') - 1);
+                $tahunAkhir = (int) ($rowAkhir['Tahun'] ?? $rowAkhir['tahun'] ?? date('Y'));
+
+                $yAwal = (float) ($rowAwal['PDRB Sektor'] ?? $rowAwal['pdrb_sektor'] ?? 0);
+                $yAkhir = (float) ($rowAkhir['PDRB Sektor'] ?? $rowAkhir['pdrb_sektor'] ?? 0);
+
+                $totalYAwal = (float) ($rowAwal['Total PDRB'] ?? $rowAwal['total_pdrb'] ?? 0);
+                $totalYAkhir = (float) ($rowAkhir['Total PDRB'] ?? $rowAkhir['total_pdrb'] ?? 0);
+
+                $yPembandingAwal = (float) ($rowAwal['PDRB Sektor Pembanding'] ?? $rowAwal['pdrb_sektor_pembanding'] ?? 0);
+                $yPembandingAkhir = (float) ($rowAkhir['PDRB Sektor Pembanding'] ?? $rowAkhir['pdrb_sektor_pembanding'] ?? 0);
+
+                $totalPembandingAwal = (float) ($rowAwal['Total PDRB Pembanding'] ?? $rowAwal['total_pdrb_pembanding'] ?? 0);
+                $totalPembandingAkhir = (float) ($rowAkhir['Total PDRB Pembanding'] ?? $rowAkhir['total_pdrb_pembanding'] ?? 0);
+
+                $ri = ($yAwal > 0) ? (($yAkhir - $yAwal) / $yAwal) * 100 : 0;
+                $rp = ($totalPembandingAwal > 0) ? (($totalPembandingAkhir - $totalPembandingAwal) / $totalPembandingAwal) * 100 : 0;
+                $yi = ($totalYAkhir > 0) ? ($yAkhir / $totalYAkhir) * 100 : 0;
+                $yp = ($totalPembandingAkhir > 0) ? ($yPembandingAkhir / $totalPembandingAkhir) * 100 : 0;
+            } else {
+                $singleRow = $rows[0];
+                $tahunAwal = (int) ($singleRow['Tahun Awal'] ?? $singleRow['tahun_awal'] ?? date('Y') - 1);
+                $tahunAkhir = (int) ($singleRow['Tahun'] ?? $singleRow['tahun'] ?? date('Y'));
+
+                $ri = (float) ($singleRow['laju_pertumbuhan_daerah'] ?? $singleRow['r_i'] ?? 0);
+                $rp = (float) ($singleRow['laju_pertumbuhan_pembanding'] ?? $singleRow['r_p'] ?? 0);
+                $yi = (float) ($singleRow['kontribusi_daerah'] ?? $singleRow['y_i'] ?? 0);
+                $yp = (float) ($singleRow['kontribusi_pembanding'] ?? $singleRow['y_p'] ?? 0);
+
+                $yAwal = 0; $yAkhir = 0; $totalYAwal = 0; $totalYAkhir = 0;
+                $yPembandingAwal = 0; $yPembandingAkhir = 0; $totalPembandingAwal = 0; $totalPembandingAkhir = 0;
+            }
+
+            $r_i = $ri / 100;
+            $r_p = $rp / 100;
+            $y_i = $yi / 100;
+            $y_p = $yp / 100;
+
             $kuadran = '';
-            if ($ri >= $rp && $yi >= $yp) $kuadran = 'Kuadran I';
-            elseif ($ri < $rp && $yi >= $yp) $kuadran = 'Kuadran II';
-            elseif ($ri >= $rp && $yi < $yp) $kuadran = 'Kuadran III';
+            if ($r_i >= $r_p && $y_i >= $y_p) $kuadran = 'Kuadran I';
+            elseif ($r_i < $r_p && $y_i >= $y_p) $kuadran = 'Kuadran II';
+            elseif ($r_i >= $r_p && $y_i < $y_p) $kuadran = 'Kuadran III';
             else $kuadran = 'Kuadran IV';
 
             $klasifikasiMap = [
@@ -456,13 +624,25 @@ class KlassenController extends Controller
                     'provinsi' => $prov,
                     'kabupaten' => $kab,
                     'sektor' => $sektor,
-                    'tahun' => $tahun,
-                    'tahun_awal' => $tahun - 1,
-                    'tahun_akhir' => $tahun,
+                    'tahun' => $tahunAkhir,
+                    'tahun_awal' => $tahunAwal,
+                    'tahun_akhir' => $tahunAkhir,
+                    'pdrb_sektor_analisis_awal' => $yAwal,
+                    'pdrb_sektor_analisis_akhir' => $yAkhir,
+                    'total_pdrb_analisis_awal' => $totalYAwal,
+                    'total_pdrb_analisis_akhir' => $totalYAkhir,
+                    'pdrb_sektor_pembanding_awal' => $yPembandingAwal,
+                    'pdrb_sektor_pembanding_akhir' => $yPembandingAkhir,
+                    'total_pdrb_pembanding_awal' => $totalPembandingAwal,
+                    'total_pdrb_pembanding_akhir' => $totalPembandingAkhir,
                     'laju_pertumbuhan_daerah' => $ri,
                     'laju_pertumbuhan_pembanding' => $rp,
                     'kontribusi_daerah' => $yi,
                     'kontribusi_pembanding' => $yp,
+                    'r_i' => $r_i,
+                    'r_p' => $r_p,
+                    'y_i' => $y_i,
+                    'y_p' => $y_p,
                     'daerah_analisis' => $daerahAnalisis,
                     'daerah_pembanding' => $daerahPembanding,
                     'kuadran' => $kuadran,
