@@ -1,4 +1,5 @@
 import Chart from "chart.js/auto";
+import { setupDynamicKabupatenDropdown } from "./analysis.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -8,12 +9,26 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChart("contributionChart", charts.contribution);
     renderChart("lqChart", charts.lq);
     renderChart("ssaChart", charts.ssa);
+
+    /*
+    =====================================
+    FILTER KABUPATEN BERDASARKAN PROVINSI
+    =====================================
+    */
+    const comparisonForm = document.querySelector(".comparison-filter");
+    if (comparisonForm) {
+        const provSelect = comparisonForm.querySelector('select[name="provinsi"]');
+        const kabSelect = comparisonForm.querySelector('select[name="kabupaten"]');
+        if (provSelect && kabSelect) {
+            setupDynamicKabupatenDropdown(provSelect, kabSelect);
+        }
+    }
+
     /*
     =====================================
     FILTER EFFECT
     =====================================
     */
-
     document
         .querySelectorAll(".comparison-filter select")
         .forEach(select => {

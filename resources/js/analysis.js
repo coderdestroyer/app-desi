@@ -342,6 +342,79 @@ document.addEventListener("DOMContentLoaded", () => {
 
         });
 
-    
+    /*
+    ==========================================================
+    FILTER KABUPATEN BERDASARKAN PROVINSI
+    ==========================================================
+    */
+    const analysisForm = document.querySelector(".filter-box");
+    if (analysisForm) {
+        const provSelect = analysisForm.querySelector('select[name="provinsi"]');
+        const kabSelect = analysisForm.querySelector('select[name="kabupaten"]');
+        if (provSelect && kabSelect) {
+            setupDynamicKabupatenDropdown(provSelect, kabSelect);
+        }
+    }
 
 });
+
+/*
+==========================================================
+DYNAMIC PROVINSI - KABUPATEN DROPDOWN HELPER
+==========================================================
+*/
+export function setupDynamicKabupatenDropdown(provinsiSelect, kabupatenSelect) {
+    if (!provinsiSelect || !kabupatenSelect || provinsiSelect.dataset.dynamicLinked === "true") {
+        return;
+    }
+    provinsiSelect.dataset.dynamicLinked = "true";
+
+    const allOptions = Array.from(kabupatenSelect.querySelectorAll("option")).map(opt => ({
+        value: opt.value,
+        text: opt.textContent.trim(),
+        provinsi: opt.getAttribute("data-provinsi") || "",
+        selected: opt.selected
+    }));
+
+    function updateOptions(isInitial = false) {
+        const selectedProv = String(provinsiSelect.value || "").trim();
+        const currentKabVal = isInitial
+            ? (allOptions.find(o => o.selected && o.value)?.value || kabupatenSelect.value)
+            : kabupatenSelect.value;
+
+        kabupatenSelect.innerHTML = "";
+
+        const placeholderOpt = allOptions.find(o => !o.value) || { value: "", text: "Pilih Kabupaten / Kota" };
+        const defaultOption = document.createElement("option");
+        defaultOption.value = placeholderOpt.value;
+        defaultOption.textContent = placeholderOpt.text;
+        kabupatenSelect.appendChild(defaultOption);
+
+        let matchFound = false;
+
+        allOptions.forEach(opt => {
+            if (!opt.value) return;
+
+            if (!selectedProv || String(opt.provinsi) === selectedProv) {
+                const el = document.createElement("option");
+                el.value = opt.value;
+                el.textContent = opt.text;
+                el.setAttribute("data-provinsi", opt.provinsi);
+
+                if (String(opt.value) === String(currentKabVal)) {
+                    el.selected = true;
+                    matchFound = true;
+                }
+
+                kabupatenSelect.appendChild(el);
+            }
+        });
+
+        if (!matchFound) {
+            kabupatenSelect.value = "";
+        }
+    }
+
+    provinsiSelect.addEventListener("change", () => updateOptions(false));
+    updateOptions(true);
+}

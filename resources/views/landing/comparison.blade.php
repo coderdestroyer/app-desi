@@ -74,9 +74,11 @@
 
                 <option
                     value="{{ $item->kab_id }}"
-                    @selected($filter['kabupaten']==$item->kab_id)
+                    data-provinsi="{{ $item->provinsi_id }}"
+                    @selected(($filter['kabupaten'] ?? null) == $item->kab_id)
                 >
-                    {{ Str::title(Str::lower($item->nama_kabupaten)) }}                </option>
+                    {{ Str::title(Str::lower($item->nama_kabupaten)) }}
+                </option>
 
             @endforeach
 

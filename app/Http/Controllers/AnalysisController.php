@@ -28,9 +28,16 @@ class AnalysisController extends Controller
          * ------------------------------------------
          */
 
-        $provinsiId = $request->integer('provinsi');
+        $provinsiId = $request->filled('provinsi') ? $request->integer('provinsi') : null;
 
-        $kabId = $request->integer('kabupaten');
+        $kabId = $request->filled('kabupaten') ? $request->integer('kabupaten') : null;
+
+        if ($kabId && !$provinsiId) {
+            $selectedKab = Kabupaten::find($kabId);
+            if ($selectedKab) {
+                $provinsiId = $selectedKab->provinsi_id;
+            }
+        }
 
         $metode = $request->get(
             'metode',
@@ -49,32 +56,11 @@ class AnalysisController extends Controller
          */
 
         $provinsi =
-
             Provinsi::orderBy('nama_provinsi')
                 ->get();
 
         $kabupaten =
-
-            Kabupaten::query()
-
-                ->when(
-
-                    $provinsiId,
-
-                    fn($q)=>
-
-                        $q->where(
-
-                            'provinsi_id',
-
-                            $provinsiId
-
-                        )
-
-                )
-
-                ->orderBy('nama_kabupaten')
-
+            Kabupaten::orderBy('nama_kabupaten')
                 ->get();
 
         /**
