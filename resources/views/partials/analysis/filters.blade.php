@@ -38,6 +38,7 @@
 
             <option
                 value="{{ $item->kab_id }}"
+                data-provinsi="{{ $item->provinsi_id }}"
                 {{ ($filter['kabupaten'] ?? null) == $item->kab_id ? 'selected' : '' }}
             >
                 {{ Str::title(Str::lower($item->nama_kabupaten)) }} 
