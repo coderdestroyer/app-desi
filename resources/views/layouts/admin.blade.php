@@ -316,6 +316,9 @@
         </div>
     </div>
 
+    <!-- ExcelJS (Advanced Excel Export Library) -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+
     @stack('scripts')
     @include('partials.live-filter-script')
 

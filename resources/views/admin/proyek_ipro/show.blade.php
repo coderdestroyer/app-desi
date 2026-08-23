@@ -21,6 +21,33 @@
                 Mode Read-Only Admin
             </span>
 
+            <div class="relative" x-data="{ openExport: false }">
+                <button @click="openExport = !openExport" @click.outside="openExport = false" class="px-4 py-2 rounded-xl bg-[#1F497D] hover:bg-[#16355B] text-white text-xs font-bold inline-flex items-center gap-2 transition-all shadow-md cursor-pointer">
+                    <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                    <span>Export Excel</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+                </button>
+                <div x-show="openExport" x-transition class="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-[#CFE3D5] py-2 z-50">
+                    <button @click="exportToExcel('all'); openExport = false" class="w-full text-left px-4 py-2 text-xs font-bold text-[#145239] hover:bg-[#EEF8F2] flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-file-zipper text-emerald-600"></i>
+                        <span>Export Semua (3 Sheet Lengkap)</span>
+                    </button>
+                    <div class="border-t border-slate-100 my-1"></div>
+                    <button @click="exportToExcel('capex'); openExport = false" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-boxes-packing text-slate-500"></i>
+                        <span>Export CAPEX</span>
+                    </button>
+                    <button @click="exportToExcel('pl'); openExport = false" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-chart-line text-slate-500"></i>
+                        <span>Export Proyeksi Laba Rugi</span>
+                    </button>
+                    <button @click="exportToExcel('cashflow'); openExport = false" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-wallet text-slate-500"></i>
+                        <span>Export Laporan Arus Kas</span>
+                    </button>
+                </div>
+            </div>
+
             @if($project->status_publikasi === 'published')
                 <span class="px-3.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
@@ -855,6 +882,541 @@
                     cumulative += this.getNetCashflow(i);
                 }
                 return cumulative;
+            },
+
+            projectName: @json($project->nama_proyek),
+            capexList: @json($capexList),
+
+            buildCapexSheet(wb) {
+                const ws = wb.addWorksheet('Estimasi CAPEX');
+
+                const COLOR_HEADER_BG = 'FF1F497D';
+                const COLOR_HEADER_TEXT = 'FFFFFFFF';
+                const COLOR_PARENT_BG = 'FFD9E1F2';
+                const COLOR_PARENT_TEXT = 'FF0F2C59';
+                const COLOR_TOTAL_BG = 'FF1F497D';
+                const COLOR_TOTAL_TEXT = 'FFFFD54F';
+                const COLOR_BORDER = 'FFD9D9D9';
+
+                ws.columns = [
+                    { header: '', key: 'colA', width: 10 },
+                    { header: '', key: 'colB', width: 45 },
+                    { header: '', key: 'colC', width: 16 },
+                    { header: '', key: 'colD', width: 14 },
+                    { header: '', key: 'colE', width: 18 },
+                    { header: '', key: 'colF', width: 24 },
+                    { header: '', key: 'colG', width: 28 },
+                ];
+
+                ws.mergeCells('A1:G1');
+                const titleCell = ws.getCell('A1');
+                titleCell.value = 'ESTIMASI BIAYA INVESTASI AWAL (CAPEX)';
+                titleCell.font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FF1F497D' } };
+                titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+                ws.mergeCells('A2:G2');
+                const subTitleCell = ws.getCell('A2');
+                subTitleCell.value = `Nama Proyek: ${this.projectName}`;
+                subTitleCell.font = { name: 'Calibri', size: 11, italic: true, color: { argb: 'FF475569' } };
+                subTitleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+                ws.addRow([]);
+
+                const headerTitles = ['No', 'Nama Komponen', 'Volume', 'Satuan', 'Luas (m²)', 'Harga Satuan (Rp)', 'Total Harga (Rp)'];
+                const headerRow = ws.addRow(headerTitles);
+                headerRow.height = 28;
+
+                headerRow.eachCell((cell, colNumber) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_HEADER_BG } };
+                    cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_HEADER_TEXT } };
+                    cell.alignment = {
+                        vertical: 'middle',
+                        horizontal: (colNumber === 1 || colNumber === 4) ? 'center' : (colNumber === 2 ? 'left' : 'right'),
+                        wrapText: true
+                    };
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        bottom: { style: 'medium', color: { argb: COLOR_HEADER_BG } },
+                        right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                    };
+                });
+
+                if (Array.isArray(this.capexList)) {
+                    this.capexList.forEach((kategori, parentIdx) => {
+                        const parentRow = ws.addRow([
+                            parentIdx + 1,
+                            (kategori.kategori || '').toUpperCase(),
+                            '-',
+                            '-',
+                            '-',
+                            '-',
+                            Number(kategori.subtotal || 0)
+                        ]);
+                        parentRow.height = 24;
+
+                        parentRow.eachCell((cell, colNumber) => {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_PARENT_BG } };
+                            cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_PARENT_TEXT } };
+                            cell.alignment = {
+                                vertical: 'middle',
+                                horizontal: (colNumber === 1 || colNumber === 4) ? 'center' : (colNumber === 2 ? 'left' : 'right')
+                            };
+                            cell.border = {
+                                top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                                left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                                bottom: { style: 'thin', color: { argb: COLOR_BORDER } },
+                                right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                            };
+
+                            if (colNumber === 7) {
+                                cell.numFmt = '#,##0;(#,##0);"-"';
+                            }
+                        });
+
+                        if (Array.isArray(kategori.items)) {
+                            kategori.items.forEach((item, childIdx) => {
+                                const childRow = ws.addRow([
+                                    `${parentIdx + 1}.${childIdx + 1}`,
+                                    item.nama || '',
+                                    item.vol !== null && item.vol !== undefined ? Number(item.vol) : 0,
+                                    item.satuan || '-',
+                                    item.luas !== null && item.luas !== undefined ? Number(item.luas) : 0,
+                                    item.harga_m2 !== null && item.harga_m2 !== undefined ? Number(item.harga_m2) : 0,
+                                    Number(item.total || 0)
+                                ]);
+                                childRow.height = 20;
+
+                                childRow.eachCell((cell, colNumber) => {
+                                    cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1E293B' } };
+                                    cell.alignment = {
+                                        vertical: 'middle',
+                                        horizontal: (colNumber === 1 || colNumber === 4) ? 'center' : (colNumber === 2 ? 'left' : 'right')
+                                    };
+                                    cell.border = {
+                                        top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                                        left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                                        bottom: { style: 'thin', color: { argb: COLOR_BORDER } },
+                                        right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                                    };
+
+                                    if (colNumber === 3 || colNumber === 5 || colNumber === 6 || colNumber === 7) {
+                                        cell.numFmt = '#,##0;(#,##0);"-"';
+                                    }
+                                });
+                            });
+                        }
+                    });
+                }
+
+                const grandTotal = Number(this.totalCapex || 0);
+                const totalRow = ws.addRow([
+                    '',
+                    'TOTAL ESTIMASI CAPEX',
+                    '',
+                    '',
+                    '',
+                    '',
+                    grandTotal
+                ]);
+                totalRow.height = 28;
+
+                ws.mergeCells(`A${totalRow.number}:F${totalRow.number}`);
+
+                totalRow.eachCell((cell, colNumber) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_TOTAL_BG } };
+                    cell.font = { name: 'Calibri', size: 12, bold: true, color: { argb: COLOR_TOTAL_TEXT } };
+                    cell.alignment = {
+                        vertical: 'middle',
+                        horizontal: colNumber === 7 ? 'right' : 'center'
+                    };
+                    cell.border = {
+                        top: { style: 'medium', color: { argb: COLOR_TOTAL_BG } },
+                        left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        bottom: { style: 'double', color: { argb: COLOR_TOTAL_BG } },
+                        right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                    };
+
+                    if (colNumber === 7) {
+                        cell.numFmt = '#,##0;(#,##0);"-"';
+                    }
+                });
+            },
+
+            buildPLSheet(wb) {
+                const ws = wb.addWorksheet('Proyeksi Laba Rugi');
+
+                const COLOR_HEADER_BG = 'FF1F497D';
+                const COLOR_HEADER_TEXT = 'FFFFFFFF';
+                const COLOR_SECTION_BG = 'FF8EA9DB';
+                const COLOR_SECTION_TEXT = 'FF0F2C59';
+                const COLOR_L1_BG = 'FFE6EEF8';
+                const COLOR_SUBTOTAL_BG = 'FFD9E1F2';
+                const COLOR_SUMMARY_BG = 'FFB8CCE4';
+                const COLOR_TOTAL_BG = 'FF1F497D';
+                const COLOR_TOTAL_TEXT = 'FFFFD54F';
+                const COLOR_BORDER = 'FFD9D9D9';
+
+                const totalCols = this.years.length + 1;
+
+                const colsConfig = [{ header: '', key: 'col1', width: 45 }];
+                this.years.forEach(y => {
+                    colsConfig.push({ header: '', key: `year_${y}`, width: 22 });
+                });
+                ws.columns = colsConfig;
+
+                const lastColLetter = ws.getColumn(totalCols).letter;
+
+                ws.mergeCells(`A1:${lastColLetter}1`);
+                const titleCell = ws.getCell('A1');
+                titleCell.value = 'PROYEKSI LABA RUGI (PROFIT & LOSS)';
+                titleCell.font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FF1F497D' } };
+                titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+                ws.mergeCells(`A2:${lastColLetter}2`);
+                const subTitleCell = ws.getCell('A2');
+                subTitleCell.value = `Nama Proyek: ${this.projectName}`;
+                subTitleCell.font = { name: 'Calibri', size: 11, italic: true, color: { argb: 'FF475569' } };
+
+                ws.mergeCells(`A3:${lastColLetter}3`);
+                const paramCell = ws.getCell('A3');
+                paramCell.value = `Depresiasi: Rp ${this.formatRupiah(this.settings.pl_nominal_depresiasi)}/thn | Suku Bunga: ${this.settings.suku_bunga_kredit}% | Pajak PPh: ${this.settings.pl_persentase_pajak_penghasilan}%`;
+                paramCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF64748B' } };
+
+                ws.addRow([]);
+
+                const headerTitles = ['Kategori / Komponen'];
+                this.years.forEach(y => headerTitles.push(`Tahun Ke-${y}`));
+                const headerRow = ws.addRow(headerTitles);
+                headerRow.height = 28;
+
+                headerRow.eachCell((cell, colNumber) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_HEADER_BG } };
+                    cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_HEADER_TEXT } };
+                    cell.alignment = {
+                        vertical: 'middle',
+                        horizontal: colNumber === 1 ? 'left' : 'right'
+                    };
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        bottom: { style: 'medium', color: { argb: COLOR_HEADER_BG } },
+                        right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                    };
+                });
+
+                const addStyledRow = (rowValues, bgHex = null, textHex = 'FF1E293B', isBold = false, height = 20, isTotal = false) => {
+                    const row = ws.addRow(rowValues);
+                    row.height = height;
+
+                    row.eachCell((cell, colNumber) => {
+                        if (bgHex) {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgHex } };
+                        }
+                        cell.font = { name: 'Calibri', size: isTotal ? 11 : 10, bold: isBold, color: { argb: textHex } };
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: colNumber === 1 ? 'left' : 'right'
+                        };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            bottom: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                        };
+
+                        if (colNumber > 1 && typeof cell.value === 'number') {
+                            cell.numFmt = '#,##0;(#,##0);"-"';
+                        }
+                    });
+                    return row;
+                };
+
+                const addSectionHeader = (title) => {
+                    const rowVals = [title];
+                    this.years.forEach(() => rowVals.push(''));
+                    const row = ws.addRow(rowVals);
+                    row.height = 24;
+                    ws.mergeCells(`A${row.number}:${lastColLetter}${row.number}`);
+                    const c = row.getCell(1);
+                    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SECTION_BG } };
+                    c.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_SECTION_TEXT } };
+                    c.alignment = { vertical: 'middle', horizontal: 'left' };
+                };
+
+                const renderCategoryBlock = (tipe) => {
+                    const parents = this.getParents(tipe);
+                    parents.forEach(parent => {
+                        const pRow = [parent.nama_komponen || '(Tanpa Nama)'];
+                        this.years.forEach(y => pRow.push(this.getRowYearlyTotal(parent.temp_id, y)));
+                        addStyledRow(pRow, COLOR_L1_BG, 'FF1E293B', true, 22);
+
+                        const children = this.getChildren(parent.temp_id);
+                        children.forEach(child => {
+                            const cRow = [`   ${child.nama_komponen || '(Tanpa Nama)'}`];
+                            this.years.forEach(y => cRow.push(this.getRowYearlyTotal(child.temp_id, y)));
+                            addStyledRow(cRow, null, 'FF334155', true, 20);
+
+                            const subchildren = this.getChildren(child.temp_id);
+                            subchildren.forEach(subchild => {
+                                const scRow = [`      ${subchild.nama_komponen || '(Tanpa Nama)'}`];
+                                this.years.forEach(y => scRow.push(Number(subchild.yearly_data[y] || 0)));
+                                addStyledRow(scRow, null, 'FF475569', false, 19);
+                            });
+                        });
+                    });
+                };
+
+                addSectionHeader('A. PENDAPATAN');
+                renderCategoryBlock('PENDAPATAN');
+
+                addSectionHeader('B. BIAYA OPERASIONAL');
+                renderCategoryBlock('BIAYA_OPERASIONAL');
+
+                addSectionHeader('RINGKASAN FINANSIAL');
+
+                const totPendRow = ['TOTAL PENDAPATAN'];
+                this.years.forEach(y => totPendRow.push(this.calculateTotal('PENDAPATAN', y)));
+                addStyledRow(totPendRow, COLOR_SUBTOTAL_BG, 'FF145239', true, 24);
+
+                const totBiayaRow = ['TOTAL BIAYA OPERASIONAL'];
+                this.years.forEach(y => totBiayaRow.push(this.calculateTotal('BIAYA_OPERASIONAL', y)));
+                addStyledRow(totBiayaRow, COLOR_SUBTOTAL_BG, 'FF991B1B', true, 24);
+
+                const ebitdaRow = ['EBITDA'];
+                this.years.forEach(y => ebitdaRow.push(this.getEBITDA(y)));
+                addStyledRow(ebitdaRow, COLOR_SUMMARY_BG, 'FF0F2C59', true, 24);
+
+                const depRow = ['Depresiasi (-)'];
+                this.years.forEach(() => depRow.push(Number(this.settings.pl_nominal_depresiasi || 0)));
+                addStyledRow(depRow, null, 'FF475569', false, 20);
+
+                const ebitRow = ['EBIT (Laba Operasional)'];
+                this.years.forEach(y => ebitRow.push(this.getEBIT(y)));
+                addStyledRow(ebitRow, COLOR_SUMMARY_BG, 'FF0F2C59', true, 24);
+
+                const bungRow = ['Beban Bunga Pinjaman Bank (-)'];
+                this.years.forEach(y => bungRow.push(this.getBebanBunga(y)));
+                addStyledRow(bungRow, null, 'FF475569', false, 20);
+
+                const ebtRow = ['EBT (Laba Sebelum Pajak)'];
+                this.years.forEach(y => ebtRow.push(this.getEBT(y)));
+                addStyledRow(ebtRow, COLOR_SUMMARY_BG, 'FF0F2C59', true, 24);
+
+                const pphRow = ['Pajak PPh (-)'];
+                this.years.forEach(y => pphRow.push(this.getPajakPenghasilan(y)));
+                addStyledRow(pphRow, null, 'FF475569', false, 20);
+
+                const eatRow = ['EAT / LABA BERSIH (NET INCOME)'];
+                this.years.forEach(y => eatRow.push(this.getEAT(y)));
+                addStyledRow(eatRow, COLOR_TOTAL_BG, COLOR_TOTAL_TEXT, true, 28, true);
+            },
+
+            buildCashflowSheet(wb) {
+                const ws = wb.addWorksheet('Tabel Arus Kas');
+
+                const COLOR_HEADER_BG = 'FF1F497D';
+                const COLOR_HEADER_TEXT = 'FFFFFFFF';
+                const COLOR_SECTION_BG = 'FF8EA9DB';
+                const COLOR_SECTION_TEXT = 'FF0F2C59';
+                const COLOR_SUBTOTAL_BG = 'FFD9E1F2';
+                const COLOR_TOTAL_BG = 'FF1F497D';
+                const COLOR_TOTAL_TEXT = 'FFFFD54F';
+                const COLOR_BORDER = 'FFD9D9D9';
+
+                const totalCols = this.years.length + 2;
+
+                const colsConfig = [{ header: '', key: 'col1', width: 35 }];
+                for (let t = 0; t <= this.jangkaWaktuTahun; t++) {
+                    colsConfig.push({ header: '', key: `year_${t}`, width: 22 });
+                }
+                ws.columns = colsConfig;
+
+                const lastColLetter = ws.getColumn(totalCols).letter;
+
+                ws.mergeCells(`A1:${lastColLetter}1`);
+                const titleCell = ws.getCell('A1');
+                titleCell.value = 'LAPORAN PROYEKSI ARUS KAS (CASH FLOW)';
+                titleCell.font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FF1F497D' } };
+                titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+                ws.mergeCells(`A2:${lastColLetter}2`);
+                const subTitleCell = ws.getCell('A2');
+                subTitleCell.value = `Nama Proyek: ${this.projectName}`;
+                subTitleCell.font = { name: 'Calibri', size: 11, italic: true, color: { argb: 'FF475569' } };
+                subTitleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+                ws.mergeCells(`A3:${lastColLetter}3`);
+                const paramCell = ws.getCell('A3');
+                paramCell.value = `Parameter Pembiayaan: Equity (${this.settings.rasio_modal_sendiri}%) | Debt (${this.settings.rasio_pinjaman_kredit}%) | Suku Bunga (${this.settings.suku_bunga_kredit}%) | Tenor (${this.settings.tenor_kredit_tahun} Thn)`;
+                paramCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF64748B' } };
+
+                ws.addRow([]);
+
+                const headerTitles = ['Tahun', '0'];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) {
+                    headerTitles.push(t.toString());
+                }
+                const headerRow = ws.addRow(headerTitles);
+                headerRow.height = 28;
+
+                headerRow.eachCell((cell, colNumber) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_HEADER_BG } };
+                    cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_HEADER_TEXT } };
+                    cell.alignment = {
+                        vertical: 'middle',
+                        horizontal: colNumber === 1 ? 'left' : 'right'
+                    };
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        bottom: { style: 'medium', color: { argb: COLOR_HEADER_BG } },
+                        right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                    };
+                });
+
+                const addStyledRow = (rowValues, bgHex = null, textHex = 'FF1E293B', isBold = false, height = 20, isTotal = false) => {
+                    const row = ws.addRow(rowValues);
+                    row.height = height;
+
+                    row.eachCell((cell, colNumber) => {
+                        if (bgHex) {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgHex } };
+                        }
+                        cell.font = { name: 'Calibri', size: isTotal ? 11 : 10, bold: isBold, color: { argb: textHex } };
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: colNumber === 1 ? 'left' : 'right'
+                        };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            bottom: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                        };
+
+                        if (colNumber > 1 && typeof cell.value === 'number') {
+                            cell.numFmt = '#,##0;(#,##0);"-"';
+                        }
+                    });
+                    return row;
+                };
+
+                const addSectionHeader = (title) => {
+                    const rowVals = [title];
+                    for (let t = 0; t <= this.jangkaWaktuTahun; t++) rowVals.push('');
+                    const row = ws.addRow(rowVals);
+                    row.height = 24;
+                    ws.mergeCells(`A${row.number}:${lastColLetter}${row.number}`);
+                    const c = row.getCell(1);
+                    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SECTION_BG } };
+                    c.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_SECTION_TEXT } };
+                    c.alignment = { vertical: 'middle', horizontal: 'left' };
+                };
+
+                addSectionHeader('ARUS KAS OPERASIONAL');
+
+                const kmRow = ['   Kas Masuk', '-'];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) {
+                    kmRow.push(this.pendapatanPerTahun[t] ? Number(this.pendapatanPerTahun[t]) : 0);
+                }
+                addStyledRow(kmRow, null, 'FF145239', true);
+
+                const kkRow = ['   Kas Keluar', '-'];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) {
+                    kkRow.push(this.opexPerTahun[t] ? -Number(this.opexPerTahun[t]) : 0);
+                }
+                addStyledRow(kkRow, null, 'FF991B1B', true);
+
+                addSectionHeader('ARUS KAS NON-OPERASIONAL');
+
+                const smRow = ['   Setoran Modal', Number(this.getEquityAmount())];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) smRow.push('-');
+                addStyledRow(smRow);
+
+                const pkRow = ['   Penarikan Kredit', Number(this.getDebtAmount())];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) pkRow.push('-');
+                addStyledRow(pkRow);
+
+                const kmnRow = ['   Kas Masuk Non-operasional', Number(this.getTotalKasMasukNonOps(0))];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) kmnRow.push('-');
+                addStyledRow(kmnRow, COLOR_SUBTOTAL_BG, 'FF145239', true, 22);
+
+                const invRow = ['   Investasi', -Number(this.totalCapex)];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) invRow.push('-');
+                addStyledRow(invRow, null, 'FF991B1B');
+
+                const pokRow = ['   Pokok', '-'];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) {
+                    const val = this.getAngsuranPokok(t);
+                    pokRow.push(val > 0 ? -Number(val) : '-');
+                }
+                addStyledRow(pokRow, null, 'FF991B1B');
+
+                const bungRow = ['   Bunga', '-'];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) {
+                    const val = this.getBebanBunga(t);
+                    bungRow.push(val > 0 ? -Number(val) : '-');
+                }
+                addStyledRow(bungRow, null, 'FF991B1B');
+
+                const kknRow = ['   Kas Keluar Non-Operasional', -Number(this.totalCapex)];
+                for (let t = 1; t <= this.jangkaWaktuTahun; t++) {
+                    const totalOut = this.getAngsuranPokok(t) + this.getBebanBunga(t);
+                    kknRow.push(totalOut > 0 ? -Number(totalOut) : '-');
+                }
+                addStyledRow(kknRow, COLOR_SUBTOTAL_BG, 'FF991B1B', true, 22);
+
+                addSectionHeader('RINGKASAN SALDO');
+
+                const saldoRow = ['   Saldo'];
+                for (let t = 0; t <= this.jangkaWaktuTahun; t++) {
+                    saldoRow.push(Number(this.getNetCashflow(t)));
+                }
+                addStyledRow(saldoRow, 'FFB8CCE4', 'FF0F2C59', true, 24);
+
+                const akumRow = ['   Akumulasi Saldo'];
+                for (let t = 0; t <= this.jangkaWaktuTahun; t++) {
+                    akumRow.push(Number(this.getAkumulasiSaldo(t)));
+                }
+                addStyledRow(akumRow, COLOR_TOTAL_BG, COLOR_TOTAL_TEXT, true, 28, true);
+            },
+
+            async exportToExcel(type = 'all') {
+                if (typeof ExcelJS === 'undefined') {
+                    alert('Library ExcelJS belum siap. Silakan periksa koneksi internet Anda.');
+                    return;
+                }
+
+                const wb = new ExcelJS.Workbook();
+                wb.creator = 'DPMPTSP Admin';
+
+                if (type === 'capex') {
+                    this.buildCapexSheet(wb);
+                } else if (type === 'pl') {
+                    this.buildPLSheet(wb);
+                } else if (type === 'cashflow') {
+                    this.buildCashflowSheet(wb);
+                } else {
+                    this.buildCapexSheet(wb);
+                    this.buildPLSheet(wb);
+                    this.buildCashflowSheet(wb);
+                }
+
+                const buffer = await wb.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const sanitizeName = (this.projectName || 'Proyek').toLowerCase().replace(/[^a-z0-9]/g, '_');
+                
+                let prefix = 'Dokumen_IPRO_Lengkap';
+                if (type === 'capex') prefix = 'Estimasi_CAPEX';
+                if (type === 'pl') prefix = 'Proyeksi_Laba_Rugi';
+                if (type === 'cashflow') prefix = 'Laporan_Arus_Kas';
+
+                link.download = `${prefix}_${sanitizeName}.xlsx`;
+                link.click();
+                URL.revokeObjectURL(link.href);
             }
         }));
     });

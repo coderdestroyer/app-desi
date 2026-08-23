@@ -55,6 +55,11 @@
                 <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau'"></span>
             </button>
 
+            <button @click="exportToExcel()" class="flex-1 sm:flex-initial bg-[#1F497D] hover:bg-[#16355B] text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                <span>Export Excel</span>
+            </button>
+
             <button @click="saveData()" :disabled="isSaving" class="flex-1 sm:flex-initial bg-[#145239] hover:bg-[#0B5D3D] text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
                 <i x-show="isSaving" class="fa-solid fa-spinner animate-spin"></i>
                 <i x-show="!isSaving" class="fa-solid fa-floppy-disk"></i>
@@ -76,14 +81,14 @@
 
     <!-- Main Workspace -->
     <div class="bg-white rounded-2xl shadow-xs border border-[#CFE3D5] p-4 sm:p-5 md:p-6 overflow-hidden">
-        
+
         <!-- Table Title and Desc -->
         <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
                 <h2 class="text-lg sm:text-xl font-bold text-slate-800">Proyeksi Laba Rugi (Profit & Loss)</h2>
                 <p class="text-xs text-slate-500 mt-1">Buat struktur kategori Anda sendiri secara dinamis hingga 3 level turunan.</p>
             </div>
-            
+
             <button @click="isSettingsOpen = !isSettingsOpen" class="w-full md:w-auto inline-flex items-center justify-center text-xs font-semibold px-3.5 py-2 bg-[#E7F2EB] hover:bg-[#CFE3D5] text-[#145239] rounded-xl transition-colors border border-[#CFE3D5] shadow-xs gap-2">
                 <i class="fa-solid fa-sliders text-xs"></i>
                 <span x-text="isSettingsOpen ? 'Tutup Pengaturan Variabel' : 'Pengaturan Variabel'"></span>
@@ -103,19 +108,20 @@
                     <span>Simpan Pengaturan</span>
                 </button>
             </div>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Depresiasi (Nominal per Tahun)</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-xs text-slate-500 font-bold">Rp</span>
-                        <input type="text" 
-                               :value="formatRupiah(settings.pl_nominal_depresiasi)" 
-                               @input="let raw = $event.target.value.replace(/[^0-9]/g, ''); settings.pl_nominal_depresiasi = raw ? parseFloat(raw) : 0; $event.target.value = formatRupiah(settings.pl_nominal_depresiasi);" 
-                               class="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-2.5 py-1.5 text-xs focus:border-[#145239] focus:ring-[#145239] font-mono shadow-xs" 
-                               placeholder="0">
+                        <input type="text"
+                            :value="formatRupiah(settings.pl_nominal_depresiasi)"
+                            @input="let raw = $event.target.value.replace(/[^0-9]/g, ''); settings.pl_nominal_depresiasi = raw ? parseFloat(raw) : 0; $event.target.value = formatRupiah(settings.pl_nominal_depresiasi);"
+                            class="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-2.5 py-1.5 text-xs focus:border-[#145239] focus:ring-[#145239] font-mono shadow-xs"
+                            placeholder="0">
                     </div>
-                    <p class="text-[10px] text-[#145239] mt-1 font-medium"><i class="fa-solid fa-calculator mr-1"></i>Otomatis: (Total CAPEX - Persiapan - Fasilitas Pendukung) / {{ $project->jangka_waktu_tahun }} Tahun</p>                </div>
+                    <p class="text-[10px] text-[#145239] mt-1 font-medium"><i class="fa-solid fa-calculator mr-1"></i>Otomatis: (Total CAPEX - Persiapan - Fasilitas Pendukung) / {{ $project->jangka_waktu_tahun }} Tahun</p>
+                </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Suku Bunga Pinjaman (% / Tahun)</label>
                     <div class="relative">
@@ -156,7 +162,7 @@
                         </template>
                     </tr>
                 </thead>
-                
+
                 <!-- ================= 1. BLOK PENDAPATAN ================= -->
                 <tbody x-show="getParents('PENDAPATAN').length > 0">
                     <tr class="bg-[#E7F2EB] text-[#145239] font-bold">
@@ -197,7 +203,9 @@
                                 <tr>
                                     <td class="px-4 py-2 pl-6 sm:pl-10 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                         <div class="flex items-center">
-                                            <svg class="w-3 h-3 text-slate-300 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            <svg class="w-3 h-3 text-slate-300 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
                                             <div x-show="!isPreviewMode" class="flex items-center space-x-2 w-full">
                                                 <input type="text" x-model="child.nama_komponen" class="w-full min-w-[100px] bg-white border border-slate-200 rounded px-2 py-1 text-xs sm:text-sm font-semibold focus:border-[#145239]" placeholder="Sub-kategori...">
                                                 <button @click="addChild(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-lg text-[10px] sm:text-xs font-bold transition-colors shadow-xs">
@@ -228,7 +236,9 @@
                                 <tr class="bg-slate-50 border-t border-slate-100">
                                     <td class="px-4 py-2 pl-10 sm:pl-16 sm:sticky sm:left-0 bg-slate-50 z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                         <div class="flex items-center">
-                                            <svg class="w-3 h-3 text-slate-400 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            <svg class="w-3 h-3 text-slate-400 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
                                             <div x-show="!isPreviewMode" class="flex items-center space-x-2 w-full">
                                                 <input type="text" x-model="subchild.nama_komponen" class="w-full min-w-[100px] bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:border-[#145239]" placeholder="Detail Komponen...">
                                                 <button @click="removeRow(subchild.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors shadow-xs">
@@ -292,7 +302,9 @@
                                 <tr>
                                     <td class="px-4 py-2 pl-6 sm:pl-10 sm:sticky sm:left-0 bg-white z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                         <div class="flex items-center">
-                                            <svg class="w-3 h-3 text-slate-300 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            <svg class="w-3 h-3 text-slate-300 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
                                             <div x-show="!isPreviewMode" class="flex items-center space-x-2 w-full">
                                                 <input type="text" x-model="child.nama_komponen" class="w-full min-w-[100px] bg-white border border-slate-200 rounded px-2 py-1 text-xs sm:text-sm font-semibold focus:border-[#145239]" placeholder="Sub-kategori...">
                                                 <button @click="addChild(child.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-[#E7F2EB] text-[#145239] hover:bg-[#CFE3D5] border border-[#CFE3D5] rounded-lg text-[10px] sm:text-xs font-bold transition-colors shadow-xs">
@@ -323,7 +335,9 @@
                                 <tr class="bg-slate-50 border-t border-slate-100">
                                     <td class="px-4 py-2 pl-10 sm:pl-16 sm:sticky sm:left-0 bg-slate-50 z-20 border-r border-slate-200 shadow-[2px_0_5px_rgba(0,0,0,0.08)]">
                                         <div class="flex items-center">
-                                            <svg class="w-3 h-3 text-slate-400 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            <svg class="w-3 h-3 text-slate-400 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
                                             <div x-show="!isPreviewMode" class="flex items-center space-x-2 w-full">
                                                 <input type="text" x-model="subchild.nama_komponen" class="w-full min-w-[100px] bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:border-[#145239]" placeholder="Detail Komponen...">
                                                 <button @click="removeRow(subchild.temp_id)" class="shrink-0 inline-flex items-center justify-center px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-colors shadow-xs">
@@ -359,7 +373,9 @@
 
                 <!-- ================= 3. RINGKASAN FINANSIAL ================= -->
                 <tbody x-show="rows.length > 0">
-                    <tr><td :colspan="years.length + 1" class="h-6 bg-white border-0"></td></tr>
+                    <tr>
+                        <td :colspan="years.length + 1" class="h-6 bg-white border-0"></td>
+                    </tr>
 
                     <!-- Total Pendapatan & Biaya Murni -->
                     <tr class="bg-[#E7F2EB] border-t border-[#CFE3D5] font-bold">
@@ -453,14 +469,18 @@
             jangkaWaktuTahun: {{ $project->jangka_waktu_tahun ?? 10 }},
             projectId: {{ $project->id }},
             years: [],
-            
+
             isInitializing: false,
             isPreviewMode: false,
             isSaving: false,
             isSavingSettings: false,
             isSettingsOpen: false,
 
-            toast: { show: false, message: '', isSuccess: true },
+            toast: {
+                show: false,
+                message: '',
+                isSuccess: true
+            },
 
             totalCapex: {{ $totalCapex }},
 
@@ -494,7 +514,7 @@
                 for (let i = 1; i <= this.jangkaWaktuTahun; i++) {
                     this.years.push(i);
                 }
-                
+
                 const localDraft = localStorage.getItem(this.storageKey);
                 if (localDraft) {
                     try {
@@ -506,7 +526,7 @@
                             this.autoSaveStatus = 'draft';
                             this.lastSavedTime = parsed.time || '';
                         }
-                    } catch(e) {}
+                    } catch (e) {}
                 }
 
                 if (this.hasUnsavedChanges) {
@@ -515,8 +535,12 @@
 
                 this.loadData();
 
-                this.$watch('rows', () => { this.triggerAutoSave(); });
-                this.$watch('settings', () => { this.triggerAutoSave(); });
+                this.$watch('rows', () => {
+                    this.triggerAutoSave();
+                });
+                this.$watch('settings', () => {
+                    this.triggerAutoSave();
+                });
 
                 this.startCountdownTimer();
                 this.setupNavigationInterception();
@@ -540,9 +564,11 @@
             pushHistoryGuard() {
                 if (!this.isGuardPushed) {
                     try {
-                        history.pushState({ unsavedGuard: true }, '', window.location.href);
+                        history.pushState({
+                            unsavedGuard: true
+                        }, '', window.location.href);
                         this.isGuardPushed = true;
-                    } catch(e) {}
+                    } catch (e) {}
                 }
             },
 
@@ -557,8 +583,10 @@
                 window.addEventListener('popstate', (e) => {
                     if (this.hasUnsavedChanges) {
                         try {
-                            history.pushState({ unsavedGuard: true }, '', window.location.href);
-                        } catch(err) {}
+                            history.pushState({
+                                unsavedGuard: true
+                            }, '', window.location.href);
+                        } catch (err) {}
                         this.pendingNavigationUrl = 'BACK_NAVIGATION';
                         this.showLeaveModal = true;
                     }
@@ -573,14 +601,14 @@
                     const href = link.getAttribute('href');
                     const target = link.getAttribute('target');
 
-                    if (!href || 
-                        href.startsWith('#') || 
-                        href.startsWith('javascript:') || 
-                        href.startsWith('mailto:') || 
-                        href.startsWith('tel:') || 
-                        target === '_blank' || 
-                        e.ctrlKey || 
-                        e.metaKey || 
+                    if (!href ||
+                        href.startsWith('#') ||
+                        href.startsWith('javascript:') ||
+                        href.startsWith('mailto:') ||
+                        href.startsWith('tel:') ||
+                        target === '_blank' ||
+                        e.ctrlKey ||
+                        e.metaKey ||
                         link.hasAttribute('download')) {
                         return;
                     }
@@ -603,7 +631,10 @@
                 clearTimeout(this.localDraftTimeout);
                 this.localDraftTimeout = setTimeout(() => {
                     const now = new Date();
-                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    const timeStr = now.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                     localStorage.setItem(this.storageKey, JSON.stringify({
                         rows: this.rows,
                         settings: this.settings,
@@ -627,11 +658,17 @@
                             'X-CSRF-TOKEN': csrfMeta ? csrfMeta.getAttribute('content') : '{{ csrf_token() }}',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ components: this.rows, settings: this.settings })
+                        body: JSON.stringify({
+                            components: this.rows,
+                            settings: this.settings
+                        })
                     });
                     if (response.ok) {
                         const now = new Date();
-                        this.lastSavedTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        this.lastSavedTime = now.toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
                         this.autoSaveStatus = 'saved';
                         this.hasUnsavedChanges = false;
                         this.isGuardPushed = false;
@@ -692,12 +729,14 @@
                 this.isInitializing = true;
                 try {
                     const response = await fetch(`/operator/projects/${this.projectId}/laba-rugi`, {
-                        headers: { 'Accept': 'application/json' }
+                        headers: {
+                            'Accept': 'application/json'
+                        }
                     });
-                    
+
                     if (response.ok) {
                         const data = await response.json();
-                        
+
                         if (data.settings) {
                             this.settings = data.settings;
                             if (!this.settings.pl_persentase_pajak_penghasilan || parseFloat(this.settings.pl_persentase_pajak_penghasilan) <= 0) {
@@ -713,20 +752,20 @@
                         if (data.total_capex !== undefined) {
                             this.totalCapex = parseFloat(data.total_capex) || 0;
                         }
-                        
+
                         const components = data.components || [];
                         let newRows = [];
-                        
+
                         components.forEach(comp => {
                             let yearly_data = {};
                             this.years.forEach(y => yearly_data[y] = 0);
-                            
+
                             if (comp.yearly_data) {
                                 comp.yearly_data.forEach(yd => {
                                     yearly_data[yd.tahun_ke] = parseFloat(yd.nilai);
                                 });
                             }
-                            
+
                             newRows.push({
                                 id: comp.id,
                                 temp_id: 'db_' + comp.id,
@@ -736,7 +775,7 @@
                                 yearly_data: yearly_data
                             });
                         });
-                        
+
                         const localDraft = localStorage.getItem(this.storageKey);
                         if (!localDraft) {
                             this.rows = newRows;
@@ -786,13 +825,13 @@
             addChild(parentTempId) {
                 let parentIdx = this.rows.findIndex(r => r.temp_id === parentTempId);
                 let parentType = 'PENDAPATAN';
-                
+
                 if (parentIdx !== -1) {
                     // Karena ini sekarang punya sub-item, data inputannya kita paksa ke 0 agar dijumlahkan dari bawah
                     this.years.forEach(y => this.rows[parentIdx].yearly_data[y] = 0);
                     parentType = this.rows[parentIdx].tipe_kategori;
                 }
-                
+
                 this.rows.push({
                     id: null,
                     temp_id: this.generateId(),
@@ -860,7 +899,7 @@
                 const debt = this.getDebtAmount();
                 const tenor = parseInt(this.settings.tenor_kredit_tahun) || 5;
                 const rate = (parseFloat(this.settings.suku_bunga_kredit) || 8.05) / 100;
-                
+
                 if (year <= tenor && debt > 0) {
                     return debt * rate;
                 }
@@ -873,7 +912,7 @@
 
             getPajakPenghasilan(year) {
                 let ebt = this.getEBT(year);
-                if (ebt <= 0) return 0; 
+                if (ebt <= 0) return 0;
                 let persentase = parseFloat(this.settings.pl_persentase_pajak_penghasilan) || 22;
                 return ebt * (persentase / 100);
             },
@@ -885,7 +924,10 @@
             formatRupiah(value) {
                 if (value === null || value === undefined || isNaN(value)) return '0';
                 let isNegative = value < 0;
-                let formatted = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.abs(value));
+                let formatted = new Intl.NumberFormat('id-ID', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(Math.abs(value));
                 return isNegative ? `-${formatted}` : formatted;
             },
 
@@ -893,7 +935,9 @@
                 this.toast.message = message;
                 this.toast.isSuccess = isSuccess;
                 this.toast.show = true;
-                setTimeout(() => { this.toast.show = false; }, 3500);
+                setTimeout(() => {
+                    this.toast.show = false;
+                }, 3500);
             },
 
             async saveSettings() {
@@ -927,15 +971,338 @@
                     this.hasUnsavedChanges = false;
                     this.autoSaveStatus = 'saved';
                     localStorage.removeItem(this.storageKey);
-                    this.isPreviewMode = true; 
+                    this.isPreviewMode = true;
                 } else {
                     this.showToast('Gagal menyimpan data.', false);
                 }
+            },
+
+            async exportToExcel() {
+                if (typeof ExcelJS === 'undefined') {
+                    alert('Library ExcelJS belum siap. Silakan periksa koneksi internet Anda.');
+                    return;
+                }
+
+                const wb = new ExcelJS.Workbook();
+                wb.creator = 'DPMPTSP';
+                const ws = wb.addWorksheet('Proyeksi Laba Rugi');
+
+                const COLOR_HEADER_BG = 'FF1F497D'; // Biru Tua Header
+                const COLOR_HEADER_TEXT = 'FFFFFFFF'; // Putih
+                const COLOR_SECTION_BG = 'FF8EA9DB'; // Biru Muda Seksi
+                const COLOR_SECTION_TEXT = 'FF0F2C59'; // Biru Tua Teks
+                const COLOR_L1_BG = 'FFE6EEF8'; // Soft Blue Level 1
+                const COLOR_SUBTOTAL_BG = 'FFD9E1F2'; // Soft Light Blue Subtotal
+                const COLOR_SUMMARY_BG = 'FFB8CCE4'; // Medium Light Blue Summary
+                const COLOR_TOTAL_BG = 'FF1F497D'; // Biru Tua Total EAT
+                const COLOR_TOTAL_TEXT = 'FFFFD54F'; // Kuning Emas
+                const COLOR_BORDER = 'FFD9D9D9';
+
+                const totalCols = this.years.length + 1; // Col 1 + Years 1..N
+
+                const colsConfig = [{
+                    header: '',
+                    key: 'col1',
+                    width: 45
+                }];
+                this.years.forEach(y => {
+                    colsConfig.push({
+                        header: '',
+                        key: `year_${y}`,
+                        width: 22
+                    });
+                });
+                ws.columns = colsConfig;
+
+                const lastColLetter = ws.getColumn(totalCols).letter;
+
+                // Title Banner
+                ws.mergeCells(`A1:${lastColLetter}1`);
+                const titleCell = ws.getCell('A1');
+                titleCell.value = 'PROYEKSI LABA RUGI (PROFIT & LOSS)';
+                titleCell.font = {
+                    name: 'Calibri',
+                    size: 14,
+                    bold: true,
+                    color: {
+                        argb: 'FF1F497D'
+                    }
+                };
+                titleCell.alignment = {
+                    vertical: 'middle',
+                    horizontal: 'left'
+                };
+
+                ws.mergeCells(`A2:${lastColLetter}2`);
+                const subTitleCell = ws.getCell('A2');
+                subTitleCell.value = `Nama Proyek: ${@json($project->nama_proyek)}`;
+                subTitleCell.font = {
+                    name: 'Calibri',
+                    size: 11,
+                    italic: true,
+                    color: {
+                        argb: 'FF475569'
+                    }
+                };
+
+                ws.mergeCells(`A3:${lastColLetter}3`);
+                const paramCell = ws.getCell('A3');
+                paramCell.value = `Depresiasi: Rp ${this.formatRupiah(this.settings.pl_nominal_depresiasi)}/thn | Suku Bunga: ${this.settings.suku_bunga_kredit}% | Pajak PPh: ${this.settings.pl_persentase_pajak_penghasilan}%`;
+                paramCell.font = {
+                    name: 'Calibri',
+                    size: 10,
+                    italic: true,
+                    color: {
+                        argb: 'FF64748B'
+                    }
+                };
+
+                ws.addRow([]);
+
+                // Table Header Row
+                const headerTitles = ['Kategori / Komponen'];
+                this.years.forEach(y => headerTitles.push(`Tahun Ke-${y}`));
+                const headerRow = ws.addRow(headerTitles);
+                headerRow.height = 28;
+
+                headerRow.eachCell((cell, colNumber) => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: {
+                            argb: COLOR_HEADER_BG
+                        }
+                    };
+                    cell.font = {
+                        name: 'Calibri',
+                        size: 11,
+                        bold: true,
+                        color: {
+                            argb: COLOR_HEADER_TEXT
+                        }
+                    };
+                    cell.alignment = {
+                        vertical: 'middle',
+                        horizontal: colNumber === 1 ? 'left' : 'right'
+                    };
+                    cell.border = {
+                        top: {
+                            style: 'thin',
+                            color: {
+                                argb: COLOR_BORDER
+                            }
+                        },
+                        left: {
+                            style: 'thin',
+                            color: {
+                                argb: COLOR_BORDER
+                            }
+                        },
+                        bottom: {
+                            style: 'medium',
+                            color: {
+                                argb: COLOR_HEADER_BG
+                            }
+                        },
+                        right: {
+                            style: 'thin',
+                            color: {
+                                argb: COLOR_BORDER
+                            }
+                        }
+                    };
+                });
+
+                const addStyledRow = (rowValues, bgHex = null, textHex = 'FF1E293B', isBold = false, height = 20, isTotal = false) => {
+                    const row = ws.addRow(rowValues);
+                    row.height = height;
+
+                    row.eachCell((cell, colNumber) => {
+                        if (bgHex) {
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: {
+                                    argb: bgHex
+                                }
+                            };
+                        }
+                        cell.font = {
+                            name: 'Calibri',
+                            size: isTotal ? 11 : 10,
+                            bold: isBold,
+                            color: {
+                                argb: textHex
+                            }
+                        };
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: colNumber === 1 ? 'left' : 'right'
+                        };
+                        cell.border = {
+                            top: {
+                                style: 'thin',
+                                color: {
+                                    argb: COLOR_BORDER
+                                }
+                            },
+                            left: {
+                                style: 'thin',
+                                color: {
+                                    argb: COLOR_BORDER
+                                }
+                            },
+                            bottom: {
+                                style: 'thin',
+                                color: {
+                                    argb: COLOR_BORDER
+                                }
+                            },
+                            right: {
+                                style: 'thin',
+                                color: {
+                                    argb: COLOR_BORDER
+                                }
+                            }
+                        };
+
+                        if (colNumber > 1 && typeof cell.value === 'number') {
+                            cell.numFmt = '#,##0;(#,##0);"-"';
+                        }
+                    });
+                    return row;
+                };
+
+                const addSectionHeader = (title) => {
+                    const rowVals = [title];
+                    this.years.forEach(() => rowVals.push(''));
+                    const row = ws.addRow(rowVals);
+                    row.height = 24;
+                    ws.mergeCells(`A${row.number}:${lastColLetter}${row.number}`);
+                    const c = row.getCell(1);
+                    c.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: {
+                            argb: COLOR_SECTION_BG
+                        }
+                    };
+                    c.font = {
+                        name: 'Calibri',
+                        size: 11,
+                        bold: true,
+                        color: {
+                            argb: COLOR_SECTION_TEXT
+                        }
+                    };
+                    c.alignment = {
+                        vertical: 'middle',
+                        horizontal: 'left'
+                    };
+                };
+
+                // Helper render category tree
+                const renderCategoryBlock = (tipe) => {
+                    const parents = this.getParents(tipe);
+                    parents.forEach(parent => {
+                        // Level 1
+                        const pRow = [parent.nama_komponen || '(Tanpa Nama)'];
+                        this.years.forEach(y => pRow.push(this.getRowYearlyTotal(parent.temp_id, y)));
+                        addStyledRow(pRow, COLOR_L1_BG, 'FF1E293B', true, 22);
+
+                        // Level 2
+                        const children = this.getChildren(parent.temp_id);
+                        children.forEach(child => {
+                            const cRow = [`   ${child.nama_komponen || '(Tanpa Nama)'}`];
+                            this.years.forEach(y => cRow.push(this.getRowYearlyTotal(child.temp_id, y)));
+                            addStyledRow(cRow, null, 'FF334155', true, 20);
+
+                            // Level 3
+                            const subchildren = this.getChildren(child.temp_id);
+                            subchildren.forEach(subchild => {
+                                const scRow = [`      ${subchild.nama_komponen || '(Tanpa Nama)'}`];
+                                this.years.forEach(y => scRow.push(Number(subchild.yearly_data[y] || 0)));
+                                addStyledRow(scRow, null, 'FF475569', false, 19);
+                            });
+                        });
+                    });
+                };
+
+                // 1. BLOK PENDAPATAN
+                addSectionHeader('A. PENDAPATAN');
+                renderCategoryBlock('PENDAPATAN');
+
+                // 2. BLOK BIAYA OPERASIONAL
+                addSectionHeader('B. BIAYA OPERASIONAL');
+                renderCategoryBlock('BIAYA_OPERASIONAL');
+
+                // 3. RINGKASAN FINANSIAL
+                addSectionHeader('RINGKASAN FINANSIAL');
+
+                // Total Pendapatan
+                const totPendRow = ['TOTAL PENDAPATAN'];
+                this.years.forEach(y => totPendRow.push(this.calculateTotal('PENDAPATAN', y)));
+                addStyledRow(totPendRow, COLOR_SUBTOTAL_BG, 'FF145239', true, 24);
+
+                // Total Biaya Operasional
+                const totBiayaRow = ['TOTAL BIAYA OPERASIONAL'];
+                this.years.forEach(y => totBiayaRow.push(this.calculateTotal('BIAYA_OPERASIONAL', y)));
+                addStyledRow(totBiayaRow, COLOR_SUBTOTAL_BG, 'FF991B1B', true, 24);
+
+                // EBITDA
+                const ebitdaRow = ['EBITDA'];
+                this.years.forEach(y => ebitdaRow.push(this.getEBITDA(y)));
+                addStyledRow(ebitdaRow, COLOR_SUMMARY_BG, 'FF0F2C59', true, 24);
+
+                // Depresiasi
+                const depRow = ['Depresiasi (-)'];
+                this.years.forEach(() => depRow.push(Number(this.settings.pl_nominal_depresiasi || 0)));
+                addStyledRow(depRow, null, 'FF475569', false, 20);
+
+                // EBIT
+                const ebitRow = ['EBIT (Laba Operasional)'];
+                this.years.forEach(y => ebitRow.push(this.getEBIT(y)));
+                addStyledRow(ebitRow, COLOR_SUMMARY_BG, 'FF0F2C59', true, 24);
+
+                // Beban Bunga
+                const bungRow = ['Beban Bunga Pinjaman Bank (-)'];
+                this.years.forEach(y => bungRow.push(this.getBebanBunga(y)));
+                addStyledRow(bungRow, null, 'FF475569', false, 20);
+
+                // EBT
+                const ebtRow = ['EBT (Laba Sebelum Pajak)'];
+                this.years.forEach(y => ebtRow.push(this.getEBT(y)));
+                addStyledRow(ebtRow, COLOR_SUMMARY_BG, 'FF0F2C59', true, 24);
+
+                // Pajak PPh
+                const pphRow = ['Pajak PPh (-)'];
+                this.years.forEach(y => pphRow.push(this.getPajakPenghasilan(y)));
+                addStyledRow(pphRow, null, 'FF475569', false, 20);
+
+                // EAT / NET INCOME
+                const eatRow = ['EAT / LABA BERSIH (NET INCOME)'];
+                this.years.forEach(y => eatRow.push(this.getEAT(y)));
+                addStyledRow(eatRow, COLOR_TOTAL_BG, COLOR_TOTAL_TEXT, true, 28, true);
+
+                // Download File
+                const buffer = await wb.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const sanitizeName = @json(Str::slug($project->nama_proyek));
+                link.download = `Proyeksi_Laba_Rugi_${sanitizeName}.xlsx`;
+                link.click();
+                URL.revokeObjectURL(link.href);
             }
         }));
     }
 
-    if (window.Alpine) { registerLabaRugi(); } 
-    else { document.addEventListener('alpine:init', registerLabaRugi); }
+    if (window.Alpine) {
+        registerLabaRugi();
+    } else {
+        document.addEventListener('alpine:init', registerLabaRugi);
+    }
 </script>
 @endsection
