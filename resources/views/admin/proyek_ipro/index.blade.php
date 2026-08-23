@@ -74,6 +74,11 @@
                     <span>Reset Filter</span>
                 </a>
             @endif
+
+            <button type="button" onclick="exportIproListToExcel()" class="sm:col-span-2 lg:col-span-1 h-11 px-4 rounded-xl bg-[#1F497D] hover:bg-[#16355B] text-white text-xs font-bold inline-flex items-center justify-center gap-2 transition-colors shadow-xs shrink-0 cursor-pointer">
+                <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                <span>Export Excel</span>
+            </button>
         </form>
     </div>
 
@@ -191,4 +196,127 @@
     @endif
 
 </div>
+
+<script>
+    async function exportIproListToExcel() {
+        if (typeof ExcelJS === 'undefined') {
+            alert('Library ExcelJS belum siap. Silakan periksa koneksi internet Anda.');
+            return;
+        }
+
+        const wb = new ExcelJS.Workbook();
+        wb.creator = 'DPMPTSP Admin';
+        const ws = wb.addWorksheet('Daftar Proyek IPRO');
+
+        const COLOR_HEADER_BG = 'FF1F497D'; // Biru Tua Header
+        const COLOR_HEADER_TEXT = 'FFFFFFFF'; // Putih
+        const COLOR_BORDER = 'FFD9D9D9';
+
+        ws.columns = [
+            { header: '', key: 'colNo', width: 8 },
+            { header: '', key: 'colNama', width: 35 },
+            { header: '', key: 'colDeskripsi', width: 45 },
+            { header: '', key: 'colKab', width: 22 },
+            { header: '', key: 'colSektor', width: 25 },
+            { header: '', key: 'colTahun', width: 14 },
+            { header: '', key: 'colTenor', width: 14 },
+            { header: '', key: 'colOperator', width: 22 },
+            { header: '', key: 'colStatus', width: 15 },
+        ];
+
+        // Title Banner
+        ws.mergeCells('A1:I1');
+        const titleCell = ws.getCell('A1');
+        titleCell.value = 'DAFTAR DOKUMEN PROYEK INVESTASI (IPRO)';
+        titleCell.font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FF1F497D' } };
+        titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+        ws.mergeCells('A2:I2');
+        const subTitleCell = ws.getCell('A2');
+        subTitleCell.value = 'Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu (DPMPTSP)';
+        subTitleCell.font = { name: 'Calibri', size: 11, italic: true, color: { argb: 'FF475569' } };
+        subTitleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+        ws.addRow([]);
+
+        // Table Header
+        const headerTitles = ['No', 'Nama Proyek', 'Deskripsi Proyek', 'Kabupaten / Kota', 'Sektor Ekonomi', 'Tahun Awal', 'Tenor (Thn)', 'Penginput (Operator)', 'Status'];
+        const headerRow = ws.addRow(headerTitles);
+        headerRow.height = 28;
+
+        headerRow.eachCell((cell, colNumber) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_HEADER_BG } };
+            cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_HEADER_TEXT } };
+            cell.alignment = {
+                vertical: 'middle',
+                horizontal: (colNumber === 1 || colNumber === 6 || colNumber === 7 || colNumber === 9) ? 'center' : 'left',
+                wrapText: true
+            };
+            cell.border = {
+                top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                bottom: { style: 'medium', color: { argb: COLOR_HEADER_BG } },
+                right: { style: 'thin', color: { argb: COLOR_BORDER } }
+            };
+        });
+
+        // Rows from DB
+        const projectsData = [
+            @foreach($projects as $index => $project)
+            {
+                no: {{ $projects->firstItem() + $index }},
+                nama: @json($project->nama_proyek),
+                deskripsi: @json($project->deskripsi ?: '-'),
+                kabupaten: @json($project->kabupaten ? $project->kabupaten->nama_kabupaten : 'Wilayah Sumut'),
+                sektor: @json($project->sektor ? $project->sektor->nama_sektor : '-'),
+                tahun: {{ $project->tahun_awal ?: '-' }},
+                tenor: {{ $project->jangka_waktu_tahun ?: '-' }},
+                operator: @json($project->user ? $project->user->name : 'Operator'),
+                status: @json(ucfirst($project->status_publikasi ?: 'Draft'))
+            },
+            @endforeach
+        ];
+
+        projectsData.forEach((p, idx) => {
+            const row = ws.addRow([
+                p.no,
+                p.nama,
+                p.deskripsi,
+                p.kabupaten,
+                p.sektor,
+                p.tahun,
+                p.tenor,
+                p.operator,
+                p.status
+            ]);
+            row.height = 22;
+
+            const isEven = idx % 2 === 1;
+            const bgHex = isEven ? 'FFF7FAF8' : 'FFFFFFFF';
+
+            row.eachCell((cell, colNumber) => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgHex } };
+                cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1E293B' } };
+                cell.alignment = {
+                    vertical: 'middle',
+                    horizontal: (colNumber === 1 || colNumber === 6 || colNumber === 7 || colNumber === 9) ? 'center' : 'left'
+                };
+                cell.border = {
+                    top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                    left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                    bottom: { style: 'thin', color: { argb: COLOR_BORDER } },
+                    right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                };
+            });
+        });
+
+        const buffer = await wb.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'Daftar_Proyek_IPRO_DPMPTSP.xlsx';
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+</script>
 @endsection

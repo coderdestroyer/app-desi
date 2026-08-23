@@ -50,6 +50,11 @@
                 </template>
             </div>
 
+            <button @click="exportToExcel()" class="w-full sm:w-auto px-4 py-2 bg-[#1F497D] hover:bg-[#16355B] text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                <span>Export Excel</span>
+            </button>
+
             <a href="{{ route('operator.projects.show', $project->id) }}" class="w-full sm:w-auto px-4 py-2 border border-[#CFE3D5] bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition-colors flex items-center justify-center gap-2">
                 <i class="fa-solid fa-arrow-left text-xs"></i>
                 <span>Kembali ke Detail</span>
@@ -336,7 +341,9 @@
                 this.$watch('settings', () => {
                     this.recalculate();
                     this.triggerAutoSave();
-                }, { deep: true });
+                }, {
+                    deep: true
+                });
 
                 this.startCountdownTimer();
                 this.setupNavigationInterception();
@@ -380,8 +387,12 @@
 
                 const pokokMap = {};
                 const bungaMap = {};
-                const netCashflowMap = { 0: -totalCapex };
-                const akumulasiMap = { 0: -totalCapex };
+                const netCashflowMap = {
+                    0: -totalCapex
+                };
+                const akumulasiMap = {
+                    0: -totalCapex
+                };
 
                 let runningAccumulated = -totalCapex;
 
@@ -596,6 +607,211 @@
                     this.toast.message = 'Gagal menyimpan pengaturan ke database.';
                     this.toast.show = true;
                 }
+            },
+
+            async exportToExcel() {
+                if (typeof ExcelJS === 'undefined') {
+                    alert('Library ExcelJS belum siap. Silakan periksa koneksi internet Anda.');
+                    return;
+                }
+
+                const wb = new ExcelJS.Workbook();
+                wb.creator = 'DPMPTSP Operator';
+                const ws = wb.addWorksheet('Tabel Arus Kas');
+
+                const COLOR_HEADER_BG = 'FF1F497D'; // Biru Tua Header
+                const COLOR_HEADER_TEXT = 'FFFFFFFF'; // Putih
+                const COLOR_SECTION_BG = 'FF8EA9DB'; // Biru Muda Seksi
+                const COLOR_SECTION_TEXT = 'FF0F2C59'; // Biru Tua Seksi Teks
+                const COLOR_SUBTOTAL_BG = 'FFD9E1F2'; // Soft Light Blue Subtotal
+                const COLOR_TOTAL_BG = 'FF1F497D'; // Biru Tua Total Akumulasi
+                const COLOR_TOTAL_TEXT = 'FFFFD54F'; // Kuning Emas
+                const COLOR_BORDER = 'FFD9D9D9';
+
+                const totalCols = this.jangkaWaktu + 2; // Col 1 + Year 0 + Years 1..N
+
+                // Set Columns width
+                const colsConfig = [{ header: '', key: 'col1', width: 35 }];
+                for (let t = 0; t <= this.jangkaWaktu; t++) {
+                    colsConfig.push({ header: '', key: `year_${t}`, width: 22 });
+                }
+                ws.columns = colsConfig;
+
+                const lastColLetter = ws.getColumn(totalCols).letter;
+
+                // Title Banner
+                ws.mergeCells(`A1:${lastColLetter}1`);
+                const titleCell = ws.getCell('A1');
+                titleCell.value = 'LAPORAN PROYEKSI ARUS KAS (CASH FLOW)';
+                titleCell.font = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FF1F497D' } };
+                titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+                ws.mergeCells(`A2:${lastColLetter}2`);
+                const subTitleCell = ws.getCell('A2');
+                subTitleCell.value = `Nama Proyek: ${@json($project->nama_proyek)}`;
+                subTitleCell.font = { name: 'Calibri', size: 11, italic: true, color: { argb: 'FF475569' } };
+                subTitleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+
+                ws.mergeCells(`A3:${lastColLetter}3`);
+                const paramCell = ws.getCell('A3');
+                paramCell.value = `Parameter Pembiayaan: Equity (${this.settings.rasio_modal_sendiri}%) | Debt (${this.settings.rasio_pinjaman_kredit}%) | Suku Bunga (${this.settings.suku_bunga_kredit}%) | Tenor (${this.settings.tenor_kredit_tahun} Thn)`;
+                paramCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF64748B' } };
+
+                ws.addRow([]);
+
+                // Table Header Row
+                const headerTitles = ['Tahun', '0'];
+                for (let t = 1; t <= this.jangkaWaktu; t++) {
+                    headerTitles.push(t.toString());
+                }
+                const headerRow = ws.addRow(headerTitles);
+                headerRow.height = 28;
+
+                headerRow.eachCell((cell, colNumber) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_HEADER_BG } };
+                    cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_HEADER_TEXT } };
+                    cell.alignment = {
+                        vertical: 'middle',
+                        horizontal: colNumber === 1 ? 'left' : 'right'
+                    };
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                        bottom: { style: 'medium', color: { argb: COLOR_HEADER_BG } },
+                        right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                    };
+                });
+
+                // Helper formatting function for rows
+                const addStyledRow = (rowValues, bgHex = null, textHex = 'FF1E293B', isBold = false, height = 20, isTotal = false) => {
+                    const row = ws.addRow(rowValues);
+                    row.height = height;
+
+                    row.eachCell((cell, colNumber) => {
+                        if (bgHex) {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgHex } };
+                        }
+                        cell.font = { name: 'Calibri', size: isTotal ? 11 : 10, bold: isBold, color: { argb: textHex } };
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: colNumber === 1 ? 'left' : 'right'
+                        };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            left: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            bottom: { style: 'thin', color: { argb: COLOR_BORDER } },
+                            right: { style: 'thin', color: { argb: COLOR_BORDER } }
+                        };
+
+                        if (colNumber > 1 && typeof cell.value === 'number') {
+                            cell.numFmt = '#,##0;(#,##0);"-"';
+                        }
+                    });
+                    return row;
+                };
+
+                const addSectionHeader = (title) => {
+                    const rowVals = [title];
+                    for (let t = 0; t <= this.jangkaWaktu; t++) rowVals.push('');
+                    const row = ws.addRow(rowVals);
+                    row.height = 24;
+                    ws.mergeCells(`A${row.number}:${lastColLetter}${row.number}`);
+                    const c = row.getCell(1);
+                    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_SECTION_BG } };
+                    c.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLOR_SECTION_TEXT } };
+                    c.alignment = { vertical: 'middle', horizontal: 'left' };
+                };
+
+                // 1. ARUS KAS OPERASIONAL
+                addSectionHeader('ARUS KAS OPERASIONAL');
+
+                // Kas Masuk
+                const kmRow = ['   Kas Masuk', '-'];
+                for (let t = 1; t <= this.jangkaWaktu; t++) {
+                    kmRow.push(this.pendapatanPerTahun[t] ? Number(this.pendapatanPerTahun[t]) : 0);
+                }
+                addStyledRow(kmRow, null, 'FF145239', true);
+
+                // Kas Keluar
+                const kkRow = ['   Kas Keluar', '-'];
+                for (let t = 1; t <= this.jangkaWaktu; t++) {
+                    kkRow.push(this.opexPerTahun[t] ? -Number(this.opexPerTahun[t]) : 0);
+                }
+                addStyledRow(kkRow, null, 'FF991B1B', true);
+
+                // 2. ARUS KAS NON-OPERASIONAL
+                addSectionHeader('ARUS KAS NON-OPERASIONAL');
+
+                // Setoran Modal
+                const smRow = ['   Setoran Modal', Number(this.equityAmount)];
+                for (let t = 1; t <= this.jangkaWaktu; t++) smRow.push('-');
+                addStyledRow(smRow);
+
+                // Penarikan Kredit
+                const pkRow = ['   Penarikan Kredit', Number(this.debtAmount)];
+                for (let t = 1; t <= this.jangkaWaktu; t++) pkRow.push('-');
+                addStyledRow(pkRow);
+
+                // Subtotal Kas Masuk Non-operasional
+                const kmnRow = ['   Kas Masuk Non-operasional', Number(this.equityAmount) + Number(this.debtAmount)];
+                for (let t = 1; t <= this.jangkaWaktu; t++) kmnRow.push('-');
+                addStyledRow(kmnRow, COLOR_SUBTOTAL_BG, 'FF145239', true, 22);
+
+                // Investasi
+                const invRow = ['   Investasi', -Number(this.totalCapex)];
+                for (let t = 1; t <= this.jangkaWaktu; t++) invRow.push('-');
+                addStyledRow(invRow, null, 'FF991B1B');
+
+                // Pokok
+                const pokRow = ['   Pokok', '-'];
+                for (let t = 1; t <= this.jangkaWaktu; t++) {
+                    const val = this.pokokMap[t] || 0;
+                    pokRow.push(val > 0 ? -Number(val) : '-');
+                }
+                addStyledRow(pokRow, null, 'FF991B1B');
+
+                // Bunga
+                const bungRow = ['   Bunga', '-'];
+                for (let t = 1; t <= this.jangkaWaktu; t++) {
+                    const val = this.bungaMap[t] || 0;
+                    bungRow.push(val > 0 ? -Number(val) : '-');
+                }
+                addStyledRow(bungRow, null, 'FF991B1B');
+
+                // Subtotal Kas Keluar Non-Operasional
+                const kknRow = ['   Kas Keluar Non-Operasional', -Number(this.totalCapex)];
+                for (let t = 1; t <= this.jangkaWaktu; t++) {
+                    const totalOut = (this.pokokMap[t] || 0) + (this.bungaMap[t] || 0);
+                    kknRow.push(totalOut > 0 ? -Number(totalOut) : '-');
+                }
+                addStyledRow(kknRow, COLOR_SUBTOTAL_BG, 'FF991B1B', true, 22);
+
+                // 3. RINGKASAN SALDO
+                addSectionHeader('RINGKASAN SALDO');
+
+                // Saldo
+                const saldoRow = ['   Saldo'];
+                for (let t = 0; t <= this.jangkaWaktu; t++) {
+                    saldoRow.push(Number(this.netCashflowMap[t] || 0));
+                }
+                addStyledRow(saldoRow, 'FFB8CCE4', 'FF0F2C59', true, 24);
+
+                // Akumulasi Saldo
+                const akumRow = ['   Akumulasi Saldo'];
+                for (let t = 0; t <= this.jangkaWaktu; t++) {
+                    akumRow.push(Number(this.akumulasiMap[t] || 0));
+                }
+                const finalAkumRow = addStyledRow(akumRow, COLOR_TOTAL_BG, COLOR_TOTAL_TEXT, true, 28, true);
+
+                // Download File
+                const buffer = await wb.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const sanitizeName = @json(Str::slug($project->nama_proyek));
+                link.download = `Tabel_Arus_Kas_${sanitizeName}.xlsx`;
+                link.click();
+                URL.revokeObjectURL(link.href);
             }
         }));
     }

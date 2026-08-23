@@ -107,7 +107,7 @@
                         </a>
                     </li>
                 </ul>
-                
+
                 @if($isPeluangInvestasi)
                 <!-- SIDEBAR MENU PELUANG INVESTASI (IPRO) -->
                 <div class="mt-[18px] mx-[12px] mb-[10px] text-[#ffd457] text-xs font-bold uppercase">
@@ -149,7 +149,7 @@
                     </li>
                     {{-- COLLAPSIBLE GROUPING DATA PDRB --}}
                     @php
-                        $isPdrbGroupActive = request()->routeIs('operator.pdrb.*') || request()->routeIs('operator.pdrb-provinsi.*');
+                    $isPdrbGroupActive = request()->routeIs('operator.pdrb.*') || request()->routeIs('operator.pdrb-provinsi.*');
                     @endphp
                     <li class="mb-[5px]" x-data="{ open: {{ $isPdrbGroupActive ? 'true' : 'false' }} }">
                         <button type="button" @click="open = !open"
@@ -197,10 +197,10 @@
                     </li>
                     {{-- COLLAPSIBLE GROUPING ANALISIS POTENSI --}}
                     @php
-                        $isAnalisisGroupActive = request()->routeIs('operator.lq.*') 
-                                              || request()->routeIs('operator.ss.*') 
-                                              || request()->routeIs('operator.tipologi.*') 
-                                              || request()->routeIs('operator.klassen.*');
+                    $isAnalisisGroupActive = request()->routeIs('operator.lq.*')
+                    || request()->routeIs('operator.ss.*')
+                    || request()->routeIs('operator.tipologi.*')
+                    || request()->routeIs('operator.klassen.*');
                     @endphp
                     <li class="mb-[5px]" x-data="{ open: {{ $isAnalisisGroupActive ? 'true' : 'false' }} }">
                         <button type="button" @click="open = !open"
@@ -301,6 +301,8 @@
 
     <!-- SheetJS (Excel Export & Import Library) -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- ExcelJS (Advanced Excel Export with Styling & Cell Formatting) -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 
     @stack('modals')
     @stack('scripts')

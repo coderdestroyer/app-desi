@@ -55,6 +55,11 @@
                 <span x-text="isPreviewMode ? 'Edit Data' : 'Pratinjau'"></span>
             </button>
 
+            <button @click="exportToExcel()" class="flex-1 sm:flex-initial bg-[#1F497D] hover:bg-[#16355B] text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                <span>Export Excel</span>
+            </button>
+
             <button @click="saveData()" :disabled="isSaving" class="flex-1 sm:flex-initial bg-[#145239] hover:bg-[#0B5D3D] text-white px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed gap-2">
                 <i x-show="isSaving" class="fa-solid fa-spinner animate-spin"></i>
                 <i x-show="!isSaving" class="fa-solid fa-floppy-disk"></i>
@@ -76,7 +81,7 @@
 
     <!-- Main Workspace -->
     <div class="bg-white rounded-2xl shadow-xs border border-[#CFE3D5] p-4 sm:p-5 md:p-6 overflow-hidden">
-        
+
         <!-- Table Title and Desc -->
         <div class="mb-6 border-b border-slate-100 pb-4">
             <h2 class="text-lg sm:text-xl font-bold text-slate-800">Estimasi Biaya Investasi Awal (CAPEX)</h2>
@@ -200,11 +205,11 @@
             </div>
         </div>
 
-        </div>
+    </div>
 
     <!-- MODAL KONFIRMASI PERUBAHAN BELUM DISIMPAN -->
     <x-confirm-unsaved-modal />
-    </div>
+</div>
 </div>
 
 <script>
@@ -214,7 +219,11 @@
             isSaving: false,
             rows: [],
             errors: {},
-            toast: { show: false, message: '', isSuccess: true },
+            toast: {
+                show: false,
+                message: '',
+                isSuccess: true
+            },
             hasUnsavedChanges: false,
             showLeaveModal: false,
             pendingNavigationUrl: null,
@@ -247,9 +256,9 @@
                             this.lastSavedTime = parsed.time || '';
                             loadedFromDraft = true;
                         }
-                    } catch(e) {}
+                    } catch (e) {}
                 }
-                
+
                 if (!loadedFromDraft) {
                     if (dbComponents.length > 0) {
                         this.rows = dbComponents.map(c => ({
@@ -275,7 +284,10 @@
                         temp_id: 'temp_def_1',
                         parent_temp_id: null,
                         nama_komponen: 'Persiapan',
-                        volume: null, satuan: '', luas: null, harga_m2: null
+                        volume: null,
+                        satuan: '',
+                        luas: null,
+                        harga_m2: null
                     });
                 }
                 parents = this.getParents();
@@ -285,7 +297,10 @@
                         temp_id: 'temp_def_2',
                         parent_temp_id: null,
                         nama_komponen: 'Fasilitas Service dan Pendukung',
-                        volume: null, satuan: '', luas: null, harga_m2: null
+                        volume: null,
+                        satuan: '',
+                        luas: null,
+                        harga_m2: null
                     });
                 }
 
@@ -321,9 +336,11 @@
             pushHistoryGuard() {
                 if (!this.isGuardPushed) {
                     try {
-                        history.pushState({ unsavedGuard: true }, '', window.location.href);
+                        history.pushState({
+                            unsavedGuard: true
+                        }, '', window.location.href);
                         this.isGuardPushed = true;
-                    } catch(e) {}
+                    } catch (e) {}
                 }
             },
 
@@ -338,8 +355,10 @@
                 window.addEventListener('popstate', (e) => {
                     if (this.hasUnsavedChanges) {
                         try {
-                            history.pushState({ unsavedGuard: true }, '', window.location.href);
-                        } catch(err) {}
+                            history.pushState({
+                                unsavedGuard: true
+                            }, '', window.location.href);
+                        } catch (err) {}
                         this.pendingNavigationUrl = 'BACK_NAVIGATION';
                         this.showLeaveModal = true;
                     }
@@ -354,14 +373,14 @@
                     const href = link.getAttribute('href');
                     const target = link.getAttribute('target');
 
-                    if (!href || 
-                        href.startsWith('#') || 
-                        href.startsWith('javascript:') || 
-                        href.startsWith('mailto:') || 
-                        href.startsWith('tel:') || 
-                        target === '_blank' || 
-                        e.ctrlKey || 
-                        e.metaKey || 
+                    if (!href ||
+                        href.startsWith('#') ||
+                        href.startsWith('javascript:') ||
+                        href.startsWith('mailto:') ||
+                        href.startsWith('tel:') ||
+                        target === '_blank' ||
+                        e.ctrlKey ||
+                        e.metaKey ||
                         link.hasAttribute('download')) {
                         return;
                     }
@@ -383,7 +402,10 @@
                 clearTimeout(this.localDraftTimeout);
                 this.localDraftTimeout = setTimeout(() => {
                     const now = new Date();
-                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    const timeStr = now.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                     localStorage.setItem(this.storageKey, JSON.stringify({
                         rows: this.rows,
                         time: timeStr
@@ -400,18 +422,23 @@
 
                 try {
                     const res = await fetch('{{ route('operator.projects.capex.store', $project->id) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ components: this.rows })
-                    });
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                components: this.rows
+                            })
+                        });
                     const data = await res.json();
                     if (data.success) {
                         const now = new Date();
-                        this.lastSavedTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        this.lastSavedTime = now.toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
                         this.autoSaveStatus = 'saved';
                         this.hasUnsavedChanges = false;
                         this.isGuardPushed = false;
@@ -422,7 +449,7 @@
                         this.autoSaveStatus = 'draft';
                         return false;
                     }
-                } catch(e) {
+                } catch (e) {
                     this.autoSaveStatus = 'draft';
                     return false;
                 }
@@ -484,8 +511,8 @@
                 const firstParent = parents[0];
                 let lastParent = null;
 
-                let lastParentIdx = parents.findIndex(p => 
-                    p.temp_id === 'temp_def_2' || 
+                let lastParentIdx = parents.findIndex(p =>
+                    p.temp_id === 'temp_def_2' ||
                     (p.nama_komponen && p.nama_komponen.toLowerCase().includes('fasilitas service'))
                 );
 
@@ -594,13 +621,359 @@
                 this.errors = {};
                 const success = await this.autoSaveToServer(true);
                 this.isSaving = false;
-                if(success) {
+                if (success) {
                     this.toast.isSuccess = true;
                     this.toast.message = 'Data CAPEX berhasil disimpan ke database.';
                     this.toast.show = true;
                 } else {
                     alert('Gagal menyimpan data CAPEX.');
                 }
+            },
+
+            async exportToExcel() {
+                if (typeof ExcelJS === 'undefined') {
+                    alert('Library ExcelJS belum siap. Silakan periksa koneksi internet Anda.');
+                    return;
+                }
+
+                const wb = new ExcelJS.Workbook();
+                wb.creator = 'DPMPTSP';
+                const ws = wb.addWorksheet('Estimasi CAPEX');
+
+                const COLOR_HEADER_BG = 'FF1F497D'; // Biru Tua Header
+                const COLOR_HEADER_TEXT = 'FFFFFFFF'; // Putih
+                const COLOR_PARENT_BG = 'FFD9E1F2'; // Biru Muda Kategori Utama
+                const COLOR_PARENT_TEXT = 'FF0F2C59'; // Biru Tua Teks
+                const COLOR_TOTAL_BG = 'FF1F497D'; // Biru Tua Total
+                const COLOR_TOTAL_TEXT = 'FFFFD54F'; // Kuning Emas
+                const COLOR_BORDER = 'FFD9D9D9';
+
+                ws.columns = [{
+                        header: '',
+                        key: 'colA',
+                        width: 10
+                    },
+                    {
+                        header: '',
+                        key: 'colB',
+                        width: 45
+                    },
+                    {
+                        header: '',
+                        key: 'colC',
+                        width: 16
+                    },
+                    {
+                        header: '',
+                        key: 'colD',
+                        width: 14
+                    },
+                    {
+                        header: '',
+                        key: 'colE',
+                        width: 18
+                    },
+                    {
+                        header: '',
+                        key: 'colF',
+                        width: 24
+                    },
+                    {
+                        header: '',
+                        key: 'colG',
+                        width: 28
+                    },
+                ];
+
+                ws.mergeCells('A1:G1');
+                const titleCell = ws.getCell('A1');
+                titleCell.value = 'ESTIMASI BIAYA INVESTASI AWAL (CAPEX)';
+                titleCell.font = {
+                    name: 'Calibri',
+                    size: 14,
+                    bold: true,
+                    color: {
+                        argb: 'FF1F497D'
+                    }
+                };
+                titleCell.alignment = {
+                    vertical: 'middle',
+                    horizontal: 'left'
+                };
+
+                ws.mergeCells('A2:G2');
+                const subTitleCell = ws.getCell('A2');
+                subTitleCell.value = `Nama Proyek: ${@json($project->nama_proyek)}`;
+                subTitleCell.font = {
+                    name: 'Calibri',
+                    size: 11,
+                    italic: true,
+                    color: {
+                        argb: 'FF475569'
+                    }
+                };
+                subTitleCell.alignment = {
+                    vertical: 'middle',
+                    horizontal: 'left'
+                };
+
+                ws.addRow([]);
+
+                const headerTitles = ['No', 'Nama Komponen', 'Volume', 'Satuan', 'Luas (m²)', 'Harga Satuan (Rp)', 'Total Harga (Rp)'];
+                const headerRow = ws.addRow(headerTitles);
+                headerRow.height = 28;
+
+                headerRow.eachCell((cell, colNumber) => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: {
+                            argb: COLOR_HEADER_BG
+                        }
+                    };
+                    cell.font = {
+                        name: 'Calibri',
+                        size: 11,
+                        bold: true,
+                        color: {
+                            argb: COLOR_HEADER_TEXT
+                        }
+                    };
+                    cell.alignment = {
+                        vertical: 'middle',
+                        horizontal: (colNumber === 1 || colNumber === 4) ? 'center' : (colNumber === 2 ? 'left' : 'right'),
+                        wrapText: true
+                    };
+                    cell.border = {
+                        top: {
+                            style: 'thin',
+                            color: {
+                                argb: COLOR_BORDER
+                            }
+                        },
+                        left: {
+                            style: 'thin',
+                            color: {
+                                argb: COLOR_BORDER
+                            }
+                        },
+                        bottom: {
+                            style: 'medium',
+                            color: {
+                                argb: COLOR_HEADER_BG
+                            }
+                        },
+                        right: {
+                            style: 'thin',
+                            color: {
+                                argb: COLOR_BORDER
+                            }
+                        }
+                    };
+                });
+
+                const parents = this.getParents();
+                parents.forEach((parent, parentIdx) => {
+                    const parentTotal = this.getParentTotal(parent.temp_id);
+                    const parentRow = ws.addRow([
+                        parentIdx + 1,
+                        (parent.nama_komponen || '').toUpperCase(),
+                        '-',
+                        '-',
+                        '-',
+                        '-',
+                        parentTotal
+                    ]);
+                    parentRow.height = 24;
+
+                    parentRow.eachCell((cell, colNumber) => {
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: {
+                                argb: COLOR_PARENT_BG
+                            }
+                        };
+                        cell.font = {
+                            name: 'Calibri',
+                            size: 11,
+                            bold: true,
+                            color: {
+                                argb: COLOR_PARENT_TEXT
+                            }
+                        };
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: (colNumber === 1 || colNumber === 4) ? 'center' : (colNumber === 2 ? 'left' : 'right')
+                        };
+                        cell.border = {
+                            top: {
+                                style: 'thin',
+                                color: {
+                                    argb: COLOR_BORDER
+                                }
+                            },
+                            left: {
+                                style: 'thin',
+                                color: {
+                                    argb: COLOR_BORDER
+                                }
+                            },
+                            bottom: {
+                                style: 'thin',
+                                color: {
+                                    argb: COLOR_BORDER
+                                }
+                            },
+                            right: {
+                                style: 'thin',
+                                color: {
+                                    argb: COLOR_BORDER
+                                }
+                            }
+                        };
+
+                        if (colNumber === 7) {
+                            cell.numFmt = '#,##0;(#,##0);"-"';
+                        }
+                    });
+
+                    const children = this.getChildren(parent.temp_id);
+                    children.forEach((child, childIdx) => {
+                        const childTotal = this.getRowTotal(child);
+                        const childRow = ws.addRow([
+                            `${parentIdx + 1}.${childIdx + 1}`,
+                            child.nama_komponen || '',
+                            child.volume !== null && child.volume !== undefined ? Number(child.volume) : 0,
+                            child.satuan || '-',
+                            child.luas !== null && child.luas !== undefined ? Number(child.luas) : 0,
+                            child.harga_m2 !== null && child.harga_m2 !== undefined ? Number(child.harga_m2) : 0,
+                            childTotal
+                        ]);
+                        childRow.height = 20;
+
+                        childRow.eachCell((cell, colNumber) => {
+                            cell.font = {
+                                name: 'Calibri',
+                                size: 10,
+                                color: {
+                                    argb: 'FF1E293B'
+                                }
+                            };
+                            cell.alignment = {
+                                vertical: 'middle',
+                                horizontal: (colNumber === 1 || colNumber === 4) ? 'center' : (colNumber === 2 ? 'left' : 'right')
+                            };
+                            cell.border = {
+                                top: {
+                                    style: 'thin',
+                                    color: {
+                                        argb: COLOR_BORDER
+                                    }
+                                },
+                                left: {
+                                    style: 'thin',
+                                    color: {
+                                        argb: COLOR_BORDER
+                                    }
+                                },
+                                bottom: {
+                                    style: 'thin',
+                                    color: {
+                                        argb: COLOR_BORDER
+                                    }
+                                },
+                                right: {
+                                    style: 'thin',
+                                    color: {
+                                        argb: COLOR_BORDER
+                                    }
+                                }
+                            };
+
+                            if (colNumber === 3 || colNumber === 5 || colNumber === 6 || colNumber === 7) {
+                                cell.numFmt = '#,##0;(#,##0);"-"';
+                            }
+                        });
+                    });
+                });
+
+                const grandTotal = this.getGrandTotal();
+                const totalRow = ws.addRow([
+                    '',
+                    'TOTAL ESTIMASI CAPEX',
+                    '',
+                    '',
+                    '',
+                    '',
+                    grandTotal
+                ]);
+                totalRow.height = 28;
+
+                ws.mergeCells(`A${totalRow.number}:F${totalRow.number}`);
+
+                totalRow.eachCell((cell, colNumber) => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: {
+                            argb: COLOR_TOTAL_BG
+                        }
+                    };
+                    cell.font = {
+                        name: 'Calibri',
+                        size: 12,
+                        bold: true,
+                        color: {
+                            argb: COLOR_TOTAL_TEXT
+                        }
+                    };
+                    cell.alignment = {
+                        vertical: 'middle',
+                        horizontal: colNumber === 7 ? 'right' : 'center'
+                    };
+                    cell.border = {
+                        top: {
+                            style: 'medium',
+                            color: {
+                                argb: COLOR_TOTAL_BG
+                            }
+                        },
+                        left: {
+                            style: 'thin',
+                            color: {
+                                argb: COLOR_BORDER
+                            }
+                        },
+                        bottom: {
+                            style: 'double',
+                            color: {
+                                argb: COLOR_TOTAL_BG
+                            }
+                        },
+                        right: {
+                            style: 'thin',
+                            color: {
+                                argb: COLOR_BORDER
+                            }
+                        }
+                    };
+
+                    if (colNumber === 7) {
+                        cell.numFmt = '#,##0;(#,##0);"-"';
+                    }
+                });
+
+                const buffer = await wb.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const sanitizeName = @json(Str::slug($project->nama_proyek));
+                link.download = `Estimasi_CAPEX_${sanitizeName}.xlsx`;
+                link.click();
+                URL.revokeObjectURL(link.href);
             }
         }));
     }
