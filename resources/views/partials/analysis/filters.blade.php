@@ -26,25 +26,41 @@
     </select>
 
     {{-- =========================
-        Kabupaten
+        Kabupaten / Provinsi
     ========================== --}}
     <select name="kabupaten">
 
         <option value="">
-            Pilih Kabupaten / Kota
+            Pilih Kabupaten / Kota / Provinsi
         </option>
 
-        @foreach($kabupaten as $item)
+        @if(isset($provinsi) && count($provinsi) > 0)
+            <optgroup label="Tingkat Provinsi (vs Nasional)">
+                @foreach($provinsi as $p)
+                    <option
+                        value="prov_{{ $p->provinsi_id }}"
+                        data-provinsi="{{ $p->provinsi_id }}"
+                        {{ ($filter['kabupaten'] ?? null) == ('prov_' . $p->provinsi_id) ? 'selected' : '' }}
+                    >
+                        🏛️ PROVINSI {{ Str::upper($p->nama_provinsi) }}
+                    </option>
+                @endforeach
+            </optgroup>
+        @endif
 
-            <option
-                value="{{ $item->kab_id }}"
-                data-provinsi="{{ $item->provinsi_id }}"
-                {{ ($filter['kabupaten'] ?? null) == $item->kab_id ? 'selected' : '' }}
-            >
-                {{ Str::title(Str::lower($item->nama_kabupaten)) }} 
-            </option>
+        <optgroup label="Tingkat Kabupaten / Kota (vs Provinsi)">
+            @foreach($kabupaten as $item)
 
-        @endforeach
+                <option
+                    value="{{ $item->kab_id }}"
+                    data-provinsi="{{ $item->provinsi_id }}"
+                    {{ ($filter['kabupaten'] ?? null) == $item->kab_id ? 'selected' : '' }}
+                >
+                    {{ Str::title(Str::lower($item->nama_kabupaten)) }} 
+                </option>
+
+            @endforeach
+        </optgroup>
 
     </select>
 

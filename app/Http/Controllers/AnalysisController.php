@@ -29,13 +29,27 @@ class AnalysisController extends Controller
          */
 
         $provinsiId = $request->filled('provinsi') ? $request->integer('provinsi') : null;
+        $kabParam = $request->get('kabupaten');
 
-        $kabId = $request->filled('kabupaten') ? $request->integer('kabupaten') : null;
+        $kabId = null;
+        $targetWilayahId = null;
 
-        if ($kabId && !$provinsiId) {
-            $selectedKab = Kabupaten::find($kabId);
-            if ($selectedKab) {
-                $provinsiId = $selectedKab->provinsi_id;
+        if ($kabParam) {
+            if (str_starts_with((string) $kabParam, 'prov_')) {
+                $targetWilayahId = (string) $kabParam;
+                $pId = (int) str_replace('prov_', '', (string) $kabParam);
+                if (!$provinsiId) {
+                    $provinsiId = $pId;
+                }
+            } elseif (is_numeric($kabParam)) {
+                $kabId = (int) $kabParam;
+                $targetWilayahId = $kabId;
+                if (!$provinsiId) {
+                    $selectedKab = Kabupaten::find($kabId);
+                    if ($selectedKab) {
+                        $provinsiId = $selectedKab->provinsi_id;
+                    }
+                }
             }
         }
 
@@ -71,7 +85,7 @@ class AnalysisController extends Controller
 
         $dashboard = null;
 
-        if ($kabId) {
+        if ($targetWilayahId) {
 
             $dashboard =
 
@@ -79,7 +93,7 @@ class AnalysisController extends Controller
 
                     ->getDashboard(
 
-                        kabId: $kabId,
+                        kabId: $targetWilayahId,
 
                         metode: $metode,
 
@@ -111,7 +125,7 @@ class AnalysisController extends Controller
 
                     'provinsi'=>$provinsiId,
 
-                    'kabupaten'=>$kabId,
+                    'kabupaten'=>$kabParam,
 
                     'metode'=>$metode,
 

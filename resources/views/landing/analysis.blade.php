@@ -14,6 +14,9 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     />
 
+    {{-- SheetJS for Excel Export --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     @vite([
         'resources/css/navbar.css',
         'resources/css/home.css',
@@ -100,6 +103,13 @@
 @if(!empty($dashboard))
 <script>
     window.dashboardCharts = @json($dashboard['charts'] ?? []);
+    window.dashboardTable = @json($dashboard['table'] ?? []);
+    window.dashboardInfo = {
+        title: @json($dashboard['header']['title'] ?? 'Hasil Analisis'),
+        wilayah: @json($dashboard['header']['kabupaten'] ?? ''),
+        metode: @json($filter['metode'] ?? 'lq'),
+        tahun: @json($dashboard['header']['tahun'] ?? $filter['tahun'] ?? 2025)
+    };
 </script>
 @endif
 

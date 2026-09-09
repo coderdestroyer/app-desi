@@ -4,13 +4,29 @@
 
     <div class="table-card">
 
-        <div class="table-header">
+        <div class="table-header flex items-center justify-between flex-wrap gap-3">
 
             <h3>
 
                 Detail Hasil Analisis
 
             </h3>
+
+            <div class="export-btn-group">
+
+                <button type="button" id="btnExportExcel" class="btn-export btn-export-excel" title="Export data ke format Excel (.xlsx)">
+
+                    <i class="fa-solid fa-file-excel"></i> Export Excel
+
+                </button>
+
+                <button type="button" id="btnExportJson" class="btn-export btn-export-json" title="Export data ke format JSON (.json)">
+
+                    <i class="fa-solid fa-file-code"></i> Export JSON
+
+                </button>
+
+            </div>
 
         </div>
 

@@ -344,6 +344,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /*
     ==========================================================
+    EXPORT EXCEL & JSON HANDLERS
+    ==========================================================
+    */
+    const btnExcel = document.getElementById("btnExportExcel");
+    const btnJson = document.getElementById("btnExportJson");
+
+    if (btnExcel) {
+        btnExcel.addEventListener("click", () => {
+            const tableData = window.dashboardTable ?? [];
+            const info = window.dashboardInfo ?? {};
+            handleExportExcel(tableData, info);
+        });
+    }
+
+    if (btnJson) {
+        btnJson.addEventListener("click", () => {
+            const tableData = window.dashboardTable ?? [];
+            const info = window.dashboardInfo ?? {};
+            handleExportJson(tableData, info);
+        });
+    }
+
+    /*
+    ==========================================================
     FILTER KABUPATEN BERDASARKAN PROVINSI
     ==========================================================
     */
@@ -357,6 +381,102 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+
+function getSanitizedFilename(info, extension) {
+    const metode = (info.metode || 'sektoral').toLowerCase();
+    const wilayah = (info.wilayah || 'wilayah').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    const tahun = info.tahun || '2025';
+    return `analisis_${metode}_${wilayah}_${tahun}.${extension}`;
+}
+
+function handleExportExcel(tableData, info) {
+    if (!tableData || !tableData.length) {
+        alert("Tidak ada data tabel untuk diexport.");
+        return;
+    }
+
+    const filename = getSanitizedFilename(info, 'xlsx');
+
+    const formattedData = tableData.map(row => {
+        const newRow = {};
+        Object.keys(row).forEach(key => {
+            const header = key.replace(/_/g, ' ')
+                .replace(/\b\w/g, l => l.toUpperCase())
+                .replace(/Ssa/g, 'SSA')
+                .replace(/Lq/g, 'LQ');
+            newRow[header] = row[key];
+        });
+        return newRow;
+    });
+
+    if (window.XLSX) {
+        const worksheet = window.XLSX.utils.json_to_sheet(formattedData);
+        const workbook = window.XLSX.utils.book_new();
+        window.XLSX.utils.book_append_sheet(workbook, worksheet, "Hasil Analisis");
+
+        const keys = Object.keys(formattedData[0] || {});
+        worksheet['!cols'] = keys.map(k => ({ wch: Math.max(k.length + 5, 18) }));
+
+        window.XLSX.writeFile(workbook, filename);
+    } else {
+        const keys = Object.keys(formattedData[0]);
+        let csvContent = "\uFEFF";
+        csvContent += keys.map(h => `"${h.replace(/"/g, '""')}"`).join(";") + "\r\n";
+
+        formattedData.forEach(row => {
+            const values = keys.map(k => {
+                let val = row[k] ?? "";
+                if (typeof val === "number") {
+                    val = val.toString().replace('.', ',');
+                }
+                return `"${String(val).replace(/"/g, '""')}"`;
+            });
+            csvContent += values.join(";") + "\r\n";
+        });
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", filename.replace('.xlsx', '.csv'));
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+function handleExportJson(tableData, info) {
+    if (!tableData || !tableData.length) {
+        alert("Tidak ada data tabel untuk diexport.");
+        return;
+    }
+
+    const filename = getSanitizedFilename(info, 'json');
+
+    const simplifiedData = tableData.map(row => {
+        const sektorName = row.nama_sektor || row.sektor || "";
+        let val = row.nilai_lq ?? row.nilai_ssa ?? row.dij ?? row.cij ?? row.pertumbuhan_kabupaten ?? row.laju_pertumbuhan ?? 0;
+        if (typeof val === 'number') {
+            val = Number(val.toFixed(4));
+        }
+
+        return {
+            sektor: sektorName,
+            nilai: val
+        };
+    });
+
+    const jsonStr = simplifiedData
+        .map(item => JSON.stringify(item, null, 2))
+        .join(",\n");
+
+    const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 /*
 ==========================================================
@@ -373,7 +493,8 @@ export function setupDynamicKabupatenDropdown(provinsiSelect, kabupatenSelect) {
         value: opt.value,
         text: opt.textContent.trim(),
         provinsi: opt.getAttribute("data-provinsi") || "",
-        selected: opt.selected
+        selected: opt.selected,
+        group: opt.parentElement?.tagName === "OPTGROUP" ? opt.parentElement.label : null
     }));
 
     function updateOptions(isInitial = false) {
@@ -384,13 +505,14 @@ export function setupDynamicKabupatenDropdown(provinsiSelect, kabupatenSelect) {
 
         kabupatenSelect.innerHTML = "";
 
-        const placeholderOpt = allOptions.find(o => !o.value) || { value: "", text: "Pilih Kabupaten / Kota" };
+        const placeholderOpt = allOptions.find(o => !o.value) || { value: "", text: "Pilih Kabupaten / Kota / Provinsi" };
         const defaultOption = document.createElement("option");
         defaultOption.value = placeholderOpt.value;
         defaultOption.textContent = placeholderOpt.text;
         kabupatenSelect.appendChild(defaultOption);
 
         let matchFound = false;
+        const groupsMap = new Map();
 
         allOptions.forEach(opt => {
             if (!opt.value) return;
@@ -399,14 +521,26 @@ export function setupDynamicKabupatenDropdown(provinsiSelect, kabupatenSelect) {
                 const el = document.createElement("option");
                 el.value = opt.value;
                 el.textContent = opt.text;
-                el.setAttribute("data-provinsi", opt.provinsi);
+                if (opt.provinsi) {
+                    el.setAttribute("data-provinsi", opt.provinsi);
+                }
 
                 if (String(opt.value) === String(currentKabVal)) {
                     el.selected = true;
                     matchFound = true;
                 }
 
-                kabupatenSelect.appendChild(el);
+                if (opt.group) {
+                    if (!groupsMap.has(opt.group)) {
+                        const optgroup = document.createElement("optgroup");
+                        optgroup.label = opt.group;
+                        groupsMap.set(opt.group, optgroup);
+                        kabupatenSelect.appendChild(optgroup);
+                    }
+                    groupsMap.get(opt.group).appendChild(el);
+                } else {
+                    kabupatenSelect.appendChild(el);
+                }
             }
         });
 
