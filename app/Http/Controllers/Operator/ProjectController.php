@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Kabupaten;
 use App\Models\Sektor;
+use App\Services\FinancialAnalysisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -121,8 +122,10 @@ class ProjectController extends Controller
     {
         $this->authorizeProjectOwner($project);
         
-        $project->load(['kabupaten', 'kecamatan', 'sektor', 'capexComponents', 'plComponents']);
-        return view('operator.peluang_investasi.projects.show', compact('project'));
+        $project->load(['kabupaten', 'kecamatan', 'sektor', 'capexComponents', 'plComponents.yearlyData']);
+        $feasibility = FinancialAnalysisService::calculateFeasibility($project);
+
+        return view('operator.peluang_investasi.projects.show', compact('project', 'feasibility'));
     }
 
     /**
