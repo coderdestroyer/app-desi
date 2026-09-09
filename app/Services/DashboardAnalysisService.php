@@ -39,8 +39,18 @@ class DashboardAnalysisService
         $this->tipologiKlassenService = $tipologiKlassenService;
     }
 
+    private function parseTarget(int|string $kabId): array
+    {
+        $isProv = is_string($kabId) && str_starts_with($kabId, 'prov_');
+        $provId = $isProv ? (int) str_replace('prov_', '', $kabId) : null;
+        $targetId = $isProv ? $provId : (int) $kabId;
+        $tingkat = $isProv ? 'provinsi' : 'kabupaten';
+
+        return [$tingkat, $targetId, $provId];
+    }
+
     /** Entry point: dispatch ke dashboard sesuai metode */
-    public function getDashboard(int $kabId, string $metode, string|int $tahun = 'all'): array
+    public function getDashboard(int|string $kabId, string $metode, string|int $tahun = 'all'): array
     {
         return match ($metode) {
             'lq'       => $this->getLqDashboard($kabId, $tahun),
@@ -51,10 +61,22 @@ class DashboardAnalysisService
         };
     }
 
-    private function getAvailableYears(int $kabId): array
+    private function getAvailableYears(int|string $kabId): array
     {
+        [$tingkat, $targetId, $provId] = $this->parseTarget($kabId);
+
+        if ($tingkat === 'provinsi') {
+            return DB::table('pdrb_sumatera_provinsi')
+                ->where('provinsi_id', $provId)
+                ->distinct()
+                ->pluck('tahun')
+                ->sort()
+                ->values()
+                ->toArray();
+        }
+
         return DB::table('pdrb_sumatera_kabupaten')
-            ->where('kabupaten_id', $kabId)
+            ->where('kabupaten_id', $targetId)
             ->distinct()
             ->pluck('tahun')
             ->sort()
@@ -64,13 +86,19 @@ class DashboardAnalysisService
 
     /** ============ Base Queries (Direct Summary Table Queries) ============ */
 
-    private function baseLqQuery(int $kabId, string|int $tahun): Collection
+    private function baseLqQuery(int|string $kabId, string|int $tahun): Collection
     {
+        [$tingkat, $targetId, $provId] = $this->parseTarget($kabId);
         $years = $tahun === 'all' ? $this->getAvailableYears($kabId) : [(int) $tahun];
 
         $query = \App\Models\SummaryLqResult::with('sektor')
-            ->where('tingkat_wilayah', 'kabupaten')
-            ->where('kabupaten_id', $kabId);
+            ->where('tingkat_wilayah', $tingkat);
+
+        if ($tingkat === 'provinsi') {
+            $query->where('provinsi_id', $provId)->whereNull('kabupaten_id');
+        } else {
+            $query->where('kabupaten_id', $targetId);
+        }
 
         if ($tahun !== 'all') {
             $query->whereIn('tahun', $years);
@@ -90,13 +118,19 @@ class DashboardAnalysisService
         });
     }
 
-    private function baseSsaQuery(int $kabId, string|int $tahun): Collection
+    private function baseSsaQuery(int|string $kabId, string|int $tahun): Collection
     {
+        [$tingkat, $targetId, $provId] = $this->parseTarget($kabId);
         $years = $tahun === 'all' ? $this->getAvailableYears($kabId) : [(int) $tahun];
 
         $query = \App\Models\SummaryShiftShareResult::with('sektor')
-            ->where('tingkat_wilayah', 'kabupaten')
-            ->where('kabupaten_id', $kabId);
+            ->where('tingkat_wilayah', $tingkat);
+
+        if ($tingkat === 'provinsi') {
+            $query->where('provinsi_id', $provId)->whereNull('kabupaten_id');
+        } else {
+            $query->where('kabupaten_id', $targetId);
+        }
 
         if ($tahun !== 'all') {
             $query->whereIn('tahun_akhir', $years);
@@ -130,13 +164,19 @@ class DashboardAnalysisService
         });
     }
 
-    private function baseTipologiQuery(int $kabId, string|int $tahun): Collection
+    private function baseTipologiQuery(int|string $kabId, string|int $tahun): Collection
     {
+        [$tingkat, $targetId, $provId] = $this->parseTarget($kabId);
         $years = $tahun === 'all' ? $this->getAvailableYears($kabId) : [(int) $tahun];
 
         $query = \App\Models\SummaryTipologiSektorResult::with('sektor')
-            ->where('tingkat_wilayah', 'kabupaten')
-            ->where('kabupaten_id', $kabId);
+            ->where('tingkat_wilayah', $tingkat);
+
+        if ($tingkat === 'provinsi') {
+            $query->where('provinsi_id', $provId)->whereNull('kabupaten_id');
+        } else {
+            $query->where('kabupaten_id', $targetId);
+        }
 
         if ($tahun !== 'all') {
             $query->whereIn('tahun', $years);
@@ -171,13 +211,19 @@ class DashboardAnalysisService
         });
     }
 
-    private function baseKlassenQuery(int $kabId, string|int $tahun): Collection
+    private function baseKlassenQuery(int|string $kabId, string|int $tahun): Collection
     {
+        [$tingkat, $targetId, $provId] = $this->parseTarget($kabId);
         $years = $tahun === 'all' ? $this->getAvailableYears($kabId) : [(int) $tahun];
 
         $query = \App\Models\SummaryKlassenResult::with('sektor')
-            ->where('tingkat_wilayah', 'kabupaten')
-            ->where('kabupaten_id', $kabId);
+            ->where('tingkat_wilayah', $tingkat);
+
+        if ($tingkat === 'provinsi') {
+            $query->where('provinsi_id', $provId)->whereNull('kabupaten_id');
+        } else {
+            $query->where('kabupaten_id', $targetId);
+        }
 
         if ($tahun !== 'all') {
             $query->whereIn('tahun_akhir', $years);
@@ -211,16 +257,18 @@ class DashboardAnalysisService
 
     /** ============ Dashboard LQ ============ */
 
-    private function getLqDashboard(int $kabId, string|int $tahun): array
+    private function getLqDashboard(int|string $kabId, string|int $tahun): array
     {
+        [$tingkat] = $this->parseTarget($kabId);
         $rows = $this->baseLqQuery($kabId, $tahun);
         return [
             'header' => [
                 'kabupaten' => $this->getKabupatenName($kabId),
                 'tahun' => $tahun,
                 'title' => 'Hasil Analisis LQ',
-                'description' =>
-                'Mengidentifikasi sektor basis berdasarkan nilai Location Quotient (LQ).',
+                'description' => $tingkat === 'provinsi'
+                    ? 'Mengidentifikasi sektor basis Provinsi dibandingkan dengan rata-rata PDB Nasional.'
+                    : 'Mengidentifikasi sektor basis berdasarkan nilai Location Quotient (LQ).',
             ],
             'summary' => $this->getLqSummary($rows),
             'charts'  => [
@@ -413,8 +461,9 @@ class DashboardAnalysisService
 
     /** ============ Dashboard SSA ============ */
 
-    private function getSsaDashboard(int $kabId, string|int $tahun): array
+    private function getSsaDashboard(int|string $kabId, string|int $tahun): array
     {
+        [$tingkat] = $this->parseTarget($kabId);
         $rows = $this->baseSsaQuery($kabId, $tahun);
 
         return [
@@ -422,8 +471,9 @@ class DashboardAnalysisService
                 'kabupaten' => $this->getKabupatenName($kabId),
                 'tahun' => $tahun,
                 'title' => 'Hasil Analisis Shift Share',
-                'description' =>
-                    'Menganalisis pertumbuhan ekonomi sektoral dan daya saing daerah menggunakan metode Shift Share Analysis (SSA).',
+                'description' => $tingkat === 'provinsi'
+                    ? 'Menganalisis pertumbuhan ekonomi dan daya saing Provinsi terhadap PDB Nasional menggunakan metode Shift Share Analysis (SSA).'
+                    : 'Menganalisis pertumbuhan ekonomi sektoral dan daya saing daerah menggunakan metode Shift Share Analysis (SSA).',
             ],
 
             'summary' => $this->getSsaSummary($rows),
@@ -635,8 +685,9 @@ class DashboardAnalysisService
 
     /** ============ Dashboard Tipologi Sektor ============ */
 
-    private function getTipologiDashboard(int $kabId, string|int $tahun): array
+    private function getTipologiDashboard(int|string $kabId, string|int $tahun): array
     {
+        [$tingkat] = $this->parseTarget($kabId);
         $rows = $this->baseTipologiQuery($kabId, $tahun);
 
         return [
@@ -644,8 +695,9 @@ class DashboardAnalysisService
                 'kabupaten' => $this->getKabupatenName($kabId),
                 'tahun' => $tahun,
                 'title' => 'Hasil Analisis Tipologi Sektor',
-                'description' =>
-                    'Mengelompokkan sektor ekonomi ke dalam empat kuadran berdasarkan tingkat pertumbuhan dan kontribusi terhadap perekonomian daerah.',
+                'description' => $tingkat === 'provinsi'
+                    ? 'Mengelompokkan sektor ekonomi Provinsi ke dalam empat kuadran berdasarkan tingkat pertumbuhan dan kontribusi terhadap PDB Nasional.'
+                    : 'Mengelompokkan sektor ekonomi ke dalam empat kuadran berdasarkan tingkat pertumbuhan dan kontribusi terhadap perekonomian daerah.',
             ],
 
             'summary' => $this->getTipologiSummary($rows),
@@ -862,8 +914,9 @@ class DashboardAnalysisService
 
     /** ============ Dashboard Tipologi Klassen ============ */
 
-    private function getKlassenDashboard(int $kabId, string|int $tahun): array
+    private function getKlassenDashboard(int|string $kabId, string|int $tahun): array
     {
+        [$tingkat] = $this->parseTarget($kabId);
         $rows = $this->baseKlassenQuery($kabId, $tahun);
 
         return [
@@ -871,8 +924,9 @@ class DashboardAnalysisService
                 'kabupaten' => $this->getKabupatenName($kabId),
                 'tahun' => $tahun,
                 'title' => 'Hasil Analisis Tipologi Klassen',
-                'description' =>
-                    'Mengklasifikasikan sektor ekonomi berdasarkan kombinasi laju pertumbuhan dan kontribusi PDRB untuk mengidentifikasi sektor maju, berkembang, maupun tertinggal.',
+                'description' => $tingkat === 'provinsi'
+                    ? 'Mengelompokkan sektor ekonomi Provinsi berdasarkan laju pertumbuhan dan kontribusi PDRB Provinsi terhadap PDB Nasional.'
+                    : 'Mengklasifikasikan sektor ekonomi berdasarkan kombinasi laju pertumbuhan dan kontribusi PDRB untuk mengidentifikasi sektor maju, berkembang, maupun tertinggal.',
             ],
 
             'summary' => $this->getKlassenSummary($rows),
@@ -1061,9 +1115,14 @@ class DashboardAnalysisService
 
     /** ============ Shared Helpers ============ */
 
-    private function getKabupatenName(int $kabId): string
+    private function getKabupatenName(int|string $kabId): string
     {
-        return \App\Models\Kabupaten::where('kab_id', $kabId)->value('nama_kabupaten') ?? '-';
+        if (is_string($kabId) && str_starts_with($kabId, 'prov_')) {
+            $provId = (int) str_replace('prov_', '', $kabId);
+            $namaProv = \App\Models\Provinsi::where('provinsi_id', $provId)->value('nama_provinsi');
+            return $namaProv ? 'PROVINSI ' . $namaProv . ' (vs Nasional)' : 'PROVINSI (vs Nasional)';
+        }
+        return \App\Models\Kabupaten::where('kab_id', (int) $kabId)->value('nama_kabupaten') ?? '-';
     }
 
     private function total(Collection $rows): int
