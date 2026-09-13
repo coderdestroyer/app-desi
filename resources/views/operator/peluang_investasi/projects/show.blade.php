@@ -279,7 +279,7 @@
                     <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-500/5 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">Benefit Cost Rasio</span>
+                            <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">Benefit Cost Ratio (BCR)</span>
                             <span class="px-2 py-0.5 text-[10px] font-bold rounded-md {{ $feasibility['bcr'] >= 1.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300' }}">
                                 {{ $feasibility['bcr'] >= 1.0 ? 'BCR ≥ 1.0 (Untung)' : 'BCR < 1.0' }}
                             </span>
@@ -310,7 +310,7 @@
                     </div>
                     <div class="mt-3 pt-3 border-t border-emerald-200/60 text-[11px] text-slate-500 flex items-center justify-between">
                         <span>Balik Modal Awal</span>
-                        <span class="font-mono text-emerald-700 font-bold">Thn ke-{{ $feasibility['payback_tahun'] ? $feasibility['payback_tahun'] + 1 : '-' }}</span>
+                        <span class="font-mono text-emerald-700 font-bold">Thn ke-{{ $feasibility['payback_tahun'] !== null ? $feasibility['payback_tahun'] + 1 : '-' }}</span>
                     </div>
                 </div>
 
